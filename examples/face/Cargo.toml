@@ -1,0 +1,9 @@
+[package]
+name = "face"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+patina-cad = {path ="../../patina-cad"}
+glam = "0.30.3"
+tokio = { version = "1.45.1", features = ["rt", "rt-multi-thread", "macros"] }
