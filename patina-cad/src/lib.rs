@@ -5,12 +5,9 @@
 #![deny(unused_must_use)]
 
 pub mod geo3;
-pub mod stl;
-pub mod subdivision;
-mod bvh;
-mod scan;
-mod math;
+pub mod math;
 mod util;
-mod sat;
-mod meshes;
-mod geo2;
+pub mod sat;
+pub mod meshes;
+pub mod geo2;
+mod ser;

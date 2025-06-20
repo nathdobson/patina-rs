@@ -1,7 +1,7 @@
 use crate::math::vec3::Vec3;
 use crate::meshes::mesh::Mesh;
 use crate::meshes::mesh_triangle::MeshTriangle;
-use crate::subdivision::subdivide;
+use crate::meshes::subdivision::subdivide;
 
 pub struct Sphere {
     start: Vec3,

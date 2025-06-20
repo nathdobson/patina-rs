@@ -6,7 +6,7 @@ use crate::geo3::triangle::Triangle;
 use crate::math::vec3::Vec3;
 use crate::meshes::mesh::Mesh;
 use crate::sat::sat_intersects;
-use crate::scan::ScanIteratorExt;
+use crate::util::scan::ScanIteratorExt;
 use ordered_float::{NotNan, OrderedFloat};
 use std::fmt;
 use std::fmt::{Debug, Formatter};
@@ -228,7 +228,7 @@ impl Bvh {
         }
         Bvh::new(&triangles)
     }
-    pub fn root_view(&self) -> BvhNodeView {
+    pub fn root_view(&self) -> BvhNodeView<'_> {
         BvhNodeView {
             bvh: self,
             node: self.root,
@@ -241,7 +241,6 @@ impl Bvh {
     }
     pub fn intersects_point(&self, point: Vec3) -> bool {
         let pts = self.intersect_ray(&Ray3::new(point, Vec3::axis_x()));
-        println!("{:?}", pts);
         pts.len() % 2 == 1
     }
     pub fn intersect_ray(&self, ray: &Ray3) -> Vec<RayMeshIntersection> {
@@ -258,7 +257,7 @@ impl<'a> BvhNodeView<'a> {
     pub fn leaves(&self) -> &[BvhTriangle] {
         &self.bvh.nodes[self.node].leaves
     }
-    pub fn nodes(&self) -> impl Iterator<Item = BvhNodeView> {
+    pub fn nodes<'b>(&'b self) -> impl Iterator<Item = BvhNodeView<'a>> {
         self.bvh.nodes[self.node]
             .nodes
             .iter()

@@ -1,10 +1,10 @@
-use crate::bvh::Bvh;
+use crate::meshes::bvh::Bvh;
 use crate::geo2::segment2::Segment2;
 use crate::math::vec3::Vec3;
 use crate::meshes::mesh::Mesh;
 use crate::meshes::mesh_edge::MeshEdge;
 use crate::meshes::mesh_triangle::MeshTriangle;
-use crate::stl::write_stl_file;
+use crate::ser::stl::write_stl_file;
 use crate::util::sorted_pair::SortedPair;
 use arrayvec::ArrayVec;
 use itertools::Itertools;
@@ -45,7 +45,7 @@ struct VertexBuilder {
     vertex_types: Vec<VertexType>,
 }
 
-struct MeshBuilder<'a> {
+struct BimeshBuilder<'a> {
     mesh: &'a Mesh,
     // mesh_index: usize,
     tris: Vec<MeshTriangle>,
@@ -71,8 +71,8 @@ impl VertexBuilder {
     }
     pub fn build_partial_edge(
         &mut self,
-        mesh1: &mut MeshBuilder,
-        mesh2: &mut MeshBuilder,
+        mesh1: &mut BimeshBuilder,
+        mesh2: &mut BimeshBuilder,
         t1: usize,
         t2: usize,
         result: &mut ArrayVec<usize, 2>,
@@ -103,7 +103,7 @@ impl VertexBuilder {
     }
 }
 
-impl<'a> MeshBuilder<'a> {
+impl<'a> BimeshBuilder<'a> {
     pub fn new(mesh: &'a Mesh, offset: usize) -> Self {
         let tris: Vec<MeshTriangle> = mesh
             .triangles()
@@ -111,7 +111,7 @@ impl<'a> MeshBuilder<'a> {
             .map(|t| t.vertices().map(|v| v + offset).into())
             .collect();
         let bvh = Bvh::from_mesh(mesh);
-        MeshBuilder {
+        BimeshBuilder {
             mesh,
             tris,
             bvh,
@@ -237,8 +237,8 @@ impl<'a> MeshBuilder<'a> {
 impl Bimesh {
     pub fn new(mesh1: &Mesh, mesh2: &Mesh) -> Self {
         let mut vertices = VertexBuilder::new(mesh1, mesh2);
-        let mut mesh1 = MeshBuilder::new(mesh1, 0);
-        let mut mesh2 = MeshBuilder::new(mesh2, mesh1.tris.len());
+        let mut mesh1 = BimeshBuilder::new(mesh1, 0);
+        let mut mesh2 = BimeshBuilder::new(mesh2, mesh1.tris.len());
         let intersections = mesh1.bvh.intersect_bvh(&mesh2.bvh);
         for &(t1, t2) in &intersections {
             let mut vs = ArrayVec::<usize, 2>::new();
@@ -285,6 +285,7 @@ impl Bimesh {
     }
 }
 
+#[cfg(test)]
 #[tokio::test]
 async fn test_bimesh() -> anyhow::Result<()> {
     let mut mesh1 = Mesh::new(
