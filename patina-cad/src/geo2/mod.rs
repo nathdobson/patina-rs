@@ -1,2 +1,2 @@
 pub mod segment2;
-mod ray2;
+pub mod ray2;

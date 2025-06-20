@@ -16,6 +16,12 @@ impl Interval {
             max: f64::NEG_INFINITY,
         }
     }
+    pub fn full() -> Self {
+        Self {
+            min: f64::NEG_INFINITY,
+            max: f64::INFINITY,
+        }
+    }
     pub fn union(self, other: Self) -> Self {
         Interval {
             min: self.min.min(other.min),
@@ -24,8 +30,8 @@ impl Interval {
     }
     pub fn intersect(self, other: Self) -> Self {
         Interval {
-            min: self.max.max(other.min),
-            max: self.min.min(other.max),
+            min: self.min.max(other.min),
+            max: self.max.min(other.max),
         }
     }
     pub fn intersects(self, other: Self) -> bool {
@@ -34,6 +40,12 @@ impl Interval {
     }
     pub fn is_empty(&self) -> bool {
         self.min > self.max
+    }
+    pub fn min(&self) -> f64 {
+        self.min
+    }
+    pub fn max(&self) -> f64 {
+        self.max
     }
 }
 

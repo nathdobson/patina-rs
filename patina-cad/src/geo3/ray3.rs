@@ -19,14 +19,17 @@ impl Ray3 {
         self.dir
     }
     pub fn intersect_aabb(&self, aabb: &AABB) -> Option<Interval> {
-        let mut interval = Interval::empty();
+        let mut interval = Interval::full();
         for axis in 0..3 {
             let m = self.dir[axis];
             let b = self.origin[axis];
             let min = aabb.min()[axis];
             let max = aabb.max()[axis];
-            interval = interval.intersect(Interval::new((min - b) / m, (max - b) / m));
+            let part = Interval::new((min - b) / m, (max - b) / m);
+            println!("part = {:?}", part);
+            interval = interval.intersect(part);
         }
+        println!("interval = {:?}", interval);
         (!interval.is_empty()).then_some(interval)
     }
     pub fn project(&self, p: Vec3) -> f64 {

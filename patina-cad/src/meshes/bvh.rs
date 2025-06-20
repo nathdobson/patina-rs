@@ -57,6 +57,11 @@ fn tri_bounds(slice: &[BvhTriangleBuilder]) -> AABB {
     union
 }
 
+static IGNORE_AABB1: bool = true;
+static IGNORE_AABB2: bool = false;
+static IGNORE_AABB3: bool = false;
+static IGNORE_AABB4: bool = false;
+
 // struct NodeCandidate {
 //     left: Vec<BvhTriangleBuilder>,
 //     right: Vec<BvhTriangleBuilder>,
@@ -192,9 +197,26 @@ impl BvhTriangleBuilder {
 }
 
 impl BvhTriangle {
-    pub fn intersect(&self, other: &Self, result: &mut Vec<(usize, usize)>) {
-        if sat_intersects(&self.triangle, &other.triangle) {
+    pub fn intersect_leaf(&self, other: &Self, result: &mut Vec<(usize, usize)>) {
+        if self.triangle.intersects(&other.triangle) {
+            println!("intersect");
             result.push((self.index, other.index));
+        }
+    }
+    pub fn intersect_node(&self, other: &BvhNodeView, result: &mut Vec<(usize, usize)>) {
+        let in_bounds = sat_intersects(&self.triangle, other.aabb());
+        let len = result.len();
+        for node2 in other.nodes() {
+            self.intersect_node(&node2, result);
+        }
+        for leaf2 in other.leaves() {
+            self.intersect_leaf(&leaf2, result);
+        }
+        if result.len() > len && !in_bounds {
+            dbg!(self);
+            dbg!(other);
+            dbg!(result.last());
+            panic!();
         }
     }
     pub fn intersect_ray(&self, ray: &Ray3, result: &mut Vec<RayMeshIntersection>) {
@@ -236,16 +258,14 @@ impl Bvh {
     }
     pub fn intersect_bvh(&self, other: &Bvh) -> Vec<(usize, usize)> {
         let mut result = vec![];
-        self.root_view().intersect(&other.root_view(), &mut result);
+        self.root_view()
+            .intersect_node(&other.root_view(), &mut result);
         result
-    }
-    pub fn intersects_point(&self, point: Vec3) -> bool {
-        let pts = self.intersect_ray(&Ray3::new(point, Vec3::axis_x()));
-        pts.len() % 2 == 1
     }
     pub fn intersect_ray(&self, ray: &Ray3) -> Vec<RayMeshIntersection> {
         let mut result = vec![];
         self.root_view().intersect_ray(ray, &mut result);
+        println!("result = {:?}", result);
         result
     }
 }
@@ -266,16 +286,16 @@ impl<'a> BvhNodeView<'a> {
                 node: *child,
             })
     }
-    pub fn intersect(&self, other: &BvhNodeView, result: &mut Vec<(usize, usize)>) {
-        if !self.aabb().intersects(other.aabb()) {
+    pub fn intersect_node(&self, other: &BvhNodeView, result: &mut Vec<(usize, usize)>) {
+        if !IGNORE_AABB2 && !self.aabb().intersects(other.aabb()) {
             return;
         }
         for leaf1 in self.leaves() {
             for leaf2 in other.leaves() {
-                leaf1.intersect(leaf2, result);
+                leaf1.intersect_leaf(leaf2, result);
             }
             for node2 in other.nodes() {
-                node2.intersect_leaf(&leaf1, result);
+                leaf1.intersect_node(&node2, result);
             }
         }
         for node1 in self.nodes() {
@@ -283,22 +303,22 @@ impl<'a> BvhNodeView<'a> {
                 node1.intersect_leaf(&leaf2, result);
             }
             for node2 in other.nodes() {
-                node1.intersect(&node2, result);
+                node1.intersect_node(&node2, result);
             }
         }
     }
     pub fn intersect_leaf(&self, other: &BvhTriangle, result: &mut Vec<(usize, usize)>) {
-        if sat_intersects(self.aabb(), &other.triangle) {
+        if IGNORE_AABB3 || sat_intersects(self.aabb(), &other.triangle) {
             for node1 in self.nodes() {
                 node1.intersect_leaf(&other, result);
             }
             for leaf1 in self.leaves() {
-                leaf1.intersect(&other, result);
+                leaf1.intersect_leaf(&other, result);
             }
         }
     }
     pub fn intersect_ray(&self, ray: &Ray3, result: &mut Vec<RayMeshIntersection>) {
-        if ray.intersect_aabb(self.aabb()).is_some() {
+        if IGNORE_AABB4 || ray.intersect_aabb(self.aabb()).is_some() {
             for leaf in self.leaves() {
                 leaf.intersect_ray(ray, result);
             }
@@ -332,7 +352,10 @@ impl Debug for Bvh {
 
 impl Debug for BvhTriangle {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        self.triangle.fmt(f)
+        f.debug_struct("BvhTriangle")
+            .field("index", &self.index)
+            .field("vertices", &self.triangle)
+            .finish()
     }
 }
 
@@ -340,5 +363,4 @@ impl Debug for BvhTriangle {
 fn test() {
     let sphere = Sphere::new(Vec3::zero(), 1.0).as_mesh(0);
     let bvh = Bvh::from_mesh(&sphere);
-    println!("{:#?}", bvh);
 }

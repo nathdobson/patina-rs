@@ -55,6 +55,27 @@ impl Triangle {
     pub fn midpoint(&self) -> Vec3 {
         self.points().iter().sum::<Vec3>() / 3.0
     }
+    pub fn edges(&self) -> [Segment3; 3] {
+        [
+            Segment3::new(self.points()[0], self.points()[1]),
+            Segment3::new(self.points()[1], self.points()[2]),
+            Segment3::new(self.points()[2], self.points()[0]),
+        ]
+    }
+    pub fn intersects(&self, other: &Triangle) -> bool {
+        println!("testing");
+        for e in self.edges() {
+            if other.intersect_segment(&e).is_some() {
+                return true;
+            }
+        }
+        for e in other.edges() {
+            if self.intersect_segment(&e).is_some() {
+                return true;
+            }
+        }
+        false
+    }
 }
 
 impl ConvexPoly for Triangle {

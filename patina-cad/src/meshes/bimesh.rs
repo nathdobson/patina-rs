@@ -1,6 +1,7 @@
-use crate::meshes::bvh::Bvh;
 use crate::geo2::segment2::Segment2;
+use crate::geo3::ray3::Ray3;
 use crate::math::vec3::Vec3;
+use crate::meshes::bvh::Bvh;
 use crate::meshes::mesh::Mesh;
 use crate::meshes::mesh_edge::MeshEdge;
 use crate::meshes::mesh_triangle::MeshTriangle;
@@ -123,7 +124,13 @@ impl<'a> BimeshBuilder<'a> {
     pub fn add_edge(&mut self, t: usize, e: SortedPair<usize>) {
         self.new_edges.entry(t).or_default().insert(e);
     }
-    pub fn build_tris(&mut self, vertices: &VertexBuilder) {
+    pub fn build_tris(
+        &mut self,
+        vertices: &VertexBuilder,
+        source: usize,
+        mesh2: &Self,
+        bimesh_tris: &mut Vec<BimeshTriangle>,
+    ) {
         for (ti, mt) in self.tris.iter().enumerate() {
             let edges = self.new_edges.entry(ti).or_default();
             for edge in self.tris[ti].edges() {
@@ -171,6 +178,7 @@ impl<'a> BimeshBuilder<'a> {
                     NotNan::new(projections[e.first()].distance(projections[e.second()])).unwrap();
                 (d, *e.first(), *e.second())
             });
+            println!("missing_edges = {:?}", missing_edges);
             for missing in missing_edges {
                 let s1 = Segment2::new(projections[missing.first()], projections[missing.second()]);
                 if !edges.iter().any(|extant| {
@@ -190,6 +198,7 @@ impl<'a> BimeshBuilder<'a> {
             }
             let mut tris: HashSet<[usize; 3]> = HashSet::new();
             let mut adjacency_map = BTreeMap::<usize, HashSet<usize>>::new();
+            println!("edges = {:?}", edges);
             for e in edges.iter() {
                 adjacency_map
                     .entry(*e.first())
@@ -220,16 +229,30 @@ impl<'a> BimeshBuilder<'a> {
                 major.sort();
                 tris.remove(&major);
             }
+            assert!(tris.len() > 0);
             for [v1, v2, v3] in tris {
                 let p1 = *projections.get(&v1).unwrap();
                 let p2 = *projections.get(&v2).unwrap();
                 let p3 = *projections.get(&v3).unwrap();
                 let mut t = MeshTriangle::new(v1, v2, v3);
-                if (p2 - p1).cross(p3 - p1) < 0.0 {
+                let area = (p2 - p1).cross(p3 - p1);
+                if area.abs() < 1e-10 {
+                    println!("empty triangle {:?} {:?} {:?} ", p1, p2, p3);
+                }
+                if area < 0.0 {
                     t.invert();
                 }
                 self.out_tris.push(t);
             }
+        }
+        for tri in &self.out_tris {
+            let tri_vs = tri.for_vertices(&vertices.vertices);
+            let ray = Ray3::new(tri_vs.midpoint(), Vec3::new(0.123, 0.333, 0.11));
+            bimesh_tris.push(BimeshTriangle {
+                source,
+                inside: mesh2.bvh.intersect_ray(&ray).len() % 2 == 1,
+                triangle: *tri,
+            });
         }
     }
 }
@@ -237,38 +260,24 @@ impl<'a> BimeshBuilder<'a> {
 impl Bimesh {
     pub fn new(mesh1: &Mesh, mesh2: &Mesh) -> Self {
         let mut vertices = VertexBuilder::new(mesh1, mesh2);
+        let offset = mesh1.vertices().len();
         let mut mesh1 = BimeshBuilder::new(mesh1, 0);
-        let mut mesh2 = BimeshBuilder::new(mesh2, mesh1.tris.len());
+        let mut mesh2 = BimeshBuilder::new(mesh2, offset);
         let intersections = mesh1.bvh.intersect_bvh(&mesh2.bvh);
         for &(t1, t2) in &intersections {
             let mut vs = ArrayVec::<usize, 2>::new();
             vertices.build_partial_edge(&mut mesh1, &mut mesh2, t1, t2, &mut vs);
             vertices.build_partial_edge(&mut mesh2, &mut mesh1, t2, t1, &mut vs);
-            let vs = MeshEdge::from(vs.into_inner().unwrap()).sorted();
-            mesh1.add_edge(t1, vs);
-            mesh2.add_edge(t2, vs);
+            println!("{:?} {:?} {:?}", t1, t2, vs);
+            if let Ok(vs) = vs.into_inner() {
+                let vs = MeshEdge::from(vs).sorted();
+                mesh1.add_edge(t1, vs);
+                mesh2.add_edge(t2, vs);
+            }
         }
-        mesh1.build_tris(&vertices);
-        mesh2.build_tris(&vertices);
         let mut tris = vec![];
-        for tri in mesh1.out_tris {
-            tris.push(BimeshTriangle {
-                source: 0,
-                inside: mesh2
-                    .bvh
-                    .intersects_point(tri.for_vertices(&vertices.vertices).midpoint()),
-                triangle: tri,
-            });
-        }
-        for tri in mesh2.out_tris {
-            tris.push(BimeshTriangle {
-                source: 1,
-                inside: mesh1
-                    .bvh
-                    .intersects_point(tri.for_vertices(&vertices.vertices).midpoint()),
-                triangle: tri,
-            });
-        }
+        mesh1.build_tris(&vertices, 0, &mesh2, &mut tris);
+        mesh2.build_tris(&vertices, 1, &mesh1, &mut tris);
         Bimesh {
             vertices: vertices.vertices,
             tris,
@@ -283,11 +292,20 @@ impl Bimesh {
                 .collect(),
         )
     }
+    pub fn mesh_part_all(&self, source: usize) -> Mesh {
+        Mesh::new(
+            self.vertices.clone(),
+            self.tris
+                .iter()
+                .filter_map(|t| (t.source == source).then_some(t.triangle))
+                .collect(),
+        )
+    }
 }
 
 #[cfg(test)]
 #[tokio::test]
-async fn test_bimesh() -> anyhow::Result<()> {
+async fn test_tetrahedron() -> anyhow::Result<()> {
     let mut mesh1 = Mesh::new(
         vec![Vec3::zero(), Vec3::axis_x(), Vec3::axis_y(), Vec3::axis_z()],
         vec![
@@ -311,5 +329,83 @@ async fn test_bimesh() -> anyhow::Result<()> {
     write_stl_file(&bimesh.mesh_part(0, false), &dir.join("mesh1_outside.stl")).await?;
     write_stl_file(&bimesh.mesh_part(1, true), &dir.join("mesh2_inside.stl")).await?;
     write_stl_file(&bimesh.mesh_part(1, false), &dir.join("mesh2_outside.stl")).await?;
+    Ok(())
+}
+
+#[cfg(test)]
+#[tokio::test]
+async fn test_triangle() -> anyhow::Result<()> {
+    let mut mesh1 = Mesh::new(
+        vec![Vec3::axis_x(), Vec3::axis_y(), Vec3::axis_z()],
+        vec![MeshTriangle::new(0, 1, 2)],
+    );
+    let mut mesh2 = Mesh::new(
+        vec![
+            Vec3::new(1.0, 1.0, 0.0),
+            Vec3::new(0.2, 0.1, 0.5),
+            Vec3::new(0.1, 0.2, 0.5),
+        ],
+        vec![MeshTriangle::new(0, 1, 2)],
+    );
+    let bimesh = Bimesh::new(&mesh1, &mesh2);
+    let dir = PathBuf::from("../")
+        .join("target")
+        .join("test_outputs")
+        .join("test_triangle");
+    tokio::fs::create_dir_all(&dir).await?;
+    write_stl_file(&bimesh.mesh_part_all(0), &dir.join("mesh1.stl")).await?;
+    write_stl_file(&bimesh.mesh_part_all(1), &dir.join("mesh2.stl")).await?;
+    Ok(())
+}
+
+#[cfg(test)]
+#[tokio::test]
+async fn test_triangle1() -> anyhow::Result<()> {
+    let mut mesh1 = Mesh::new(
+        vec![Vec3::axis_x(), Vec3::axis_y(), Vec3::axis_z()],
+        vec![MeshTriangle::new(0, 1, 2)],
+    );
+    let mut mesh2 = Mesh::new(
+        vec![
+            Vec3::new(1.0, 1.0, 0.0),
+            Vec3::new(0.2, 0.1, 0.5),
+            Vec3::new(0.1, 0.2, 0.5),
+        ],
+        vec![MeshTriangle::new(0, 1, 2)],
+    );
+    let bimesh = Bimesh::new(&mesh1, &mesh2);
+    let dir = PathBuf::from("../")
+        .join("target")
+        .join("test_outputs")
+        .join("test_triangle1");
+    tokio::fs::create_dir_all(&dir).await?;
+    write_stl_file(&bimesh.mesh_part_all(0), &dir.join("mesh1.stl")).await?;
+    write_stl_file(&bimesh.mesh_part_all(1), &dir.join("mesh2.stl")).await?;
+    Ok(())
+}
+
+#[cfg(test)]
+#[tokio::test]
+async fn test_triangle2() -> anyhow::Result<()> {
+    let mut mesh1 = Mesh::new(
+        vec![Vec3::axis_x(), Vec3::axis_y(), Vec3::axis_z()],
+        vec![MeshTriangle::new(0, 1, 2)],
+    );
+    let mut mesh2 = Mesh::new(
+        vec![
+            Vec3::new(1.0, 1.0, 0.0),
+            Vec3::new(0.2, 0.1, 0.5),
+            Vec3::new(1.0, -1.0, 0.5),
+        ],
+        vec![MeshTriangle::new(0, 1, 2)],
+    );
+    let bimesh = Bimesh::new(&mesh1, &mesh2);
+    let dir = PathBuf::from("../")
+        .join("target")
+        .join("test_outputs")
+        .join("test_triangle2");
+    tokio::fs::create_dir_all(&dir).await?;
+    write_stl_file(&bimesh.mesh_part_all(0), &dir.join("mesh1.stl")).await?;
+    write_stl_file(&bimesh.mesh_part_all(1), &dir.join("mesh2.stl")).await?;
     Ok(())
 }

@@ -1,8 +1,8 @@
 use crate::math::macros::impl_ref_binop;
+use crate::math::vec2::Vec2;
 use std::fmt::{Debug, Formatter};
 use std::iter::Sum;
 use std::ops::{Add, AddAssign, Div, Index, IndexMut, Mul, Neg, Sub};
-use crate::math::vec2::Vec2;
 
 #[derive(Copy, Clone)]
 pub struct Vec3([f64; 3]);
@@ -62,6 +62,9 @@ impl Vec3 {
     }
     pub fn axis_z() -> Self {
         Vec3::new(0.0, 0.0, 1.0)
+    }
+    pub fn axes() -> [Self; 3] {
+        [Self::axis_x(), Self::axis_y(), Self::axis_z()]
     }
     pub fn dot(self, rhs: Self) -> f64 {
         self.x() * rhs.x() + self.y() * rhs.y() + self.z() * rhs.z()

@@ -8,6 +8,12 @@ pub struct Plane {
 }
 
 impl Plane {
+    pub fn intersect(&self, other: &Plane) ->Ray3{
+        todo!();
+    }
+}
+
+impl Plane {
     pub fn new(origin: Vec3, normal: Vec3) -> Self {
         Plane { origin, normal }
     }

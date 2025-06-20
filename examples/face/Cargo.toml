@@ -7,3 +7,5 @@ edition = "2024"
 patina-cad = {path ="../../patina-cad"}
 glam = "0.30.4"
 tokio = { version = "1.45.1", features = ["rt", "rt-multi-thread", "macros"] }
+rand_xorshift = "0.4.0"
+rand = "0.9.1"

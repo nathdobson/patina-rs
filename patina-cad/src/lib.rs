@@ -10,4 +10,4 @@ mod util;
 pub mod sat;
 pub mod meshes;
 pub mod geo2;
-mod ser;
+pub mod ser;

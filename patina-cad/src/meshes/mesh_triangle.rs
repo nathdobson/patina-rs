@@ -29,7 +29,10 @@ impl MeshTriangle {
         ]
     }
     pub fn for_vertices(&self, vs: &[Vec3]) -> Triangle {
-        Triangle::new(self.vertices.map(|v| vs[v]))
+        Triangle::new(self.vertices.map(|v| {
+            *vs.get(v)
+                .unwrap_or_else(|| panic!("Vertex count is {} but the vertex is {}", vs.len(), v))
+        }))
     }
 }
 

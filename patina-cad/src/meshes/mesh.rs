@@ -1,13 +1,26 @@
-use std::collections::HashMap;
-use itertools::Itertools;
 use crate::math::vec3::Vec3;
-use crate::meshes::mesh_triangle::MeshTriangle;
 use crate::meshes::error::ManifoldError;
+use crate::meshes::mesh_triangle::MeshTriangle;
+use itertools::Itertools;
+use rand::Rng;
+use std::collections::HashMap;
 
 #[derive(Clone)]
 pub struct Mesh {
     vertices: Vec<Vec3>,
     triangles: Vec<MeshTriangle>,
+}
+
+impl Mesh {
+    pub fn perturb(&mut self, rng: &mut impl Rng, factor: f64) {
+        for vertex in &mut self.vertices {
+            *vertex += Vec3::new(
+                rng.random::<f64>() * factor,
+                rng.random::<f64>() * factor,
+                rng.random::<f64>() * factor,
+            );
+        }
+    }
 }
 
 impl Mesh {
@@ -66,6 +79,7 @@ impl Mesh {
         Ok(())
     }
     pub fn new(vertices: Vec<Vec3>, triangles: Vec<MeshTriangle>) -> Self {
+        println!("V={} T={}", vertices.len(), triangles.len());
         for t in &triangles {
             for v in *t {
                 assert!(v < vertices.len());
@@ -86,7 +100,7 @@ fn test_check_manifold() {
             vec![Vec3::zero(), Vec3::zero()],
             vec![MeshTriangle::new(0, 0, 1)]
         )
-            .check_manifold()
+        .check_manifold()
     );
     assert_eq!(
         Err(ManifoldError::MissingVertex),
@@ -99,7 +113,7 @@ fn test_check_manifold() {
                 MeshTriangle::new(1, 0, 3)
             ]
         )
-            .check_manifold()
+        .check_manifold()
     );
     assert_eq!(
         Ok(()),
@@ -112,7 +126,7 @@ fn test_check_manifold() {
                 MeshTriangle::new(1, 0, 3)
             ]
         )
-            .check_manifold()
+        .check_manifold()
     );
     assert_eq!(
         Err(ManifoldError::BrokenFan),
@@ -124,7 +138,7 @@ fn test_check_manifold() {
                 MeshTriangle::new(0, 2, 3)
             ]
         )
-            .check_manifold()
+        .check_manifold()
     );
     assert_eq!(
         Err(ManifoldError::SplitFan),
@@ -141,7 +155,7 @@ fn test_check_manifold() {
                 MeshTriangle::new(3, 2, 5)
             ]
         )
-            .check_manifold()
+        .check_manifold()
     );
     assert_eq!(
         Err(ManifoldError::DuplicateFan),
@@ -158,6 +172,6 @@ fn test_check_manifold() {
                 MeshTriangle::new(4, 3, 6)
             ]
         )
-            .check_manifold()
+        .check_manifold()
     );
 }
