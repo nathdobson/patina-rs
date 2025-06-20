@@ -61,6 +61,10 @@ impl Vec2 {
     pub fn angle(self) -> f64 {
         self.y().atan2(self.x())
     }
+    pub fn is_finite(self)->bool{
+        self.0.iter().all(|x| x.is_finite())
+    }
+
 }
 
 impl From<[f64; 2]> for Vec2 {

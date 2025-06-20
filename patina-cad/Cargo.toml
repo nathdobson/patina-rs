@@ -13,3 +13,4 @@ rand = "0.9.1"
 [dev-dependencies]
 tokio = {version="1.45.1", features = ["rt","macros"] }
 anyhow = "1.0.98"
+rand_xorshift = "0.4.0"

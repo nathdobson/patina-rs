@@ -3,27 +3,29 @@ use crate::geo3::triangle3::Triangle3;
 use crate::math::interval::Interval;
 use crate::math::vec3::Vec3;
 use std::any::type_name;
+use std::fmt::Debug;
 
 pub trait ConvexPoly {
     fn normals(&self) -> impl AsRef<[Vec3]>;
     fn project_onto(&self, vector: Vec3) -> Interval;
 }
 
-pub fn sat_intersects<A: ConvexPoly, B: ConvexPoly>(a: &A, b: &B) -> bool {
+pub fn sat_intersects<A: ConvexPoly + Debug, B: ConvexPoly + Debug>(a: &A, b: &B) -> bool {
     sat_intersects_partial(a, b) && sat_intersects_partial(b, a)
 }
 
-fn sat_intersects_partial<A: ConvexPoly, B: ConvexPoly>(a: &A, b: &B) -> bool {
+fn sat_intersects_partial<A: ConvexPoly + Debug, B: ConvexPoly + Debug>(a: &A, b: &B) -> bool {
     for normal in a.normals().as_ref() {
+        assert!(normal.is_finite(), "{:?} {:?}", a, b);
         let mut ia = a.project_onto(*normal);
         if ia.min() >= ia.max() {
             ia = Interval::new(ia.min(), ia.min());
         }
         let ib = b.project_onto(*normal);
-        assert!(ia.min().is_finite());
-        assert!(ia.max().is_finite());
-        assert!(ib.min().is_finite());
-        assert!(ib.max().is_finite());
+        assert!(ia.min().is_finite(), "{:?} {:?}", ia, normal);
+        assert!(ia.max().is_finite(), "{:?} {:?}", ia, normal);
+        assert!(ib.min().is_finite(), "{:?} {:?}", ib, normal);
+        assert!(ib.max().is_finite(), "{:?} {:?}", ib, normal);
         if !ia.intersects(ib) {
             return false;
         }

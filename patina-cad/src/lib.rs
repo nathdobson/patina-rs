@@ -3,6 +3,7 @@
 #![feature(hash_set_entry)]
 #![allow(dead_code, unused_variables, unused_mut, unused_imports)]
 #![deny(unused_must_use)]
+#![allow(unreachable_code)]
 
 pub mod geo3;
 pub mod math;

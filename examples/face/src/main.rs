@@ -16,22 +16,31 @@ use tokio::io;
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
-    // let mut face = Cylinder::new(Vec3::zero(), Vec3::new(0.0, 0.0, 0.1), 10.0).as_mesh(7);
-    // let eye = Cylinder::new(Vec3::new(3.0, 3.0, -0.1), Vec3::new(0.0, 0.0, 0.3), 1.0).as_mesh(3);
-    let mut face = Sphere::new(Vec3::zero(), 10.0).as_mesh(2);
-    let mut eye = Sphere::new(Vec3::new(9.0, 1.0, 1.0), 3.0).as_mesh(2);
-    let mut rng = XorShiftRng::seed_from_u64(123);
-    face.perturb(&mut rng, 0.001);
-    eye.perturb(&mut rng, 0.001);
-    face.check_manifold().unwrap();
-    eye.check_manifold().unwrap();
-    let bimesh = Bimesh::new(&face, &eye);
+    let mut face = Sphere::new(Vec3::zero(), 10.0).as_mesh(3);
+    let mut ear1 = Sphere::new(Vec3::new(10.0, 3.0, 3.0), 3.0).as_mesh(2);
+    let mut ear2 = Sphere::new(Vec3::new(-10.0, 3.0, 3.0), 3.0).as_mesh(2);
+    let mut eye1 = Cylinder::new(Vec3::new(3.0, 3.0, 8.0), Vec3::axis_z() * 2.0, 1.5).as_mesh(17);
+    let mut eye2 = Cylinder::new(Vec3::new(-3.0, 3.0, 8.0), Vec3::axis_z() * 2.0, 1.5).as_mesh(17);
+    let mut nose = Sphere::new(Vec3::new(0.0, 5.0, 9.0), 2.0).as_mesh(2);
+    let mut rng = XorShiftRng::seed_from_u64(1);
+    eye1.perturb(&mut rng, 0.0001);
+    eye2.perturb(&mut rng, 0.0001);
+    ear1.perturb(&mut rng, 0.0001);
+    ear2.perturb(&mut rng, 0.0001);
+    face.perturb(&mut rng, 0.0001);
+    nose.perturb(&mut rng, 0.0001);
+    eye1.check_manifold().unwrap();
+    let total = face
+        .union(&ear1)
+        .union(&ear2)
+        .union(&eye1)
+        .union(&eye2)
+        //
+        .union(&nose)
+    //
+        ;
     let dir = PathBuf::from("examples").join("face").join("output");
     tokio::fs::create_dir_all(&dir).await.ok();
-    write_stl_file(&bimesh.union(), &dir.join("union.stl")).await?;
-    write_stl_file(&bimesh.intersect(), &dir.join("intersect.stl")).await?;
-    write_stl_file(&bimesh.forward_difference(), &dir.join("forward_difference.stl")).await?;
-    write_stl_file(&bimesh.reverse_difference(), &dir.join("reverse_difference.stl")).await?;
-    // write_stl_file(&mesh, PathBuf::from("examples/face/output.stl").as_path()).await?;
+    write_stl_file(&total, &dir.join("face.stl")).await?;
     Ok(())
 }

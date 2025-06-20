@@ -7,13 +7,15 @@ pub enum ManifoldError {
     // A vertex occurs in no triangles.
     MissingVertex,
     // The fan around a vertex is not connected.
-    BrokenFan,
+    BrokenFan(usize, usize),
     // The fan around a vertex has extra triangles.
-    SplitFan,
+    SplitFan(usize),
     // There is more than one fan around a vertex.
     DuplicateFan,
     // A triangle contains an unknown vertex.
     BadVertex,
+    // A triangle has no area
+    EmptyTriangle,
 }
 
 impl std::error::Error for ManifoldError {}

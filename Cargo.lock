@@ -175,6 +175,7 @@ dependencies = [
  "itertools",
  "ordered-float",
  "rand",
+ "rand_xorshift",
  "tokio",
 ]
 

@@ -1,11 +1,12 @@
 use crate::math::vec3::Vec3;
+use crate::meshes::bimesh::Bimesh;
 use crate::meshes::error::ManifoldError;
 use crate::meshes::mesh_triangle::MeshTriangle;
 use itertools::Itertools;
 use rand::Rng;
 use std::collections::HashMap;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Mesh {
     vertices: Vec<Vec3>,
     triangles: Vec<MeshTriangle>,
@@ -59,11 +60,13 @@ impl Mesh {
                 let start = *edges.keys().next().unwrap();
                 let mut walk = start;
                 loop {
-                    let next = edges.remove(&walk).ok_or(ManifoldError::BrokenFan)?;
+                    let next = edges
+                        .remove(&walk)
+                        .ok_or(ManifoldError::BrokenFan(v, walk))?;
                     walk = next
                         .into_iter()
                         .exactly_one()
-                        .map_err(|_| ManifoldError::SplitFan)?;
+                        .map_err(|e| ManifoldError::SplitFan(v))?;
                     if walk == start {
                         break;
                     }
@@ -75,6 +78,13 @@ impl Mesh {
         }
         if !edge_table.is_empty() {
             return Err(ManifoldError::BadVertex);
+        }
+        for t in &self.triangles {
+            let t = t.for_vertices(&self.vertices);
+            if t.area() <= 10e-15 {
+                println!("{:?}",t.area());
+                return Err(ManifoldError::EmptyTriangle);
+            }
         }
         Ok(())
     }
@@ -102,6 +112,9 @@ impl Mesh {
             })));
         }
         Mesh::new(new_vertices, new_triangles)
+    }
+    pub fn union(&self, other: &Mesh) -> Mesh {
+        Bimesh::new(self, other).union()
     }
 }
 
@@ -142,7 +155,7 @@ fn test_check_manifold() {
         .check_manifold()
     );
     assert_eq!(
-        Err(ManifoldError::BrokenFan),
+        Err(ManifoldError::BrokenFan(todo!(), todo!())),
         Mesh::new(
             vec![Vec3::zero(); 4],
             vec![
@@ -154,7 +167,7 @@ fn test_check_manifold() {
         .check_manifold()
     );
     assert_eq!(
-        Err(ManifoldError::SplitFan),
+        Err(ManifoldError::SplitFan(todo!())),
         Mesh::new(
             vec![Vec3::zero(); 6],
             vec![

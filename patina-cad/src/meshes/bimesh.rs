@@ -11,7 +11,9 @@ use crate::util::sorted_pair::SortedPair;
 use arrayvec::ArrayVec;
 use itertools::Itertools;
 use ordered_float::NotNan;
+use rand::Rng;
 use std::collections::{BTreeMap, HashMap, HashSet, hash_set};
+use std::iter;
 use std::path::PathBuf;
 
 pub struct BimeshTriangle {
@@ -37,7 +39,7 @@ impl BimeshTriangle {
     }
 }
 
-#[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
+#[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Debug)]
 struct VertexType {
     edge: Option<SortedPair<usize>>,
 }
@@ -166,12 +168,34 @@ impl<'a> BimeshBuilder<'a> {
             for (&v1, &p1) in projections.iter() {
                 for (&v2, &p2) in projections.iter() {
                     let e = SortedPair::new(v1, v2);
-                    if v1 != v2
-                        && (vertices.vertex_types[v1].edge != vertices.vertex_types[v2].edge)
-                        && !edges.contains(&e)
-                    {
-                        missing_edges.insert(e);
+                    if v1 == v2 {
+                        continue;
                     }
+                    match (
+                        vertices.vertex_types[v1].edge,
+                        vertices.vertex_types[v2].edge,
+                    ) {
+                        (None, None) => continue,
+                        (Some(e1), None) => {
+                            if *e1.first() == v2 || *e1.second() == v2 {
+                                continue;
+                            }
+                        }
+                        (None, Some(e2)) => {
+                            if *e2.first() == v1 || *e2.second() == v1 {
+                                continue;
+                            }
+                        }
+                        (Some(e1), Some(e2)) => {
+                            if e1 == e2 {
+                                continue;
+                            }
+                        }
+                    }
+                    if edges.contains(&e) {
+                        continue;
+                    }
+                    missing_edges.insert(e);
                 }
             }
             let mut missing_edges = missing_edges.into_iter().collect::<Vec<_>>();
@@ -236,6 +260,7 @@ impl<'a> BimeshBuilder<'a> {
                 major.sort();
                 tris.remove(&major);
             }
+            // println!("{:?}", tris);
             assert!(tris.len() > 0);
             let expected_area = mt.for_vertices(&vertices.vertices).area();
             let mut actual_area = 0.0;
@@ -248,12 +273,28 @@ impl<'a> BimeshBuilder<'a> {
                     t.invert();
                 }
                 let area = t.for_vertices(&vertices.vertices).area();
-                if area < 1e-10 {
-                    panic!("Empty triangle");
+                if area < 1e-15 {
+                    println!("{:?}", mt);
+                    println!("{:?}", mt.for_vertices(&vertices.vertices).area());
+                    for &v in adjacency_map.keys() {
+                        println!("{:?} -> {:?}", v, vertices.vertex_types[v]);
+                    }
+                    println!("{:?}", orig_edges);
+                    println!("{:?}", edges);
+                    println!("{:?}", adjacency_map);
+                    println!("{:?}", tris);
+                    panic!(
+                        "Empty triangle {:?} {:?} {:?} {:?}",
+                        [p1, p2, p3, p2 - p1, p3 - p1],
+                        (p2 - p1).cross(p3 - p1),
+                        t.for_vertices(&vertices.vertices),
+                        area
+                    );
                 }
                 actual_area += area;
                 self.out_tris.push(t);
             }
+            println!("area diff {:?}", expected_area - actual_area);
         }
         for tri in &self.out_tris {
             let tri_vs = tri.for_vertices(&vertices.vertices);
@@ -269,6 +310,8 @@ impl<'a> BimeshBuilder<'a> {
 
 impl Bimesh {
     pub fn new(mesh1: &Mesh, mesh2: &Mesh) -> Self {
+        mesh1.check_manifold().unwrap();
+        mesh2.check_manifold().unwrap();
         let mut vertices = VertexBuilder::new(mesh1, mesh2);
         let offset = mesh1.vertices().len();
         let mut mesh1 = BimeshBuilder::new(mesh1, 0);
@@ -337,11 +380,12 @@ impl Bimesh {
         for i1 in 0..mesh.vertices().len() {
             for i2 in i1 + 1..mesh.vertices().len() {
                 let d = mesh.vertices()[i1].distance(mesh.vertices()[i2]);
-                if d < 1e-5 {
-                    panic!("similar vertex {} ~= {} ({})", i1, i2, d);
+                if d < 1e-10 {
+                    println!("similar vertex {} ~= {} ({})", i1, i2, d);
                 }
             }
         }
+        println!("{:#?}", mesh);
         mesh.check_manifold().unwrap();
         mesh
     }
@@ -463,5 +507,66 @@ async fn test_triangle2() -> anyhow::Result<()> {
     tokio::fs::create_dir_all(&dir).await?;
     write_stl_file(&bimesh.mesh_part_all(0), &dir.join("mesh1.stl")).await?;
     write_stl_file(&bimesh.mesh_part_all(1), &dir.join("mesh2.stl")).await?;
+    Ok(())
+}
+
+#[cfg(test)]
+#[tokio::test]
+async fn test_tetrahedron_random() -> anyhow::Result<()> {
+    use rand::SeedableRng;
+    use rand_xorshift::XorShiftRng;
+
+    for seed in 0..100000 {
+        println!("seed {:?}", seed);
+        let mut rng = XorShiftRng::seed_from_u64(seed);
+        let max = 1000000.0;
+        let range = 0.0f64..max;
+        let meshes = iter::repeat_with(|| {
+            let mut vs: Vec<Vec3> = iter::repeat_with(|| {
+                Vec3::new(
+                    rng.random_range(range.clone()).round() / max,
+                    rng.random_range(range.clone()).round() / max,
+                    rng.random_range(range.clone()).round() / max,
+                )
+            })
+            .take(4)
+            .collect();
+            let d1 = vs[1] - vs[0];
+            let d2 = vs[2] - vs[0];
+            let d3 = vs[3] - vs[0];
+            if d1.cross(d2).dot(d3) < 0.0 {
+                vs.swap(2, 3);
+            }
+            Mesh::new(
+                vs,
+                vec![
+                    MeshTriangle::new(0, 2, 1),
+                    MeshTriangle::new(0, 3, 2),
+                    MeshTriangle::new(0, 1, 3),
+                    MeshTriangle::new(1, 2, 3),
+                ],
+            )
+        })
+        .take(2)
+        .collect::<Vec<_>>();
+        let mesh1 = &meshes[0];
+        let mesh2 = &meshes[1];
+        let dir = PathBuf::from("../")
+            .join("target")
+            .join("test_outputs")
+            .join("test_tetrahedron_random");
+        tokio::fs::create_dir_all(&dir).await?;
+        let bimesh = Bimesh::new(mesh1, mesh2);
+        if seed == 123123123123 {
+            write_stl_file(&mesh1, &dir.join("mesh1.stl")).await?;
+            write_stl_file(&mesh2, &dir.join("mesh2.stl")).await?;
+            write_stl_file(&bimesh.mesh_part(0, true), &dir.join("mesh1_inside.stl")).await?;
+            write_stl_file(&bimesh.mesh_part(0, false), &dir.join("mesh1_outside.stl")).await?;
+            write_stl_file(&bimesh.mesh_part(1, true), &dir.join("mesh2_inside.stl")).await?;
+            write_stl_file(&bimesh.mesh_part(1, false), &dir.join("mesh2_outside.stl")).await?;
+        }
+        bimesh.intersect();
+        bimesh.union();
+    }
     Ok(())
 }

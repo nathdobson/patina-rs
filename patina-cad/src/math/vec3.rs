@@ -72,6 +72,9 @@ impl Vec3 {
     pub fn distance(self, other: Self) -> f64 {
         (self - other).length()
     }
+    pub fn is_finite(self)->bool{
+        self.0.iter().all(|x| x.is_finite())
+    }
 }
 
 impl From<[f64; 3]> for Vec3 {

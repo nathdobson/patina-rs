@@ -28,6 +28,7 @@ impl Cylinder {
         self.radius
     }
     pub fn as_mesh(&self, detail: usize) -> Mesh {
+        assert!(detail >= 3);
         let mut vertices = Vec::new();
         for i in 0..detail {
             let theta = i as f64 / detail as f64 * PI * 2.0;
