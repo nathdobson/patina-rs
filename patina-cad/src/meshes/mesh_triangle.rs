@@ -1,4 +1,4 @@
-use crate::geo3::triangle::Triangle;
+use crate::geo3::triangle3::Triangle3;
 use crate::math::vec3::Vec3;
 use crate::meshes::mesh_edge::MeshEdge;
 use std::fmt::{Debug, Formatter};
@@ -28,8 +28,8 @@ impl MeshTriangle {
             MeshEdge::new(self.vertices[2], self.vertices[0]),
         ]
     }
-    pub fn for_vertices(&self, vs: &[Vec3]) -> Triangle {
-        Triangle::new(self.vertices.map(|v| {
+    pub fn for_vertices(&self, vs: &[Vec3]) -> Triangle3 {
+        Triangle3::new(self.vertices.map(|v| {
             *vs.get(v)
                 .unwrap_or_else(|| panic!("Vertex count is {} but the vertex is {}", vs.len(), v))
         }))

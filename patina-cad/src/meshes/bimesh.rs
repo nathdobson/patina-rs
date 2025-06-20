@@ -1,4 +1,5 @@
 use crate::geo2::segment2::Segment2;
+use crate::geo2::triangle2::Triangle2;
 use crate::geo3::ray3::Ray3;
 use crate::math::vec3::Vec3;
 use crate::meshes::bvh::Bvh;
@@ -133,6 +134,7 @@ impl<'a> BimeshBuilder<'a> {
     ) {
         for (ti, mt) in self.tris.iter().enumerate() {
             let edges = self.new_edges.entry(ti).or_default();
+            let orig_edges = edges.clone();
             for edge in self.tris[ti].edges() {
                 let mut edge_seq = edge.vertices().to_vec();
                 if let Some(new) = self.new_vertices.get(&edge.sorted()) {
@@ -178,7 +180,6 @@ impl<'a> BimeshBuilder<'a> {
                     NotNan::new(projections[e.first()].distance(projections[e.second()])).unwrap();
                 (d, *e.first(), *e.second())
             });
-            println!("missing_edges = {:?}", missing_edges);
             for missing in missing_edges {
                 let s1 = Segment2::new(projections[missing.first()], projections[missing.second()]);
                 if !edges.iter().any(|extant| {
@@ -198,7 +199,6 @@ impl<'a> BimeshBuilder<'a> {
             }
             let mut tris: HashSet<[usize; 3]> = HashSet::new();
             let mut adjacency_map = BTreeMap::<usize, HashSet<usize>>::new();
-            println!("edges = {:?}", edges);
             for e in edges.iter() {
                 adjacency_map
                     .entry(*e.first())
@@ -218,6 +218,13 @@ impl<'a> BimeshBuilder<'a> {
                     let v2 = v2v[i];
                     let v3 = v2v[(i + 1) % v2v.len()];
                     if adjacency_map.get(&v2).unwrap().contains(&v3) {
+                        let t2 =
+                            Triangle2::new([projections[&v1], projections[&v2], projections[&v3]]);
+                        if projections.iter().any(|(&vx, &p)| {
+                            vx != v1 && vx != v2 && vx != v3 && t2.intersects_point(p)
+                        }) {
+                            continue;
+                        }
                         let mut t = [v1, v2, v3];
                         t.sort();
                         tris.insert(t);
@@ -230,18 +237,21 @@ impl<'a> BimeshBuilder<'a> {
                 tris.remove(&major);
             }
             assert!(tris.len() > 0);
-            for [v1, v2, v3] in tris {
+            let expected_area = mt.for_vertices(&vertices.vertices).area();
+            let mut actual_area = 0.0;
+            for &[v1, v2, v3] in &tris {
                 let p1 = *projections.get(&v1).unwrap();
                 let p2 = *projections.get(&v2).unwrap();
                 let p3 = *projections.get(&v3).unwrap();
                 let mut t = MeshTriangle::new(v1, v2, v3);
-                let area = (p2 - p1).cross(p3 - p1);
-                if area.abs() < 1e-10 {
-                    println!("empty triangle {:?} {:?} {:?} ", p1, p2, p3);
-                }
-                if area < 0.0 {
+                if (p2 - p1).cross(p3 - p1) < 0.0 {
                     t.invert();
                 }
+                let area = t.for_vertices(&vertices.vertices).area();
+                if area < 1e-10 {
+                    panic!("Empty triangle");
+                }
+                actual_area += area;
                 self.out_tris.push(t);
             }
         }
@@ -268,7 +278,6 @@ impl Bimesh {
             let mut vs = ArrayVec::<usize, 2>::new();
             vertices.build_partial_edge(&mut mesh1, &mut mesh2, t1, t2, &mut vs);
             vertices.build_partial_edge(&mut mesh2, &mut mesh1, t2, t1, &mut vs);
-            println!("{:?} {:?} {:?}", t1, t2, vs);
             if let Ok(vs) = vs.into_inner() {
                 let vs = MeshEdge::from(vs).sorted();
                 mesh1.add_edge(t1, vs);
@@ -300,6 +309,53 @@ impl Bimesh {
                 .filter_map(|t| (t.source == source).then_some(t.triangle))
                 .collect(),
         )
+    }
+    fn binop(&self, inside1: bool, inside2: bool, invert1: bool, invert2: bool) -> Mesh {
+        let mesh = Mesh::new(
+            self.vertices.clone(),
+            self.tris
+                .iter()
+                .filter_map(|t| {
+                    let inside;
+                    let invert;
+                    if t.source == 0 {
+                        inside = inside1;
+                        invert = invert1;
+                    } else {
+                        inside = inside2;
+                        invert = invert2;
+                    }
+                    let mut tri = *t.triangle();
+                    if invert {
+                        tri.invert()
+                    }
+                    (inside == t.inside).then_some(tri)
+                })
+                .collect(),
+        );
+        let mesh = mesh.without_dead_vertices();
+        for i1 in 0..mesh.vertices().len() {
+            for i2 in i1 + 1..mesh.vertices().len() {
+                let d = mesh.vertices()[i1].distance(mesh.vertices()[i2]);
+                if d < 1e-5 {
+                    panic!("similar vertex {} ~= {} ({})", i1, i2, d);
+                }
+            }
+        }
+        mesh.check_manifold().unwrap();
+        mesh
+    }
+    pub fn union(&self) -> Mesh {
+        self.binop(false, false, false, false)
+    }
+    pub fn intersect(&self) -> Mesh {
+        self.binop(true, true, false, false)
+    }
+    pub fn forward_difference(&self) -> Mesh {
+        self.binop(false, true, false, true)
+    }
+    pub fn reverse_difference(&self) -> Mesh {
+        self.binop(true, false, true, false)
     }
 }
 

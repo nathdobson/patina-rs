@@ -2,7 +2,7 @@ use crate::geo3::aabb::AABB;
 use crate::geo3::ray3::Ray3;
 use crate::geo3::sphere;
 use crate::geo3::sphere::Sphere;
-use crate::geo3::triangle::Triangle;
+use crate::geo3::triangle3::Triangle3;
 use crate::math::vec3::Vec3;
 use crate::meshes::mesh::Mesh;
 use crate::sat::sat_intersects;
@@ -26,7 +26,7 @@ pub struct BvhNodeView<'a> {
 
 pub struct BvhTriangle {
     index: usize,
-    triangle: Triangle,
+    triangle: Triangle3,
 }
 
 pub struct Bvh {
@@ -42,7 +42,7 @@ pub struct BvhBuilder {
 #[derive(Copy, Clone, Debug)]
 pub struct BvhTriangleBuilder {
     index: usize,
-    triangle: Triangle,
+    triangle: Triangle3,
     midpoint: Vec3,
     aabb: AABB,
 }
@@ -182,7 +182,7 @@ impl BvhBuilder {
 }
 
 impl BvhTriangleBuilder {
-    pub fn new(index: usize, triangle: Triangle) -> Self {
+    pub fn new(index: usize, triangle: Triangle3) -> Self {
         BvhTriangleBuilder {
             index,
             triangle,
@@ -199,7 +199,6 @@ impl BvhTriangleBuilder {
 impl BvhTriangle {
     pub fn intersect_leaf(&self, other: &Self, result: &mut Vec<(usize, usize)>) {
         if self.triangle.intersects(&other.triangle) {
-            println!("intersect");
             result.push((self.index, other.index));
         }
     }
@@ -246,7 +245,7 @@ impl Bvh {
         let mut triangles = vec![];
         for (index, t) in mesh.triangles().iter().enumerate() {
             let points = t.vertices().map(|v| mesh.vertices()[v]);
-            triangles.push(BvhTriangleBuilder::new(index, Triangle::new(points)));
+            triangles.push(BvhTriangleBuilder::new(index, Triangle3::new(points)));
         }
         Bvh::new(&triangles)
     }
@@ -265,7 +264,6 @@ impl Bvh {
     pub fn intersect_ray(&self, ray: &Ray3) -> Vec<RayMeshIntersection> {
         let mut result = vec![];
         self.root_view().intersect_ray(ray, &mut result);
-        println!("result = {:?}", result);
         result
     }
 }

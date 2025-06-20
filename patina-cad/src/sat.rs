@@ -1,5 +1,5 @@
 use crate::geo3::aabb::AABB;
-use crate::geo3::triangle::Triangle;
+use crate::geo3::triangle3::Triangle3;
 use crate::math::interval::Interval;
 use crate::math::vec3::Vec3;
 use std::any::type_name;
@@ -14,7 +14,6 @@ pub fn sat_intersects<A: ConvexPoly, B: ConvexPoly>(a: &A, b: &B) -> bool {
 }
 
 fn sat_intersects_partial<A: ConvexPoly, B: ConvexPoly>(a: &A, b: &B) -> bool {
-    println!("sat_intersects_partial {:?} {:?}", type_name::<A>(), type_name::<A>());
     for normal in a.normals().as_ref() {
         let mut ia = a.project_onto(*normal);
         if ia.min() >= ia.max() {

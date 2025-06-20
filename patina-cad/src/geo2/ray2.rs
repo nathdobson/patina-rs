@@ -28,6 +28,10 @@ impl Ray2 {
         let ts = mat.invert() * (self.origin - r2.origin);
         (ts.x() >= 0.0 && ts.y() >= 0.0).then_some(ts)
     }
+    pub fn is_left(&self, p: Vec2) -> bool {
+        let d2 = p - self.origin;
+        self.dir.cross(d2) >= 0.0
+    }
 }
 
 #[test]

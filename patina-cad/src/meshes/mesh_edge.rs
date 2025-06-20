@@ -1,5 +1,5 @@
 use crate::geo3::segment3::Segment3;
-use crate::geo3::triangle::Triangle;
+use crate::geo3::triangle3::Triangle3;
 use crate::math::vec3::Vec3;
 use crate::meshes::mesh_triangle::MeshTriangle;
 use crate::util::sorted_pair::SortedPair;

@@ -79,7 +79,6 @@ impl Mesh {
         Ok(())
     }
     pub fn new(vertices: Vec<Vec3>, triangles: Vec<MeshTriangle>) -> Self {
-        println!("V={} T={}", vertices.len(), triangles.len());
         for t in &triangles {
             for v in *t {
                 assert!(v < vertices.len());
@@ -89,6 +88,20 @@ impl Mesh {
             vertices,
             triangles,
         }
+    }
+    pub fn without_dead_vertices(&self) -> Mesh {
+        let mut new_vertices = vec![];
+        let mut vertex_map = HashMap::new();
+        let mut new_triangles = vec![];
+        for t1 in &self.triangles {
+            new_triangles.push(MeshTriangle::from(t1.vertices().map(|v| {
+                *vertex_map.entry(v).or_insert_with(|| {
+                    new_vertices.push(self.vertices[v]);
+                    new_vertices.len() - 1
+                })
+            })));
+        }
+        Mesh::new(new_vertices, new_triangles)
     }
 }
 

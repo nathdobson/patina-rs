@@ -8,11 +8,11 @@ use crate::sat::ConvexPoly;
 use std::fmt::{Debug, Formatter};
 
 #[derive(Copy, Clone)]
-pub struct Triangle([Vec3; 3]);
+pub struct Triangle3([Vec3; 3]);
 
-impl Triangle {
-    pub fn new(points: [Vec3; 3]) -> Triangle {
-        Triangle(points)
+impl Triangle3 {
+    pub fn new(points: [Vec3; 3]) -> Triangle3 {
+        Triangle3(points)
     }
     pub fn points(&self) -> &[Vec3; 3] {
         &self.0
@@ -62,8 +62,7 @@ impl Triangle {
             Segment3::new(self.points()[2], self.points()[0]),
         ]
     }
-    pub fn intersects(&self, other: &Triangle) -> bool {
-        println!("testing");
+    pub fn intersects(&self, other: &Triangle3) -> bool {
         for e in self.edges() {
             if other.intersect_segment(&e).is_some() {
                 return true;
@@ -76,9 +75,14 @@ impl Triangle {
         }
         false
     }
+    pub fn area(&self) -> f64 {
+        (self.points()[1] - self.points()[0])
+            .cross(self.points()[2] - self.points()[0])
+            .length()
+    }
 }
 
-impl ConvexPoly for Triangle {
+impl ConvexPoly for Triangle3 {
     fn normals(&self) -> impl AsRef<[Vec3]> {
         [self.normal()]
     }
@@ -92,7 +96,7 @@ impl ConvexPoly for Triangle {
     }
 }
 
-impl Debug for Triangle {
+impl Debug for Triangle3 {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         self.0.fmt(f)
     }
@@ -100,7 +104,7 @@ impl Debug for Triangle {
 
 #[test]
 fn test_triangle_segment_intersect() {
-    let tri = Triangle::new([
+    let tri = Triangle3::new([
         Vec3::new(1.0, 0.0, 0.0),
         Vec3::new(0.0, 1.0, 0.0),
         Vec3::new(0.0, 0.0, 1.0),

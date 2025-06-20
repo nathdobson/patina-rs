@@ -26,10 +26,8 @@ impl Ray3 {
             let min = aabb.min()[axis];
             let max = aabb.max()[axis];
             let part = Interval::new((min - b) / m, (max - b) / m);
-            println!("part = {:?}", part);
             interval = interval.intersect(part);
         }
-        println!("interval = {:?}", interval);
         (!interval.is_empty()).then_some(interval)
     }
     pub fn project(&self, p: Vec3) -> f64 {
