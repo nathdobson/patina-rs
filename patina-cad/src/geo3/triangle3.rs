@@ -64,12 +64,16 @@ impl Triangle3 {
     }
     pub fn intersects(&self, other: &Triangle3) -> bool {
         for e in self.edges() {
-            if other.intersect_segment(&e).is_some() {
+            if other.intersect_segment(&e).is_some()
+                || other.intersect_segment(&e.reverse()).is_some()
+            {
                 return true;
             }
         }
         for e in other.edges() {
-            if self.intersect_segment(&e).is_some() {
+            if self.intersect_segment(&e).is_some()
+                || self.intersect_segment(&e.reverse()).is_some()
+            {
                 return true;
             }
         }

@@ -1,10 +1,11 @@
 use crate::geo3::triangle3::Triangle3;
 use crate::math::vec3::Vec3;
 use crate::meshes::mesh_edge::MeshEdge;
+use crate::meshes::ordered_mesh_edge::OrderedMeshEdge;
 use std::fmt::{Debug, Formatter};
 use std::ops::Index;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub struct MeshTriangle {
     vertices: [usize; 3],
 }
@@ -20,6 +21,13 @@ impl MeshTriangle {
     }
     pub fn vertices(&self) -> [usize; 3] {
         self.vertices
+    }
+    pub fn ordered_edges(&self) -> [OrderedMeshEdge; 3] {
+        [
+            OrderedMeshEdge::new(self.vertices[0], self.vertices[1]),
+            OrderedMeshEdge::new(self.vertices[1], self.vertices[2]),
+            OrderedMeshEdge::new(self.vertices[2], self.vertices[0]),
+        ]
     }
     pub fn edges(&self) -> [MeshEdge; 3] {
         [

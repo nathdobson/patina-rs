@@ -1,6 +1,6 @@
 use crate::math::macros::impl_ref_binop;
 use crate::math::vec2::Vec2;
-use std::fmt::{Debug, Formatter};
+use std::fmt::{Debug, Display, Formatter};
 use std::iter::Sum;
 use std::ops::{Add, AddAssign, Div, Index, IndexMut, Mul, Neg, Sub};
 
@@ -72,7 +72,7 @@ impl Vec3 {
     pub fn distance(self, other: Self) -> f64 {
         (self - other).length()
     }
-    pub fn is_finite(self)->bool{
+    pub fn is_finite(self) -> bool {
         self.0.iter().all(|x| x.is_finite())
     }
 }
@@ -234,5 +234,11 @@ impl FromIterator<f64> for Vec3 {
 impl Debug for Vec3 {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "[{:.5}, {:.5}, {:.5}]", self.x(), self.y(), self.z())
+    }
+}
+
+impl Display for Vec3 {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:.5}\t{:.5}\t{:.5}", self.x(), self.y(), self.z())
     }
 }

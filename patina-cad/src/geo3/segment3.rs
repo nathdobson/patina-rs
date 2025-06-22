@@ -23,4 +23,7 @@ impl Segment3 {
     pub fn as_ray(&self) -> Ray3 {
         Ray3::new(self.p1, self.p2 - self.p1)
     }
+    pub fn reverse(&self) -> Segment3 {
+        Segment3::new(self.p2, self.p1)
+    }
 }

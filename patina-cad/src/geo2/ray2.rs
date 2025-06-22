@@ -1,3 +1,4 @@
+use crate::geo2::segment2::Segment2;
 use crate::geo3::aabb::AABB;
 use crate::math::interval::Interval;
 use crate::math::mat2::Mat2;
@@ -27,6 +28,13 @@ impl Ray2 {
         let mat = Mat2::from_cols(-self.dir, r2.dir);
         let ts = mat.invert() * (self.origin - r2.origin);
         (ts.x() >= 0.0 && ts.y() >= 0.0).then_some(ts)
+    }
+    pub fn intersect_segment(&self, seg: &Segment2) -> bool {
+        if let Some(v) = self.intersect_time(&seg.as_ray()) {
+            v.y() <= 1.0
+        } else {
+            false
+        }
     }
     pub fn is_left(&self, p: Vec2) -> bool {
         let d2 = p - self.origin;

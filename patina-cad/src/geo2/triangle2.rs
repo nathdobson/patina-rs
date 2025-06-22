@@ -26,4 +26,7 @@ impl Triangle2 {
             .cloned()
             .all_equal()
     }
+    pub fn area(&self) -> f64 {
+        (self.vertices()[1] - self.vertices()[0]).cross(self.vertices()[2] - self.vertices()[0])
+    }
 }

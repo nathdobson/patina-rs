@@ -6,8 +6,8 @@ use crate::meshes::bvh::Bvh;
 use crate::meshes::mesh::Mesh;
 use crate::meshes::mesh_edge::MeshEdge;
 use crate::meshes::mesh_triangle::MeshTriangle;
+use crate::meshes::ordered_mesh_edge::OrderedMeshEdge;
 use crate::ser::stl::write_stl_file;
-use crate::util::sorted_pair::SortedPair;
 use arrayvec::ArrayVec;
 use itertools::Itertools;
 use ordered_float::NotNan;
@@ -41,7 +41,7 @@ impl BimeshTriangle {
 
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Debug)]
 struct VertexType {
-    edge: Option<SortedPair<usize>>,
+    edge: Option<MeshEdge>,
 }
 
 struct VertexBuilder {
@@ -54,8 +54,8 @@ struct BimeshBuilder<'a> {
     // mesh_index: usize,
     tris: Vec<MeshTriangle>,
     bvh: Bvh,
-    new_vertices: HashMap<SortedPair<usize>, HashMap<usize, Option<usize>>>,
-    new_edges: HashMap<usize, HashSet<SortedPair<usize>>>,
+    new_vertices: HashMap<MeshEdge, HashMap<usize, Option<usize>>>,
+    new_edges: HashMap<usize, HashSet<MeshEdge>>,
     out_tris: Vec<MeshTriangle>,
 }
 
@@ -81,10 +81,10 @@ impl VertexBuilder {
         t2: usize,
         result: &mut ArrayVec<usize, 2>,
     ) {
-        for e1 in mesh1.tris[t1].edges() {
+        for e1 in mesh1.tris[t1].ordered_edges() {
             if let Some(v) = mesh1
                 .new_vertices
-                .entry(e1.sorted())
+                .entry(e1.edge())
                 .or_default()
                 .entry(t2)
                 .or_insert_with(|| {
@@ -95,7 +95,7 @@ impl VertexBuilder {
                         .map(|time| {
                             self.vertices.push(e1s.at_time(time));
                             self.vertex_types.push(VertexType {
-                                edge: Some(e1.sorted()),
+                                edge: Some(e1.edge()),
                             });
                             self.vertices.len() - 1
                         })
@@ -124,7 +124,7 @@ impl<'a> BimeshBuilder<'a> {
             out_tris: vec![],
         }
     }
-    pub fn add_edge(&mut self, t: usize, e: SortedPair<usize>) {
+    pub fn add_edge(&mut self, t: usize, e: MeshEdge) {
         self.new_edges.entry(t).or_default().insert(e);
     }
     pub fn build_tris(
@@ -137,9 +137,9 @@ impl<'a> BimeshBuilder<'a> {
         for (ti, mt) in self.tris.iter().enumerate() {
             let edges = self.new_edges.entry(ti).or_default();
             let orig_edges = edges.clone();
-            for edge in self.tris[ti].edges() {
+            for edge in self.tris[ti].ordered_edges() {
                 let mut edge_seq = edge.vertices().to_vec();
-                if let Some(new) = self.new_vertices.get(&edge.sorted()) {
+                if let Some(new) = self.new_vertices.get(&edge.edge()) {
                     for vo in new.values() {
                         if let Some(v) = vo {
                             edge_seq.push(*v);
@@ -151,13 +151,13 @@ impl<'a> BimeshBuilder<'a> {
                     NotNan::new(proj.project(vertices.vertices[*v])).unwrap()
                 });
                 for e in edge_seq.array_windows::<2>() {
-                    edges.insert(SortedPair::from(*e));
+                    edges.insert(MeshEdge::from(*e));
                 }
             }
             let tri = mt.for_vertices(&vertices.vertices);
             let mut projections = HashMap::new();
             for edge in edges.iter() {
-                for v in edge.into_inner() {
+                for v in edge.vertices() {
                     projections
                         .entry(v)
                         .or_insert_with(|| tri.project(vertices.vertices[v]));
@@ -167,7 +167,7 @@ impl<'a> BimeshBuilder<'a> {
 
             for (&v1, &p1) in projections.iter() {
                 for (&v2, &p2) in projections.iter() {
-                    let e = SortedPair::new(v1, v2);
+                    let e = MeshEdge::new(v1, v2);
                     if v1 == v2 {
                         continue;
                     }
@@ -177,12 +177,12 @@ impl<'a> BimeshBuilder<'a> {
                     ) {
                         (None, None) => continue,
                         (Some(e1), None) => {
-                            if *e1.first() == v2 || *e1.second() == v2 {
+                            if e1[0] == v2 || e1[1] == v2 {
                                 continue;
                             }
                         }
                         (None, Some(e2)) => {
-                            if *e2.first() == v1 || *e2.second() == v1 {
+                            if e2[0] == v1 || e2[1] == v1 {
                                 continue;
                             }
                         }
@@ -200,19 +200,17 @@ impl<'a> BimeshBuilder<'a> {
             }
             let mut missing_edges = missing_edges.into_iter().collect::<Vec<_>>();
             missing_edges.sort_by_cached_key(|e| {
-                let d =
-                    NotNan::new(projections[e.first()].distance(projections[e.second()])).unwrap();
-                (d, *e.first(), *e.second())
+                let d = NotNan::new(projections[&e[0]].distance(projections[&e[1]])).unwrap();
+                (d, e[0], e[1])
             });
             for missing in missing_edges {
-                let s1 = Segment2::new(projections[missing.first()], projections[missing.second()]);
+                let s1 = Segment2::new(projections[&missing[0]], projections[&missing[1]]);
                 if !edges.iter().any(|extant| {
-                    let s2 =
-                        Segment2::new(projections[extant.first()], projections[extant.second()]);
-                    if missing.first() == extant.first()
-                        || missing.first() == extant.second()
-                        || missing.second() == extant.first()
-                        || missing.second() == extant.second()
+                    let s2 = Segment2::new(projections[&extant[0]], projections[&extant[1]]);
+                    if missing[0] == extant[0]
+                        || missing[0] == extant[1]
+                        || missing[1] == extant[0]
+                        || missing[1] == extant[1]
                     {
                         return false;
                     }
@@ -224,14 +222,8 @@ impl<'a> BimeshBuilder<'a> {
             let mut tris: HashSet<[usize; 3]> = HashSet::new();
             let mut adjacency_map = BTreeMap::<usize, HashSet<usize>>::new();
             for e in edges.iter() {
-                adjacency_map
-                    .entry(*e.first())
-                    .or_default()
-                    .insert(*e.second());
-                adjacency_map
-                    .entry(*e.second())
-                    .or_default()
-                    .insert(*e.first());
+                adjacency_map.entry(e[0]).or_default().insert(e[1]);
+                adjacency_map.entry(e[1]).or_default().insert(e[0]);
             }
             for (&v1, v2s) in adjacency_map.iter() {
                 let mut v2v = v2s.iter().cloned().collect::<Vec<usize>>();
@@ -322,7 +314,7 @@ impl Bimesh {
             vertices.build_partial_edge(&mut mesh1, &mut mesh2, t1, t2, &mut vs);
             vertices.build_partial_edge(&mut mesh2, &mut mesh1, t2, t1, &mut vs);
             if let Ok(vs) = vs.into_inner() {
-                let vs = MeshEdge::from(vs).sorted();
+                let vs = OrderedMeshEdge::from(vs).edge();
                 mesh1.add_edge(t1, vs);
                 mesh2.add_edge(t2, vs);
             }

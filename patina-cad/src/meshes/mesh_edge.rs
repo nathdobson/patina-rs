@@ -1,20 +1,21 @@
 use crate::geo3::segment3::Segment3;
 use crate::geo3::triangle3::Triangle3;
 use crate::math::vec3::Vec3;
+use crate::meshes::mesh::Mesh;
 use crate::meshes::mesh_triangle::MeshTriangle;
-use crate::util::sorted_pair::SortedPair;
+use std::fmt::{Debug, Formatter};
+use std::ops::Index;
 
-#[derive(Copy, Clone, Eq, Ord, PartialOrd, PartialEq, Hash, Debug)]
+#[derive(Copy, Clone, Eq, Ord, PartialOrd, PartialEq, Hash)]
 pub struct MeshEdge {
     vertices: [usize; 2],
 }
 
 impl MeshEdge {
     pub fn new(v1: usize, v2: usize) -> Self {
-        MeshEdge { vertices: [v1, v2] }
-    }
-    pub fn invert(&mut self) {
-        self.vertices.swap(0, 1);
+        let mut vs = [v1, v2];
+        vs.sort();
+        MeshEdge { vertices: vs }
     }
     pub fn vertices(&self) -> [usize; 2] {
         self.vertices
@@ -22,13 +23,33 @@ impl MeshEdge {
     pub fn for_vertices(&self, vs: &[Vec3]) -> Segment3 {
         Segment3::new(vs[self.vertices[0]], vs[self.vertices[1]])
     }
-    pub fn sorted(&self) -> SortedPair<usize> {
-        SortedPair::new(self.vertices[0], self.vertices[1])
+    pub fn shares_vertex(&self, other: &MeshEdge) -> bool {
+        for v1 in self.vertices {
+            for v2 in other.vertices {
+                if v1 == v2 {
+                    return true;
+                }
+            }
+        }
+        false
     }
 }
 
 impl From<[usize; 2]> for MeshEdge {
     fn from(vertices: [usize; 2]) -> Self {
         MeshEdge { vertices }
+    }
+}
+
+impl Index<usize> for MeshEdge {
+    type Output = usize;
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.vertices[index]
+    }
+}
+
+impl Debug for MeshEdge {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[{}, {}]", self.vertices[0], self.vertices[1])
     }
 }
