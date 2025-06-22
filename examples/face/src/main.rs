@@ -21,7 +21,7 @@ async fn main() -> io::Result<()> {
     let mut ear2 = Sphere::new(Vec3::new(-10.0, 3.0, 3.0), 3.0).as_mesh(2);
     let mut eye1 = Cylinder::new(Vec3::new(3.0, 3.0, 8.0), Vec3::axis_z() * 2.0, 1.5).as_mesh(17);
     let mut eye2 = Cylinder::new(Vec3::new(-3.0, 3.0, 8.0), Vec3::axis_z() * 2.0, 1.5).as_mesh(17);
-    let mut nose = Sphere::new(Vec3::new(0.0, 5.0, 9.0), 2.0).as_mesh(2);
+    let mut nose = Sphere::new(Vec3::new(0.0, 0.0, 9.0), 2.0).as_mesh(2);
     let mut rng = XorShiftRng::seed_from_u64(1);
     eye1.perturb(&mut rng, 0.0001);
     eye2.perturb(&mut rng, 0.0001);
@@ -35,7 +35,6 @@ async fn main() -> io::Result<()> {
         .union(&ear2)
         .union(&eye1)
         .union(&eye2)
-        //
         .union(&nose)
     //
         ;

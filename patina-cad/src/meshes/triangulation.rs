@@ -57,9 +57,8 @@ impl Triangulation {
                 candidate_edges.push((e1, s1));
             }
         }
-        candidate_edges.sort_by_cached_key(|(e1, s1)| {
-            (NotNan::new(s1.as_ray().dir().length()).unwrap(), *e1)
-        });
+        candidate_edges
+            .sort_by_cached_key(|(e1, s1)| (NotNan::new(s1.as_ray().dir().length()).unwrap(), *e1));
         'next_edge: for (e1, s1) in candidate_edges {
             for e2 in self.edges.iter() {
                 if e1.shares_vertex(e2) {

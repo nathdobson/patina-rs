@@ -1,5 +1,6 @@
 use crate::math::macros::impl_ref_binop;
-use std::fmt::{Debug, Formatter};
+use crate::math::vec3::Vec3;
+use std::fmt::{Debug, Display, Formatter};
 use std::iter::Sum;
 use std::ops::{Add, AddAssign, Div, Index, IndexMut, Mul, Neg, Sub};
 
@@ -61,10 +62,9 @@ impl Vec2 {
     pub fn angle(self) -> f64 {
         self.y().atan2(self.x())
     }
-    pub fn is_finite(self)->bool{
+    pub fn is_finite(self) -> bool {
         self.0.iter().all(|x| x.is_finite())
     }
-
 }
 
 impl From<[f64; 2]> for Vec2 {
@@ -223,5 +223,11 @@ impl FromIterator<f64> for Vec2 {
 impl Debug for Vec2 {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "[{:.5}, {:.5}]", self.x(), self.y())
+    }
+}
+
+impl Display for Vec2 {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:.5}\t{:.5}", self.x(), self.y())
     }
 }

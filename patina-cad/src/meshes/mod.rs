@@ -5,7 +5,6 @@ pub mod error;
 mod ordered_mesh_edge;
 pub mod subdivision;
 pub mod bvh;
-mod bimesh2;
 mod mesh_edge;
 mod mesh_polygon;
 mod triangulation;

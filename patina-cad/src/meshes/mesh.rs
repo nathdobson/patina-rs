@@ -1,10 +1,10 @@
 use crate::math::vec3::Vec3;
-use crate::meshes::bimesh::Bimesh;
 use crate::meshes::error::ManifoldError;
 use crate::meshes::mesh_triangle::MeshTriangle;
 use itertools::Itertools;
 use rand::Rng;
 use std::collections::HashMap;
+use crate::meshes::bimesh::Bimesh;
 
 #[derive(Clone, Debug)]
 pub struct Mesh {
@@ -79,13 +79,13 @@ impl Mesh {
         if !edge_table.is_empty() {
             return Err(ManifoldError::BadVertex);
         }
-        for t in &self.triangles {
-            let t = t.for_vertices(&self.vertices);
-            if t.area() <= 10e-15 {
-                println!("{:?}",t.area());
-                return Err(ManifoldError::EmptyTriangle);
-            }
-        }
+        // for t in &self.triangles {
+        //     let t = t.for_vertices(&self.vertices);
+        //     if t.area() <= 10e-15 {
+        //         println!("{:?}",t.area());
+        //         return Err(ManifoldError::EmptyTriangle);
+        //     }
+        // }
         Ok(())
     }
     pub fn new(vertices: Vec<Vec3>, triangles: Vec<MeshTriangle>) -> Self {
