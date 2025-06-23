@@ -1,5 +1,7 @@
 use crate::math::macros::impl_ref_binop;
 use crate::math::vec2::Vec2;
+use rand::Rng;
+use rand::distr::{Distribution, StandardUniform};
 use std::fmt::{Debug, Display, Formatter};
 use std::iter::Sum;
 use std::ops::{Add, AddAssign, Div, Index, IndexMut, Mul, Neg, Sub};
@@ -74,6 +76,19 @@ impl Vec3 {
     }
     pub fn is_finite(self) -> bool {
         self.0.iter().all(|x| x.is_finite())
+    }
+    pub fn random_unit(rng: &mut impl Rng) -> Self {
+        loop {
+            let v = Vec3::new(
+                rng.random_range(-1.0..1.0),
+                rng.random_range(-1.0..1.0),
+                rng.random_range(-1.0..1.0),
+            );
+            if v.length() < 1.0 {
+                continue;
+            }
+            return v.normalize();
+        }
     }
 }
 
@@ -240,5 +255,11 @@ impl Debug for Vec3 {
 impl Display for Vec3 {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:.5}\t{:.5}\t{:.5}", self.x(), self.y(), self.z())
+    }
+}
+
+impl Distribution<Vec3> for StandardUniform {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Vec3 {
+        Vec3::new(rng.random(), rng.random(), rng.random())
     }
 }

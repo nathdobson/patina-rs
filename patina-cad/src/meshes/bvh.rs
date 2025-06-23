@@ -8,6 +8,7 @@ use crate::meshes::mesh::Mesh;
 use crate::sat::sat_intersects;
 use crate::util::scan::ScanIteratorExt;
 use ordered_float::{NotNan, OrderedFloat};
+use rand::Rng;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::ops::Add;
@@ -231,8 +232,8 @@ impl BvhTriangle {
 #[derive(Debug)]
 #[non_exhaustive]
 pub struct RayMeshIntersection {
-    index: usize,
-    time: f64,
+    pub index: usize,
+    pub time: f64,
 }
 
 impl Bvh {
@@ -265,6 +266,12 @@ impl Bvh {
         let mut result = vec![];
         self.root_view().intersect_ray(ray, &mut result);
         result
+    }
+    pub fn intersects_point(&self, point: Vec3, rng: &mut impl Rng) -> bool {
+        self.intersect_ray(&Ray3::new(point, Vec3::random_unit(rng)))
+            .len()
+            % 2
+            == 1
     }
 }
 

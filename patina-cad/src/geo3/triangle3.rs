@@ -5,7 +5,7 @@ use crate::math::interval::Interval;
 use crate::math::vec2::Vec2;
 use crate::math::vec3::Vec3;
 use crate::sat::ConvexPoly;
-use std::fmt::{Debug, Formatter};
+use std::fmt::{Debug, Display, Formatter};
 
 #[derive(Copy, Clone)]
 pub struct Triangle3([Vec3; 3]);
@@ -103,6 +103,18 @@ impl ConvexPoly for Triangle3 {
 impl Debug for Triangle3 {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         self.0.fmt(f)
+    }
+}
+
+impl Display for Triangle3 {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}\n{}\n{}\n",
+            self.points()[0],
+            self.points()[1],
+            self.points()[2]
+        )
     }
 }
 

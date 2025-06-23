@@ -8,3 +8,6 @@ pub mod bvh;
 mod mesh_edge;
 mod mesh_polygon;
 mod triangulation;
+mod simplify;
+#[cfg(test)]
+mod mesh_test;

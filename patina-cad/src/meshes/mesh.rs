@@ -1,10 +1,12 @@
+use crate::geo3::ray3::Ray3;
 use crate::math::vec3::Vec3;
+use crate::meshes::bimesh::Bimesh;
+use crate::meshes::bvh::RayMeshIntersection;
 use crate::meshes::error::ManifoldError;
 use crate::meshes::mesh_triangle::MeshTriangle;
 use itertools::Itertools;
-use rand::Rng;
+use rand::{Rng, rng};
 use std::collections::HashMap;
-use crate::meshes::bimesh::Bimesh;
 
 #[derive(Clone, Debug)]
 pub struct Mesh {
@@ -114,7 +116,23 @@ impl Mesh {
         Mesh::new(new_vertices, new_triangles)
     }
     pub fn union(&self, other: &Mesh) -> Mesh {
-        Bimesh::new(self, other).union()
+        Bimesh::new(self, other, &mut rng()).union()
+    }
+    pub fn intersect_ray(&self, ray: &Ray3) -> Vec<RayMeshIntersection> {
+        let mut result = vec![];
+        for (tri, mtri) in self.triangles.iter().enumerate() {
+            let ptri = mtri.for_vertices(&self.vertices);
+            if let Some(time) = ptri.intersect_ray(ray) {
+                result.push(RayMeshIntersection { index: tri, time });
+            }
+        }
+        result
+    }
+    pub fn intersects_point(&self, point: Vec3, rng: &mut impl Rng) -> bool {
+        self.intersect_ray(&Ray3::new(point, Vec3::random_unit(rng)))
+            .len()
+            % 2
+            == 1
     }
 }
 
