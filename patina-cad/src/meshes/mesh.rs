@@ -1,8 +1,9 @@
 use crate::geo3::ray3::Ray3;
+use crate::math::float_bool::{Epsilon, FloatBool};
 use crate::math::vec3::Vec3;
 use crate::meshes::bimesh::Bimesh;
-use crate::meshes::bvh::RayMeshIntersection;
 use crate::meshes::error::ManifoldError;
+use crate::meshes::intersect_bvh_ray::MeshRayIntersection;
 use crate::meshes::mesh_triangle::MeshTriangle;
 use itertools::Itertools;
 use rand::{Rng, rng};
@@ -115,24 +116,31 @@ impl Mesh {
         }
         Mesh::new(new_vertices, new_triangles)
     }
-    pub fn union(&self, other: &Mesh) -> Mesh {
-        Bimesh::new(self, other, &mut rng()).union()
+    pub fn union(&self, other: &Mesh, eps: Epsilon) -> Mesh {
+        Bimesh::new(self, other, eps, &mut rng()).union()
     }
-    pub fn intersect_ray(&self, ray: &Ray3) -> Vec<RayMeshIntersection> {
+    pub fn intersect_ray(&self, ray: &Ray3, eps: Epsilon) -> Vec<MeshRayIntersection> {
         let mut result = vec![];
         for (tri, mtri) in self.triangles.iter().enumerate() {
             let ptri = mtri.for_vertices(&self.vertices);
-            if let Some(time) = ptri.intersect_ray(ray) {
-                result.push(RayMeshIntersection { index: tri, time });
+            let (truth, time) = ptri.intersect_ray(ray, eps);
+            if truth.maybe() {
+                result.push(MeshRayIntersection {
+                    index: tri,
+                    time,
+                    truth,
+                });
             }
         }
         result
     }
-    pub fn intersects_point(&self, point: Vec3, rng: &mut impl Rng) -> bool {
-        self.intersect_ray(&Ray3::new(point, Vec3::random_unit(rng)))
-            .len()
-            % 2
-            == 1
+    pub fn intersects_point(&self, point: Vec3, eps: Epsilon, rng: &mut impl Rng) -> FloatBool {
+        let ints = self.intersect_ray(&Ray3::new(point, Vec3::random_unit(rng)), eps);
+        let mut result = FloatBool::from(false);
+        for int in &ints {
+            result = result.xor(int.truth);
+        }
+        result
     }
 }
 
@@ -173,7 +181,7 @@ fn test_check_manifold() {
         .check_manifold()
     );
     assert_eq!(
-        Err(ManifoldError::BrokenFan(todo!(), todo!())),
+        Err(ManifoldError::BrokenFan(0, 3)),
         Mesh::new(
             vec![Vec3::zero(); 4],
             vec![
@@ -185,7 +193,7 @@ fn test_check_manifold() {
         .check_manifold()
     );
     assert_eq!(
-        Err(ManifoldError::SplitFan(todo!())),
+        Err(ManifoldError::SplitFan(2)),
         Mesh::new(
             vec![Vec3::zero(); 6],
             vec![

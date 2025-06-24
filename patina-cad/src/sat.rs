@@ -1,5 +1,6 @@
 use crate::geo3::aabb::AABB;
 use crate::geo3::triangle3::Triangle3;
+use crate::math::float_bool::{Epsilon, FloatBool};
 use crate::math::interval::Interval;
 use crate::math::vec3::Vec3;
 use std::any::type_name;
@@ -10,11 +11,20 @@ pub trait ConvexPoly {
     fn project_onto(&self, vector: Vec3) -> Interval;
 }
 
-pub fn sat_intersects<A: ConvexPoly + Debug, B: ConvexPoly + Debug>(a: &A, b: &B) -> bool {
-    sat_intersects_partial(a, b) && sat_intersects_partial(b, a)
+pub fn sat_intersects<A: ConvexPoly + Debug, B: ConvexPoly + Debug>(
+    a: &A,
+    b: &B,
+    eps: Epsilon,
+) -> FloatBool {
+    sat_intersects_partial(a, b, eps).and(sat_intersects_partial(b, a, eps))
 }
 
-fn sat_intersects_partial<A: ConvexPoly + Debug, B: ConvexPoly + Debug>(a: &A, b: &B) -> bool {
+fn sat_intersects_partial<A: ConvexPoly + Debug, B: ConvexPoly + Debug>(
+    a: &A,
+    b: &B,
+    eps: Epsilon,
+) -> FloatBool {
+    let mut result = FloatBool::from(true);
     for normal in a.normals().as_ref() {
         assert!(normal.is_finite(), "{:?} {:?}", a, b);
         let mut ia = a.project_onto(*normal);
@@ -26,11 +36,9 @@ fn sat_intersects_partial<A: ConvexPoly + Debug, B: ConvexPoly + Debug>(a: &A, b
         assert!(ia.max().is_finite(), "{:?} {:?}", ia, normal);
         assert!(ib.min().is_finite(), "{:?} {:?}", ib, normal);
         assert!(ib.max().is_finite(), "{:?} {:?}", ib, normal);
-        if !ia.intersects(ib) {
-            return false;
-        }
+        result = result.and(ia.intersects(ib, eps));
     }
-    true
+    result
 }
 
 // #[test]

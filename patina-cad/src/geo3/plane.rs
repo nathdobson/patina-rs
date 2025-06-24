@@ -1,4 +1,5 @@
 use crate::geo3::ray3::Ray3;
+use crate::math::float_bool::{Epsilon, FloatBool};
 use crate::math::vec3::Vec3;
 
 #[derive(Debug)]
@@ -8,7 +9,7 @@ pub struct Plane {
 }
 
 impl Plane {
-    pub fn intersect(&self, other: &Plane) ->Ray3{
+    pub fn intersect(&self, other: &Plane) -> Ray3 {
         todo!();
     }
 }
@@ -23,19 +24,11 @@ impl Plane {
     pub fn normal(&self) -> Vec3 {
         self.normal
     }
-    pub fn intersect_ray(&self, ray: &Ray3) -> Option<f64> {
+    pub fn intersect_ray(&self, ray: &Ray3, eps: Epsilon) -> (FloatBool, f64) {
         let t = (self.origin - ray.origin()).dot(self.normal) / ray.dir().dot(self.normal);
         if t.is_infinite() {
-            return None;
+            return (FloatBool::from(false), f64::NAN);
         }
-        let result = (t >= 0.0).then_some(t)?;
-        assert!(
-            result.is_finite(),
-            "self={:?} ray={:?} time={:?}",
-            self,
-            ray,
-            result
-        );
-        Some(result)
+        (eps.less(0.0, t), t)
     }
 }

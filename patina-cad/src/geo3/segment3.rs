@@ -1,4 +1,7 @@
+use crate::geo3::aabb::AABB;
 use crate::geo3::ray3::Ray3;
+use crate::math::float_bool::{Epsilon, FloatBool};
+use crate::math::interval::Interval;
 use crate::math::vec3::Vec3;
 
 #[derive(Debug)]
@@ -25,5 +28,12 @@ impl Segment3 {
     }
     pub fn reverse(&self) -> Segment3 {
         Segment3::new(self.p2, self.p1)
+    }
+    pub fn length(&self) -> f64 {
+        (self.p2 - self.p1).length()
+    }
+    pub fn intersects_aabb(&self, aabb: &AABB, eps: Epsilon) -> (FloatBool, Interval) {
+        let (truth, time) = self.as_ray().intersect_aabb(aabb, eps);
+        (truth.and(eps.less(time.min(), 1.0)), time)
     }
 }

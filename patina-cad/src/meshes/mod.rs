@@ -11,3 +11,5 @@ mod triangulation;
 mod simplify;
 #[cfg(test)]
 mod mesh_test;
+mod intersect_bvh_bvh;
+mod intersect_bvh_ray;
