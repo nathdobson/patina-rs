@@ -49,11 +49,13 @@ pub struct Epsilon(f64);
 
 impl Epsilon {
     pub fn new(x: f64) -> Self {
-        assert!(x >= 0.0);
+        assert!(x > 0.0);
         assert!(x <= 1.0);
         Epsilon(x)
     }
     pub fn less(&self, a: f64, b: f64) -> FloatBool {
+        assert!(!a.is_nan());
+        assert!(!b.is_nan());
         FloatBool::new((b - a) / self.0 + 0.5)
     }
 }

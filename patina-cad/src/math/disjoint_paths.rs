@@ -2,6 +2,7 @@ use crate::math::edmonds_karp_vertex::EdmondsKarpVertex;
 use itertools::Itertools;
 use std::iter;
 
+#[derive(Debug)]
 pub struct DisjointPaths {
     ekv: EdmondsKarpVertex,
     begins: Vec<usize>,
@@ -40,6 +41,7 @@ impl DisjointPaths {
                 path.push(prev);
                 prev = next;
             }
+            path.push(prev);
             if path.len() > 1 {
                 paths.push(path);
             }

@@ -26,7 +26,7 @@ impl Plane {
     }
     pub fn intersect_ray(&self, ray: &Ray3, eps: Epsilon) -> (FloatBool, f64) {
         let t = (self.origin - ray.origin()).dot(self.normal) / ray.dir().dot(self.normal);
-        if t.is_infinite() {
+        if !t.is_finite() {
             return (FloatBool::from(false), f64::NAN);
         }
         (eps.less(0.0, t), t)

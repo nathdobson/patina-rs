@@ -3,11 +3,12 @@ use ordered_float::NotNan;
 use std::collections::hash_map::Entry;
 use std::collections::{HashMap, HashSet};
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 struct EdgeLabel {
     flow: f64,
     capacity: f64,
 }
+#[derive(Debug)]
 pub struct EdmondsKarp {
     edges: HashMap<usize, HashMap<usize, EdgeLabel>>,
     sources: HashSet<usize>,

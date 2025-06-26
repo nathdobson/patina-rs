@@ -1,6 +1,7 @@
 use crate::math::edmonds_karp::EdmondsKarp;
 use itertools::Itertools;
 
+#[derive(Debug)]
 pub struct EdmondsKarpVertex {
     ek: EdmondsKarp,
 }
