@@ -58,6 +58,9 @@ impl Epsilon {
         assert!(!b.is_nan());
         FloatBool::new((b - a) / self.0 + 0.5)
     }
+    pub fn value(self) -> f64 {
+        self.0
+    }
 }
 
 impl From<bool> for FloatBool {

@@ -3,9 +3,10 @@ use crate::geo3::triangle3::Triangle3;
 use crate::math::vec3::Vec3;
 use crate::meshes::mesh_edge::MeshEdge;
 use crate::meshes::mesh_triangle::MeshTriangle;
+use std::fmt::{Debug, Formatter};
 use std::ops::Index;
 
-#[derive(Copy, Clone, Eq, Ord, PartialOrd, PartialEq, Hash, Debug)]
+#[derive(Copy, Clone, Eq, Ord, PartialOrd, PartialEq, Hash)]
 pub struct OrderedMeshEdge {
     vertices: [usize; 2],
 }
@@ -38,5 +39,11 @@ impl Index<usize> for OrderedMeshEdge {
     type Output = usize;
     fn index(&self, index: usize) -> &Self::Output {
         &self.vertices[index]
+    }
+}
+
+impl Debug for OrderedMeshEdge {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self.vertices)
     }
 }

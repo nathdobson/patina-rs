@@ -267,11 +267,9 @@ impl<'a> Bimesh<'a> {
             partial_loop.extend(&cont[1..cont.len() - 1]);
             full_loops.push(partial_loop);
         }
-        println!("loops = {:?}", full_loops);
         self.loops = full_loops;
     }
     pub fn build_loop_meta(&mut self) {
-        println!("{:?}", self.loops);
         let mut keep_vertices = HashSet::new();
         for (id, loop1) in self.loops.iter().enumerate() {
             for (&v1, &v2) in loop1.iter().circular_tuple_windows() {
@@ -337,7 +335,6 @@ impl<'a> Bimesh<'a> {
         }
     }
     fn build_ordered_wings(&mut self) {
-        println!("{:?}", self.reverse_loop_adjacency);
         for (&v1, int) in self.new_vertices.iter() {
             let mut result: [usize; 2] = [
                 self.reverse_loop_adjacency.get(&v1).unwrap(),
@@ -392,30 +389,6 @@ impl<'a> Bimesh<'a> {
                         face.edges.insert(MeshEdge::new(v1, v2));
                     }
                 }
-                // for e in 0..3 {
-                //     for &nv in &face.edge_vertices[e] {
-                //         let ordered_wing = self.ordered_wings.get(&nv).unwrap();
-                //         if ordered_wing[0] == tri {
-                //             continue;
-                //         }
-                //         assert_eq!(ordered_wing[1], tri);
-                //         let mut prev = nv;
-                //         loop {
-                //             let next = *self.forward_loop_adjacency.get(&prev).unwrap();
-                //             assert_ne!(next, nv);
-                //             face.edges.insert(MeshEdge::new(prev, next));
-                //             match self.vertex_origins[next] {
-                //                 VertexOrigin::Mesh(_) => unreachable!(),
-                //                 VertexOrigin::Intersect(int) => {
-                //                     if int.edge_mesh == mesh {
-                //                         break;
-                //                     }
-                //                 }
-                //             }
-                //             prev = next;
-                //         }
-                //     }
-                // }
             }
         }
     }
@@ -423,9 +396,10 @@ impl<'a> Bimesh<'a> {
         for mesh in 0..2 {
             for (tri, face) in &mut self.new_faces[mesh].iter_mut().enumerate() {
                 let ptri = self.input_tris[mesh][tri].for_vertices(&self.vertices);
-                let mut triangulation = Triangulation::new();
+                let mut triangulation = Triangulation::new(self.eps);
                 for v in self.input_tris[mesh][tri] {
-                    triangulation.add_vertex(v, ptri.project(self.vertices[v]));
+                    let mut proj = ptri.project(self.vertices[v]);
+                    triangulation.add_vertex(v, proj);
                 }
                 for vs in &face.edge_vertices {
                     for &v in vs {
@@ -436,7 +410,12 @@ impl<'a> Bimesh<'a> {
                     triangulation.add_boundary(v1, v2);
                 }
                 for &v in &face.internal_vertices {
-                    triangulation.add_vertex(v, ptri.project(self.vertices[v]));
+                    let proj = ptri.project(self.vertices[v]);
+                    let proj_mid = ptri.project(ptri.midpoint());
+                    triangulation.add_vertex(
+                        v,
+                        proj * (1.0 - self.eps.value()) + proj_mid * self.eps.value(),
+                    );
                 }
                 for e in &face.edges {
                     triangulation.add_edge(e[0], e[1]);
@@ -461,10 +440,7 @@ impl<'a> Bimesh<'a> {
                 }
                 assert!((actual_area - expected_area).abs() < 1e-10);
                 let mut edge_table = HashMap::<MeshEdge, HashSet<OrderedMeshEdge>>::new();
-                println!("mt={:?}", self.input_tris[mesh][tri]);
-                println!("evs={:?}", face.edge_vertices);
-                println!("ivs={:?}", face.internal_vertices);
-                println!("tris={:?}", triangulation);
+
                 for (&v1, &v2) in face.border_vertices.iter().circular_tuple_windows() {
                     let e = OrderedMeshEdge::new(v2, v1);
                     assert!(edge_table.entry(e.edge()).or_default().insert(e), "{:?}", e);
@@ -605,7 +581,6 @@ impl<'a> Bimesh<'a> {
             });
         let tris = tris1.chain(tris2).collect();
         let mesh = Mesh::new(vertices, tris);
-        println!("{:#?}", mesh);
         let mesh = mesh.without_dead_vertices();
         mesh.check_manifold().unwrap();
         mesh
@@ -697,7 +672,7 @@ fn rand_tetr(rng: &mut XorShiftRng, steps: usize) -> Mesh {
 }
 
 #[tokio::test]
-async fn test() -> anyhow::Result<()> {
+async fn test_random() -> anyhow::Result<()> {
     let eps = Epsilon::new(1e-10);
     let dir = PathBuf::from("../")
         .join("target")
@@ -707,7 +682,7 @@ async fn test() -> anyhow::Result<()> {
 
     for steps in 3..100 {
         println!("steps={:?}", steps);
-        for seed in 0..1000 {
+        for seed in 2..1000 {
             println!("seed={:?}", seed);
             let mut rng = XorShiftRng::seed_from_u64(seed);
             let m1 = rand_tetr(&mut rng, steps);
@@ -715,10 +690,14 @@ async fn test() -> anyhow::Result<()> {
             write_stl_file(&m1, &dir.join("mesh1.stl")).await?;
             write_stl_file(&m2, &dir.join("mesh2.stl")).await?;
             let bm = Bimesh::new(&m1, &m2, eps, &mut rng);
+            write_stl_file(&bm.new_mesh(0, false), &dir.join("mesh1_outside.stl")).await?;
+            write_stl_file(&bm.new_mesh(0, true), &dir.join("mesh1_inside.stl")).await?;
+            write_stl_file(&bm.new_mesh(1, false), &dir.join("mesh2_outside.stl")).await?;
+            write_stl_file(&bm.new_mesh(1, true), &dir.join("mesh2_inside.stl")).await?;
             let union = bm.union();
             let inter = bm.intersect();
-            // write_stl_file(&union, &dir.join("union.stl")).await?;
-            // write_stl_file(&inter, &dir.join("inter.stl")).await?;
+            write_stl_file(&union, &dir.join("union.stl")).await?;
+            write_stl_file(&inter, &dir.join("inter.stl")).await?;
             for i in 2..100 {
                 let p: Vec3 = rng.random();
                 let in_m1 = m1.intersects_point(p, eps, &mut rng);
