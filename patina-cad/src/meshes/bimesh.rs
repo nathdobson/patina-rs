@@ -227,6 +227,8 @@ impl<'a> Bimesh<'a> {
                             *vertex,
                             VertexPosition::Tri(*tri),
                         );
+                        vs.push(*vertex);
+                        continue;
                     }
                     MeshIntersectDescriptor::EdgeTriangle { .. } => {}
                 }
@@ -287,6 +289,72 @@ impl<'a> Bimesh<'a> {
                         *vertex = *merged;
                     }
                 }
+            }
+            for (vertex, pos) in self.vertex_positions.vertex_positions[mesh].iter_mut() {
+                match pos {
+                    VertexPosition::Edge(e) => {
+                        let mut e2 = e.vertices();
+                        for v in &mut e2 {
+                            if let Some(v2) = merge.get(v) {
+                                *v = *v2;
+                            }
+                        }
+                        *e = MeshEdge::from(e2);
+                    }
+                    VertexPosition::Tri(t) => {}
+                }
+            }
+        }
+        for origin in &mut self.vertex_origins {
+            match origin {
+                VertexOrigin::Mesh => {}
+                VertexOrigin::Intersect { int } => match &mut int.descriptor {
+                    MeshIntersectDescriptor::VertexVertex { vertices } => {
+                        for v in vertices {
+                            if let Some(v2) = merge.get(v) {
+                                *v = *v2;
+                            }
+                        }
+                    }
+                    MeshIntersectDescriptor::VertexEdge {
+                        vertex_mesh,
+                        vertex,
+                        edge_mesh,
+                        edge,
+                    } => {}
+                    MeshIntersectDescriptor::EdgeEdge { edges } => {
+                        for edge in edges {
+                            let mut e2 = edge.vertices();
+                            for v in &mut e2 {
+                                if let Some(v2) = merge.get(v) {
+                                    *v = *v2;
+                                }
+                            }
+                            *edge = MeshEdge::from(e2);
+                        }
+                    }
+                    MeshIntersectDescriptor::VertexTriangle {
+                        vertex_mesh,
+                        vertex,
+                        tri_mesh,
+                        tri,
+                    } => {}
+                    MeshIntersectDescriptor::EdgeTriangle {
+                        edge_mesh,
+                        edge,
+                        tri_mesh,
+                        tri,
+                    } => {
+                        let mut e2 = edge.vertices();
+                        for v in &mut e2 {
+                            if let Some(v2) = merge.get(v) {
+                                *v = *v2;
+                            }
+                        }
+                        *edge = MeshEdge::from(e2);
+                    }
+                },
+                VertexOrigin::Removed => {}
             }
         }
     }
@@ -370,7 +438,14 @@ impl<'a> Bimesh<'a> {
                     VertexPosition::Edge(e) => {
                         assert!(
                             self.all_fans[mesh]
-                                .insert(*v, self.input_wings[e].wing_tris.to_vec())
+                                .insert(
+                                    *v,
+                                    self.input_wings
+                                        .get(e)
+                                        .unwrap_or_else(|| panic!("Cannot find wing for {:?}", e))
+                                        .wing_tris
+                                        .to_vec()
+                                )
                                 .is_none()
                         );
                     }
@@ -398,7 +473,9 @@ impl<'a> Bimesh<'a> {
         let segment = edge.for_vertices(&self.vertices);
         let center = segment.as_ray().dir();
         let tris = self.input_tris_for_edge(mesh, edge.edge());
-        if tris.len() == 1 {
+        if tris.is_empty() {
+            panic!("No tangents for {:?}", edge);
+        } else if tris.len() == 1 {
             let normal = self.input_tris[mesh][tris[0]]
                 .for_vertices(&self.vertices)
                 .normal();
@@ -441,10 +518,8 @@ impl<'a> Bimesh<'a> {
     pub fn build_new_edges(&mut self, rng: &mut impl Rng) {
         for (tris, vs) in self.new_vertices_by_tri_pair.iter() {
             if let Ok([v1, v2]) = vs.clone().into_inner() {
-                println!("tris {:?} intersect at {} and  {}", tris, v1, v2);
                 let mut edge = OrderedMeshEdge::new(v1, v2);
                 let ev = self.vertices[v2] - self.vertices[v1];
-                println!("{:?}", edge);
                 let b1 = ev.cross(Vec3::random_unit(rng)).normalize();
                 let b2 = ev.cross(b1).normalize();
                 assert!(ev.dot(b1).abs() < 1e-10);
@@ -462,9 +537,6 @@ impl<'a> Bimesh<'a> {
                     }
                 }
                 let mut angle_order = angle_order.into_inner().unwrap();
-                for (mesh, index, angle) in &angle_order {
-                    println!("{}\t{}", 1.0, angle - angle_order[0].2);
-                }
                 angle_order.sort_by_key(|&(mesh, side, angle)| NotNan::new(angle).unwrap());
                 let definite = angle_order
                     .iter()
@@ -476,34 +548,25 @@ impl<'a> Bimesh<'a> {
                     .all(|((m1, s1, a1), (m2, s2, a2))| m1 != m2);
                 if definite {
                     if alternating {
-                        println!("alt");
                         let forward = angle_order.iter().circular_tuple_windows().any(
-                            |((m1, s1, a1), (m2, s2, a2))| (m1, s1, m2, s2) == (&0, &0, &1, &1),
+                            |((m1, s1, a1), (m2, s2, a2))| (m1, s1, m2, s2) == (&0, &0, &1, &0),
                         );
                         let reverse = angle_order.iter().circular_tuple_windows().any(
-                            |((m1, s1, a1), (m2, s2, a2))| (m1, s1, m2, s2) == (&0, &0, &1, &0),
+                            |((m1, s1, a1), (m2, s2, a2))| (m1, s1, m2, s2) == (&0, &0, &1, &1),
                         );
                         assert_ne!(forward, reverse);
                         if reverse {
-                            println!("reverse");
                             edge.invert();
-                        } else {
-                            println!("forward");
                         }
                         self.strong_edges.insert(edge);
-                    } else {
-                        println!("not alt");
                     }
                 } else {
-                    println!("weak");
                     self.weak_edges.push(edge);
                 }
             }
         }
     }
     pub fn build_loops(&mut self) {
-        println!("strong={:#?}", self.strong_edges);
-        println!("weak={:#?}", self.weak_edges);
         let mut loops = LoopBuilder::new();
         for v in 0..self.vertices.len() {
             loops.add_vertex(v);
@@ -685,13 +748,6 @@ impl<'a> Bimesh<'a> {
                 for &tri in &triangulation {
                     let tri3 = tri.for_vertices(&self.vertices);
                     actual_area += tri3.area();
-                }
-                println!("{:?} {:?} {:?}", mesh, tri, self.input_tris[mesh][tri]);
-                for &v in &face.border_vertices {
-                    println!("{} {:?} {:?}", v, self.vertices[v], self.vertex_origins[v]);
-                }
-                for &v in &face.border_vertices {
-                    println!("{}", self.vertices[v]);
                 }
                 assert!(
                     (actual_area - expected_area).abs() < 1e-10,
@@ -945,13 +1001,21 @@ async fn test_random() -> anyhow::Result<()> {
         .join("test_random");
     tokio::fs::create_dir_all(&dir).await?;
 
-    for steps in 3..100 {
+    for steps in 99..100 {
         println!("steps={:?}", steps);
-        for seed in 4..1000 {
+        for seed in 2..1000 {
             println!("seed={:?}", seed);
             let mut rng = XorShiftRng::seed_from_u64(seed);
             let m1 = rand_tetr(&mut rng, steps);
             let m2 = rand_tetr(&mut rng, steps);
+            // if m1
+            //     .vertices()
+            //     .iter()
+            //     .any(|p| m2.vertices().iter().contains(p))
+            // {
+            //     //TODO: handle shared vertices by ordering loops with fans
+            //     continue;
+            // }
             println!("{:#?}\n{:#?}", m1, m2);
             write_stl_file(&m1, &dir.join("mesh1.stl")).await?;
             write_stl_file(&m2, &dir.join("mesh2.stl")).await?;

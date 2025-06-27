@@ -10,7 +10,6 @@ pub struct LoopBuilder {
 
 impl LoopBuilder {
     pub fn new() -> Self {
-        println!("New loop builder");
         LoopBuilder {
             strong_forward: HashMap::new(),
             strong_reverse: HashMap::new(),

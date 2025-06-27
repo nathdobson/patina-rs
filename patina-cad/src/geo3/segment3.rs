@@ -48,7 +48,7 @@ impl Segment3 {
         let truth = eps
             .equals(d, 0.0)
             .and(eps.less(0.0, t))
-            .and(eps.less(1.0, t));
+            .and(eps.less(t, 1.0));
         (truth, t, pv)
     }
     pub fn intersects_segment(

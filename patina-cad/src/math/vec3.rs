@@ -6,7 +6,7 @@ use std::fmt::{Debug, Display, Formatter};
 use std::iter::Sum;
 use std::ops::{Add, AddAssign, Div, Index, IndexMut, Mul, Neg, Sub};
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct Vec3([f64; 3]);
 
 impl Vec3 {
