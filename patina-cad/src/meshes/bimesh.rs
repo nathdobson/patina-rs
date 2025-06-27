@@ -33,7 +33,7 @@ struct NewFace {
 
 enum VertexOrigin {
     Mesh(usize),
-    Intersect,
+    Intersect { int: MeshIntersectVertex },
 }
 
 pub struct Bimesh<'a> {
@@ -46,6 +46,7 @@ pub struct Bimesh<'a> {
     input_wings: HashMap<MeshEdge, BimeshWings>,
     intersects: Vec<MeshIntersect>,
     new_vertices: HashMap<usize, MeshIntersectVertex>,
+    new_vertices_by_tri_pair: HashMap<[usize; 2], ArrayVec<usize, 2>>,
     new_edges: Vec<OrderedMeshEdge>,
     loops: Vec<Vec<usize>>,
     forward_loop_adjacency: HashMap<usize, usize>,
@@ -78,6 +79,7 @@ impl<'a> Bimesh<'a> {
             loops: vec![],
             intersects: vec![],
             new_vertices: HashMap::new(),
+            new_vertices_by_tri_pair: Default::default(),
             new_edges: vec![],
             forward_loop_adjacency: HashMap::new(),
             reverse_loop_adjacency: HashMap::new(),
@@ -124,85 +126,57 @@ impl<'a> Bimesh<'a> {
             }
         }
     }
-    pub fn build_new_vertices(&mut self) {
+    pub fn build_new_faces(&mut self) {
+        for mesh in 0..2 {
+            for tri in self.input_tris[mesh].iter() {
+                self.new_faces[mesh].push(NewFace {
+                    edge_vertices: [const { vec![] }; 3],
+                    internal_vertices: vec![],
+                    border_vertices: vec![],
+                    edges: HashSet::new(),
+                });
+            }
+        }
+    }
+    pub fn build_intersects(&mut self) {
         let mut intersect = IntersectBvhBvh::new(self.eps);
         intersect.intersect_node_node(
             &self.bvhs[0].root_view(&self.input_tris[0], &self.vertices),
             &self.bvhs[1].root_view(&self.input_tris[1], &self.vertices),
         );
-        let mut by_descriptor = HashMap::new();
         self.intersects = intersect.build();
+    }
+    pub fn build_new_vertices(&mut self) {
+        let mut by_descriptor = HashMap::new();
         for int in &self.intersects {
+            println!("int {:?}", int.tris);
             let mut vs = ArrayVec::<_, 2>::new();
-            for intv in &int.vertices {
+            for int_vertex in &int.vertices {
                 vs.push(
                     *by_descriptor
-                        .entry(intv.descriptor.clone())
+                        .entry(int_vertex.descriptor.clone())
                         .or_insert_with(|| {
                             let vertex = self.vertices.len();
-                            self.vertices.push(intv.position);
-                            self.vertex_origins.push(VertexOrigin::Intersect);
-                            self.new_vertices.insert(vertex, intv.clone());
+                            self.vertices.push(int_vertex.position);
+                            self.vertex_origins.push(VertexOrigin::Intersect {
+                                int: int_vertex.clone(),
+                            });
+                            self.new_vertices.insert(vertex, int_vertex.clone());
                             vertex
                         }),
                 );
             }
-            for (&vindex, vint) in vs.iter().zip(int.vertices.iter()) {
-                let mut in_edges = ArrayVec::<(usize, MeshEdge), 2>::new();
-                let mut in_tris = ArrayVec::<usize, 2>::new();
-                match vint.descriptor {
-                    MeshIntersectDescriptor::VertexVertex { .. } => {}
-                    MeshIntersectDescriptor::VertexEdge {
-                        vertex_mesh,
-                        vertex,
-                        edge_mesh,
-                        edge,
-                    } => {
-                        in_edges.push((edge_mesh, edge));
-                    }
-                    MeshIntersectDescriptor::EdgeEdge { edges } => {
-                        in_edges.push((0, edges[0]));
-                        in_edges.push((1, edges[1]));
-                    }
-                    MeshIntersectDescriptor::VertexTriangle {
-                        vertex_mesh,
-                        vertex,
-                        tri_mesh,
-                        tri,
-                    } => {
-                        in_tris.push(tri_mesh);
-                    }
-                    MeshIntersectDescriptor::EdgeTriangle {
-                        edge_mesh,
-                        edge,
-                        tri_mesh,
-                        tri,
-                    } => {
-                        in_edges.push((edge_mesh, edge));
-                        in_tris.push(tri_mesh);
-                    }
-                }
-                for (mesh, edge) in in_edges {
-                    self.new_faces[mesh][int.tris[mesh]].edge_vertices[self.input_tris[mesh]
-                        [int.tris[mesh]]
-                        .vertices()
-                        .iter()
-                        .position(|v| *v == edge.vertices()[0])
-                        .unwrap()]
-                    .push(vindex);
-                }
-                for &mesh in &in_tris {
-                    self.new_faces[mesh][int.tris[mesh]]
-                        .internal_vertices
-                        .push(vindex);
-                }
-            }
-            if let Ok([v1, v2]) = vs.into_inner() {
+            self.new_vertices_by_tri_pair.insert(int.tris, vs.clone());
+        }
+    }
+    pub fn build_new_edges(&mut self) {
+        for (tris, vs) in self.new_vertices_by_tri_pair.iter() {
+            if let Ok([v1, v2]) = vs.clone().into_inner() {
                 let mut edge = OrderedMeshEdge::new(v1, v2);
-                let n1 = self.input_tris[0][int.tris[0]]
+                let n1 = self.input_tris[0][tris[0]]
                     .for_vertices(&self.vertices)
                     .normal();
-                let n2 = self.input_tris[1][int.tris[1]]
+                let n2 = self.input_tris[1][tris[1]]
                     .for_vertices(&self.vertices)
                     .normal();
                 let ev = self.new_vertices[&v2].position - self.new_vertices[&v1].position;
@@ -214,57 +188,6 @@ impl<'a> Bimesh<'a> {
             }
         }
     }
-    // pub fn build_new_edges(&mut self) {
-    // let mut face_pair_to_vertices = HashMap::<[usize; 2], ArrayVec<usize, 6>>::new();
-    // for (&v, int) in self.new_vertices.iter() {
-    //     let mut pair = [None; 2];
-    //     pair[int.plane_mesh] = Some(int.plane_tri);
-    //     for tri2 in self.input_wings[&int.edge].wing_tris {
-    //         pair[int.edge_mesh] = Some(tri2);
-    //         face_pair_to_vertices
-    //             .entry(pair.clone().map(|x| x.unwrap()))
-    //             .or_default()
-    //             .push(v);
-    //     }
-    // }
-    // for (&[tri1, tri2], vs) in &mut face_pair_to_vertices {
-    //     if vs
-    //         .iter()
-    //         .filter(|&&v| self.new_vertices[&v].truth.is_true())
-    //         .count()
-    //         >= 2
-    //     {
-    //         vs.retain(|&mut v| self.new_vertices[&v].truth.is_true());
-    //     }
-    //     for (&v1, &v2) in vs.iter().tuple_combinations() {
-    //         let mut edge = OrderedMeshEdge::new(v1, v2);
-    //         let n1 = self.input_tris[0][tri1]
-    //             .for_vertices(&self.vertices)
-    //             .normal();
-    //         let n2 = self.input_tris[1][tri2]
-    //             .for_vertices(&self.vertices)
-    //             .normal();
-    //         let ev = self.new_vertices[&v2].position - self.new_vertices[&v1].position;
-    //         let det = n1.cross(n2).dot(ev);
-    //         if self.new_vertices[&v1].truth.is_true() && self.new_vertices[&v2].truth.is_true()
-    //         {
-    //             if det < 0.0 {
-    //                 edge.invert();
-    //             }
-    //             self.new_edges.push(edge);
-    //         } else {
-    //             let reversed = self.eps.less(det, 0.0);
-    //             if reversed.not().maybe() {
-    //                 self.new_edges.push(edge);
-    //             }
-    //             edge.invert();
-    //             if reversed.maybe() {
-    //                 self.new_edges.push(edge);
-    //             }
-    //         };
-    //     }
-    // }
-    // }
     pub fn build_loops(&mut self) {
         let mut loop_builder: LoopBuilder<usize> = LoopBuilder::new();
         for e in &self.new_edges {
@@ -272,76 +195,6 @@ impl<'a> Bimesh<'a> {
             loop_builder.insert(v1, v2);
         }
         self.loops = loop_builder.build();
-
-        // let mut partial_loops = vec![];
-        // let mut visited = HashSet::new();
-        // for (&i1, &i2) in strong_adj_forward.iter() {
-        //     if !visited.insert(i1) {
-        //         continue;
-        //     }
-        //     let mut start = i1;
-        //     while let Some(&prev) = strong_adj_reverse.get(&start) {
-        //         start = prev;
-        //         if start == i1 {
-        //             break;
-        //         }
-        //     }
-        //     let mut loop1 = vec![];
-        //     let mut prev = start;
-        //     loop {
-        //         loop1.push(prev);
-        //         visited.insert(prev);
-        //         if let Some(&next) = strong_adj_forward.get(&prev) {
-        //             prev = next;
-        //             if next == start {
-        //                 full_loops.push(loop1);
-        //                 break;
-        //             }
-        //         } else {
-        //             partial_loops.push(loop1);
-        //             break;
-        //         }
-        //     }
-        // }
-        // let mut weak_graph = DisjointPaths::new(self.vertices.len());
-        // for (&v, int) in self.new_vertices.iter() {
-        //     if !int.truth.is_true() {
-        //         weak_graph.add_vertex(v);
-        //     }
-        // }
-        // for partial_loop in &partial_loops {
-        //     let begin = *partial_loop.first().unwrap();
-        //     let end = *partial_loop.last().unwrap();
-        //     weak_graph.add_vertex(end);
-        //     weak_graph.add_begin(end);
-        //     weak_graph.add_vertex(begin);
-        //     weak_graph.add_end(begin);
-        // }
-        // for weak_edge in &weak_edges {
-        //     weak_graph.add_edge(weak_edge[0], weak_edge[1]);
-        // }
-        // weak_graph.solve();
-        // let weak_paths = weak_graph.paths();
-        // let mut weak_path_table = HashMap::new();
-        // for weak_path in weak_paths {
-        //     let begin = *weak_path.first().unwrap();
-        //     weak_path_table.insert(begin, weak_path);
-        // }
-        // for mut partial_loop in partial_loops {
-        //     let cont = weak_path_table
-        //         .get(partial_loop.last().unwrap())
-        //         .expect("Missing continuation");
-        //     assert_eq!(
-        //         cont.last(),
-        //         partial_loop.first(),
-        //         "{:?} vs {:?}",
-        //         cont,
-        //         partial_loop
-        //     );
-        //     partial_loop.extend(&cont[1..cont.len() - 1]);
-        //     full_loops.push(partial_loop);
-        // }
-        // self.loops = full_loops;
     }
     pub fn build_loop_meta(&mut self) {
         let mut keep_vertices = HashSet::new();
@@ -357,80 +210,69 @@ impl<'a> Bimesh<'a> {
         }
         self.new_vertices.retain(|k, v| keep_vertices.contains(k));
     }
-    pub fn build_new_faces(&mut self) {
-        for mesh in 0..2 {
-            for tri in self.input_tris[mesh].iter() {
-                self.new_faces[mesh].push(NewFace {
-                    edge_vertices: [const { vec![] }; 3],
-                    internal_vertices: vec![],
-                    border_vertices: vec![],
-                    edges: HashSet::new(),
-                });
+    pub fn collect_face_vertices(&mut self) {
+        for (v, origin) in self.vertex_origins.iter().enumerate() {
+            let VertexOrigin::Intersect { int } = origin else {
+                continue;
+            };
+            let mut in_edges = ArrayVec::<(usize, MeshEdge), 2>::new();
+            let mut in_tris = ArrayVec::<(usize, usize), 2>::new();
+            match int.descriptor {
+                MeshIntersectDescriptor::VertexVertex { .. } => {}
+                MeshIntersectDescriptor::VertexEdge {
+                    vertex_mesh,
+                    vertex,
+                    edge_mesh,
+                    edge,
+                } => {
+                    in_edges.push((edge_mesh, edge));
+                }
+                MeshIntersectDescriptor::EdgeEdge { edges } => {
+                    in_edges.push((0, edges[0]));
+                    in_edges.push((1, edges[1]));
+                }
+                MeshIntersectDescriptor::VertexTriangle {
+                    vertex_mesh,
+                    vertex,
+                    tri_mesh,
+                    tri,
+                } => {
+                    in_tris.push((tri_mesh, tri));
+                }
+                MeshIntersectDescriptor::EdgeTriangle {
+                    edge_mesh,
+                    edge,
+                    tri_mesh,
+                    tri,
+                } => {
+                    in_edges.push((edge_mesh, edge));
+                    in_tris.push((tri_mesh, tri));
+                }
+            }
+            for (mesh, edge) in in_edges {
+                let wing = &self.input_wings[&edge];
+                assert_eq!(wing.mesh, mesh);
+                for tri in wing.wing_tris {
+                    let pos = self.input_tris[mesh][tri]
+                        .edges()
+                        .iter()
+                        .position(|&e2| e2 == edge)
+                        .unwrap();
+                    self.new_faces[mesh][tri].edge_vertices[pos].push(v);
+                }
+            }
+            for &(mesh, tri) in &in_tris {
+                self.new_faces[mesh][tri].internal_vertices.push(v);
             }
         }
     }
-    pub fn collect_face_vertices(&mut self) {
-        // for int in &self.intersects {
-        //     for v in &int.vertices {
-        //         let pos = v.position;
-        //         let vindex=self.
-        //         match v.descriptor {
-        //             MeshIntersectDescriptor::VertexVertex { vertices } => {
-        //                 //
-        //             }
-        //             MeshIntersectDescriptor::VertexEdge {
-        //                 vertex_mesh,
-        //                 vertex,
-        //                 edge_mesh,
-        //                 edge,
-        //             } => {
-        //                 //
-        //             }
-        //             MeshIntersectDescriptor::EdgeEdge { edges } => {
-        //
-        //             }
-        //             MeshIntersectDescriptor::VertexTriangle { .. } => {}
-        //             MeshIntersectDescriptor::EdgeTriangle { .. } => {}
-        //         }
-        //     }
-        // }
-        // for (&v, int) in self.new_vertices.iter() {
-        // match &int.descriptor {
-        //     MeshIntersectDescriptor::VertexVertex { vertices } => self.new_faces[0][int.tri1],
-        //     MeshIntersectDescriptor::VertexEdge { .. } => {}
-        //     MeshIntersectDescriptor::EdgeEdge { .. } => {}
-        //     MeshIntersectDescriptor::VertexTriangle { .. } => {}
-        //     MeshIntersectDescriptor::EdgeTriangle { .. } => {}
-        // }
-        // self.new_faces[int.plane_mesh][int.plane_tri]
-        //     .internal_vertices
-        //     .push(v);
-        // for wing_tri in &self
-        //     .input_wings
-        //     .get(&int.edge)
-        //     .expect("expected wing")
-        //     .wing_tris
-        // {
-        //     let input_tri = self.input_tris[int.edge_mesh][*wing_tri];
-        //     let edge_index = input_tri
-        //         .ordered_edges()
-        //         .iter()
-        //         .position(|e| e.edge() == int.edge)
-        //         .unwrap();
-        //     self.new_faces[int.edge_mesh][*wing_tri].edge_vertices[edge_index].push(v);
-        // }
-        // }
+    pub fn order_edge_vertices(&mut self) {
         for mesh in 0..2 {
             for tri in 0..self.new_faces[mesh].len() {
                 let input_tri = &self.input_tris[mesh][tri];
                 let new_face = &mut self.new_faces[mesh][tri];
                 for ei in 0..3 {
                     let ordered_edge = input_tri.ordered_edges()[ei];
-                    // let mul = if ordered_edge[0] < ordered_edge[1] {
-                    //     1.0
-                    // } else {
-                    //     -1.0
-                    // };
                     new_face.edge_vertices[ei].sort_by_cached_key(|&v| {
                         NotNan::new(
                             self.vertices[v].distance(self.vertices[input_tri.vertices()[ei]]),
@@ -441,35 +283,6 @@ impl<'a> Bimesh<'a> {
             }
         }
     }
-    // fn build_ordered_wings(&mut self) {
-    //     for (&v1, int) in self.new_vertices.iter() {
-    //         let mut result: [usize; 2] = [
-    //             self.reverse_loop_adjacency.get(&v1).unwrap(),
-    //             self.forward_loop_adjacency.get(&v1).unwrap(),
-    //         ]
-    //         .map(|&v2| match self.vertex_origins[v2] {
-    //             VertexOrigin::Mesh(_) => unreachable!(),
-    //             VertexOrigin::Intersect => {
-    //                 let int2 = &self.new_vertices[&v2];
-    //                 if int.edge_mesh == int2.edge_mesh {
-    //                     for &tri1 in &self.input_wings.get(&int.edge).unwrap().wing_tris {
-    //                         for &tri2 in &self.input_wings.get(&int2.edge).unwrap().wing_tris {
-    //                             if tri1 == tri2 {
-    //                                 return tri1;
-    //                             }
-    //                         }
-    //                     }
-    //                     unreachable!()
-    //                 } else if int.edge_mesh == int2.plane_mesh {
-    //                     int2.plane_tri
-    //                 } else {
-    //                     unreachable!()
-    //                 }
-    //             }
-    //         });
-    //         self.ordered_wings.insert(v1, result);
-    //     }
-    // }
     pub fn build_polygon_edges(&mut self) {
         for mesh in 0..2 {
             for (tri, face) in &mut self.new_faces[mesh].iter_mut().enumerate() {
@@ -500,6 +313,7 @@ impl<'a> Bimesh<'a> {
         }
     }
     pub fn build_triangulation(&mut self) {
+        println!("{:#?}", self.new_faces);
         for mesh in 0..2 {
             for (tri, face) in &mut self.new_faces[mesh].iter_mut().enumerate() {
                 let ptri = self.input_tris[mesh][tri].for_vertices(&self.vertices);
@@ -565,6 +379,7 @@ impl<'a> Bimesh<'a> {
         }
     }
     pub fn build_connected_components(&mut self) {
+        println!("{:#?}", self.new_tris);
         for mesh in 0..2 {
             let mut edge_to_tris = HashMap::<_, ArrayVec<_, 2>>::new();
             for (tri_index, tri) in self.new_tris[mesh].iter().enumerate() {
@@ -583,8 +398,10 @@ impl<'a> Bimesh<'a> {
                 }
             }
             let mut tri_adj = HashMap::<_, Vec<_>>::new();
-            for (_, tris) in edge_to_tris {
-                let [t1, t2] = tris.into_inner().unwrap();
+            for (e, tris) in edge_to_tris {
+                let [t1, t2] = tris.into_inner().unwrap_or_else(|_| {
+                    panic!("Missing triangle pair for {:?} in mesh {}", e, mesh)
+                });
                 tri_adj.entry(t1).or_default().push(t2);
                 tri_adj.entry(t2).or_default().push(t1);
             }
@@ -651,12 +468,13 @@ impl<'a> Bimesh<'a> {
     pub fn build(&mut self, rng: &mut impl Rng) {
         self.build_relabel();
         self.build_new_faces();
+        self.build_intersects();
         self.build_new_vertices();
-        // self.build_new_edges();
+        self.build_new_edges();
         self.build_loops();
         self.build_loop_meta();
-        // self.build_ordered_wings();
         self.collect_face_vertices();
+        self.order_edge_vertices();
         self.build_polygon_edges();
         self.build_triangulation();
         self.build_connected_components();

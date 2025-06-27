@@ -71,7 +71,6 @@ impl Triangulation {
             && self.is_ccw(v3, v4, v1) != self.is_ccw(v3, v4, v2)
     }
     pub fn solve(mut self) -> Vec<MeshTriangle> {
-        println!("{:#?}", self);
         while let Some(&boundary) = self.boundaries.iter().min() {
             let [v1, v2] = boundary.vertices();
             let mut candidates = vec![];
