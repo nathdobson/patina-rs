@@ -9,9 +9,9 @@ pub struct DisjointPaths {
 }
 
 impl DisjointPaths {
-    pub fn new(vertices: usize) -> Self {
+    pub fn new() -> Self {
         let mut dp = DisjointPaths {
-            ekv: EdmondsKarpVertex::new(vertices),
+            ekv: EdmondsKarpVertex::new(),
             begins: vec![],
         };
         dp

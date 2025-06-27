@@ -42,18 +42,29 @@ impl Ray3 {
         let d1 = self.dir;
         let e2 = other.origin;
         let d2 = other.dir;
-        let n = d1.cross(d2).normalize();
-        if !n.is_finite() {
+        let n = d1.cross(d2);
+        let nls = n.length_squared();
+        let nl = nls.sqrt();
+        if !n.is_finite() || !nls.is_finite() || !nl.is_finite() || nls == 0.0 || nl == 0.0 {
             return (FloatBool::from(false), f64::NAN, f64::NAN, Vec3::nan());
         }
-        let distance = n.dot(e2 - e1).abs();
-        let t1 = d2.cross(n).dot(e2 - e1);
-        let t2 = d1.cross(n).dot(e2 - e1);
+        let distance = (n / nl).dot(e2 - e1).abs();
+        let t1 = d2.cross(n).dot(e2 - e1) / nls;
+        assert!(t1.is_finite(), "{:?}", t1);
+        let t2 = d1.cross(n).dot(e2 - e1) / nls;
+        assert!(t2.is_finite(), "{:?}", t2);
         let p1 = self.at_time(t1);
         let p2 = other.at_time(t2);
+        if distance < eps.value() {
+            assert!(
+                p1.distance(p2) < eps.value(),
+                "{:?} vs {:?}",
+                distance,
+                p1.distance(p2)
+            );
+        }
         let p = (p1 + p2) / 2.0;
-        assert!(t1.is_finite());
-        assert!(t2.is_finite());
+
         (eps.equals(distance, 0.0), t1, t2, p)
     }
 }

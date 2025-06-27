@@ -7,7 +7,7 @@ pub struct EdmondsKarpVertex {
 }
 
 impl EdmondsKarpVertex {
-    pub fn new(num_vertices: usize) -> Self {
+    pub fn new() -> Self {
         let mut ekv = EdmondsKarpVertex {
             ek: EdmondsKarp::new(),
         };
@@ -47,7 +47,7 @@ impl EdmondsKarpVertex {
 
 #[test]
 fn test_basic() {
-    let mut ekv = EdmondsKarpVertex::new(2);
+    let mut ekv = EdmondsKarpVertex::new();
     ekv.add_source(0);
     ekv.add_vertex_capacity(0, 1.0);
     ekv.add_edge_capacity(0, 1, 2.0);

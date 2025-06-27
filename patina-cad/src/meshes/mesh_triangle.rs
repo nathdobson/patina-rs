@@ -22,6 +22,9 @@ impl MeshTriangle {
     pub fn vertices(&self) -> [usize; 3] {
         self.vertices
     }
+    pub fn vertices_mut(&mut self) -> &mut [usize; 3] {
+        &mut self.vertices
+    }
     pub fn ordered_edges(&self) -> [OrderedMeshEdge; 3] {
         [
             OrderedMeshEdge::new(self.vertices[0], self.vertices[1]),
