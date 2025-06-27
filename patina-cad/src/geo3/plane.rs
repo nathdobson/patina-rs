@@ -31,4 +31,17 @@ impl Plane {
         }
         (eps.less(0.0, t), t)
     }
+    pub fn intersect_line(&self, ray: &Ray3) -> Option<f64> {
+        let t = (self.origin - ray.origin()).dot(self.normal) / ray.dir().dot(self.normal);
+        if !t.is_finite() {
+            return None;
+        }
+        Some(t)
+    }
+    pub fn intersects_point(&self, point: Vec3, eps: Epsilon) -> FloatBool {
+        eps.equals(self.normal.dot(point - self.origin), 0.0)
+    }
+    pub fn outside(&self, p: Vec3, eps: Epsilon) -> FloatBool {
+        eps.less(0.0, self.normal.dot(p - self.origin))
+    }
 }

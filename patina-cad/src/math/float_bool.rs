@@ -58,6 +58,11 @@ impl Epsilon {
         assert!(!b.is_nan());
         FloatBool::new((b - a) / self.0 + 0.5)
     }
+    pub fn equals(&self, a: f64, b: f64) -> FloatBool {
+        assert!(!a.is_nan());
+        assert!(!b.is_nan());
+        FloatBool::new((b - a).abs() / self.0).not()
+    }
     pub fn value(self) -> f64 {
         self.0
     }
@@ -66,12 +71,6 @@ impl Epsilon {
 impl From<bool> for FloatBool {
     fn from(value: bool) -> Self {
         Self::new(value as u8 as f64)
-    }
-}
-
-impl Debug for FloatBool {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:.5}", self.0)
     }
 }
 
@@ -92,5 +91,17 @@ impl PartialOrd for FloatBool {
 impl Ord for FloatBool {
     fn cmp(&self, other: &Self) -> Ordering {
         self.0.partial_cmp(&other.0).unwrap()
+    }
+}
+
+impl Debug for FloatBool {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if self.is_true() {
+            write!(f, "true")
+        } else if self.is_false() {
+            write!(f, "false")
+        } else {
+            write!(f, "{:.5}", self.0)
+        }
     }
 }

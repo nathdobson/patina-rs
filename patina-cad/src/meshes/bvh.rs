@@ -6,7 +6,7 @@ use crate::geo3::sphere::Sphere;
 use crate::geo3::triangle3::Triangle3;
 use crate::math::float_bool::{Epsilon, FloatBool};
 use crate::math::vec3::Vec3;
-use crate::meshes::intersect_bvh_bvh::{IntersectBvhBvh, MeshMeshIntersection};
+use crate::meshes::intersect_bvh_bvh::{IntersectBvhBvh, MeshIntersect};
 use crate::meshes::intersect_bvh_ray::{IntersectBvhRay, MeshRayIntersection};
 use crate::meshes::mesh::Mesh;
 use crate::meshes::mesh_triangle::MeshTriangle;
@@ -34,8 +34,8 @@ pub struct BvhNodeView<'a> {
 
 pub struct BvhTriangleView<'a> {
     index: usize,
-    mesh_triangle: &'a MeshTriangle,
-    triangle: Triangle3,
+    triangle: &'a MeshTriangle,
+    vertices: &'a [Vec3],
 }
 
 pub struct Bvh {
@@ -216,7 +216,11 @@ impl Bvh {
         }
         Bvh::new(&triangles)
     }
-    pub fn root_view<'a>(&'a self, tris: &'a [MeshTriangle], vertices: &'a [Vec3]) -> BvhNodeView<'a> {
+    pub fn root_view<'a>(
+        &'a self,
+        tris: &'a [MeshTriangle],
+        vertices: &'a [Vec3],
+    ) -> BvhNodeView<'a> {
         BvhNodeView {
             tris,
             vertices,
@@ -230,8 +234,6 @@ impl Bvh {
     //         .intersect_node(&other.root_view(), &mut result);
     //     result
     // }
-
-
 }
 
 impl<'a> BvhNodeView<'a> {
@@ -244,8 +246,8 @@ impl<'a> BvhNodeView<'a> {
             .iter()
             .map(|&index| BvhTriangleView {
                 index,
-                mesh_triangle: &self.tris[index],
-                triangle: self.tris[index].for_vertices(&self.vertices),
+                triangle: &self.tris[index],
+                vertices: self.vertices,
             })
     }
     pub fn nodes<'b>(&'b self) -> impl Iterator<Item = BvhNodeView<'a>> {
@@ -341,11 +343,14 @@ impl<'a> BvhTriangleView<'a> {
     pub fn index(&self) -> usize {
         self.index
     }
-    pub fn mesh_triangle(&self) -> &'a MeshTriangle {
-        self.mesh_triangle
+    pub fn triangle(&self) -> &'a MeshTriangle {
+        self.triangle
     }
-    pub fn triangle(&self) -> &Triangle3 {
-        &self.triangle
+    pub fn triangle3(&self) -> Triangle3 {
+        self.triangle.for_vertices(self.vertices)
+    }
+    pub fn vertices(&self) -> &[Vec3] {
+        self.vertices
     }
 }
 
@@ -353,7 +358,7 @@ impl<'a> Debug for BvhTriangleView<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.debug_struct("BvhTriangleView")
             .field("index", &self.index)
-            .field("mesh_triangle", self.mesh_triangle)
+            .field("mesh_triangle", self.triangle)
             .field("triangle", &self.triangle)
             .finish()
     }

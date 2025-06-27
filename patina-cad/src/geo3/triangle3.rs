@@ -7,6 +7,7 @@ use crate::math::interval::Interval;
 use crate::math::vec2::Vec2;
 use crate::math::vec3::Vec3;
 use crate::sat::{ConvexPoly, sat_intersects};
+use itertools::Itertools;
 use ordered_float::NotNan;
 use std::fmt::{Debug, Display, Formatter};
 
@@ -104,6 +105,17 @@ impl Triangle3 {
         (self.points()[1] - self.points()[0])
             .cross(self.points()[2] - self.points()[0])
             .length()
+    }
+    pub fn intersect_point(&self, point: Vec3, eps: Epsilon) -> FloatBool {
+        let mut result = self.plane().intersects_point(point, eps);
+        for edge in self.edges() {
+            let ray = edge.as_ray();
+            result = result.and(eps.less(
+                0.0,
+                ray.dir().cross(point - ray.origin()).dot(self.normal()),
+            ));
+        }
+        result
     }
 }
 

@@ -37,4 +37,23 @@ impl Ray3 {
     pub fn at_time(&self, t: f64) -> Vec3 {
         self.origin + self.dir * t
     }
+    pub fn intersects_line(&self, other: &Ray3, eps: Epsilon) -> (FloatBool, f64, f64, Vec3) {
+        let e1 = self.origin;
+        let d1 = self.dir;
+        let e2 = other.origin;
+        let d2 = other.dir;
+        let n = d1.cross(d2).normalize();
+        if !n.is_finite() {
+            return (FloatBool::from(false), f64::NAN, f64::NAN, Vec3::nan());
+        }
+        let distance = n.dot(e2 - e1).abs();
+        let t1 = d2.cross(n).dot(e2 - e1);
+        let t2 = d1.cross(n).dot(e2 - e1);
+        let p1 = self.at_time(t1);
+        let p2 = other.at_time(t2);
+        let p = (p1 + p2) / 2.0;
+        assert!(t1.is_finite());
+        assert!(t2.is_finite());
+        (eps.equals(distance, 0.0), t1, t2, p)
+    }
 }

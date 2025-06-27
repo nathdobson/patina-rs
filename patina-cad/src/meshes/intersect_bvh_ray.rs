@@ -1,7 +1,7 @@
 use crate::geo3::ray3::Ray3;
 use crate::math::float_bool::{Epsilon, FloatBool};
 use crate::meshes::bvh::{Bvh, BvhNodeView, BvhTriangleView};
-use crate::meshes::intersect_bvh_bvh::MeshMeshIntersection;
+use crate::meshes::intersect_bvh_bvh::MeshIntersect;
 
 #[derive(Debug)]
 #[non_exhaustive]
@@ -35,7 +35,7 @@ impl IntersectBvhRay {
         }
     }
     fn intersect_leaf_ray(&mut self, node: &BvhTriangleView, ray: &Ray3) {
-        let (truth, time) = node.triangle().intersect_ray(ray, self.eps);
+        let (truth, time) = node.triangle3().intersect_ray(ray, self.eps);
         if truth.maybe() {
             self.result.push(MeshRayIntersection {
                 index: node.index(),

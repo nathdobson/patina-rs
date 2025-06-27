@@ -20,7 +20,10 @@ impl Vec3 {
         self / self.length()
     }
     pub fn length(self) -> f64 {
-        self.into_iter().map(|x| x * x).sum::<f64>().sqrt()
+        self.length_squared().sqrt()
+    }
+    pub fn length_squared(self) -> f64 {
+        self.into_iter().map(|x| x * x).sum::<f64>()
     }
     pub fn cross(self, rhs: Vec3) -> Self {
         Self([
@@ -89,6 +92,9 @@ impl Vec3 {
             }
             return v.normalize();
         }
+    }
+    pub fn nan() -> Self {
+        Self::splat(f64::NAN)
     }
 }
 

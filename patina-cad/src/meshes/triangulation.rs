@@ -71,6 +71,7 @@ impl Triangulation {
             && self.is_ccw(v3, v4, v1) != self.is_ccw(v3, v4, v2)
     }
     pub fn solve(mut self) -> Vec<MeshTriangle> {
+        println!("{:#?}", self);
         while let Some(&boundary) = self.boundaries.iter().min() {
             let [v1, v2] = boundary.vertices();
             let mut candidates = vec![];
@@ -107,7 +108,10 @@ impl Triangulation {
                 }
                 candidates.push(v3);
             }
-            let v3 = candidates.into_iter().min().expect("no viable vertices");
+            let v3 = candidates
+                .into_iter()
+                .min()
+                .unwrap_or_else(|| panic!("no viable vertices for {} {}", v1, v2));
             self.triangles.push(MeshTriangle::new(v1, v2, v3));
             self.edges.insert(MeshEdge::new(v2, v3));
             self.edges.insert(MeshEdge::new(v3, v1));

@@ -3,7 +3,7 @@ use crate::geo3::triangle3::Triangle3;
 use crate::math::vec3::Vec3;
 use crate::meshes::mesh::Mesh;
 use crate::meshes::mesh_triangle::MeshTriangle;
-use std::fmt::{Debug, Formatter};
+use std::fmt::{Debug, Display, Formatter};
 use std::ops::Index;
 
 #[derive(Copy, Clone, Eq, Ord, PartialOrd, PartialEq, Hash)]
@@ -51,5 +51,13 @@ impl Index<usize> for MeshEdge {
 impl Debug for MeshEdge {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "[{}, {}]", self.vertices[0], self.vertices[1])
+    }
+}
+
+impl Display for MeshEdge {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let temp = format!("{}_{}", self.vertices[0], self.vertices[1]);
+        f.pad(&temp)?;
+        Ok(())
     }
 }
