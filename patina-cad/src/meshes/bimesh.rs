@@ -992,6 +992,7 @@ fn rand_tetr(rng: &mut XorShiftRng, steps: usize) -> Mesh {
     }
 }
 
+#[cfg(test)]
 #[tokio::test]
 async fn test_random() -> anyhow::Result<()> {
     let eps = Epsilon::new(1e-10);
