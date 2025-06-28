@@ -1,17 +1,15 @@
 #![feature(exit_status_error)]
 #![deny(unused_must_use)]
 
-use std::io::Cursor;
-use threemf::Mesh;
-use threemf::model::{Build, Item, Object, Resources, Triangle, Triangles, Unit, Vertex, Vertices};
+use patina_cad::threemf::ModelContainer;
+use patina_cad::threemf::mesh::{Mesh, Triangle, Triangles, Vertex, Vertices};
+use patina_cad::threemf::model::{Build, Item, Model, Object, Resources, Unit, Xmlns};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let mut encoded: Vec<u8> = vec![];
-    threemf::write(
-        Cursor::new(&mut encoded),
-        threemf::model::Model {
-            xmlns: "http://schemas.microsoft.com/3dmanufacturing/core/2015/02".to_string(),
+    let model_cont = ModelContainer {
+        model: Model {
+            xmlns: Xmlns::Model,
             metadata: vec![],
             resources: Resources {
                 object: vec![Object {
@@ -52,19 +50,19 @@ async fn main() -> anyhow::Result<()> {
                                     v3: 2,
                                 },
                                 Triangle {
-                                    v1: 1,
-                                    v2: 0,
-                                    v3: 3,
+                                    v1: 0,
+                                    v2: 3,
+                                    v3: 1,
                                 },
                                 Triangle {
                                     v1: 2,
-                                    v2: 1,
-                                    v3: 3,
+                                    v2: 3,
+                                    v3: 0,
                                 },
                                 Triangle {
-                                    v1: 0,
-                                    v2: 2,
-                                    v3: 3,
+                                    v1: 1,
+                                    v2: 3,
+                                    v3: 2,
                                 },
                             ],
                         },
@@ -82,10 +80,8 @@ async fn main() -> anyhow::Result<()> {
             },
             unit: Unit::Millimeter,
         },
-    )?;
-
-    // let model = Model {};
-    // let encoded = model.encode()?;
+    };
+    let encoded = model_cont.encode()?;
     tokio::fs::write("examples/flap/output.3mf", encoded).await?;
     tokio::fs::remove_dir_all("examples/flap/output").await.ok();
     tokio::fs::create_dir("examples/flap/output").await.ok();
@@ -108,8 +104,19 @@ async fn main() -> anyhow::Result<()> {
     slicer
         .arg("--load-settings")
         .arg(format!("{};{}", machine, process));
-    slicer.arg("--export-3mf").arg("/Users/nathan/Documents/workspace/patina/examples/flap/sliced.3mf");
+    slicer
+        .arg("--export-3mf")
+        .arg("/Users/nathan/Documents/workspace/patina/examples/flap/sliced.3mf");
     slicer.arg("examples/flap/output.3mf");
     slicer.spawn()?.wait().await?.exit_ok()?;
+    tokio::fs::remove_dir_all("examples/flap/sliced").await.ok();
+    tokio::fs::create_dir("examples/flap/sliced").await.ok();
+    tokio::process::Command::new("unzip")
+        .arg("../sliced.3mf")
+        .current_dir("examples/flap/sliced")
+        .spawn()?
+        .wait()
+        .await?
+        .exit_ok()?;
     Ok(())
 }

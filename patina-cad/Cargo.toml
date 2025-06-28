@@ -11,6 +11,9 @@ arrayvec = "0.7.6"
 rand = "0.9.1"
 rand_xorshift = "0.4.0"
 zip = "4.2.0"
+serde = { version = "1.0.219", features = ["derive"] }
+serde-xml-rs="0.8.1"
+anyhow="1.0.98"
 
 [dev-dependencies]
 tokio = {version="1.45.1", features = ["rt","macros"] }
