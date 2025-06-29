@@ -212,12 +212,13 @@ async fn main() -> anyhow::Result<()> {
     let mut slicer =
         tokio::process::Command::new("/Applications/BambuStudio.app/Contents/MacOS/BambuStudio");
     slicer.arg("--debug").arg("2");
-    slicer.arg("--arrange").arg("0");
     slicer.arg("--slice").arg("0");
     let filament = "/Users/nathan/Library/Application Support/BambuStudio/system/BBL/filament/Bambu PLA Basic @BBL A1M 0.2 nozzle.json";
     slicer.arg("--load-filaments").arg(filament);
     let machine = "/Users/nathan/Library/Application Support/BambuStudio/system/BBL/machine/Bambu Lab A1 mini 0.4 nozzle.json";
     let process = "/Users/nathan/Library/Application Support/BambuStudio/system/BBL/process/0.20mm Standard @BBL A1M.json";
+    slicer.arg("--enable-timelapse");
+    slicer.arg("--timelapse-type=1");
     slicer
         .arg("--load-settings")
         .arg(format!("{};{}", machine, process));
