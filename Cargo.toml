@@ -1,6 +1,7 @@
 [workspace]
 resolver = "3"
-members = [ "examples/face", "examples/flap","patina-cad"]
+members = [ "examples/face", "examples/flap", "patina-3mf","patina-cad"]
 
 [workspace.dependencies]
 patina-cad = {path="patina-cad"}
+patina-3mf = {path="patina-3mf"}

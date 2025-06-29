@@ -1,9 +1,9 @@
-use crate::threemf::mesh::Mesh;
 use serde::{Deserialize, Serialize};
+use crate::mesh::Mesh;
 
 // Derived from https://docs.rs/threemf/latest/threemf/
 #[derive(Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
+#[serde(rename = "model", rename_all = "lowercase")]
 pub struct Model {
     #[serde(rename = "@xmlns", default)]
     pub xmlns: Xmlns,
@@ -48,7 +48,7 @@ impl Default for Unit {
 pub struct Metadata {
     #[serde(rename = "@name")]
     pub name: String,
-    #[serde(rename = "$value")]
+    #[serde(rename = "#text")]
     pub value: Option<String>,
 }
 
@@ -93,6 +93,12 @@ pub struct BaseMaterial {
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
+pub enum ObjectType {
+    Model,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub struct Object {
     #[serde(rename = "@id")]
     pub id: usize,
@@ -108,6 +114,9 @@ pub struct Object {
 
     #[serde(rename = "@pindex", skip_serializing_if = "Option::is_none")]
     pub pindex: Option<usize>,
+
+    #[serde(rename = "@type", skip_serializing_if = "Option::is_none")]
+    pub object_type: Option<ObjectType>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mesh: Option<Mesh>,
@@ -147,4 +156,22 @@ pub struct Item {
 
     #[serde(rename = "@partnumber", skip_serializing_if = "Option::is_none")]
     pub partnumber: Option<String>,
+
+    #[serde(
+        rename = "@printable",
+        skip_serializing_if = "Option::is_none",
+        with = "bool_as_int"
+    )]
+    pub printable: Option<bool>,
+}
+
+pub mod bool_as_int {
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+    pub fn serialize<S: Serializer>(b: &Option<bool>, ser: S) -> Result<S::Ok, S::Error> {
+        b.map(|x| x as u8).serialize(ser)
+    }
+    pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<Option<bool>, D::Error> {
+        Ok(Option::<u8>::deserialize(d)?.map(|x| x != 0))
+    }
 }

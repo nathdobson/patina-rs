@@ -1,19 +1,19 @@
 #![feature(exit_status_error)]
 #![deny(unused_must_use)]
 
-use patina_cad::threemf::ModelContainer;
-use patina_cad::threemf::mesh::{Mesh, Triangle, Triangles, Vertex, Vertices};
-use patina_cad::threemf::model::{
-    BaseMaterial, BaseMaterials, Build, Color, Colorgroup, Component, Components, Item, Model,
-    Object, Resources, Unit, Xmlns,
-};
+use patina_3mf::mesh::{Mesh, Triangle, Triangles, Vertex, Vertices};
+use patina_3mf::model::{Build, Component, Components, Item, Metadata, Model, Object, ObjectType, Resources, Unit, Xmlns};
+use patina_3mf::ModelContainer;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let model_cont = ModelContainer {
         model: Model {
             xmlns: Xmlns::Model,
-            metadata: vec![],
+            metadata: vec![Metadata {
+                name: "Application".to_string(),
+                value: Some("BambuStudio-01.10.01.50".to_string()),
+            }],
             resources: Resources {
                 object: vec![
                     Object {
@@ -31,19 +31,19 @@ async fn main() -> anyhow::Result<()> {
                                         z: 0.0,
                                     },
                                     Vertex {
-                                        x: 100.0,
+                                        x: 10.0,
                                         y: 0.0,
                                         z: 0.0,
                                     },
                                     Vertex {
                                         x: 0.0,
-                                        y: 100.0,
+                                        y: 10.0,
                                         z: 0.0,
                                     },
                                     Vertex {
                                         x: 0.0,
                                         y: 0.0,
-                                        z: 100.0,
+                                        z: 10.0,
                                     },
                                 ],
                             },
@@ -73,6 +73,7 @@ async fn main() -> anyhow::Result<()> {
                             },
                         }),
                         components: None,
+                        object_type: Some(ObjectType::Model),
                     },
                     Object {
                         id: 2,
@@ -84,24 +85,24 @@ async fn main() -> anyhow::Result<()> {
                             vertices: Vertices {
                                 vertex: vec![
                                     Vertex {
-                                        x: 100.0,
-                                        y: 100.0,
-                                        z: 100.0,
+                                        x: 0.0,
+                                        y: 0.0,
+                                        z: 0.0,
                                     },
                                     Vertex {
-                                        x: 100.0,
+                                        x: -10.0,
                                         y: 0.0,
                                         z: 0.0,
                                     },
                                     Vertex {
                                         x: 0.0,
-                                        y: 100.0,
+                                        y: -10.0,
                                         z: 0.0,
                                     },
                                     Vertex {
                                         x: 0.0,
                                         y: 0.0,
-                                        z: 100.0,
+                                        z: 10.0,
                                     },
                                 ],
                             },
@@ -131,9 +132,10 @@ async fn main() -> anyhow::Result<()> {
                             },
                         }),
                         components: None,
+                        object_type: Some(ObjectType::Model),
                     },
                     Object {
-                        id: 3,
+                        id: 9,
                         partnumber: None,
                         name: None,
                         pid: None,    //Some(10),
@@ -151,46 +153,18 @@ async fn main() -> anyhow::Result<()> {
                                 },
                             ],
                         }),
+                        object_type: Some(ObjectType::Model),
                     },
                 ],
-                basematerials: vec![
-                //     BaseMaterials {
-                //     id: 10,
-                //     base: vec![
-                //         BaseMaterial {
-                //             name: "red".to_string(),
-                //             displaycolor: "#FF0000FF".to_string(),
-                //         },
-                //         BaseMaterial {
-                //             name: "blue".to_string(),
-                //             displaycolor: "#0000FFFF".to_string(),
-                //         },
-                //         BaseMaterial {
-                //             name: "magenta".to_string(),
-                //             displaycolor: "#FF00FFFF".to_string(),
-                //         },
-                //     ],
-                // }
-                ],
-                colorgroup: vec![
-                //     Colorgroup {
-                //     id: 10,
-                //     color: vec![
-                //         Color {
-                //             color: "#0000FFFF".to_string(),
-                //         },
-                //         Color {
-                //             color: "#FF0000FF".to_string(),
-                //         },
-                //     ],
-                // }
-                ],
+                basematerials: vec![],
+                colorgroup: vec![],
             },
             build: Build {
                 item: vec![Item {
-                    objectid: 3,
+                    objectid: 9,
                     transform: None,
                     partnumber: None,
+                    printable: Some(true),
                 }],
             },
             unit: Unit::Millimeter,
