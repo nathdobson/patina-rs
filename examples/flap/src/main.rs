@@ -3,7 +3,10 @@
 
 use patina_cad::threemf::ModelContainer;
 use patina_cad::threemf::mesh::{Mesh, Triangle, Triangles, Vertex, Vertices};
-use patina_cad::threemf::model::{Build, Item, Model, Object, Resources, Unit, Xmlns};
+use patina_cad::threemf::model::{
+    BaseMaterial, BaseMaterials, Build, Color, Colorgroup, Component, Components, Item, Model,
+    Object, Resources, Unit, Xmlns,
+};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -12,68 +15,180 @@ async fn main() -> anyhow::Result<()> {
             xmlns: Xmlns::Model,
             metadata: vec![],
             resources: Resources {
-                object: vec![Object {
-                    id: 1,
-                    partnumber: None,
-                    name: None,
-                    pid: None,
-                    mesh: Some(Mesh {
-                        vertices: Vertices {
-                            vertex: vec![
-                                Vertex {
-                                    x: 0.0,
-                                    y: 0.0,
-                                    z: 0.0,
+                object: vec![
+                    Object {
+                        id: 1,
+                        partnumber: None,
+                        name: None,
+                        pid: None,    //Some(10),
+                        pindex: None, //Some(0),
+                        mesh: Some(Mesh {
+                            vertices: Vertices {
+                                vertex: vec![
+                                    Vertex {
+                                        x: 0.0,
+                                        y: 0.0,
+                                        z: 0.0,
+                                    },
+                                    Vertex {
+                                        x: 100.0,
+                                        y: 0.0,
+                                        z: 0.0,
+                                    },
+                                    Vertex {
+                                        x: 0.0,
+                                        y: 100.0,
+                                        z: 0.0,
+                                    },
+                                    Vertex {
+                                        x: 0.0,
+                                        y: 0.0,
+                                        z: 100.0,
+                                    },
+                                ],
+                            },
+                            triangles: Triangles {
+                                triangle: vec![
+                                    Triangle {
+                                        v1: 0,
+                                        v2: 1,
+                                        v3: 2,
+                                    },
+                                    Triangle {
+                                        v1: 0,
+                                        v2: 3,
+                                        v3: 1,
+                                    },
+                                    Triangle {
+                                        v1: 2,
+                                        v2: 3,
+                                        v3: 0,
+                                    },
+                                    Triangle {
+                                        v1: 1,
+                                        v2: 3,
+                                        v3: 2,
+                                    },
+                                ],
+                            },
+                        }),
+                        components: None,
+                    },
+                    Object {
+                        id: 2,
+                        partnumber: None,
+                        name: None,
+                        pid: None,    //Some(10),
+                        pindex: None, //Some(1),
+                        mesh: Some(Mesh {
+                            vertices: Vertices {
+                                vertex: vec![
+                                    Vertex {
+                                        x: 100.0,
+                                        y: 100.0,
+                                        z: 100.0,
+                                    },
+                                    Vertex {
+                                        x: 100.0,
+                                        y: 0.0,
+                                        z: 0.0,
+                                    },
+                                    Vertex {
+                                        x: 0.0,
+                                        y: 100.0,
+                                        z: 0.0,
+                                    },
+                                    Vertex {
+                                        x: 0.0,
+                                        y: 0.0,
+                                        z: 100.0,
+                                    },
+                                ],
+                            },
+                            triangles: Triangles {
+                                triangle: vec![
+                                    Triangle {
+                                        v1: 0,
+                                        v2: 1,
+                                        v3: 2,
+                                    },
+                                    Triangle {
+                                        v1: 0,
+                                        v2: 3,
+                                        v3: 1,
+                                    },
+                                    Triangle {
+                                        v1: 2,
+                                        v2: 3,
+                                        v3: 0,
+                                    },
+                                    Triangle {
+                                        v1: 1,
+                                        v2: 3,
+                                        v3: 2,
+                                    },
+                                ],
+                            },
+                        }),
+                        components: None,
+                    },
+                    Object {
+                        id: 3,
+                        partnumber: None,
+                        name: None,
+                        pid: None,    //Some(10),
+                        pindex: None, //Some(2),
+                        mesh: None,
+                        components: Some(Components {
+                            component: vec![
+                                Component {
+                                    objectid: 1,
+                                    transform: None,
                                 },
-                                Vertex {
-                                    x: 100.0,
-                                    y: 0.0,
-                                    z: 0.0,
-                                },
-                                Vertex {
-                                    x: 0.0,
-                                    y: 100.0,
-                                    z: 0.0,
-                                },
-                                Vertex {
-                                    x: 0.0,
-                                    y: 0.0,
-                                    z: 100.0,
+                                Component {
+                                    objectid: 2,
+                                    transform: None,
                                 },
                             ],
-                        },
-                        triangles: Triangles {
-                            triangle: vec![
-                                Triangle {
-                                    v1: 0,
-                                    v2: 1,
-                                    v3: 2,
-                                },
-                                Triangle {
-                                    v1: 0,
-                                    v2: 3,
-                                    v3: 1,
-                                },
-                                Triangle {
-                                    v1: 2,
-                                    v2: 3,
-                                    v3: 0,
-                                },
-                                Triangle {
-                                    v1: 1,
-                                    v2: 3,
-                                    v3: 2,
-                                },
-                            ],
-                        },
-                    }),
-                    components: None,
-                }],
-                basematerials: None,
+                        }),
+                    },
+                ],
+                basematerials: vec![
+                //     BaseMaterials {
+                //     id: 10,
+                //     base: vec![
+                //         BaseMaterial {
+                //             name: "red".to_string(),
+                //             displaycolor: "#FF0000FF".to_string(),
+                //         },
+                //         BaseMaterial {
+                //             name: "blue".to_string(),
+                //             displaycolor: "#0000FFFF".to_string(),
+                //         },
+                //         BaseMaterial {
+                //             name: "magenta".to_string(),
+                //             displaycolor: "#FF00FFFF".to_string(),
+                //         },
+                //     ],
+                // }
+                ],
+                colorgroup: vec![
+                //     Colorgroup {
+                //     id: 10,
+                //     color: vec![
+                //         Color {
+                //             color: "#0000FFFF".to_string(),
+                //         },
+                //         Color {
+                //             color: "#FF0000FF".to_string(),
+                //         },
+                //     ],
+                // }
+                ],
             },
             build: Build {
                 item: vec![Item {
-                    objectid: 1,
+                    objectid: 3,
                     transform: None,
                     partnumber: None,
                 }],
@@ -87,6 +202,7 @@ async fn main() -> anyhow::Result<()> {
     tokio::fs::create_dir("examples/flap/output").await.ok();
 
     tokio::process::Command::new("unzip")
+        .arg("-q")
         .arg("../output.3mf")
         .current_dir("examples/flap/output")
         .spawn()?
@@ -95,7 +211,8 @@ async fn main() -> anyhow::Result<()> {
         .exit_ok()?;
     let mut slicer =
         tokio::process::Command::new("/Applications/BambuStudio.app/Contents/MacOS/BambuStudio");
-    slicer.arg("--debug").arg("1");
+    slicer.arg("--debug").arg("2");
+    slicer.arg("--arrange").arg("0");
     slicer.arg("--slice").arg("0");
     let filament = "/Users/nathan/Library/Application Support/BambuStudio/system/BBL/filament/Bambu PLA Basic @BBL A1M 0.2 nozzle.json";
     slicer.arg("--load-filaments").arg(filament);
@@ -112,6 +229,7 @@ async fn main() -> anyhow::Result<()> {
     tokio::fs::remove_dir_all("examples/flap/sliced").await.ok();
     tokio::fs::create_dir("examples/flap/sliced").await.ok();
     tokio::process::Command::new("unzip")
+        .arg("-q")
         .arg("../sliced.3mf")
         .current_dir("examples/flap/sliced")
         .spawn()?

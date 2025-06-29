@@ -53,11 +53,42 @@ pub struct Metadata {
 }
 
 #[derive(Serialize, Deserialize, Default)]
+pub struct Color {
+    #[serde(rename = "@color", default)]
+    pub color: String,
+}
+
+#[derive(Serialize, Deserialize, Default)]
+pub struct Colorgroup {
+    #[serde(rename = "@id")]
+    pub id: usize,
+    #[serde(rename = "m:color", default)]
+    pub color: Vec<Color>,
+}
+
+#[derive(Serialize, Deserialize, Default)]
 pub struct Resources {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub basematerials: Vec<BaseMaterials>,
+    #[serde(default, rename = "m:colorgroup")]
+    pub colorgroup: Vec<Colorgroup>,
     #[serde(default)]
     pub object: Vec<Object>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub basematerials: Option<()>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct BaseMaterials {
+    #[serde(rename = "@id")]
+    pub id: usize,
+    pub base: Vec<BaseMaterial>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct BaseMaterial {
+    #[serde(rename = "@name")]
+    pub name: String,
+    #[serde(rename = "@displaycolor")]
+    pub displaycolor: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -75,6 +106,9 @@ pub struct Object {
     #[serde(rename = "@pid", skip_serializing_if = "Option::is_none")]
     pub pid: Option<usize>,
 
+    #[serde(rename = "@pindex", skip_serializing_if = "Option::is_none")]
+    pub pindex: Option<usize>,
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mesh: Option<Mesh>,
 
@@ -83,13 +117,11 @@ pub struct Object {
 }
 
 #[derive(Serialize, Deserialize)]
-
 pub struct Components {
     pub component: Vec<Component>,
 }
 
 #[derive(Serialize, Deserialize)]
-
 pub struct Component {
     #[serde(rename = "@objectid")]
     pub objectid: usize,
@@ -99,7 +131,6 @@ pub struct Component {
 }
 
 #[derive(Serialize, Deserialize, Default)]
-
 pub struct Build {
     #[serde(default)]
     pub item: Vec<Item>,

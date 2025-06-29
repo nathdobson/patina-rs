@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 #[deny(unused_must_use)]
 use std::io::{Cursor, Write};
 use std::mem;
+use xml::EmitterConfig;
 use zip::ZipWriter;
 use zip::result::ZipResult;
 use zip::write::SimpleFileOptions;
@@ -26,15 +27,14049 @@ const CONTENT_TYPES_FILE: &[u8] = //
         <Default
             Extension="texture"
             ContentType="application/vnd.ms-package.3dmanufacturing-3dmodeltexture" />
+        <Default Extension="png" ContentType="image/png"/>
     </Types>
 "#;
 
 const RELS_FILE:&[u8]=//
     br#"<?xml version="1.0" encoding="UTF-8"?>
             <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-                <Relationship Target="/3D/model.model" Id="rel-1" Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel"/>
+                <Relationship Target="/3D/3dmodel.model" Id="rel-1" Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel"/>
+                <Relationship Target="/Metadata/thumbnail.png" Id="rel-2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail"/>
             </Relationships>
         "#;
+
+const RELS_FILE_3D:&[u8]=//
+br#"<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+ <Relationship Target="/3D/Objects/object_3.model" Id="rel-1" Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel"/>
+</Relationships>
+"#;
+
+const MODEL_CONFIG: &[u8] = //
+    br#"<?xml version="1.0" encoding="UTF-8"?>
+<config>
+  <object id="9">
+    <metadata key="name" value="part1"/>
+    <metadata key="extruder" value="1"/>
+    <metadata face_count="8278"/>
+    <part id="1" subtype="normal_part">
+      <metadata key="name" value="part1.stl"/>
+      <metadata key="matrix" value="1 0 0 -1.9930372239539795 0 1 0 24.999771119541016 0 0 1 1.7763568398500629e-15 0 0 0 1"/>
+      <metadata key="source_file" value="E:\3D\models\Multi color coin\part1.stl"/>
+      <metadata key="source_object_id" value="0"/>
+      <metadata key="source_volume_id" value="0"/>
+      <metadata key="source_offset_x" value="-0.49825930595397949"/>
+      <metadata key="source_offset_y" value="6.2499427795410156"/>
+      <metadata key="source_offset_z" value="2.5"/>
+      <metadata key="extruder" value="1"/>
+      <mesh_stat face_count="1040" edges_fixed="0" degenerate_facets="0" facets_removed="0" facets_reversed="0" backwards_edges="0"/>
+    </part>
+    <part id="2" subtype="normal_part">
+      <metadata key="name" value="part2.stl"/>
+      <metadata key="matrix" value="1 0 0 -23.272918715292967 0 1 0 21.778161760640867 0 0 1 1.7763568398500629e-15 0 0 0 1"/>
+      <metadata key="source_file" value="E:\3D\models\Multi color coin\part2.stl"/>
+      <metadata key="source_object_id" value="0"/>
+      <metadata key="source_volume_id" value="0"/>
+      <metadata key="source_offset_x" value="-5.8182296752929688"/>
+      <metadata key="source_offset_y" value="5.44454026222229"/>
+      <metadata key="source_offset_z" value="2.5"/>
+      <metadata key="extruder" value="2"/>
+      <mesh_stat face_count="1006" edges_fixed="0" degenerate_facets="0" facets_removed="0" facets_reversed="0" backwards_edges="0"/>
+    </part>
+    <part id="3" subtype="normal_part">
+      <metadata key="name" value="part3.stl"/>
+      <metadata key="matrix" value="1 0 0 23.272918715292967 0 1 0 -21.778763283950347 0 0 1 1.7763568398500629e-15 0 0 0 1"/>
+      <metadata key="source_file" value="E:\3D\models\Multi color coin\part3.stl"/>
+      <metadata key="source_object_id" value="0"/>
+      <metadata key="source_volume_id" value="0"/>
+      <metadata key="source_offset_x" value="5.8182296752929688"/>
+      <metadata key="source_offset_y" value="-5.444691002368927"/>
+      <metadata key="source_offset_z" value="2.5"/>
+      <metadata key="extruder" value="2"/>
+      <mesh_stat face_count="1032" edges_fixed="0" degenerate_facets="0" facets_removed="0" facets_reversed="0" backwards_edges="0"/>
+    </part>
+    <part id="4" subtype="normal_part">
+      <metadata key="name" value="part4.stl"/>
+      <metadata key="matrix" value="1 0 0 -24.999771119541016 0 1 0 -1.9930372239539795 0 0 1 1.7763568398500629e-15 0 0 0 1"/>
+      <metadata key="source_file" value="E:\3D\models\Multi color coin\part4.stl"/>
+      <metadata key="source_object_id" value="0"/>
+      <metadata key="source_volume_id" value="0"/>
+      <metadata key="source_offset_x" value="-6.2499427795410156"/>
+      <metadata key="source_offset_y" value="-0.49825930595397949"/>
+      <metadata key="source_offset_z" value="2.5"/>
+      <metadata key="extruder" value="3"/>
+      <mesh_stat face_count="1036" edges_fixed="0" degenerate_facets="0" facets_removed="0" facets_reversed="0" backwards_edges="0"/>
+    </part>
+    <part id="5" subtype="normal_part">
+      <metadata key="name" value="part5.stl"/>
+      <metadata key="matrix" value="1 0 0 21.778763283950347 0 1 0 23.272918715292967 0 0 1 1.7763568398500629e-15 0 0 0 1"/>
+      <metadata key="source_file" value="E:\3D\models\Multi color coin\part5.stl"/>
+      <metadata key="source_object_id" value="0"/>
+      <metadata key="source_volume_id" value="0"/>
+      <metadata key="source_offset_x" value="5.444691002368927"/>
+      <metadata key="source_offset_y" value="5.8182296752929688"/>
+      <metadata key="source_offset_z" value="2.5"/>
+      <metadata key="extruder" value="4"/>
+      <mesh_stat face_count="1032" edges_fixed="0" degenerate_facets="0" facets_removed="0" facets_reversed="0" backwards_edges="0"/>
+    </part>
+    <part id="6" subtype="normal_part">
+      <metadata key="name" value="part6.stl"/>
+      <metadata key="matrix" value="1 0 0 1.9930191040009766 0 1 0 -24.999771119541016 0 0 1 -1.7763568398500629e-15 0 0 0 1"/>
+      <metadata key="source_file" value="E:\3D\models\Multi color coin\part6.stl"/>
+      <metadata key="source_object_id" value="0"/>
+      <metadata key="source_volume_id" value="0"/>
+      <metadata key="source_offset_x" value="0.49825477600097656"/>
+      <metadata key="source_offset_y" value="-6.2499427795410156"/>
+      <metadata key="source_offset_z" value="2.4999999999999991"/>
+      <metadata key="extruder" value="1"/>
+      <mesh_stat face_count="1060" edges_fixed="0" degenerate_facets="0" facets_removed="0" facets_reversed="0" backwards_edges="0"/>
+    </part>
+    <part id="7" subtype="normal_part">
+      <metadata key="name" value="part7.stl"/>
+      <metadata key="matrix" value="1 0 0 -21.778051124481049 0 1 0 -23.272918715292967 0 0 1 -1.7763568398500629e-15 0 0 0 1"/>
+      <metadata key="source_file" value="E:\3D\models\Multi color coin\part7.stl"/>
+      <metadata key="source_object_id" value="0"/>
+      <metadata key="source_volume_id" value="0"/>
+      <metadata key="source_offset_x" value="-5.4445127844810486"/>
+      <metadata key="source_offset_y" value="-5.8182296752929688"/>
+      <metadata key="source_offset_z" value="2.4999999999999991"/>
+      <metadata key="extruder" value="4"/>
+      <mesh_stat face_count="1014" edges_fixed="0" degenerate_facets="0" facets_removed="0" facets_reversed="0" backwards_edges="0"/>
+    </part>
+    <part id="8" subtype="normal_part">
+      <metadata key="name" value="part8.stl"/>
+      <metadata key="matrix" value="1 0 0 24.999771119541016 0 1 0 1.9930191040009766 0 0 1 1.7763568398500629e-15 0 0 0 1"/>
+      <metadata key="source_file" value="E:\3D\models\Multi color coin\part8.stl"/>
+      <metadata key="source_object_id" value="0"/>
+      <metadata key="source_volume_id" value="0"/>
+      <metadata key="source_offset_x" value="6.2499427795410156"/>
+      <metadata key="source_offset_y" value="0.49825477600097656"/>
+      <metadata key="source_offset_z" value="2.5"/>
+      <metadata key="extruder" value="3"/>
+      <mesh_stat face_count="1058" edges_fixed="0" degenerate_facets="0" facets_removed="0" facets_reversed="0" backwards_edges="0"/>
+    </part>
+  </object>
+  <plate>
+    <metadata key="plater_id" value="1"/>
+    <metadata key="plater_name" value=""/>
+    <metadata key="locked" value="false"/>
+    <metadata key="gcode_file" value="Metadata/plate_1.gcode"/>
+    <metadata key="thumbnail_file" value="Metadata/plate_1.png"/>
+    <metadata key="thumbnail_no_light_file" value="Metadata/plate_no_light_1.png"/>
+    <metadata key="top_file" value="Metadata/top_1.png"/>
+    <metadata key="pick_file" value="Metadata/pick_1.png"/>
+    <model_instance>
+      <metadata key="object_id" value="9"/>
+      <metadata key="instance_id" value="0"/>
+      <metadata key="identify_id" value="150"/>
+    </model_instance>
+  </plate>
+  <assemble>
+   <assemble_item object_id="9" instance_id="0" transform="1 0 0 0 1 0 0 0 1 0 0 2.5000000000000004" offset="0 0 0" />
+  </assemble>
+</config>
+"#;
+
+const PROJECT_CONFIG: &[u8] = br##"{
+    "accel_to_decel_enable": "0",
+    "accel_to_decel_factor": "50%",
+    "activate_air_filtration": [
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+    ],
+    "additional_cooling_fan_speed": [
+        "70",
+        "70",
+        "70",
+        "70",
+        "70"
+    ],
+    "auxiliary_fan": "1",
+    "bed_custom_model": "",
+    "bed_custom_texture": "",
+    "bed_exclude_area": [
+        "0x0",
+        "18x0",
+        "18x28",
+        "0x28"
+    ],
+    "before_layer_change_gcode": "",
+    "best_object_pos": "0.5,0.5",
+    "bottom_shell_layers": "3",
+    "bottom_shell_thickness": "0",
+    "bottom_surface_pattern": "monotonic",
+    "bridge_angle": "0",
+    "bridge_flow": "1",
+    "bridge_no_support": "0",
+    "bridge_speed": "50",
+    "brim_object_gap": "0.1",
+    "brim_type": "auto_brim",
+    "brim_width": "5",
+    "chamber_temperatures": [
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+    ],
+    "change_filament_gcode": "M620 S[next_extruder]A\nM204 S9000\n{if toolchange_count > 1 && (z_hop_types[current_extruder] == 0 || z_hop_types[current_extruder] == 3)}\nG17\nG2 Z{z_after_toolchange + 0.4} I0.86 J0.86 P1 F10000 ; spiral lift a little from second lift\n{endif}\nG1 Z{max_layer_z + 3.0} F1200\n\nG1 X70 F21000\nG1 Y245\nG1 Y265 F3000\nM400\nM106 P1 S0\nM106 P2 S0\n{if old_filament_temp > 142 && next_extruder < 255}\nM104 S[old_filament_temp]\n{endif}\n{if long_retractions_when_cut[previous_extruder]}\nM620.11 S1 I[previous_extruder] E-{retraction_distances_when_cut[previous_extruder]} F{old_filament_e_feedrate}\n{else}\nM620.11 S0\n{endif}\nM400\nG1 X90 F3000\nG1 Y255 F4000\nG1 X100 F5000\nG1 X120 F15000\nG1 X20 Y50 F21000\nG1 Y-3\n{if toolchange_count == 2}\n; get travel path for change filament\nM620.1 X[travel_point_1_x] Y[travel_point_1_y] F21000 P0\nM620.1 X[travel_point_2_x] Y[travel_point_2_y] F21000 P1\nM620.1 X[travel_point_3_x] Y[travel_point_3_y] F21000 P2\n{endif}\nM620.1 E F[old_filament_e_feedrate] T{nozzle_temperature_range_high[previous_extruder]}\nT[next_extruder]\nM620.1 E F[new_filament_e_feedrate] T{nozzle_temperature_range_high[next_extruder]}\n\n{if next_extruder < 255}\n{if long_retractions_when_cut[previous_extruder]}\nM620.11 S1 I[previous_extruder] E{retraction_distances_when_cut[previous_extruder]} F{old_filament_e_feedrate}\nM628 S1\nG92 E0\nG1 E{retraction_distances_when_cut[previous_extruder]} F[old_filament_e_feedrate]\nM400\nM629 S1\n{else}\nM620.11 S0\n{endif}\nG92 E0\n{if flush_length_1 > 1}\nM83\n; FLUSH_START\n; always use highest temperature to flush\nM400\n{if filament_type[next_extruder] == \"PETG\"}\nM109 S260\n{elsif filament_type[next_extruder] == \"PVA\"}\nM109 S210\n{else}\nM109 S[nozzle_temperature_range_high]\n{endif}\n{if flush_length_1 > 23.7}\nG1 E23.7 F{old_filament_e_feedrate} ; do not need pulsatile flushing for start part\nG1 E{(flush_length_1 - 23.7) * 0.02} F50\nG1 E{(flush_length_1 - 23.7) * 0.23} F{old_filament_e_feedrate}\nG1 E{(flush_length_1 - 23.7) * 0.02} F50\nG1 E{(flush_length_1 - 23.7) * 0.23} F{new_filament_e_feedrate}\nG1 E{(flush_length_1 - 23.7) * 0.02} F50\nG1 E{(flush_length_1 - 23.7) * 0.23} F{new_filament_e_feedrate}\nG1 E{(flush_length_1 - 23.7) * 0.02} F50\nG1 E{(flush_length_1 - 23.7) * 0.23} F{new_filament_e_feedrate}\n{else}\nG1 E{flush_length_1} F{old_filament_e_feedrate}\n{endif}\n; FLUSH_END\nG1 E-[old_retract_length_toolchange] F1800\nG1 E[old_retract_length_toolchange] F300\n{endif}\n\n{if flush_length_2 > 1}\n\nG91\nG1 X3 F12000; move aside to extrude\nG90\nM83\n\n; FLUSH_START\nG1 E{flush_length_2 * 0.18} F{new_filament_e_feedrate}\nG1 E{flush_length_2 * 0.02} F50\nG1 E{flush_length_2 * 0.18} F{new_filament_e_feedrate}\nG1 E{flush_length_2 * 0.02} F50\nG1 E{flush_length_2 * 0.18} F{new_filament_e_feedrate}\nG1 E{flush_length_2 * 0.02} F50\nG1 E{flush_length_2 * 0.18} F{new_filament_e_feedrate}\nG1 E{flush_length_2 * 0.02} F50\nG1 E{flush_length_2 * 0.18} F{new_filament_e_feedrate}\nG1 E{flush_length_2 * 0.02} F50\n; FLUSH_END\nG1 E-[new_retract_length_toolchange] F1800\nG1 E[new_retract_length_toolchange] F300\n{endif}\n\n{if flush_length_3 > 1}\n\nG91\nG1 X3 F12000; move aside to extrude\nG90\nM83\n\n; FLUSH_START\nG1 E{flush_length_3 * 0.18} F{new_filament_e_feedrate}\nG1 E{flush_length_3 * 0.02} F50\nG1 E{flush_length_3 * 0.18} F{new_filament_e_feedrate}\nG1 E{flush_length_3 * 0.02} F50\nG1 E{flush_length_3 * 0.18} F{new_filament_e_feedrate}\nG1 E{flush_length_3 * 0.02} F50\nG1 E{flush_length_3 * 0.18} F{new_filament_e_feedrate}\nG1 E{flush_length_3 * 0.02} F50\nG1 E{flush_length_3 * 0.18} F{new_filament_e_feedrate}\nG1 E{flush_length_3 * 0.02} F50\n; FLUSH_END\nG1 E-[new_retract_length_toolchange] F1800\nG1 E[new_retract_length_toolchange] F300\n{endif}\n\n{if flush_length_4 > 1}\n\nG91\nG1 X3 F12000; move aside to extrude\nG90\nM83\n\n; FLUSH_START\nG1 E{flush_length_4 * 0.18} F{new_filament_e_feedrate}\nG1 E{flush_length_4 * 0.02} F50\nG1 E{flush_length_4 * 0.18} F{new_filament_e_feedrate}\nG1 E{flush_length_4 * 0.02} F50\nG1 E{flush_length_4 * 0.18} F{new_filament_e_feedrate}\nG1 E{flush_length_4 * 0.02} F50\nG1 E{flush_length_4 * 0.18} F{new_filament_e_feedrate}\nG1 E{flush_length_4 * 0.02} F50\nG1 E{flush_length_4 * 0.18} F{new_filament_e_feedrate}\nG1 E{flush_length_4 * 0.02} F50\n; FLUSH_END\n{endif}\n; FLUSH_START\nM400\nM109 S[new_filament_temp]\nG1 E2 F{new_filament_e_feedrate} ;Compensate for filament spillage during waiting temperature\n; FLUSH_END\nM400\nG92 E0\nG1 E-[new_retract_length_toolchange] F1800\nM106 P1 S255\nM400 S3\n\nG1 X70 F5000\nG1 X90 F3000\nG1 Y255 F4000\nG1 X105 F5000\nG1 Y265 F5000\nG1 X70 F10000\nG1 X100 F5000\nG1 X70 F10000\nG1 X100 F5000\n\nG1 X70 F10000\nG1 X80 F15000\nG1 X60\nG1 X80\nG1 X60\nG1 X80 ; shake to put down garbage\nG1 X100 F5000\nG1 X165 F15000; wipe and shake\nG1 Y256 ; move Y to aside, prevent collision\nM400\nG1 Z{max_layer_z + 3.0} F3000\n{if layer_z <= (initial_layer_print_height + 0.001)}\nM204 S[initial_layer_acceleration]\n{else}\nM204 S[default_acceleration]\n{endif}\n{else}\nG1 X[x_after_toolchange] Y[y_after_toolchange] Z[z_after_toolchange] F12000\n{endif}\nM621 S[next_extruder]A\n",
+    "close_fan_the_first_x_layers": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+    ],
+    "compatible_printers_condition": "",
+    "complete_print_exhaust_fan_speed": [
+        "70",
+        "70",
+        "70",
+        "70",
+        "70"
+    ],
+    "cool_plate_temp": [
+        "35",
+        "35",
+        "35",
+        "35",
+        "30"
+    ],
+    "cool_plate_temp_initial_layer": [
+        "35",
+        "35",
+        "35",
+        "35",
+        "30"
+    ],
+    "curr_bed_type": "Textured PEI Plate",
+    "default_acceleration": "10000",
+    "default_filament_colour": [
+        "",
+        "",
+        "",
+        "",
+        ""
+    ],
+    "default_filament_profile": [
+        "Bambu PLA Basic @BBL X1C"
+    ],
+    "default_jerk": "0",
+    "default_print_profile": "0.20mm Standard @BBL X1C",
+    "deretraction_speed": [
+        "30"
+    ],
+    "detect_narrow_internal_solid_infill": "1",
+    "detect_overhang_wall": "1",
+    "detect_thin_wall": "0",
+    "different_settings_to_system": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+    ],
+    "draft_shield": "disabled",
+    "during_print_exhaust_fan_speed": [
+        "70",
+        "70",
+        "70",
+        "70",
+        "70"
+    ],
+    "elefant_foot_compensation": "0.15",
+    "enable_arc_fitting": "1",
+    "enable_long_retraction_when_cut": "2",
+    "enable_overhang_bridge_fan": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+    ],
+    "enable_overhang_speed": "1",
+    "enable_pressure_advance": [
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+    ],
+    "enable_prime_tower": "1",
+    "enable_support": "0",
+    "enforce_support_layers": "0",
+    "eng_plate_temp": [
+        "0",
+        "0",
+        "0",
+        "0",
+        "30"
+    ],
+    "eng_plate_temp_initial_layer": [
+        "0",
+        "0",
+        "0",
+        "0",
+        "30"
+    ],
+    "ensure_vertical_shell_thickness": "1",
+    "exclude_object": "1",
+    "extruder_clearance_dist_to_rod": "33",
+    "extruder_clearance_height_to_lid": "90",
+    "extruder_clearance_height_to_rod": "34",
+    "extruder_clearance_max_radius": "68",
+    "extruder_colour": [
+        "#018001"
+    ],
+    "extruder_offset": [
+        "0x2"
+    ],
+    "extruder_type": [
+        "DirectDrive"
+    ],
+    "fan_cooling_layer_time": [
+        "100",
+        "100",
+        "100",
+        "100",
+        "100"
+    ],
+    "fan_max_speed": [
+        "100",
+        "100",
+        "100",
+        "100",
+        "100"
+    ],
+    "fan_min_speed": [
+        "100",
+        "100",
+        "100",
+        "100",
+        "100"
+    ],
+    "filament_colour": [
+        "#0000FF",
+        "#FFFFFF",
+        "#8E9089",
+        "#000000",
+        "#000000"
+    ],
+    "filament_cost": [
+        "20",
+        "22.99",
+        "24.99",
+        "24.99",
+        "20"
+    ],
+    "filament_density": [
+        "1.24",
+        "1.25",
+        "1.26",
+        "1.26",
+        "1.24"
+    ],
+    "filament_deretraction_speed": [
+        "nil",
+        "nil",
+        "nil",
+        "nil",
+        "nil"
+    ],
+    "filament_diameter": [
+        "1.75",
+        "1.75",
+        "1.75",
+        "1.75",
+        "1.75"
+    ],
+    "filament_end_gcode": [
+        "; filament end gcode \nM106 P3 S0\n",
+        "; filament end gcode \nM106 P3 S0\n",
+        "; filament end gcode \nM106 P3 S0\n",
+        "; filament end gcode \nM106 P3 S0\n",
+        "; filament end gcode \nM106 P3 S0\n"
+    ],
+    "filament_flow_ratio": [
+        "0.98",
+        "0.98",
+        "0.98",
+        "0.98",
+        "1"
+    ],
+    "filament_ids": [
+        "GFL99",
+        "GFL03",
+        "GFA00",
+        "GFA00",
+        "GFU99"
+    ],
+    "filament_is_support": [
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+    ],
+    "filament_long_retractions_when_cut": [
+        "nil",
+        "nil",
+        "1",
+        "1",
+        "nil"
+    ],
+    "filament_max_volumetric_speed": [
+        "12",
+        "16",
+        "21",
+        "21",
+        "3.2"
+    ],
+    "filament_minimal_purge_on_wipe_tower": [
+        "15",
+        "15",
+        "15",
+        "15",
+        "15"
+    ],
+    "filament_notes": "",
+    "filament_retract_before_wipe": [
+        "nil",
+        "nil",
+        "nil",
+        "nil",
+        "nil"
+    ],
+    "filament_retract_restart_extra": [
+        "nil",
+        "nil",
+        "nil",
+        "nil",
+        "nil"
+    ],
+    "filament_retract_when_changing_layer": [
+        "nil",
+        "nil",
+        "nil",
+        "nil",
+        "nil"
+    ],
+    "filament_retraction_distances_when_cut": [
+        "nil",
+        "nil",
+        "18",
+        "18",
+        "nil"
+    ],
+    "filament_retraction_length": [
+        "nil",
+        "nil",
+        "nil",
+        "nil",
+        "0.4"
+    ],
+    "filament_retraction_minimum_travel": [
+        "nil",
+        "nil",
+        "nil",
+        "nil",
+        "nil"
+    ],
+    "filament_retraction_speed": [
+        "nil",
+        "nil",
+        "nil",
+        "nil",
+        "nil"
+    ],
+    "filament_scarf_gap": [
+        "15%",
+        "15%",
+        "0%",
+        "0%",
+        "0%"
+    ],
+    "filament_scarf_height": [
+        "10%",
+        "10%",
+        "10%",
+        "10%",
+        "10%"
+    ],
+    "filament_scarf_length": [
+        "10",
+        "10",
+        "10",
+        "10",
+        "10"
+    ],
+    "filament_scarf_seam_type": [
+        "none",
+        "none",
+        "none",
+        "none",
+        "none"
+    ],
+    "filament_settings_id": [
+        "Generic PLA",
+        "eSUN PLA+ @BBL X1C",
+        "Bambu PLA Basic @BBL X1C",
+        "Bambu PLA Basic @BBL X1C",
+        "Generic TPU"
+    ],
+    "filament_shrink": [
+        "100%",
+        "100%",
+        "100%",
+        "100%",
+        "100%"
+    ],
+    "filament_soluble": [
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+    ],
+    "filament_start_gcode": [
+        "; filament start gcode\n{if  (bed_temperature[current_extruder] >55)||(bed_temperature_initial_layer[current_extruder] >55)}M106 P3 S200\n{elsif(bed_temperature[current_extruder] >50)||(bed_temperature_initial_layer[current_extruder] >50)}M106 P3 S150\n{elsif(bed_temperature[current_extruder] >45)||(bed_temperature_initial_layer[current_extruder] >45)}M106 P3 S50\n{endif}\n\n{if activate_air_filtration[current_extruder] && support_air_filtration}\nM106 P3 S{during_print_exhaust_fan_speed_num[current_extruder]} \n{endif}",
+        "; filament start gcode\n{if  (bed_temperature[current_extruder] >55)||(bed_temperature_initial_layer[current_extruder] >55)}M106 P3 S200\n{elsif(bed_temperature[current_extruder] >50)||(bed_temperature_initial_layer[current_extruder] >50)}M106 P3 S150\n{elsif(bed_temperature[current_extruder] >45)||(bed_temperature_initial_layer[current_extruder] >45)}M106 P3 S50\n{endif}\n\n{if activate_air_filtration[current_extruder] && support_air_filtration}\nM106 P3 S{during_print_exhaust_fan_speed_num[current_extruder]} \n{endif}",
+        "; filament start gcode\n{if  (bed_temperature[current_extruder] >55)||(bed_temperature_initial_layer[current_extruder] >55)}M106 P3 S200\n{elsif(bed_temperature[current_extruder] >50)||(bed_temperature_initial_layer[current_extruder] >50)}M106 P3 S150\n{elsif(bed_temperature[current_extruder] >45)||(bed_temperature_initial_layer[current_extruder] >45)}M106 P3 S50\n{endif}\nM142 P1 R35 S40\n{if activate_air_filtration[current_extruder] && support_air_filtration}\nM106 P3 S{during_print_exhaust_fan_speed_num[current_extruder]} \n{endif}",
+        "; filament start gcode\n{if  (bed_temperature[current_extruder] >55)||(bed_temperature_initial_layer[current_extruder] >55)}M106 P3 S200\n{elsif(bed_temperature[current_extruder] >50)||(bed_temperature_initial_layer[current_extruder] >50)}M106 P3 S150\n{elsif(bed_temperature[current_extruder] >45)||(bed_temperature_initial_layer[current_extruder] >45)}M106 P3 S50\n{endif}\nM142 P1 R35 S40\n{if activate_air_filtration[current_extruder] && support_air_filtration}\nM106 P3 S{during_print_exhaust_fan_speed_num[current_extruder]} \n{endif}",
+        "; filament start gcode\n{if (bed_temperature[current_extruder] >35)||(bed_temperature_initial_layer[current_extruder] >35)}M106 P3 S255\n{elsif (bed_temperature[current_extruder] >30)||(bed_temperature_initial_layer[current_extruder] >30)}M106 P3 S180\n{endif} \n\n{if activate_air_filtration[current_extruder] && support_air_filtration}\nM106 P3 S{during_print_exhaust_fan_speed_num[current_extruder]} \n{endif}"
+    ],
+    "filament_type": [
+        "PLA",
+        "PLA",
+        "PLA",
+        "PLA",
+        "TPU"
+    ],
+    "filament_vendor": [
+        "Generic",
+        "eSUN",
+        "Bambu Lab",
+        "Bambu Lab",
+        "Generic"
+    ],
+    "filament_wipe": [
+        "nil",
+        "nil",
+        "nil",
+        "nil",
+        "nil"
+    ],
+    "filament_wipe_distance": [
+        "nil",
+        "nil",
+        "nil",
+        "nil",
+        "nil"
+    ],
+    "filament_z_hop": [
+        "nil",
+        "nil",
+        "nil",
+        "nil",
+        "nil"
+    ],
+    "filament_z_hop_types": [
+        "nil",
+        "nil",
+        "nil",
+        "nil",
+        "nil"
+    ],
+    "filename_format": "{input_filename_base}_{filament_type[0]}_{print_time}.gcode",
+    "filter_out_gap_fill": "0",
+    "first_layer_print_sequence": [
+        "0"
+    ],
+    "flush_into_infill": "0",
+    "flush_into_objects": "0",
+    "flush_into_support": "1",
+    "flush_multiplier": "1",
+    "flush_volumes_matrix": [
+        "0",
+        "768",
+        "590",
+        "187",
+        "187",
+        "379",
+        "0",
+        "167",
+        "187",
+        "187",
+        "280",
+        "381",
+        "0",
+        "123",
+        "123",
+        "370",
+        "623",
+        "439",
+        "0",
+        "123",
+        "414",
+        "667",
+        "483",
+        "167",
+        "0"
+    ],
+    "flush_volumes_vector": [
+        "140",
+        "140",
+        "140",
+        "140",
+        "140",
+        "140",
+        "140",
+        "140",
+        "140",
+        "140"
+    ],
+    "from": "project",
+    "full_fan_speed_layer": [
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+    ],
+    "fuzzy_skin": "none",
+    "fuzzy_skin_point_distance": "0.8",
+    "fuzzy_skin_thickness": "0.3",
+    "gap_infill_speed": "250",
+    "gcode_add_line_number": "0",
+    "gcode_flavor": "marlin",
+    "has_scarf_joint_seam": "0",
+    "head_wrap_detect_zone": [],
+    "host_type": "octoprint",
+    "hot_plate_temp": [
+        "55",
+        "55",
+        "55",
+        "55",
+        "35"
+    ],
+    "hot_plate_temp_initial_layer": [
+        "55",
+        "55",
+        "55",
+        "55",
+        "35"
+    ],
+    "independent_support_layer_height": "1",
+    "infill_combination": "0",
+    "infill_direction": "45",
+    "infill_jerk": "9",
+    "infill_wall_overlap": "15%",
+    "inherits_group": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+    ],
+    "initial_layer_acceleration": "500",
+    "initial_layer_flow_ratio": "1",
+    "initial_layer_infill_speed": "105",
+    "initial_layer_jerk": "9",
+    "initial_layer_line_width": "0.5",
+    "initial_layer_print_height": "0.2",
+    "initial_layer_speed": "50",
+    "inner_wall_acceleration": "0",
+    "inner_wall_jerk": "9",
+    "inner_wall_line_width": "0.45",
+    "inner_wall_speed": "300",
+    "interface_shells": "0",
+    "internal_bridge_support_thickness": "0.8",
+    "internal_solid_infill_line_width": "0.42",
+    "internal_solid_infill_pattern": "zig-zag",
+    "internal_solid_infill_speed": "250",
+    "ironing_direction": "45",
+    "ironing_flow": "10%",
+    "ironing_inset": "0.21",
+    "ironing_pattern": "zig-zag",
+    "ironing_spacing": "0.15",
+    "ironing_speed": "30",
+    "ironing_type": "no ironing",
+    "is_infill_first": "0",
+    "layer_change_gcode": "; layer num/total_layer_count: {layer_num+1}/[total_layer_count]\nM622.1 S1 ; for prev firware, default turned on\nM1002 judge_flag timelapse_record_flag\nM622 J1\n{if timelapse_type == 0} ; timelapse without wipe tower\nM971 S11 C10 O0\n{elsif timelapse_type == 1} ; timelapse with wipe tower\nG92 E0\nG1 E-[retraction_length] F1800\nG17\nG2 Z{layer_z + 0.4} I0.86 J0.86 P1 F20000 ; spiral lift a little\nG1 X65 Y245 F20000 ; move to safe pos\nG17\nG2 Z{layer_z} I0.86 J0.86 P1 F20000\nG1 Y265 F3000\nM400 P300\nM971 S11 C11 O0\nG92 E0\nG1 E[retraction_length] F300\nG1 X100 F5000\nG1 Y255 F20000\n{endif}\nM623\n; update layer progress\nM73 L{layer_num+1}\nM991 S0 P{layer_num} ;notify layer change",
+    "layer_height": "0.2",
+    "line_width": "0.42",
+    "long_retractions_when_cut": [
+        "0"
+    ],
+    "machine_end_gcode": ";===== date: 20230428 =====================\nM400 ; wait for buffer to clear\nG92 E0 ; zero the extruder\nG1 E-0.8 F1800 ; retract\nG1 Z{max_layer_z + 0.5} F900 ; lower z a little\nG1 X65 Y245 F12000 ; move to safe pos \nG1 Y265 F3000\n\nG1 X65 Y245 F12000\nG1 Y265 F3000\nM140 S0 ; turn off bed\nM106 S0 ; turn off fan\nM106 P2 S0 ; turn off remote part cooling fan\nM106 P3 S0 ; turn off chamber cooling fan\n\nG1 X100 F12000 ; wipe\n; pull back filament to AMS\nM620 S255\nG1 X20 Y50 F12000\nG1 Y-3\nT255\nG1 X65 F12000\nG1 Y265\nG1 X100 F12000 ; wipe\nM621 S255\nM104 S0 ; turn off hotend\n\nM622.1 S1 ; for prev firware, default turned on\nM1002 judge_flag timelapse_record_flag\nM622 J1\n    M400 ; wait all motion done\n    M991 S0 P-1 ;end smooth timelapse at safe pos\n    M400 S3 ;wait for last picture to be taken\nM623; end of \"timelapse_record_flag\"\n\nM400 ; wait all motion done\nM17 S\nM17 Z0.4 ; lower z motor current to reduce impact if there is something in the bottom\n{if (max_layer_z + 100.0) < 250}\n    G1 Z{max_layer_z + 100.0} F600\n    G1 Z{max_layer_z +98.0}\n{else}\n    G1 Z250 F600\n    G1 Z248\n{endif}\nM400 P100\nM17 R ; restore z current\n\nM220 S100  ; Reset feedrate magnitude\nM201.2 K1.0 ; Reset acc magnitude\nM73.2   R1.0 ;Reset left time magnitude\nM1002 set_gcode_claim_speed_level : 0\n\nM17 X0.8 Y0.8 Z0.5 ; lower motor current to 45% power\n",
+    "machine_load_filament_time": "29",
+    "machine_max_acceleration_e": [
+        "5000",
+        "5000"
+    ],
+    "machine_max_acceleration_extruding": [
+        "20000",
+        "20000"
+    ],
+    "machine_max_acceleration_retracting": [
+        "5000",
+        "5000"
+    ],
+    "machine_max_acceleration_travel": [
+        "9000",
+        "9000"
+    ],
+    "machine_max_acceleration_x": [
+        "20000",
+        "20000"
+    ],
+    "machine_max_acceleration_y": [
+        "20000",
+        "20000"
+    ],
+    "machine_max_acceleration_z": [
+        "500",
+        "200"
+    ],
+    "machine_max_jerk_e": [
+        "2.5",
+        "2.5"
+    ],
+    "machine_max_jerk_x": [
+        "9",
+        "9"
+    ],
+    "machine_max_jerk_y": [
+        "9",
+        "9"
+    ],
+    "machine_max_jerk_z": [
+        "3",
+        "3"
+    ],
+    "machine_max_speed_e": [
+        "30",
+        "30"
+    ],
+    "machine_max_speed_x": [
+        "500",
+        "200"
+    ],
+    "machine_max_speed_y": [
+        "500",
+        "200"
+    ],
+    "machine_max_speed_z": [
+        "20",
+        "20"
+    ],
+    "machine_min_extruding_rate": [
+        "0",
+        "0"
+    ],
+    "machine_min_travel_rate": [
+        "0",
+        "0"
+    ],
+    "machine_pause_gcode": "M400 U1",
+    "machine_start_gcode": ";===== machine: P1S ========================\n;===== date: 20231107 =====================\n;===== turn on the HB fan & MC board fan =================\nM104 S75 ;set extruder temp to turn on the HB fan and prevent filament oozing from nozzle\nM710 A1 S255 ;turn on MC fan by default(P1S)\n;===== reset machine status =================\nM290 X40 Y40 Z2.6666666\nG91\nM17 Z0.4 ; lower the z-motor current\nG380 S2 Z30 F300 ; G380 is same as G38; lower the hotbed , to prevent the nozzle is below the hotbed\nG380 S2 Z-25 F300 ;\nG1 Z5 F300;\nG90\nM17 X1.2 Y1.2 Z0.75 ; reset motor current to default\nM960 S5 P1 ; turn on logo lamp\nG90\nM220 S100 ;Reset Feedrate\nM221 S100 ;Reset Flowrate\nM73.2   R1.0 ;Reset left time magnitude\nM1002 set_gcode_claim_speed_level : 5\nM221 X0 Y0 Z0 ; turn off soft endstop to prevent protential logic problem\nG29.1 Z{+0.0} ; clear z-trim value first\nM204 S10000 ; init ACC set to 10m/s^2\n\n;===== heatbed preheat ====================\nM1002 gcode_claim_action : 2\nM140 S[bed_temperature_initial_layer_single] ;set bed temp\nM190 S[bed_temperature_initial_layer_single] ;wait for bed temp\n\n\n\n;=============turn on fans to prevent PLA jamming=================\n{if filament_type[initial_extruder]==\"PLA\"}\n    {if (bed_temperature[initial_extruder] >45)||(bed_temperature_initial_layer[initial_extruder] >45)}\n    M106 P3 S180\n    {endif};Prevent PLA from jamming\n{endif}\nM106 P2 S100 ; turn on big fan ,to cool down toolhead\n\n;===== prepare print temperature and material ==========\nM104 S[nozzle_temperature_initial_layer] ;set extruder temp\nG91\nG0 Z10 F1200\nG90\nG28 X\nM975 S1 ; turn on\nG1 X60 F12000\nG1 Y245\nG1 Y265 F3000\nM620 M\nM620 S[initial_extruder]A   ; switch material if AMS exist\n    M109 S[nozzle_temperature_initial_layer]\n    G1 X120 F12000\n\n    G1 X20 Y50 F12000\n    G1 Y-3\n    T[initial_extruder]\n    G1 X54 F12000\n    G1 Y265\n    M400\nM621 S[initial_extruder]A\nM620.1 E F{filament_max_volumetric_speed[initial_extruder]/2.4053*60} T{nozzle_temperature_range_high[initial_extruder]}\n\n\nM412 S1 ; ===turn on filament runout detection===\n\nM109 S250 ;set nozzle to common flush temp\nM106 P1 S0\nG92 E0\nG1 E50 F200\nM400\nM104 S[nozzle_temperature_initial_layer]\nG92 E0\nG1 E50 F200\nM400\nM106 P1 S255\nG92 E0\nG1 E5 F300\nM109 S{nozzle_temperature_initial_layer[initial_extruder]-20} ; drop nozzle temp, make filament shink a bit\nG92 E0\nG1 E-0.5 F300\n\nG1 X70 F9000\nG1 X76 F15000\nG1 X65 F15000\nG1 X76 F15000\nG1 X65 F15000; shake to put down garbage\nG1 X80 F6000\nG1 X95 F15000\nG1 X80 F15000\nG1 X165 F15000; wipe and shake\nM400\nM106 P1 S0\n;===== prepare print temperature and material end =====\n\n\n;===== wipe nozzle ===============================\nM1002 gcode_claim_action : 14\nM975 S1\nM106 S255\nG1 X65 Y230 F18000\nG1 Y264 F6000\nM109 S{nozzle_temperature_initial_layer[initial_extruder]-20}\nG1 X100 F18000 ; first wipe mouth\n\nG0 X135 Y253 F20000  ; move to exposed steel surface edge\nG28 Z P0 T300; home z with low precision,permit 300deg temperature\nG29.2 S0 ; turn off ABL\nG0 Z5 F20000\n\nG1 X60 Y265\nG92 E0\nG1 E-0.5 F300 ; retrack more\nG1 X100 F5000; second wipe mouth\nG1 X70 F15000\nG1 X100 F5000\nG1 X70 F15000\nG1 X100 F5000\nG1 X70 F15000\nG1 X100 F5000\nG1 X70 F15000\nG1 X90 F5000\nG0 X128 Y261 Z-1.5 F20000  ; move to exposed steel surface and stop the nozzle\nM104 S140 ; set temp down to heatbed acceptable\nM106 S255 ; turn on fan (G28 has turn off fan)\n\nM221 S; push soft endstop status\nM221 Z0 ;turn off Z axis endstop\nG0 Z0.5 F20000\nG0 X125 Y259.5 Z-1.01\nG0 X131 F211\nG0 X124\nG0 Z0.5 F20000\nG0 X125 Y262.5\nG0 Z-1.01\nG0 X131 F211\nG0 X124\nG0 Z0.5 F20000\nG0 X125 Y260.0\nG0 Z-1.01\nG0 X131 F211\nG0 X124\nG0 Z0.5 F20000\nG0 X125 Y262.0\nG0 Z-1.01\nG0 X131 F211\nG0 X124\nG0 Z0.5 F20000\nG0 X125 Y260.5\nG0 Z-1.01\nG0 X131 F211\nG0 X124\nG0 Z0.5 F20000\nG0 X125 Y261.5\nG0 Z-1.01\nG0 X131 F211\nG0 X124\nG0 Z0.5 F20000\nG0 X125 Y261.0\nG0 Z-1.01\nG0 X131 F211\nG0 X124\nG0 X128\nG2 I0.5 J0 F300\nG2 I0.5 J0 F300\nG2 I0.5 J0 F300\nG2 I0.5 J0 F300\n\nM109 S140 ; wait nozzle temp down to heatbed acceptable\nG2 I0.5 J0 F3000\nG2 I0.5 J0 F3000\nG2 I0.5 J0 F3000\nG2 I0.5 J0 F3000\n\nM221 R; pop softend status\nG1 Z10 F1200\nM400\nG1 Z10\nG1 F30000\nG1 X230 Y15\nG29.2 S1 ; turn on ABL\n;G28 ; home again after hard wipe mouth\nM106 S0 ; turn off fan , too noisy\n;===== wipe nozzle end ================================\n\n\n;===== bed leveling ==================================\nM1002 judge_flag g29_before_print_flag\nM622 J1\n\n    M1002 gcode_claim_action : 1\n    G29 A X{first_layer_print_min[0]} Y{first_layer_print_min[1]} I{first_layer_print_size[0]} J{first_layer_print_size[1]}\n    M400\n    M500 ; save cali data\n\nM623\n;===== bed leveling end ================================\n\n;===== home after wipe mouth============================\nM1002 judge_flag g29_before_print_flag\nM622 J0\n\n    M1002 gcode_claim_action : 13\n    G28\n\nM623\n;===== home after wipe mouth end =======================\n\nM975 S1 ; turn on vibration supression\n\n\n;=============turn on fans to prevent PLA jamming=================\n{if filament_type[initial_extruder]==\"PLA\"}\n    {if (bed_temperature[initial_extruder] >45)||(bed_temperature_initial_layer[initial_extruder] >45)}\n    M106 P3 S180\n    {endif};Prevent PLA from jamming\n{endif}\nM106 P2 S100 ; turn on big fan ,to cool down toolhead\n\n\nM104 S{nozzle_temperature_initial_layer[initial_extruder]} ; set extrude temp earlier, to reduce wait time\n\n;===== mech mode fast check============================\nG1 X128 Y128 Z10 F20000\nM400 P200\nM970.3 Q1 A7 B30 C80  H15 K0\nM974 Q1 S2 P0\n\nG1 X128 Y128 Z10 F20000\nM400 P200\nM970.3 Q0 A7 B30 C90 Q0 H15 K0\nM974 Q0 S2 P0\n\nM975 S1\nG1 F30000\nG1 X230 Y15\nG28 X ; re-home XY\n;===== fmech mode fast check============================\n\n\n;===== nozzle load line ===============================\nM975 S1\nG90\nM83\nT1000\nG1 X18.0 Y1.0 Z0.8 F18000;Move to start position\nM109 S{nozzle_temperature_initial_layer[initial_extruder]}\nG1 Z0.2\nG0 E2 F300\nG0 X240 E15 F{outer_wall_volumetric_speed/(0.3*0.5)     * 60}\nG0 Y11 E0.700 F{outer_wall_volumetric_speed/(0.3*0.5)/ 4 * 60}\nG0 X239.5\nG0 E0.2\nG0 Y1.5 E0.700\nG0 X18 E15 F{outer_wall_volumetric_speed/(0.3*0.5)     * 60}\nM400\n\n;===== for Textured PEI Plate , lower the nozzle as the nozzle was touching topmost of the texture when homing ==\n;curr_bed_type={curr_bed_type}\n{if curr_bed_type==\"Textured PEI Plate\"}\nG29.1 Z{-0.04} ; for Textured PEI Plate\n{endif}\n;========turn off light and wait extrude temperature =============\nM1002 gcode_claim_action : 0\nM106 S0 ; turn off fan\nM106 P2 S0 ; turn off big fan\nM106 P3 S0 ; turn off chamber fan\n\nM975 S1 ; turn on mech mode supression\n",
+    "machine_unload_filament_time": "28",
+    "max_bridge_length": "0",
+    "max_layer_height": [
+        "0.28"
+    ],
+    "max_travel_detour_distance": "0",
+    "min_bead_width": "85%",
+    "min_feature_size": "25%",
+    "min_layer_height": [
+        "0.08"
+    ],
+    "minimum_sparse_infill_area": "15",
+    "mmu_segmented_region_interlocking_depth": "0",
+    "mmu_segmented_region_max_width": "0",
+    "name": "project_settings",
+    "nozzle_diameter": [
+        "0.4"
+    ],
+    "nozzle_height": "4.2",
+    "nozzle_temperature": [
+        "220",
+        "220",
+        "220",
+        "220",
+        "240"
+    ],
+    "nozzle_temperature_initial_layer": [
+        "220",
+        "220",
+        "220",
+        "220",
+        "240"
+    ],
+    "nozzle_temperature_range_high": [
+        "240",
+        "240",
+        "240",
+        "240",
+        "250"
+    ],
+    "nozzle_temperature_range_low": [
+        "190",
+        "190",
+        "190",
+        "190",
+        "200"
+    ],
+    "nozzle_type": "stainless_steel",
+    "nozzle_volume": "107",
+    "only_one_wall_first_layer": "0",
+    "ooze_prevention": "0",
+    "other_layers_print_sequence": [
+        "0"
+    ],
+    "other_layers_print_sequence_nums": "0",
+    "outer_wall_acceleration": "5000",
+    "outer_wall_jerk": "9",
+    "outer_wall_line_width": "0.42",
+    "outer_wall_speed": "200",
+    "overhang_1_4_speed": "0",
+    "overhang_2_4_speed": "50",
+    "overhang_3_4_speed": "30",
+    "overhang_4_4_speed": "10",
+    "overhang_fan_speed": [
+        "100",
+        "100",
+        "100",
+        "100",
+        "100"
+    ],
+    "overhang_fan_threshold": [
+        "50%",
+        "50%",
+        "50%",
+        "50%",
+        "95%"
+    ],
+    "overhang_threshold_participating_cooling": [
+        "95%"
+    ],
+    "overhang_totally_speed": "50",
+    "post_process": [],
+    "precise_z_height": "0",
+    "pressure_advance": [
+        "0.02",
+        "0.02",
+        "0.02",
+        "0.02",
+        "0.02"
+    ],
+    "prime_tower_brim_width": "3",
+    "prime_tower_width": "35",
+    "prime_volume": "45",
+    "print_compatible_printers": [
+        "Bambu Lab X1 Carbon 0.4 nozzle",
+        "Bambu Lab X1 0.4 nozzle",
+        "Bambu Lab P1S 0.4 nozzle",
+        "Bambu Lab X1E 0.4 nozzle"
+    ],
+    "print_flow_ratio": "1",
+    "print_sequence": "by layer",
+    "print_settings_id": "0.20mm Standard @BBL X1C",
+    "printable_area": [
+        "0x0",
+        "256x0",
+        "256x256",
+        "0x256"
+    ],
+    "printable_height": "250",
+    "printer_model": "Bambu Lab P1S",
+    "printer_notes": "",
+    "printer_settings_id": "Bambu Lab P1S 0.4 nozzle",
+    "printer_structure": "corexy",
+    "printer_technology": "FFF",
+    "printer_variant": "0.4",
+    "printhost_authorization_type": "key",
+    "printhost_ssl_ignore_revoke": "0",
+    "printing_by_object_gcode": "",
+    "process_notes": "",
+    "raft_contact_distance": "0.1",
+    "raft_expansion": "1.5",
+    "raft_first_layer_density": "90%",
+    "raft_first_layer_expansion": "2",
+    "raft_layers": "0",
+    "reduce_crossing_wall": "0",
+    "reduce_fan_stop_start_freq": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+    ],
+    "reduce_infill_retraction": "1",
+    "required_nozzle_HRC": [
+        "3",
+        "3",
+        "3",
+        "3",
+        "3"
+    ],
+    "resolution": "0.012",
+    "retract_before_wipe": [
+        "0%"
+    ],
+    "retract_length_toolchange": [
+        "2"
+    ],
+    "retract_lift_above": [
+        "0"
+    ],
+    "retract_lift_below": [
+        "249"
+    ],
+    "retract_restart_extra": [
+        "0"
+    ],
+    "retract_restart_extra_toolchange": [
+        "0"
+    ],
+    "retract_when_changing_layer": [
+        "1"
+    ],
+    "retraction_distances_when_cut": [
+        "18"
+    ],
+    "retraction_length": [
+        "0.8"
+    ],
+    "retraction_minimum_travel": [
+        "1"
+    ],
+    "retraction_speed": [
+        "30"
+    ],
+    "role_base_wipe_speed": "1",
+    "scan_first_layer": "0",
+    "scarf_angle_threshold": "155",
+    "seam_gap": "15%",
+    "seam_position": "aligned",
+    "seam_slope_conditional": "1",
+    "seam_slope_entire_loop": "0",
+    "seam_slope_inner_walls": "1",
+    "seam_slope_steps": "10",
+    "silent_mode": "0",
+    "single_extruder_multi_material": "1",
+    "skirt_distance": "2",
+    "skirt_height": "1",
+    "skirt_loops": "0",
+    "slice_closing_radius": "0.049",
+    "slicing_mode": "regular",
+    "slow_down_for_layer_cooling": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+    ],
+    "slow_down_layer_time": [
+        "8",
+        "6",
+        "4",
+        "4",
+        "8"
+    ],
+    "slow_down_min_speed": [
+        "20",
+        "20",
+        "20",
+        "20",
+        "10"
+    ],
+    "small_perimeter_speed": "50%",
+    "small_perimeter_threshold": "0",
+    "smooth_coefficient": "150",
+    "smooth_speed_discontinuity_area": "1",
+    "solid_infill_filament": "1",
+    "sparse_infill_acceleration": "100%",
+    "sparse_infill_anchor": "400%",
+    "sparse_infill_anchor_max": "20",
+    "sparse_infill_density": "15%",
+    "sparse_infill_filament": "1",
+    "sparse_infill_line_width": "0.45",
+    "sparse_infill_pattern": "grid",
+    "sparse_infill_speed": "270",
+    "spiral_mode": "0",
+    "spiral_mode_max_xy_smoothing": "200%",
+    "spiral_mode_smooth": "0",
+    "standby_temperature_delta": "-5",
+    "start_end_points": [
+        "30x-3",
+        "54x245"
+    ],
+    "supertack_plate_temp": [
+        "45",
+        "45",
+        "45",
+        "45",
+        "0"
+    ],
+    "supertack_plate_temp_initial_layer": [
+        "45",
+        "45",
+        "45",
+        "45",
+        "0"
+    ],
+    "support_air_filtration": "0",
+    "support_angle": "0",
+    "support_base_pattern": "default",
+    "support_base_pattern_spacing": "2.5",
+    "support_bottom_interface_spacing": "0.5",
+    "support_bottom_z_distance": "0.2",
+    "support_chamber_temp_control": "0",
+    "support_critical_regions_only": "0",
+    "support_expansion": "0",
+    "support_filament": "0",
+    "support_interface_bottom_layers": "2",
+    "support_interface_filament": "0",
+    "support_interface_loop_pattern": "0",
+    "support_interface_not_for_body": "1",
+    "support_interface_pattern": "auto",
+    "support_interface_spacing": "0.5",
+    "support_interface_speed": "80",
+    "support_interface_top_layers": "2",
+    "support_line_width": "0.42",
+    "support_object_first_layer_gap": "0.2",
+    "support_object_xy_distance": "0.35",
+    "support_on_build_plate_only": "0",
+    "support_remove_small_overhang": "1",
+    "support_speed": "150",
+    "support_style": "default",
+    "support_threshold_angle": "30",
+    "support_top_z_distance": "0.2",
+    "support_type": "normal(auto)",
+    "temperature_vitrification": [
+        "45",
+        "45",
+        "45",
+        "45",
+        "30"
+    ],
+    "template_custom_gcode": "",
+    "textured_plate_temp": [
+        "55",
+        "55",
+        "55",
+        "55",
+        "35"
+    ],
+    "textured_plate_temp_initial_layer": [
+        "55",
+        "55",
+        "55",
+        "55",
+        "35"
+    ],
+    "thick_bridges": "0",
+    "thumbnail_size": [
+        "50x50"
+    ],
+    "time_lapse_gcode": "",
+    "timelapse_type": "0",
+    "top_area_threshold": "100%",
+    "top_one_wall_type": "all top",
+    "top_shell_layers": "5",
+    "top_shell_thickness": "1",
+    "top_solid_infill_flow_ratio": "1",
+    "top_surface_acceleration": "2000",
+    "top_surface_jerk": "9",
+    "top_surface_line_width": "0.42",
+    "top_surface_pattern": "monotonicline",
+    "top_surface_speed": "200",
+    "travel_jerk": "9",
+    "travel_speed": "500",
+    "travel_speed_z": "0",
+    "tree_support_branch_angle": "45",
+    "tree_support_branch_diameter": "2",
+    "tree_support_branch_diameter_angle": "5",
+    "tree_support_branch_distance": "5",
+    "tree_support_wall_count": "0",
+    "upward_compatible_machine": [
+        "Bambu Lab P1P 0.4 nozzle",
+        "Bambu Lab X1 0.4 nozzle",
+        "Bambu Lab X1 Carbon 0.4 nozzle",
+        "Bambu Lab X1E 0.4 nozzle",
+        "Bambu Lab A1 0.4 nozzle"
+    ],
+    "use_firmware_retraction": "0",
+    "use_relative_e_distances": "1",
+    "version": "01.10.01.50",
+    "wall_distribution_count": "1",
+    "wall_filament": "1",
+    "wall_generator": "classic",
+    "wall_loops": "2",
+    "wall_sequence": "inner wall/outer wall",
+    "wall_transition_angle": "10",
+    "wall_transition_filter_deviation": "25%",
+    "wall_transition_length": "100%",
+    "wipe": [
+        "1"
+    ],
+    "wipe_distance": [
+        "2"
+    ],
+    "wipe_speed": "80%",
+    "wipe_tower_no_sparse_layers": "0",
+    "wipe_tower_rotation_angle": "0",
+    "wipe_tower_x": [
+        "165"
+    ],
+    "wipe_tower_y": [
+        "216.893"
+    ],
+    "xy_contour_compensation": "0",
+    "xy_hole_compensation": "0",
+    "z_hop": [
+        "0.4"
+    ],
+    "z_hop_types": [
+        "Auto Lift"
+    ]
+}"##;
+
+const SLICER_PE_MODEL_CONFIG: &[u8] = //
+    br#"<?xml version="1.0" encoding="UTF-8"?>
+<config>
+ <object id="1" instances_count="1">
+  <metadata type="object" key="name" value="Base"/>
+  <volume firstid="0" lastid="1">
+   <metadata type="volume" key="name" value="Base.stl"/>
+   <metadata type="volume" key="volume_type" value="ModelPart"/>
+   <metadata type="volume" key="matrix" value="1 0 0 0 0 1 0 0 0 0 1 -2 0 0 0 1"/>
+   <metadata type="volume" key="source_file" value="Base.stl"/>
+   <metadata type="volume" key="source_object_id" value="0"/>
+   <metadata type="volume" key="source_volume_id" value="0"/>
+   <metadata type="volume" key="source_offset_x" value="0"/>
+   <metadata type="volume" key="source_offset_y" value="0"/>
+   <metadata type="volume" key="source_offset_z" value="2"/>
+   <metadata type="volume" key="extruder" value="1"/>
+   <mesh edges_fixed="0" degenerate_facets="0" facets_removed="0" facets_reversed="0" backwards_edges="0"/>
+  </volume>
+  <volume firstid="2" lastid="3">
+   <metadata type="volume" key="name" value="Body3.stl"/>
+   <metadata type="volume" key="volume_type" value="ModelPart"/>
+   <metadata type="volume" key="matrix" value="1 0 0 12.699999809265138 0 1 0 0 0 0 1 2 0 0 0 1"/>
+   <metadata type="volume" key="source_file" value="Body3.stl"/>
+   <metadata type="volume" key="source_object_id" value="0"/>
+   <metadata type="volume" key="source_volume_id" value="0"/>
+   <metadata type="volume" key="source_offset_x" value="12.699999809265138"/>
+   <metadata type="volume" key="source_offset_y" value="0"/>
+   <metadata type="volume" key="source_offset_z" value="6"/>
+   <metadata type="volume" key="extruder" value="1"/>
+   <mesh edges_fixed="0" degenerate_facets="0" facets_removed="0" facets_reversed="0" backwards_edges="0"/>
+  </volume>
+  <volume firstid="0" lastid="3">
+   <metadata type="volume" key="name" value="Body4.stl"/>
+   <metadata type="volume" key="volume_type" value="ModelPart"/>
+   <metadata type="volume" key="matrix" value="1 0 0 -12.699999809265135 0 1 0 0 0 0 1 2 0 0 0 1"/>
+   <metadata type="volume" key="source_file" value="Body4.stl"/>
+   <metadata type="volume" key="source_object_id" value="0"/>
+   <metadata type="volume" key="source_volume_id" value="0"/>
+   <metadata type="volume" key="source_offset_x" value="-12.699999809265135"/>
+   <metadata type="volume" key="source_offset_y" value="0"/>
+   <metadata type="volume" key="source_offset_z" value="6"/>
+   <metadata type="volume" key="extruder" value="2"/>
+   <mesh edges_fixed="0" degenerate_facets="0" facets_removed="0" facets_reversed="0" backwards_edges="0"/>
+  </volume>
+ </object>
+ <object id="2" instances_count="4">
+  <metadata type="object" key="name" value="helper_disk.stl"/>
+  <volume firstid="0" lastid="743">
+   <metadata type="volume" key="name" value="helper_disk.stl"/>
+   <metadata type="volume" key="volume_type" value="ModelPart"/>
+   <metadata type="volume" key="matrix" value="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1"/>
+   <metadata type="volume" key="source_file" value="helper_disk.stl"/>
+   <metadata type="volume" key="source_object_id" value="0"/>
+   <metadata type="volume" key="source_volume_id" value="0"/>
+   <metadata type="volume" key="source_offset_x" value="0"/>
+   <metadata type="volume" key="source_offset_y" value="0"/>
+   <metadata type="volume" key="source_offset_z" value="0.10000000149011612"/>
+   <mesh edges_fixed="0" degenerate_facets="0" facets_removed="0" facets_reversed="0" backwards_edges="0"/>
+  </volume>
+ </object>
+</config>
+"#;
+
+const SLICER_PE_CONFIG:&[u8]=
+br#"; generated by PrusaSlicer 2.4.1+win64 on 2022-04-03 at 00:01:45 UTC
+
+; avoid_crossing_perimeters = 0
+; avoid_crossing_perimeters_max_detour = 0
+; bed_custom_model = 
+; bed_custom_texture = 
+; bed_shape = 0x0,250x0,250x210,0x210
+; bed_temperature = 60,60,60,60,60
+; before_layer_gcode = ;BEFORE_LAYER_CHANGE\nG92 E0.0\n;[layer_z]\n\n
+; between_objects_gcode = 
+; bottom_fill_pattern = monotonic
+; bottom_solid_layers = 4
+; bottom_solid_min_thickness = 0.5
+; bridge_acceleration = 1000
+; bridge_angle = 0
+; bridge_fan_speed = 100,100,100,100,100
+; bridge_flow_ratio = 0.95
+; bridge_speed = 25
+; brim_separation = 0.1
+; brim_type = outer_only
+; brim_width = 0
+; clip_multipart_objects = 1
+; color_change_gcode = M600\nG1 E0.4 F1500 ; prime after color change
+; colorprint_heights = 
+; compatible_printers_condition_cummulative = "printer_notes=~/.*PRINTER_VENDOR_PRUSA3D.*/ and printer_notes=~/.*PRINTER_MODEL_MK3.*/ and nozzle_diameter[0]==0.4";"nozzle_diameter[0]!=0.8 and printer_notes=~/.*PRINTER_VENDOR_PRUSA3D.*/ and printer_notes=~/.*PRINTER_MODEL_MK(2.5|3).*/ and single_extruder_multi_material";"nozzle_diameter[0]!=0.8 and printer_notes=~/.*PRINTER_VENDOR_PRUSA3D.*/ and printer_notes=~/.*PRINTER_MODEL_MK(2.5|3).*/ and single_extruder_multi_material";"nozzle_diameter[0]!=0.8 and printer_notes=~/.*PRINTER_VENDOR_PRUSA3D.*/ and printer_notes=~/.*PRINTER_MODEL_MK(2.5|3).*/ and single_extruder_multi_material";"nozzle_diameter[0]!=0.8 and printer_notes=~/.*PRINTER_VENDOR_PRUSA3D.*/ and printer_notes=~/.*PRINTER_MODEL_MK(2.5|3).*/ and single_extruder_multi_material";"nozzle_diameter[0]!=0.8 and printer_notes=~/.*PRINTER_VENDOR_PRUSA3D.*/ and printer_notes=~/.*PRINTER_MODEL_MK(2.5|3).*/ and single_extruder_multi_material"
+; complete_objects = 0
+; cooling = 1,1,1,1,1
+; cooling_tube_length = 20
+; cooling_tube_retraction = 40
+; default_acceleration = 1000
+; default_filament_profile = "Prusament PLA @MMU2"
+; default_print_profile = 0.15mm QUALITY @MK3
+; deretract_speed = 0,0,0,0,0
+; disable_fan_first_layers = 1,1,1,1,1
+; dont_support_bridges = 0
+; draft_shield = disabled
+; duplicate_distance = 6
+; elefant_foot_compensation = 0.2
+; end_filament_gcode = "; Filament-specific end gcode";"; Filament-specific end gcode";"; Filament-specific end gcode";"; Filament-specific end gcode";"; Filament-specific end gcode"
+; end_gcode = ; Lift print head a bit\n{if max_layer_z < max_print_height}G1 Z{z_offset+min(max_layer_z+30, max_print_height)}{endif} ; Move print head up\n{if has_wipe_tower}\nG1 E-15 F3000\n{else}\nG1 X0 Y210 F7200\nG1 E2 F5000\nG1 E2 F5500\nG1 E2 F6000\nG1 E-15 F5800\nG1 E-20 F5500\nG1 E10 F3000\nG1 E-10 F3100\nG1 E10 F3150\nG1 E-10 F3250\nG1 E10 F3300\n{endif}\n\nM140 S0 ; turn off heatbed\nM107 ; turn off fan\n\n; Unload filament\nM702 C\n\nG4 ; wait\nM221 S100 ; reset flow\nM900 K0 ; reset LA\n{if print_settings_id=~/.*(DETAIL @MK3|QUALITY @MK3|SOLUBLE|@0.25 nozzle MK3).*/}M907 E538 ; reset extruder motor current{endif}\nM104 S0 ; turn off temperature\nG1 X0 Y210 F3000 ; home X axis\nM84 ; disable motors\n
+; ensure_vertical_shell_thickness = 1
+; external_perimeter_extrusion_width = 0.45
+; external_perimeter_speed = 25
+; external_perimeters_first = 0
+; extra_loading_move = -25
+; extra_perimeters = 0
+; extruder_clearance_height = 20
+; extruder_clearance_radius = 45
+; extruder_colour = #FFFFFF;#000000;#C0C0C0;#FF4F4F;#FF8000
+; extruder_offset = 0x0,0x0,0x0,0x0,0x0
+; extrusion_axis = E
+; extrusion_multiplier = 1,1,1,1,1
+; extrusion_width = 0.45
+; fan_always_on = 1,1,1,1,1
+; fan_below_layer_time = 100,100,100,100,100
+; filament_colour = #FF8000;#FF8000;#FF8000;#FF8000;#FF8000
+; filament_cooling_final_speed = 2,2,2,2,2
+; filament_cooling_initial_speed = 3,3,3,3,3
+; filament_cooling_moves = 1,1,1,1,1
+; filament_cost = 36.29,36.29,36.29,36.29,36.29
+; filament_density = 1.24,1.24,1.24,1.24,1.24
+; filament_deretract_speed = nil,nil,nil,nil,nil
+; filament_diameter = 1.75,1.75,1.75,1.75,1.75
+; filament_load_time = 15,15,15,15,15
+; filament_loading_speed = 14,14,14,14,14
+; filament_loading_speed_start = 19,19,19,19,19
+; filament_max_volumetric_speed = 13,13,13,13,13
+; filament_minimal_purge_on_wipe_tower = 15,15,15,15,15
+; filament_notes = ;;;;
+; filament_ramming_parameters = "130 120 2.70968 2.93548 3.32258 3.83871 4.58065 5.54839 6.51613 7.35484 7.93548 8.16129| 0.05 2.66451 0.45 3.05805 0.95 4.05807 1.45 5.97742 1.95 7.69999 2.45 8.1936 2.95 11.342 3.45 11.4065 3.95 7.6 4.45 7.6 4.95 7.6";"130 120 2.70968 2.93548 3.32258 3.83871 4.58065 5.54839 6.51613 7.35484 7.93548 8.16129| 0.05 2.66451 0.45 3.05805 0.95 4.05807 1.45 5.97742 1.95 7.69999 2.45 8.1936 2.95 11.342 3.45 11.4065 3.95 7.6 4.45 7.6 4.95 7.6";"130 120 2.70968 2.93548 3.32258 3.83871 4.58065 5.54839 6.51613 7.35484 7.93548 8.16129| 0.05 2.66451 0.45 3.05805 0.95 4.05807 1.45 5.97742 1.95 7.69999 2.45 8.1936 2.95 11.342 3.45 11.4065 3.95 7.6 4.45 7.6 4.95 7.6";"130 120 2.70968 2.93548 3.32258 3.83871 4.58065 5.54839 6.51613 7.35484 7.93548 8.16129| 0.05 2.66451 0.45 3.05805 0.95 4.05807 1.45 5.97742 1.95 7.69999 2.45 8.1936 2.95 11.342 3.45 11.4065 3.95 7.6 4.45 7.6 4.95 7.6";"130 120 2.70968 2.93548 3.32258 3.83871 4.58065 5.54839 6.51613 7.35484 7.93548 8.16129| 0.05 2.66451 0.45 3.05805 0.95 4.05807 1.45 5.97742 1.95 7.69999 2.45 8.1936 2.95 11.342 3.45 11.4065 3.95 7.6 4.45 7.6 4.95 7.6"
+; filament_retract_before_travel = nil,nil,nil,nil,nil
+; filament_retract_before_wipe = nil,nil,nil,nil,nil
+; filament_retract_layer_change = nil,nil,nil,nil,nil
+; filament_retract_length = nil,nil,nil,nil,nil
+; filament_retract_lift = nil,nil,nil,nil,nil
+; filament_retract_lift_above = nil,nil,nil,nil,nil
+; filament_retract_lift_below = nil,nil,nil,nil,nil
+; filament_retract_restart_extra = nil,nil,nil,nil,nil
+; filament_retract_speed = nil,nil,nil,nil,nil
+; filament_settings_id = "Prusament PLA @MMU2";"Prusament PLA @MMU2";"Prusament PLA @MMU2";"Prusament PLA @MMU2";"Prusament PLA @MMU2"
+; filament_soluble = 0,0,0,0,0
+; filament_spool_weight = 201,201,201,201,201
+; filament_toolchange_delay = 0,0,0,0,0
+; filament_type = PLA;PLA;PLA;PLA;PLA
+; filament_unload_time = 12,12,12,12,12
+; filament_unloading_speed = 20,20,20,20,20
+; filament_unloading_speed_start = 100,100,100,100,100
+; filament_vendor = Prusa Polymers
+; filament_wipe = nil,nil,nil,nil,nil
+; fill_angle = 45
+; fill_density = 15%
+; fill_pattern = gyroid
+; first_layer_acceleration = 800
+; first_layer_acceleration_over_raft = 0
+; first_layer_bed_temperature = 60,60,60,60,60
+; first_layer_extrusion_width = 0.42
+; first_layer_height = 0.2
+; first_layer_speed = 20
+; first_layer_speed_over_raft = 30
+; first_layer_temperature = 215,215,215,215,215
+; full_fan_speed_layer = 4,4,4,4,4
+; fuzzy_skin = none
+; fuzzy_skin_point_dist = 0.8
+; fuzzy_skin_thickness = 0.3
+; gap_fill_enabled = 1
+; gap_fill_speed = 40
+; gcode_comments = 0
+; gcode_flavor = marlin
+; gcode_label_objects = 1
+; gcode_resolution = 0.0125
+; gcode_substitutions = 
+; high_current_on_filament_swap = 0
+; host_type = octoprint
+; infill_acceleration = 1000
+; infill_anchor = 2.5
+; infill_anchor_max = 12
+; infill_every_layers = 1
+; infill_extruder = 1
+; infill_extrusion_width = 0.45
+; infill_first = 0
+; infill_only_where_needed = 0
+; infill_overlap = 25%
+; infill_speed = 80
+; inherits_cummulative = ;;;;;;"Original Prusa i3 MK3S & MK3S+ MMU2S"
+; interface_shells = 0
+; ironing = 0
+; ironing_flowrate = 15%
+; ironing_spacing = 0.1
+; ironing_speed = 15
+; ironing_type = top
+; layer_gcode = ;AFTER_LAYER_CHANGE\n;[layer_z]
+; layer_height = 0.2
+; machine_limits_usage = emit_to_gcode
+; machine_max_acceleration_e = 8000,8000
+; machine_max_acceleration_extruding = 1250,1250
+; machine_max_acceleration_retracting = 1250,1250
+; machine_max_acceleration_travel = 1500,1250
+; machine_max_acceleration_x = 1000,960
+; machine_max_acceleration_y = 1000,960
+; machine_max_acceleration_z = 200,200
+; machine_max_feedrate_e = 120,120
+; machine_max_feedrate_x = 200,100
+; machine_max_feedrate_y = 200,100
+; machine_max_feedrate_z = 12,12
+; machine_max_jerk_e = 4.5,4.5
+; machine_max_jerk_x = 8,8
+; machine_max_jerk_y = 8,8
+; machine_max_jerk_z = 0.4,0.4
+; machine_min_extruding_rate = 0,0
+; machine_min_travel_rate = 0,0
+; max_fan_speed = 100,100,100,100,100
+; max_layer_height = 0.25,0.25,0.25,0.25,0.25
+; max_print_height = 210
+; max_print_speed = 200
+; max_volumetric_speed = 0
+; min_fan_speed = 100,100,100,100,100
+; min_layer_height = 0.07,0.07,0.07,0.07,0.07
+; min_print_speed = 15,15,15,15,15
+; min_skirt_length = 4
+; mmu_segmented_region_max_width = 0
+; notes = 
+; nozzle_diameter = 0.4,0.4,0.4,0.4,0.4
+; only_retract_when_crossing_perimeters = 0
+; ooze_prevention = 0
+; output_filename_format = {input_filename_base}_{layer_height}mm_{filament_type[0]}_{printer_model}_{print_time}.gcode
+; overhangs = 1
+; parking_pos_retraction = 85
+; pause_print_gcode = M601
+; perimeter_acceleration = 800
+; perimeter_extruder = 1
+; perimeter_extrusion_width = 0.45
+; perimeter_speed = 45
+; perimeters = 2
+; physical_printer_settings_id = MMU2S Multi-Color
+; post_process = 
+; print_settings_id = 0.20mm QUALITY @MK3
+; printer_model = MK3SMMU2S
+; printer_notes = Don't remove the following keywords! These keywords are used in the "compatible printer" condition of the print and filament profiles to link the particular print and filament profiles to this printer profile.\nPRINTER_VENDOR_PRUSA3D\nPRINTER_MODEL_MK3\n
+; printer_settings_id = Original Prusa i3 MK3S & MK3S+ MMU2S-Octoprint
+; printer_technology = FFF
+; printer_variant = 0.4
+; printer_vendor = 
+; raft_contact_distance = 0.2
+; raft_expansion = 1.5
+; raft_first_layer_density = 90%
+; raft_first_layer_expansion = 3
+; raft_layers = 0
+; remaining_times = 1
+; resolution = 0
+; retract_before_travel = 1,1,1,1,1
+; retract_before_wipe = 0%,0%,0%,0%,0%
+; retract_layer_change = 1,1,1,1,1
+; retract_length = 0.8,0.8,0.8,0.8,0.8
+; retract_length_toolchange = 0,0,0,0,0
+; retract_lift = 0.4,0.4,0.4,0.4,0.4
+; retract_lift_above = 0,0,0,0,0
+; retract_lift_below = 209,209,209,209,209
+; retract_restart_extra = 0,0,0,0,0
+; retract_restart_extra_toolchange = 0,0,0,0,0
+; retract_speed = 35,35,35,35,35
+; seam_position = nearest
+; silent_mode = 1
+; single_extruder_multi_material = 1
+; single_extruder_multi_material_priming = 0
+; skirt_distance = 2
+; skirt_height = 3
+; skirts = 1
+; slice_closing_radius = 0.049
+; slicing_mode = regular
+; slowdown_below_layer_time = 15,15,15,15,15
+; small_perimeter_speed = 25
+; solid_infill_below_area = 0
+; solid_infill_every_layers = 0
+; solid_infill_extruder = 1
+; solid_infill_extrusion_width = 0.45
+; solid_infill_speed = 80
+; spiral_vase = 0
+; standby_temperature_delta = -5
+; start_filament_gcode = "M900 K{if printer_notes=~/.*PRINTER_MODEL_MINI.*/ and nozzle_diameter[0]==0.6}0.12{elsif printer_notes=~/.*PRINTER_MODEL_MINI.*/ and nozzle_diameter[0]==0.8}0.06{elsif printer_notes=~/.*PRINTER_MODEL_MINI.*/}0.2{elsif nozzle_diameter[0]==0.8}0.01{elsif nozzle_diameter[0]==0.6}0.04{else}0.05{endif} ; Filament gcode LA 1.5\n{if printer_notes=~/.*PRINTER_MODEL_MINI.*/};{elsif printer_notes=~/.*PRINTER_HAS_BOWDEN.*/}M900 K200{elsif nozzle_diameter[0]==0.6}M900 K18{elsif nozzle_diameter[0]==0.8};{else}M900 K30{endif} ; Filament gcode LA 1.0";"M900 K{if printer_notes=~/.*PRINTER_MODEL_MINI.*/ and nozzle_diameter[0]==0.6}0.12{elsif printer_notes=~/.*PRINTER_MODEL_MINI.*/ and nozzle_diameter[0]==0.8}0.06{elsif printer_notes=~/.*PRINTER_MODEL_MINI.*/}0.2{elsif nozzle_diameter[0]==0.8}0.01{elsif nozzle_diameter[0]==0.6}0.04{else}0.05{endif} ; Filament gcode LA 1.5\n{if printer_notes=~/.*PRINTER_MODEL_MINI.*/};{elsif printer_notes=~/.*PRINTER_HAS_BOWDEN.*/}M900 K200{elsif nozzle_diameter[0]==0.6}M900 K18{elsif nozzle_diameter[0]==0.8};{else}M900 K30{endif} ; Filament gcode LA 1.0";"M900 K{if printer_notes=~/.*PRINTER_MODEL_MINI.*/ and nozzle_diameter[0]==0.6}0.12{elsif printer_notes=~/.*PRINTER_MODEL_MINI.*/ and nozzle_diameter[0]==0.8}0.06{elsif printer_notes=~/.*PRINTER_MODEL_MINI.*/}0.2{elsif nozzle_diameter[0]==0.8}0.01{elsif nozzle_diameter[0]==0.6}0.04{else}0.05{endif} ; Filament gcode LA 1.5\n{if printer_notes=~/.*PRINTER_MODEL_MINI.*/};{elsif printer_notes=~/.*PRINTER_HAS_BOWDEN.*/}M900 K200{elsif nozzle_diameter[0]==0.6}M900 K18{elsif nozzle_diameter[0]==0.8};{else}M900 K30{endif} ; Filament gcode LA 1.0";"M900 K{if printer_notes=~/.*PRINTER_MODEL_MINI.*/ and nozzle_diameter[0]==0.6}0.12{elsif printer_notes=~/.*PRINTER_MODEL_MINI.*/ and nozzle_diameter[0]==0.8}0.06{elsif printer_notes=~/.*PRINTER_MODEL_MINI.*/}0.2{elsif nozzle_diameter[0]==0.8}0.01{elsif nozzle_diameter[0]==0.6}0.04{else}0.05{endif} ; Filament gcode LA 1.5\n{if printer_notes=~/.*PRINTER_MODEL_MINI.*/};{elsif printer_notes=~/.*PRINTER_HAS_BOWDEN.*/}M900 K200{elsif nozzle_diameter[0]==0.6}M900 K18{elsif nozzle_diameter[0]==0.8};{else}M900 K30{endif} ; Filament gcode LA 1.0";"M900 K{if printer_notes=~/.*PRINTER_MODEL_MINI.*/ and nozzle_diameter[0]==0.6}0.12{elsif printer_notes=~/.*PRINTER_MODEL_MINI.*/ and nozzle_diameter[0]==0.8}0.06{elsif printer_notes=~/.*PRINTER_MODEL_MINI.*/}0.2{elsif nozzle_diameter[0]==0.8}0.01{elsif nozzle_diameter[0]==0.6}0.04{else}0.05{endif} ; Filament gcode LA 1.5\n{if printer_notes=~/.*PRINTER_MODEL_MINI.*/};{elsif printer_notes=~/.*PRINTER_HAS_BOWDEN.*/}M900 K200{elsif nozzle_diameter[0]==0.6}M900 K18{elsif nozzle_diameter[0]==0.8};{else}M900 K30{endif} ; Filament gcode LA 1.0"
+; start_gcode = M862.3 P "[printer_model]" ; printer model check\nM862.1 P[nozzle_diameter] ; nozzle diameter check\nM115 U3.10.0 ; tell printer latest fw version\nG90 ; use absolute coordinates\nM83 ; extruder relative mode\nM104 S[first_layer_temperature] ; set extruder temp\nM140 S[first_layer_bed_temperature] ; set bed temp\nM190 S[first_layer_bed_temperature] ; wait for bed temp\nM109 S[first_layer_temperature] ; wait for extruder temp\nG28 W ; home all without mesh bed level\nG80 ; mesh bed leveling\n\n; Send the filament type to the MMU2.0 unit.\n; E stands for extruder number, F stands for filament type (0: default; 1:flex; 2: PVA)\nM403 E0 F{"" + ((filament_type[0]=="FLEX") ? 1 : ((filament_type[0]=="PVA") ? 2 : 0))}\nM403 E1 F{"" + ((filament_type[1]=="FLEX") ? 1 : ((filament_type[1]=="PVA") ? 2 : 0))}\nM403 E2 F{"" + ((filament_type[2]=="FLEX") ? 1 : ((filament_type[2]=="PVA") ? 2 : 0))}\nM403 E3 F{"" + ((filament_type[3]=="FLEX") ? 1 : ((filament_type[3]=="PVA") ? 2 : 0))}\nM403 E4 F{"" + ((filament_type[4]=="FLEX") ? 1 : ((filament_type[4]=="PVA") ? 2 : 0))}\n\n{if not has_single_extruder_multi_material_priming}\n;go outside print area\nG1 Y-3 F1000\nG1 Z0.4 F1000\n; select extruder\nT[initial_tool]\n; initial load\nG1 X55 E29 F1073\nG1 X5 E29 F1800\nG1 X55 E8 F2000\nG1 Z0.3 F1000\nG92 E0\nG1 X240 E25 F2200\nG1 Y-2 F1000\nG1 X55 E25 F1400\nG1 Z0.2 F1000\nG1 X5 E4 F1000\nG92 E0\n{endif}\n\nM221 S{if layer_height<0.075}100{else}95{endif}\nG92 E0\n\n; Don't change E values below. Excessive value can damage the printer.\n{if print_settings_id=~/.*(DETAIL @MK3|QUALITY @MK3|SOLUBLE).*/}M907 E430 ; set extruder motor current{endif}\n{if print_settings_id=~/.*(SPEED @MK3|DRAFT @MK3).*/}M907 E538 ; set extruder motor current{endif}
+; support_material = 0
+; support_material_angle = 0
+; support_material_auto = 1
+; support_material_bottom_contact_distance = 0
+; support_material_bottom_interface_layers = 0
+; support_material_buildplate_only = 0
+; support_material_closing_radius = 2
+; support_material_contact_distance = 0.2
+; support_material_enforce_layers = 0
+; support_material_extruder = 0
+; support_material_extrusion_width = 0.35
+; support_material_interface_contact_loops = 0
+; support_material_interface_extruder = 0
+; support_material_interface_layers = 2
+; support_material_interface_pattern = rectilinear
+; support_material_interface_spacing = 0.2
+; support_material_interface_speed = 80%
+; support_material_pattern = rectilinear
+; support_material_spacing = 2
+; support_material_speed = 50
+; support_material_style = grid
+; support_material_synchronize_layers = 0
+; support_material_threshold = 50
+; support_material_with_sheath = 0
+; support_material_xy_spacing = 60%
+; temperature = 205,205,205,205,205
+; template_custom_gcode = 
+; thick_bridges = 0
+; thin_walls = 0
+; threads = 12
+; thumbnails = 
+; toolchange_gcode = 
+; top_fill_pattern = monotonic
+; top_infill_extrusion_width = 0.4
+; top_solid_infill_speed = 40
+; top_solid_layers = 6
+; top_solid_min_thickness = 0.7
+; travel_speed = 180
+; travel_speed_z = 12
+; use_firmware_retraction = 0
+; use_relative_e_distances = 1
+; use_volumetric_e = 0
+; variable_layer_height = 1
+; wipe = 1,1,1,1,1
+; wipe_into_infill = 0
+; wipe_into_objects = 0
+; wipe_tower = 1
+; wipe_tower_bridging = 10
+; wipe_tower_brim_width = 2
+; wipe_tower_no_sparse_layers = 0
+; wipe_tower_rotation_angle = 0
+; wipe_tower_width = 60
+; wipe_tower_x = 170
+; wipe_tower_y = 125
+; wiping_volumes_extruders = 70,300,70,70,70,70,70,70,70,70
+; wiping_volumes_matrix = 0,140,140,140,140,370,0,140,140,140,370,140,0,140,140,370,140,140,0,140,370,140,140,140,0
+; xy_size_compensation = 0
+; z_offset = 0
+"#;
+
+const MODEL_BYTES:&[u8]=br##"<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02" xmlns:p="http://schemas.microsoft.com/3dmanufacturing/production/2015/06" unit="millimeter" xml:lang="en-US" requiredextensions="p" xmlns:BambuStudio="http://schemas.bambulab.com/package/2021">
+ <metadata name="Application">BambuStudio-01.10.01.50</metadata>
+ <metadata name="BambuStudio:3mfVersion">1</metadata>
+ <metadata name="CopyRight">"[]"</metadata>
+ <metadata name="Copyright">[]</metadata>
+ <metadata name="CreationDate">2025-01-26</metadata>
+ <metadata name="Description">&amp;lt;p&amp;gt;Quick and easy test to check the AMS or if you tweak flush volumes.&amp;lt;/p&amp;gt;&amp;lt;p&amp;gt;&amp;amp;nbsp;&amp;lt;/p&amp;gt;&amp;lt;p&amp;gt;A simple coin candy-like, you can test up to 8 colors&amp;lt;/p&amp;gt;&amp;lt;p&amp;gt;&amp;amp;nbsp;&amp;lt;/p&amp;gt;&amp;lt;p&amp;gt;It is 25mm x 5mm feel free to resize as you want&amp;lt;/p&amp;gt;&amp;lt;p&amp;gt;&amp;amp;nbsp;&amp;lt;/p&amp;gt;&amp;lt;p&amp;gt;The model is splitted in 8 parts, to change the color of each one :&amp;lt;/p&amp;gt;&amp;lt;ul&amp;gt;&amp;lt;li&amp;gt;first, synchronize your filament list from the AMS&amp;lt;/li&amp;gt;&amp;lt;li&amp;gt;in the process section, click Objects&amp;lt;/li&amp;gt;&amp;lt;li&amp;gt;right click on each part &amp;amp;gt;&amp;amp;gt; change filament&amp;lt;/li&amp;gt;&amp;lt;/ul&amp;gt;&amp;lt;figure class=&amp;#34;image image_resized&amp;#34; style=&amp;#34;width: 77.88%&amp;#34;&amp;gt;&amp;lt;img src=&amp;#34;https://makerworld.bblmw.com/makerworld/model/DSM00000000537044/design/2024-07-12_25883f9e83713.png&amp;#34;&amp;gt;&amp;lt;/figure&amp;gt;&amp;lt;p&amp;gt;&amp;amp;nbsp;&amp;lt;/p&amp;gt;&amp;lt;boostme&amp;gt;&amp;lt;boosttitle&amp;gt;Boost Me&amp;lt;/boosttitle&amp;gt;&amp;lt;boostcontent&amp;gt;If you like this design and you find it useful, please consider a Boost :-)&amp;lt;/boostcontent&amp;gt;&amp;lt;/boostme&amp;gt;</metadata>
+ <metadata name="DesignModelId">US316181fa252d43</metadata>
+ <metadata name="DesignProfileId">98057923</metadata>
+ <metadata name="DesignRegion">US</metadata>
+ <metadata name="Designer">naeh</metadata>
+ <metadata name="DesignerCover">2024-07-12_c40f0f9ff1ff4.jpg</metadata>
+ <metadata name="DesignerUserId">1988244349</metadata>
+ <metadata name="License">Standard Digital File License</metadata>
+ <metadata name="ModificationDate">2025-01-26</metadata>
+ <metadata name="Origin">original</metadata>
+ <metadata name="ProfileCover">2024-07-12_c40f0f9ff1ff4.jpg</metadata>
+ <metadata name="ProfileDescription" />
+ <metadata name="ProfileTitle">0.2mm layer, 2 walls, 15% infill</metadata>
+ <metadata name="ProfileUserId">1988244349</metadata>
+ <metadata name="ProfileUserName">naeh</metadata>
+ <metadata name="Thumbnail_Middle">/Metadata/plate_1.png</metadata>
+ <metadata name="Thumbnail_Small">/Metadata/plate_1_small.png</metadata>
+ <metadata name="Title">Multicolor AMS test print coin </metadata>
+ <resources>
+  <object id="9" p:UUID="00000003-61cb-4c03-9d28-80fed5dfa1dc" type="model">
+   <components>
+    <component p:path="/3D/Objects/object_3.model" objectid="1" p:UUID="00030000-b206-40ff-9872-83e8017abed1" transform="1 0 0 0 1 0 0 0 1 -0.498259306 6.24994278 4.4408921e-16" />
+    <component p:path="/3D/Objects/object_3.model" objectid="2" p:UUID="00030001-b206-40ff-9872-83e8017abed1" transform="1 0 0 0 1 0 0 0 1 -5.81822968 5.4445405 4.4408921e-16" />
+    <component p:path="/3D/Objects/object_3.model" objectid="3" p:UUID="00030002-b206-40ff-9872-83e8017abed1" transform="1 0 0 0 1 0 0 0 1 5.81822968 -5.44469076 4.4408921e-16" />
+    <component p:path="/3D/Objects/object_3.model" objectid="4" p:UUID="00030003-b206-40ff-9872-83e8017abed1" transform="1 0 0 0 1 0 0 0 1 -6.24994278 -0.498259306 4.4408921e-16" />
+    <component p:path="/3D/Objects/object_3.model" objectid="5" p:UUID="00030004-b206-40ff-9872-83e8017abed1" transform="1 0 0 0 1 0 0 0 1 5.44469076 5.81822968 4.4408921e-16" />
+    <component p:path="/3D/Objects/object_3.model" objectid="6" p:UUID="00030005-b206-40ff-9872-83e8017abed1" transform="1 0 0 0 1 0 0 0 1 0.498254776 -6.24994278 -4.4408921e-16" />
+    <component p:path="/3D/Objects/object_3.model" objectid="7" p:UUID="00030006-b206-40ff-9872-83e8017abed1" transform="1 0 0 0 1 0 0 0 1 -5.44451278 -5.81822968 -4.4408921e-16" />
+    <component p:path="/3D/Objects/object_3.model" objectid="8" p:UUID="00030007-b206-40ff-9872-83e8017abed1" transform="1 0 0 0 1 0 0 0 1 6.24994278 0.498254776 4.4408921e-16" />
+   </components>
+  </object>
+ </resources>
+ <build p:UUID="2c7c17d8-22b5-4d84-8835-1976022ea369">
+  <item objectid="9" p:UUID="00000009-b1ec-4553-aec9-835e5b724bb4" transform="1 0 0 0 1 0 0 0 1 128 128 2.5" printable="1" />
+ </build>
+</model>
+"##;
+
+const MODEL_SUB_FILE:&[u8]=br##"<?xml version="1.0" encoding="UTF-8"?>
+<model unit="millimeter" xml:lang="en-US" xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02" xmlns:BambuStudio="http://schemas.bambulab.com/package/2021" xmlns:p="http://schemas.microsoft.com/3dmanufacturing/production/2015/06" requiredextensions="p">
+ <metadata name="BambuStudio:3mfVersion">1</metadata>
+ <resources>
+  <object id="1" p:UUID="00030000-81cb-4c03-9d28-80fed5dfa1dc" type="model">
+   <mesh>
+    <vertices>
+     <vertex x="-4.97071362" y="0.427292824" z="2.47201109"/>
+     <vertex x="-2.34251976" y="-2.75996065" z="1.5"/>
+     <vertex x="-4.99043369" y="0.564508438" z="2.5"/>
+     <vertex x="-2.24633765" y="-2.68382621" z="1.5"/>
+     <vertex x="-4.80389023" y="0.710639954" z="2.5"/>
+     <vertex x="-2.14811635" y="-2.61034179" z="1.5"/>
+     <vertex x="-4.61345768" y="0.851666451" z="2.5"/>
+     <vertex x="-2.04792833" y="-2.53956175" z="1.5"/>
+     <vertex x="-4.41927624" y="0.987483978" z="2.5"/>
+     <vertex x="-1.94584846" y="-2.47153878" z="1.5"/>
+     <vertex x="-4.22148705" y="1.11799383" z="2.5"/>
+     <vertex x="-1.84195232" y="-2.40632343" z="1.5"/>
+     <vertex x="-4.02023697" y="1.24309969" z="2.5"/>
+     <vertex x="-1.73631716" y="-2.34396434" z="1.5"/>
+     <vertex x="-3.81567359" y="1.36271" z="2.5"/>
+     <vertex x="-1.62902164" y="-2.28450775" z="1.5"/>
+     <vertex x="-3.60794568" y="1.47673702" z="2.5"/>
+     <vertex x="-1.52014542" y="-2.22799778" z="1.5"/>
+     <vertex x="-3.39720583" y="1.58509731" z="2.5"/>
+     <vertex x="-1.40976918" y="-2.17447615" z="1.5"/>
+     <vertex x="-3.18360925" y="1.68771076" z="2.5"/>
+     <vertex x="-1.2979753" y="-2.12398338" z="1.5"/>
+     <vertex x="-2.96731234" y="1.78450298" z="2.5"/>
+     <vertex x="-1.18484652" y="-2.07655621" z="1.5"/>
+     <vertex x="-2.74847364" y="1.8754015" z="2.5"/>
+     <vertex x="-1.07046711" y="-2.03223038" z="1.5"/>
+     <vertex x="-2.52725363" y="1.96034145" z="2.5"/>
+     <vertex x="-0.95492208" y="-1.9910388" z="1.5"/>
+     <vertex x="-2.30381465" y="2.03925991" z="2.5"/>
+     <vertex x="-0.838297129" y="-1.95301151" z="1.5"/>
+     <vertex x="-2.07832074" y="2.11209869" z="2.5"/>
+     <vertex x="-0.720678926" y="-1.9181776" z="1.5"/>
+     <vertex x="-1.85093689" y="2.1788044" z="2.5"/>
+     <vertex x="-0.602155089" y="-1.88656235" z="1.5"/>
+     <vertex x="-1.62183022" y="2.23932838" z="2.5"/>
+     <vertex x="-0.482813478" y="-1.85818958" z="1.5"/>
+     <vertex x="-1.39116848" y="2.29362583" z="2.5"/>
+     <vertex x="-0.362742901" y="-1.83308029" z="1.5"/>
+     <vertex x="-1.15912092" y="2.34165764" z="2.5"/>
+     <vertex x="-0.242032468" y="-1.81125307" z="1.5"/>
+     <vertex x="-0.925857902" y="2.38338757" z="2.5"/>
+     <vertex x="-0.0679264069" y="-2.45367408" z="1.34423256"/>
+     <vertex x="-0.120944083" y="-1.79274797" z="1.5"/>
+     <vertex x="-0.0686986446" y="-2.31486607" z="1.3765533"/>
+     <vertex x="-0.067717135" y="-2.1759944" z="1.40885448"/>
+     <vertex x="-4.94861889" y="0.291134834" z="2.44399261"/>
+     <vertex x="-4.92413998" y="0.15601635" z="2.4159317"/>
+     <vertex x="-2.43651962" y="-2.83862734" z="1.5"/>
+     <vertex x="-4.89726543" y="0.02191782" z="2.38781595"/>
+     <vertex x="-4.86798477" y="-0.111178875" z="2.35963249"/>
+     <vertex x="-4.83628654" y="-0.243292332" z="2.33136797"/>
+     <vertex x="-2.52848101" y="-2.9199512" z="1.5"/>
+     <vertex x="0.332768738" y="-6.06255865" z="0.5"/>
+     <vertex x="-2.6181221" y="-3.00368834" z="1.5"/>
+     <vertex x="-2.70544744" y="-3.08983779" z="1.5"/>
+     <vertex x="-4.54582024" y="-1.14214802" z="2.13019466"/>
+     <vertex x="-4.49439907" y="-1.26707554" z="2.10082769"/>
+     <vertex x="-4.80216122" y="-0.374442101" z="2.30301046"/>
+     <vertex x="-4.76559639" y="-0.504646778" z="2.2745471"/>
+     <vertex x="-4.72658253" y="-0.633924961" z="2.245965"/>
+     <vertex x="-4.68510914" y="-0.762295246" z="2.2172513"/>
+     <vertex x="-4.64116478" y="-0.889776707" z="2.18839359"/>
+     <vertex x="-4.59473896" y="-1.01638842" z="2.15937853"/>
+     <vertex x="-4.44046402" y="-1.39118958" z="2.07126617"/>
+     <vertex x="-4.38400459" y="-1.51450825" z="2.04149675"/>
+     <vertex x="-4.32500935" y="-1.63705063" z="2.01150703"/>
+     <vertex x="-2.79039216" y="-3.17833543" z="1.5"/>
+     <vertex x="-4.26346874" y="-1.75883579" z="1.98128366"/>
+     <vertex x="-4.19937038" y="-1.87988234" z="1.95081472"/>
+     <vertex x="-4.13270473" y="-2.00020933" z="1.92008686"/>
+     <vertex x="-4.0634613" y="-2.1198349" z="1.88908768"/>
+     <vertex x="-2.8728931" y="-3.26911545" z="1.5"/>
+     <vertex x="-3.99174619" y="-2.23858643" z="1.85785389"/>
+     <vertex x="-3.91789174" y="-2.3559773" z="1.82651091"/>
+     <vertex x="-3.84197545" y="-2.47198772" z="1.79507017"/>
+     <vertex x="-3.76405883" y="-2.58662558" z="1.76353788"/>
+     <vertex x="-2.95288897" y="-3.36211038" z="1.5"/>
+     <vertex x="-3.68420434" y="-2.69989777" z="1.73191977"/>
+     <vertex x="-3.6024735" y="-2.81181169" z="1.70022058"/>
+     <vertex x="-3.51892877" y="-2.92237473" z="1.66844606"/>
+     <vertex x="-3.4336319" y="-3.03159404" z="1.63660192"/>
+     <vertex x="0.305492818" y="-6.09075403" z="0.5"/>
+     <vertex x="-3.34664464" y="-3.13947678" z="1.60469389"/>
+     <vertex x="-3.25802922" y="-3.24603057" z="1.57272673"/>
+     <vertex x="-3.03032041" y="-3.45725155" z="1.5"/>
+     <vertex x="-3.16784739" y="-3.35126233" z="1.54070711"/>
+     <vertex x="-3.07616091" y="-3.45517945" z="1.50863934"/>
+     <vertex x="-2.98303223" y="-3.55778909" z="1.4765296"/>
+     <vertex x="-2.8885231" y="-3.65909886" z="1.44438314"/>
+     <vertex x="-2.79269552" y="-3.7591157" z="1.4122057"/>
+     <vertex x="-2.69561124" y="-3.85784674" z="1.38000274"/>
+     <vertex x="-2.59733224" y="-3.95529985" z="1.34777951"/>
+     <vertex x="-2.39743829" y="-4.14639997" z="1.28329539"/>
+     <vertex x="-2.19350958" y="-4.33247375" z="1.21879721"/>
+     <vertex x="-1.98557925" y="-4.51397324" z="1.15419626"/>
+     <vertex x="-1.7731092" y="-4.69174194" z="1.08926749"/>
+     <vertex x="-1.55644393" y="-4.86579418" z="1.0240643"/>
+     <vertex x="-1.33595812" y="-5.03611708" z="0.958648682"/>
+     <vertex x="-1.11202621" y="-5.2026968" z="0.89308238"/>
+     <vertex x="-0.885022759" y="-5.36552191" z="0.827427626"/>
+     <vertex x="-0.655322075" y="-5.52457905" z="0.761746407"/>
+     <vertex x="-0.423298657" y="-5.67985487" z="0.696100712"/>
+     <vertex x="-0.189327061" y="-5.83133698" z="0.63055253"/>
+     <vertex x="0.046218276" y="-5.97901249" z="0.565164089"/>
+     <vertex x="0.282963485" y="-6.12286901" z="0.5"/>
+     <vertex x="0.36411953" y="-6.03897715" z="0.5"/>
+     <vertex x="0.398773313" y="-6.02059031" z="0.5"/>
+     <vertex x="0.435876787" y="-6.00785112" z="0.5"/>
+     <vertex x="0.370368958" y="-5.73945856" z="0.565002441"/>
+     <vertex x="0.308596164" y="-5.47014952" z="0.630006313"/>
+     <vertex x="0.250710964" y="-5.19991541" z="0.695014715"/>
+     <vertex x="0.196873635" y="-4.92871189" z="0.760039568"/>
+     <vertex x="0.147313952" y="-4.65678835" z="0.825023651"/>
+     <vertex x="0.102190405" y="-4.38393641" z="0.890016556"/>
+     <vertex x="0.0616825223" y="-4.10985994" z="0.955092192"/>
+     <vertex x="0.0260855556" y="-3.83486891" z="1.02018261"/>
+     <vertex x="-0.00430488586" y="-3.55927563" z="1.08521938"/>
+     <vertex x="-0.0291931629" y="-3.28339195" z="1.15013456"/>
+     <vertex x="-0.0482860208" y="-3.00748944" z="1.21486783"/>
+     <vertex x="-0.0613178015" y="-2.73094344" z="1.27955532"/>
+     <vertex x="-0.0649325252" y="-2.03709888" z="1.44113088"/>
+     <vertex x="-0.0602954626" y="-1.89821815" z="1.47337651"/>
+     <vertex x="-0.0537565947" y="-1.75939083" z="1.50558567"/>
+     <vertex x="-0.0452665687" y="-1.62065697" z="1.53775358"/>
+     <vertex x="-0.456370294" y="2.44782639" z="2.5"/>
+     <vertex x="-0.691550493" y="2.41878605" z="2.5"/>
+     <vertex x="-0.0347760916" y="-1.48205566" z="1.56987333"/>
+     <vertex x="-0.0222358704" y="-1.34362507" z="1.60194016"/>
+     <vertex x="-0.00759649277" y="-1.20540524" z="1.63394833"/>
+     <vertex x="0.00919133425" y="-1.06743479" z="1.66589212"/>
+     <vertex x="-0.220489979" y="2.47048759" z="2.5"/>
+     <vertex x="0.0281769633" y="-0.929753304" z="1.6977663"/>
+     <vertex x="0.0494097173" y="-0.792399406" z="1.72956467"/>
+     <vertex x="0.0729389191" y="-0.655412674" z="1.76128149"/>
+     <vertex x="0.0988139212" y="-0.51883173" z="1.79291201"/>
+     <vertex x="0.01591748" y="2.48675251" z="2.5"/>
+     <vertex x="0.127084047" y="-0.382696152" z="1.82444954"/>
+     <vertex x="0.157798618" y="-0.24704504" z="1.8558898"/>
+     <vertex x="0.191002369" y="-0.111934662" z="1.88722181"/>
+     <vertex x="0.226593584" y="0.0220756531" z="1.9183259"/>
+     <vertex x="0.264516592" y="0.154749393" z="1.94915581"/>
+     <vertex x="0.252678692" y="2.49661064" z="2.5"/>
+     <vertex x="0.304777086" y="0.286108494" z="1.97972536"/>
+     <vertex x="0.347380817" y="0.416173458" z="2.01004648"/>
+     <vertex x="0.392333567" y="0.544965267" z="2.040133"/>
+     <vertex x="0.48962003" y="2.50005341" z="2.5"/>
+     <vertex x="0.439640969" y="0.672504902" z="2.06999683"/>
+     <vertex x="0.489308834" y="0.79881382" z="2.09965086"/>
+     <vertex x="0.541342854" y="0.923913002" z="2.12910891"/>
+     <vertex x="0.595748723" y="1.04782391" z="2.15838242"/>
+     <vertex x="0.726567686" y="2.49707794" z="2.5"/>
+     <vertex x="0.65253222" y="1.17056656" z="2.18748522"/>
+     <vertex x="0.711699069" y="1.29216242" z="2.21643019"/>
+     <vertex x="0.773254991" y="1.41263342" z="2.24522924"/>
+     <vertex x="0.837205768" y="1.53199911" z="2.27389622"/>
+     <vertex x="0.963347912" y="2.48768806" z="2.5"/>
+     <vertex x="0.903556943" y="1.65028191" z="2.30244303"/>
+     <vertex x="0.972314477" y="1.76750278" z="2.3308835"/>
+     <vertex x="1.04348397" y="1.8836813" z="2.35922956"/>
+     <vertex x="1.19978702" y="2.4718895" z="2.5"/>
+     <vertex x="1.11707115" y="1.99884033" z="2.38749456"/>
+     <vertex x="1.19308186" y="2.11299992" z="2.41569138"/>
+     <vertex x="1.27152157" y="2.22618103" z="2.44383287"/>
+     <vertex x="1.35239625" y="2.33840561" z="2.47193146"/>
+     <vertex x="1.43571162" y="2.44969463" z="2.5"/>
+     <vertex x="0.466945499" y="-6.12999964" z="0.5"/>
+     <vertex x="0.498259306" y="-6.24994278" z="0.5"/>
+     <vertex x="0.498259306" y="-6.24994278" z="-2.5"/>
+     <vertex x="0.3134709" y="-6.14108801" z="-2.5"/>
+     <vertex x="0.128820091" y="-6.02971077" z="-2.5"/>
+     <vertex x="-0.0554946661" y="-5.91581631" z="-2.5"/>
+     <vertex x="-0.239274859" y="-5.79940844" z="-2.5"/>
+     <vertex x="-0.422322035" y="-5.6804924" z="-2.5"/>
+     <vertex x="-0.604437709" y="-5.55907202" z="-2.5"/>
+     <vertex x="-0.785423398" y="-5.43515301" z="-2.5"/>
+     <vertex x="-0.965080738" y="-5.30873871" z="-2.5"/>
+     <vertex x="-1.14321101" y="-5.17983484" z="-2.5"/>
+     <vertex x="-1.31961584" y="-5.04844522" z="-2.5"/>
+     <vertex x="-1.49409688" y="-4.9145751" z="-2.5"/>
+     <vertex x="-1.66645551" y="-4.77822828" z="-2.5"/>
+     <vertex x="-1.83649325" y="-4.63940954" z="-2.5"/>
+     <vertex x="-2.00401163" y="-4.49812412" z="-2.5"/>
+     <vertex x="-2.16881227" y="-4.35437584" z="-2.5"/>
+     <vertex x="-2.33069634" y="-4.20816994" z="-2.5"/>
+     <vertex x="-2.48946595" y="-4.05951023" z="-2.5"/>
+     <vertex x="-2.64492226" y="-3.9084022" z="-2.5"/>
+     <vertex x="-2.79686666" y="-3.75484991" z="-2.5"/>
+     <vertex x="-2.94510102" y="-3.59885788" z="-2.5"/>
+     <vertex x="-3.08870673" y="-3.44125009" z="-2.5"/>
+     <vertex x="-3.22560692" y="-3.28438568" z="-2.5"/>
+     <vertex x="-3.15800047" y="-3.36270547" z="-2.5"/>
+     <vertex x="-3.35584807" y="-3.1284318" z="-2.5"/>
+     <vertex x="-3.47961068" y="-2.97340989" z="-2.5"/>
+     <vertex x="-3.59707522" y="-2.81934118" z="-2.5"/>
+     <vertex x="-3.70842195" y="-2.66624737" z="-2.5"/>
+     <vertex x="-3.81383109" y="-2.51414943" z="-2.5"/>
+     <vertex x="-3.91348338" y="-2.36306906" z="-2.5"/>
+     <vertex x="-4.00755978" y="-2.21302748" z="-2.5"/>
+     <vertex x="-4.09623909" y="-2.06404638" z="-2.5"/>
+     <vertex x="-4.17970276" y="-1.91614676" z="-2.5"/>
+     <vertex x="-4.25813198" y="-1.76935053" z="-2.5"/>
+     <vertex x="-4.33170509" y="-1.62367868" z="-2.5"/>
+     <vertex x="-4.4006052" y="-1.4791522" z="-2.5"/>
+     <vertex x="-4.46500969" y="-1.3357935" z="-2.5"/>
+     <vertex x="-4.52516747" y="-1.19346189" z="-2.5"/>
+     <vertex x="-4.58253002" y="-1.04882193" z="-2.5"/>
+     <vertex x="-4.63750362" y="-0.900471687" z="-2.5"/>
+     <vertex x="-4.68992233" y="-0.748319149" z="-2.5"/>
+     <vertex x="-4.73962021" y="-0.592271805" z="-2.5"/>
+     <vertex x="-4.78643227" y="-0.432237625" z="-2.5"/>
+     <vertex x="-4.83019066" y="-0.26812458" z="-2.5"/>
+     <vertex x="-4.87073135" y="-0.0998401642" z="-2.5"/>
+     <vertex x="-4.90788746" y="0.0727071762" z="-2.5"/>
+     <vertex x="-4.94149208" y="0.249610424" z="-2.5"/>
+     <vertex x="-4.97138119" y="0.430960655" z="-2.5"/>
+     <vertex x="-4.99738789" y="0.61685133" z="-2.5"/>
+     <vertex x="-5.00278854" y="0.660832882" z="2.5"/>
+     <vertex x="-5.01411057" y="0.75870657" z="2.5"/>
+     <vertex x="-5.01934624" y="0.807373524" z="-2.5"/>
+     <vertex x="-5.02436447" y="0.858149052" z="2.5"/>
+     <vertex x="-5.0370903" y="1.00261974" z="-2.5"/>
+     <vertex x="-5.03351402" y="0.959180832" z="2.5"/>
+     <vertex x="-5.04152393" y="1.06182241" z="2.5"/>
+     <vertex x="-5.05045414" y="1.2026825" z="-2.5"/>
+     <vertex x="-5.04835796" y="1.16609287" z="2.5"/>
+     <vertex x="-5.05398178" y="1.27201271" z="2.5"/>
+     <vertex x="-5.05544186" y="1.30454874" z="-2.5"/>
+     <vertex x="-5.05835819" y="1.37960148" z="2.5"/>
+     <vertex x="-5.05927181" y="1.40765333" z="-2.5"/>
+     <vertex x="-5.06145287" y="1.48888016" z="2.5"/>
+     <vertex x="-5.06192398" y="1.51200819" z="-2.5"/>
+     <vertex x="-5.06322956" y="1.5998683" z="2.5"/>
+     <vertex x="-5.06337738" y="1.61762476" z="-2.5"/>
+     <vertex x="-5.06365108" y="1.71258545" z="2.5"/>
+     <vertex x="-5.06283283" y="1.82956314" z="-2.5"/>
+     <vertex x="-5.06268406" y="1.82705212" z="2.5"/>
+     <vertex x="-5.05663872" y="2.05901623" z="2.5"/>
+     <vertex x="-5.05817509" y="2.03645897" z="-2.5"/>
+     <vertex x="-5.05185604" y="2.17288113" z="2.5"/>
+     <vertex x="-5.04957294" y="2.23861504" z="-2.5"/>
+     <vertex x="-5.04596806" y="2.28499413" z="2.5"/>
+     <vertex x="-5.03899765" y="2.39548397" z="2.5"/>
+     <vertex x="-5.03717709" y="2.43664932" z="-2.5"/>
+     <vertex x="-5.03096581" y="2.50448227" z="2.5"/>
+     <vertex x="-5.02113819" y="2.63117981" z="-2.5"/>
+     <vertex x="-5.01180744" y="2.71852303" z="2.5"/>
+     <vertex x="-5.00160599" y="2.82282543" z="-2.5"/>
+     <vertex x="-4.98867035" y="2.92815781" z="2.5"/>
+     <vertex x="-4.9787302" y="3.01220322" z="-2.5"/>
+     <vertex x="-4.96173" y="3.13442993" z="2.5"/>
+     <vertex x="-4.95266247" y="3.19993114" z="-2.5"/>
+     <vertex x="-4.93116379" y="3.33837891" z="2.5"/>
+     <vertex x="-4.92355156" y="3.38662815" z="-2.5"/>
+     <vertex x="-4.89714622" y="3.54104805" z="2.5"/>
+     <vertex x="-4.89154911" y="3.57291222" z="-2.5"/>
+     <vertex x="-4.85985565" y="3.74347878" z="2.5"/>
+     <vertex x="-4.85680389" y="3.75940132" z="-2.5"/>
+     <vertex x="-4.81946659" y="3.94671345" z="2.5"/>
+     <vertex x="-4.81946659" y="3.94671345" z="-2.5"/>
+     <vertex x="-4.78597164" y="4.10513496" z="2.37456131"/>
+     <vertex x="-4.78597164" y="4.10513496" z="-2.37456155"/>
+     <vertex x="-4.75059795" y="4.2633791" z="2.24922514"/>
+     <vertex x="-4.75059795" y="4.2633791" z="-2.24922514"/>
+     <vertex x="-4.71339798" y="4.42139816" z="2.12400293"/>
+     <vertex x="-4.71339798" y="4.42139816" z="-2.1240027"/>
+     <vertex x="-4.67442036" y="4.57914639" z="1.99890566"/>
+     <vertex x="-4.67442036" y="4.57914639" z="-1.99890554"/>
+     <vertex x="-4.63371563" y="4.73657703" z="1.87394524"/>
+     <vertex x="-4.63371563" y="4.73657703" z="-1.87394524"/>
+     <vertex x="-4.59133434" y="4.89364338" z="1.74913311"/>
+     <vertex x="-4.59133434" y="4.89364338" z="-1.74913311"/>
+     <vertex x="-4.50174046" y="5.20649624" z="1.5"/>
+     <vertex x="-4.50174046" y="5.20649624" z="-1.5"/>
+     <vertex x="1.49200559" y="2.52260208" z="2.5"/>
+     <vertex x="1.55002713" y="2.59594917" z="2.5"/>
+     <vertex x="1.60981357" y="2.66972065" z="2.5"/>
+     <vertex x="1.67140222" y="2.74390507" z="2.5"/>
+     <vertex x="1.73483038" y="2.81848812" z="2.5"/>
+     <vertex x="1.80013537" y="2.89345741" z="2.5"/>
+     <vertex x="1.86735439" y="2.96879959" z="2.5"/>
+     <vertex x="1.93652487" y="3.0445013" z="2.5"/>
+     <vertex x="2.00768423" y="3.1205492" z="2.5"/>
+     <vertex x="-2.53048491" y="4.84405136" z="2.5"/>
+     <vertex x="-2.79363871" y="4.76883221" z="2.5"/>
+     <vertex x="-3.05492783" y="4.68737221" z="2.5"/>
+     <vertex x="2.0808692" y="3.19693184" z="2.5"/>
+     <vertex x="-1.19199669" y="5.12516308" z="2.5"/>
+     <vertex x="-1.46221924" y="5.08171749" z="2.5"/>
+     <vertex x="-1.73133159" y="5.03185368" z="2.5"/>
+     <vertex x="2.15611792" y="3.27363491" z="2.5"/>
+     <vertex x="-0.648832798" y="5.1927042" z="2.5"/>
+     <vertex x="-0.92081666" y="5.16216564" z="2.5"/>
+     <vertex x="-0.376199305" y="5.21676254" z="2.5"/>
+     <vertex x="2.2334671" y="3.35064507" z="2.5"/>
+     <vertex x="-0.103070498" y="5.23432446" z="2.5"/>
+     <vertex x="2.31295443" y="3.42794895" z="2.5"/>
+     <vertex x="0.170398951" y="5.24538231" z="2.5"/>
+     <vertex x="2.3946166" y="3.50553417" z="2.5"/>
+     <vertex x="0.444054097" y="5.24992943" z="2.5"/>
+     <vertex x="2.47849178" y="3.58338833" z="2.5"/>
+     <vertex x="0.71773994" y="5.24796295" z="2.5"/>
+     <vertex x="2.56461644" y="3.66149616" z="2.5"/>
+     <vertex x="0.991301417" y="5.23948288" z="2.5"/>
+     <vertex x="2.65288281" y="3.73973274" z="2.5"/>
+     <vertex x="1.26458371" y="5.22449589" z="2.5"/>
+     <vertex x="2.74069786" y="3.81604099" z="2.5"/>
+     <vertex x="1.53743184" y="5.20300961" z="2.5"/>
+     <vertex x="2.82727456" y="3.88983154" z="2.5"/>
+     <vertex x="1.80969143" y="5.17503643" z="2.5"/>
+     <vertex x="2.91285014" y="3.96132469" z="2.5"/>
+     <vertex x="2.08120823" y="5.14059162" z="2.5"/>
+     <vertex x="2.99766231" y="4.03074169" z="2.5"/>
+     <vertex x="2.35182858" y="5.09969521" z="2.5"/>
+     <vertex x="3.081949" y="4.09830284" z="2.5"/>
+     <vertex x="2.62139869" y="5.05237007" z="2.5"/>
+     <vertex x="3.24989605" y="4.22873974" z="2.5"/>
+     <vertex x="2.88976645" y="4.99864388" z="2.5"/>
+     <vertex x="3.41859174" y="4.35440063" z="2.5"/>
+     <vertex x="3.15677977" y="4.93854523" z="2.5"/>
+     <vertex x="3.58993769" y="4.47705173" z="2.5"/>
+     <vertex x="3.42228699" y="4.87211037" z="2.5"/>
+     <vertex x="3.76583457" y="4.59845638" z="2.5"/>
+     <vertex x="3.68613815" y="4.79937553" z="2.5"/>
+     <vertex x="3.85608387" y="4.65924358" z="2.5"/>
+     <vertex x="3.94818377" y="4.72038174" z="2.5"/>
+     <vertex x="-1.99918079" y="4.97559929" z="2.5"/>
+     <vertex x="-2.2656157" y="4.91298676" z="2.5"/>
+     <vertex x="-3.31420445" y="4.59971714" z="2.5"/>
+     <vertex x="-3.57132173" y="4.5059166" z="2.5"/>
+     <vertex x="-3.82613397" y="4.40602398" z="2.5"/>
+     <vertex x="-4.07849693" y="4.30009556" z="2.5"/>
+     <vertex x="-4.3282671" y="4.18819141" z="2.5"/>
+     <vertex x="-4.57530403" y="4.07037449" z="2.5"/>
+     <vertex x="-4.57530403" y="4.07037449" z="-2.5"/>
+     <vertex x="-4.3282671" y="4.18819141" z="-2.5"/>
+     <vertex x="-4.07849693" y="4.30009556" z="-2.5"/>
+     <vertex x="-4.23578739" y="5.31892967" z="-1.5"/>
+     <vertex x="-3.82613397" y="4.40602398" z="-2.5"/>
+     <vertex x="-3.96730781" y="5.42518902" z="-1.5"/>
+     <vertex x="-3.57132173" y="4.5059166" z="-2.5"/>
+     <vertex x="-3.69644523" y="5.52521992" z="-1.5"/>
+     <vertex x="-3.31420445" y="4.59971714" z="-2.5"/>
+     <vertex x="-3.42334485" y="5.61896706" z="-1.5"/>
+     <vertex x="-3.05492783" y="4.68737221" z="-2.5"/>
+     <vertex x="-3.14815164" y="5.7063818" z="-1.5"/>
+     <vertex x="-2.79363871" y="4.76883221" z="-2.5"/>
+     <vertex x="-2.87101293" y="5.7874155" z="-1.5"/>
+     <vertex x="-2.53048491" y="4.84405136" z="-2.5"/>
+     <vertex x="-2.59207654" y="5.86202717" z="-1.5"/>
+     <vertex x="-2.2656157" y="4.91298676" z="-2.5"/>
+     <vertex x="-2.31149101" y="5.93017673" z="-1.5"/>
+     <vertex x="-1.99918079" y="4.97559929" z="-2.5"/>
+     <vertex x="-2.02940631" y="5.99182606" z="-1.5"/>
+     <vertex x="-1.73133159" y="5.03185368" z="-2.5"/>
+     <vertex x="-1.74597287" y="6.04694366" z="-1.5"/>
+     <vertex x="-1.46221924" y="5.08171749" z="-2.5"/>
+     <vertex x="-1.4613421" y="6.09549999" z="-1.5"/>
+     <vertex x="-1.19199669" y="5.12516308" z="-2.5"/>
+     <vertex x="-1.17566562" y="6.13746929" z="-1.5"/>
+     <vertex x="-0.92081666" y="5.16216564" z="-2.5"/>
+     <vertex x="-0.889095902" y="6.17282867" z="-1.5"/>
+     <vertex x="-0.648832798" y="5.1927042" z="-2.5"/>
+     <vertex x="-0.601785898" y="6.20155907" z="-1.5"/>
+     <vertex x="-0.376199305" y="5.21676254" z="-2.5"/>
+     <vertex x="-0.313889027" y="6.22364616" z="-1.5"/>
+     <vertex x="-0.103070498" y="5.23432446" z="-2.5"/>
+     <vertex x="-0.0255587101" y="6.23907661" z="-1.5"/>
+     <vertex x="0.170398951" y="5.24538231" z="-2.5"/>
+     <vertex x="0.263051033" y="6.24784374" z="-1.5"/>
+     <vertex x="0.444054097" y="5.24992943" z="-2.5"/>
+     <vertex x="0.551786304" y="6.24994278" z="-1.5"/>
+     <vertex x="0.71773994" y="5.24796295" z="-2.5"/>
+     <vertex x="0.840493083" y="6.24537182" z="-1.5"/>
+     <vertex x="0.991301417" y="5.23948288" z="-2.5"/>
+     <vertex x="1.12901711" y="6.23413277" z="-1.5"/>
+     <vertex x="1.26458371" y="5.22449589" z="-2.5"/>
+     <vertex x="1.41720462" y="6.21623325" z="-1.5"/>
+     <vertex x="1.53743184" y="5.20300961" z="-2.5"/>
+     <vertex x="1.70490193" y="6.19168186" z="-1.5"/>
+     <vertex x="1.80969143" y="5.17503643" z="-2.5"/>
+     <vertex x="1.99195528" y="6.16049099" z="-1.5"/>
+     <vertex x="2.08120823" y="5.14059162" z="-2.5"/>
+     <vertex x="2.27821159" y="6.12267876" z="-1.5"/>
+     <vertex x="2.35182858" y="5.09969521" z="-2.5"/>
+     <vertex x="2.56351829" y="6.07826519" z="-1.5"/>
+     <vertex x="2.62139869" y="5.05237007" z="-2.5"/>
+     <vertex x="2.84772277" y="6.02727318" z="-1.5"/>
+     <vertex x="2.88976645" y="4.99864388" z="-2.5"/>
+     <vertex x="3.13067389" y="5.96972942" z="-1.5"/>
+     <vertex x="3.15677977" y="4.93854523" z="-2.5"/>
+     <vertex x="3.41222024" y="5.90566635" z="-1.5"/>
+     <vertex x="3.42228699" y="4.87211037" z="-2.5"/>
+     <vertex x="3.69221163" y="5.83511734" z="-1.5"/>
+     <vertex x="3.68613815" y="4.79937553" z="-2.5"/>
+     <vertex x="3.97049904" y="5.75811958" z="-1.5"/>
+     <vertex x="3.94818377" y="4.72038174" z="-2.5"/>
+     <vertex x="4.24693346" y="5.67471409" z="-1.5"/>
+     <vertex x="4.08388996" y="4.80871868" z="-2.37456155"/>
+     <vertex x="4.52136803" y="5.58494663" z="-1.5"/>
+     <vertex x="4.22079754" y="4.89560127" z="-2.24922514"/>
+     <vertex x="4.35883904" y="4.98103333" z="-2.1240027"/>
+     <vertex x="4.49794483" y="5.06501675" z="-1.99890554"/>
+     <vertex x="4.7936554" y="5.48886299" z="-1.5"/>
+     <vertex x="4.63804722" y="5.1475544" z="-1.87394524"/>
+     <vertex x="4.77907848" y="5.22864819" z="-1.74913311"/>
+     <vertex x="5.06365108" y="5.38651657" z="-1.5"/>
+     <vertex x="5.06365108" y="5.38651657" z="1.5"/>
+     <vertex x="4.7936554" y="5.48886299" z="1.5"/>
+     <vertex x="4.52136803" y="5.58494663" z="1.5"/>
+     <vertex x="4.24693346" y="5.67471409" z="1.5"/>
+     <vertex x="3.97049904" y="5.75811958" z="1.5"/>
+     <vertex x="3.69221163" y="5.83511734" z="1.5"/>
+     <vertex x="3.41222024" y="5.90566635" z="1.5"/>
+     <vertex x="3.13067389" y="5.96972942" z="1.5"/>
+     <vertex x="2.84772277" y="6.02727318" z="1.5"/>
+     <vertex x="2.56351829" y="6.07826519" z="1.5"/>
+     <vertex x="2.27821159" y="6.12267876" z="1.5"/>
+     <vertex x="1.99195528" y="6.16049099" z="1.5"/>
+     <vertex x="1.70490193" y="6.19168186" z="1.5"/>
+     <vertex x="1.41720462" y="6.21623325" z="1.5"/>
+     <vertex x="1.12901711" y="6.23413277" z="1.5"/>
+     <vertex x="0.840493083" y="6.24537182" z="1.5"/>
+     <vertex x="0.551786304" y="6.24994278" z="1.5"/>
+     <vertex x="0.263051033" y="6.24784374" z="1.5"/>
+     <vertex x="-0.0255587101" y="6.23907661" z="1.5"/>
+     <vertex x="-0.313889027" y="6.22364616" z="1.5"/>
+     <vertex x="-0.601785898" y="6.20155907" z="1.5"/>
+     <vertex x="-0.889095902" y="6.17282867" z="1.5"/>
+     <vertex x="-1.17566562" y="6.13746929" z="1.5"/>
+     <vertex x="-1.4613421" y="6.09549999" z="1.5"/>
+     <vertex x="-1.74597287" y="6.04694366" z="1.5"/>
+     <vertex x="-2.02940631" y="5.99182606" z="1.5"/>
+     <vertex x="-2.31149101" y="5.93017673" z="1.5"/>
+     <vertex x="-2.59207654" y="5.86202717" z="1.5"/>
+     <vertex x="-2.87101293" y="5.7874155" z="1.5"/>
+     <vertex x="-3.14815164" y="5.7063818" z="1.5"/>
+     <vertex x="-3.42334485" y="5.61896706" z="1.5"/>
+     <vertex x="-3.69644523" y="5.52521992" z="1.5"/>
+     <vertex x="-3.96730781" y="5.42518902" z="1.5"/>
+     <vertex x="-4.23578739" y="5.31892967" z="1.5"/>
+     <vertex x="4.08388996" y="4.80871868" z="2.37456131"/>
+     <vertex x="4.22079754" y="4.89560127" z="2.24922514"/>
+     <vertex x="4.35883904" y="4.98103333" z="2.12400293"/>
+     <vertex x="4.49794483" y="5.06501675" z="1.99890566"/>
+     <vertex x="4.63804722" y="5.1475544" z="1.87394524"/>
+     <vertex x="4.77907848" y="5.22864819" z="1.74913311"/>
+     <vertex x="0.458403945" y="-6.09676695" z="-2.5"/>
+     <vertex x="0.418527573" y="-5.93867493" z="-2.5"/>
+     <vertex x="0.378836453" y="-5.77587509" z="-2.5"/>
+     <vertex x="0.339536846" y="-5.60857677" z="-2.5"/>
+     <vertex x="0.300834984" y="-5.43698883" z="-2.5"/>
+     <vertex x="0.262937129" y="-5.26131916" z="-2.5"/>
+     <vertex x="0.226049572" y="-5.0817771" z="-2.5"/>
+     <vertex x="0.190378487" y="-4.89857101" z="-2.5"/>
+     <vertex x="0.156130195" y="-4.71191025" z="-2.5"/>
+     <vertex x="0.123510897" y="-4.52200317" z="-2.5"/>
+     <vertex x="0.0927268863" y="-4.32905817" z="-2.5"/>
+     <vertex x="0.0639843941" y="-4.13328457" z="-2.5"/>
+     <vertex x="0.0374896824" y="-3.93489027" z="-2.5"/>
+     <vertex x="0.0134490132" y="-3.73408484" z="-2.5"/>
+     <vertex x="-0.00793141127" y="-3.53107667" z="-2.5"/>
+     <vertex x="-0.0264452696" y="-3.32607436" z="-2.5"/>
+     <vertex x="-0.0418863297" y="-3.11928701" z="-2.5"/>
+     <vertex x="-0.0540483594" y="-2.910923" z="-2.5"/>
+     <vertex x="-0.0627251267" y="-2.70119095" z="-2.5"/>
+     <vertex x="-0.06771034" y="-2.49030018" z="-2.5"/>
+     <vertex x="-0.0687977076" y="-2.27845883" z="-2.5"/>
+     <vertex x="-0.0657810569" y="-2.06587553" z="-2.5"/>
+     <vertex x="-0.0584541559" y="-1.85275984" z="-2.5"/>
+     <vertex x="-0.0466106534" y="-1.6393199" z="-2.5"/>
+     <vertex x="-0.0302264094" y="-1.4279294" z="-2.5"/>
+     <vertex x="-0.00954920053" y="-1.22163153" z="-2.5"/>
+     <vertex x="0.015298456" y="-1.02033567" z="-2.5"/>
+     <vertex x="0.0441952944" y="-0.82392931" z="-2.5"/>
+     <vertex x="0.0770200193" y="-0.632302284" z="-2.5"/>
+     <vertex x="0.113651454" y="-0.445342541" z="-2.5"/>
+     <vertex x="0.153968304" y="-0.262938499" z="-2.5"/>
+     <vertex x="0.197849303" y="-0.0849790573" z="-2.5"/>
+     <vertex x="0.245173246" y="0.0886473656" z="-2.5"/>
+     <vertex x="0.295818865" y="0.258052349" z="-2.5"/>
+     <vertex x="0.349664867" y="0.423346519" z="-2.5"/>
+     <vertex x="0.406590044" y="0.58464241" z="-2.5"/>
+     <vertex x="0.466473162" y="0.742050648" z="-2.5"/>
+     <vertex x="0.529192924" y="0.895683289" z="-2.5"/>
+     <vertex x="0.594628096" y="1.04565144" z="-2.5"/>
+     <vertex x="0.66265738" y="1.19206619" z="-2.5"/>
+     <vertex x="0.733404636" y="1.33553934" z="-2.5"/>
+     <vertex x="0.808919072" y="1.48023462" z="-2.5"/>
+     <vertex x="0.889947474" y="1.62699747" z="-2.5"/>
+     <vertex x="0.976812005" y="1.77574539" z="-2.5"/>
+     <vertex x="1.06983507" y="1.92639637" z="-2.5"/>
+     <vertex x="1.11875665" y="2.00241089" z="-2.5"/>
+     <vertex x="1.1693387" y="2.07886982" z="-2.5"/>
+     <vertex x="1.22162139" y="2.15576363" z="-2.5"/>
+     <vertex x="1.27564514" y="2.23308277" z="-2.5"/>
+     <vertex x="1.3314501" y="2.31081676" z="-2.5"/>
+     <vertex x="1.38907671" y="2.38895512" z="-2.5"/>
+     <vertex x="1.44856501" y="2.46748734" z="-2.5"/>
+     <vertex x="1.50995553" y="2.54640293" z="-2.5"/>
+     <vertex x="1.57328832" y="2.62569332" z="-2.5"/>
+     <vertex x="1.63860393" y="2.70534611" z="-2.5"/>
+     <vertex x="1.70594239" y="2.78535366" z="-2.5"/>
+     <vertex x="1.77534401" y="2.86570358" z="-2.5"/>
+     <vertex x="1.84684908" y="2.94638538" z="-2.5"/>
+     <vertex x="1.92049801" y="3.02739143" z="-2.5"/>
+     <vertex x="1.99633098" y="3.10870934" z="-2.5"/>
+     <vertex x="2.07438827" y="3.19032955" z="-2.5"/>
+     <vertex x="2.15471029" y="3.27224159" z="-2.5"/>
+     <vertex x="2.23733711" y="3.35443497" z="-2.5"/>
+     <vertex x="2.40890408" y="3.5189991" z="-2.5"/>
+     <vertex x="2.4946146" y="3.59865379" z="-2.5"/>
+     <vertex x="2.579391" y="3.67585659" z="-2.5"/>
+     <vertex x="2.66340423" y="3.75078392" z="-2.5"/>
+     <vertex x="2.74682522" y="3.8236084" z="-2.5"/>
+     <vertex x="2.82982445" y="3.8945055" z="-2.5"/>
+     <vertex x="2.91257334" y="3.9636507" z="-2.5"/>
+     <vertex x="3.07800198" y="4.09738445" z="-2.5"/>
+     <vertex x="3.24447775" y="4.22620869" z="-2.5"/>
+     <vertex x="3.41336727" y="4.35152149" z="-2.5"/>
+     <vertex x="3.58603716" y="4.47472191" z="-2.5"/>
+     <vertex x="3.76385355" y="4.59720898" z="-2.5"/>
+     <vertex x="3.85511899" y="4.65862179" z="-2.5"/>
+    </vertices>
+    <triangles>
+     <triangle v1="0" v2="1" v3="2"/>
+     <triangle v1="2" v2="1" v3="3"/>
+     <triangle v1="2" v2="3" v3="4"/>
+     <triangle v1="4" v2="3" v3="5"/>
+     <triangle v1="4" v2="5" v3="6"/>
+     <triangle v1="6" v2="5" v3="7"/>
+     <triangle v1="6" v2="7" v3="8"/>
+     <triangle v1="8" v2="7" v3="9"/>
+     <triangle v1="8" v2="9" v3="10"/>
+     <triangle v1="10" v2="9" v3="11"/>
+     <triangle v1="10" v2="11" v3="12"/>
+     <triangle v1="12" v2="11" v3="13"/>
+     <triangle v1="12" v2="13" v3="14"/>
+     <triangle v1="14" v2="13" v3="15"/>
+     <triangle v1="14" v2="15" v3="16"/>
+     <triangle v1="16" v2="15" v3="17"/>
+     <triangle v1="16" v2="17" v3="18"/>
+     <triangle v1="18" v2="17" v3="19"/>
+     <triangle v1="18" v2="19" v3="20"/>
+     <triangle v1="20" v2="19" v3="21"/>
+     <triangle v1="20" v2="21" v3="22"/>
+     <triangle v1="22" v2="21" v3="23"/>
+     <triangle v1="22" v2="23" v3="24"/>
+     <triangle v1="24" v2="23" v3="25"/>
+     <triangle v1="24" v2="25" v3="26"/>
+     <triangle v1="26" v2="25" v3="27"/>
+     <triangle v1="26" v2="27" v3="28"/>
+     <triangle v1="28" v2="27" v3="29"/>
+     <triangle v1="28" v2="29" v3="30"/>
+     <triangle v1="30" v2="29" v3="31"/>
+     <triangle v1="30" v2="31" v3="32"/>
+     <triangle v1="32" v2="31" v3="33"/>
+     <triangle v1="32" v2="33" v3="34"/>
+     <triangle v1="34" v2="33" v3="35"/>
+     <triangle v1="34" v2="35" v3="36"/>
+     <triangle v1="36" v2="35" v3="37"/>
+     <triangle v1="36" v2="37" v3="38"/>
+     <triangle v1="38" v2="37" v3="39"/>
+     <triangle v1="38" v2="39" v3="40"/>
+     <triangle v1="40" v2="39" v3="41"/>
+     <triangle v1="40" v2="41" v3="42"/>
+     <triangle v1="42" v2="41" v3="43"/>
+     <triangle v1="42" v2="43" v3="44"/>
+     <triangle v1="0" v2="45" v3="1"/>
+     <triangle v1="1" v2="45" v3="46"/>
+     <triangle v1="1" v2="46" v3="47"/>
+     <triangle v1="47" v2="46" v3="48"/>
+     <triangle v1="47" v2="48" v3="49"/>
+     <triangle v1="49" v2="50" v3="47"/>
+     <triangle v1="47" v2="50" v3="51"/>
+     <triangle v1="47" v2="51" v3="52"/>
+     <triangle v1="52" v2="51" v3="53"/>
+     <triangle v1="52" v2="53" v3="54"/>
+     <triangle v1="54" v2="53" v3="55"/>
+     <triangle v1="54" v2="55" v3="56"/>
+     <triangle v1="50" v2="57" v3="51"/>
+     <triangle v1="51" v2="57" v3="58"/>
+     <triangle v1="51" v2="58" v3="59"/>
+     <triangle v1="51" v2="59" v3="53"/>
+     <triangle v1="53" v2="59" v3="60"/>
+     <triangle v1="53" v2="60" v3="61"/>
+     <triangle v1="61" v2="62" v3="53"/>
+     <triangle v1="53" v2="62" v3="55"/>
+     <triangle v1="56" v2="63" v3="54"/>
+     <triangle v1="54" v2="63" v3="64"/>
+     <triangle v1="54" v2="64" v3="65"/>
+     <triangle v1="54" v2="65" v3="66"/>
+     <triangle v1="66" v2="65" v3="67"/>
+     <triangle v1="66" v2="67" v3="68"/>
+     <triangle v1="68" v2="69" v3="66"/>
+     <triangle v1="66" v2="69" v3="70"/>
+     <triangle v1="66" v2="70" v3="71"/>
+     <triangle v1="71" v2="70" v3="72"/>
+     <triangle v1="71" v2="72" v3="73"/>
+     <triangle v1="73" v2="74" v3="71"/>
+     <triangle v1="71" v2="74" v3="75"/>
+     <triangle v1="71" v2="75" v3="76"/>
+     <triangle v1="76" v2="75" v3="77"/>
+     <triangle v1="76" v2="77" v3="78"/>
+     <triangle v1="78" v2="79" v3="76"/>
+     <triangle v1="76" v2="79" v3="80"/>
+     <triangle v1="76" v2="80" v3="81"/>
+     <triangle v1="81" v2="80" v3="82"/>
+     <triangle v1="81" v2="82" v3="83"/>
+     <triangle v1="81" v2="83" v3="84"/>
+     <triangle v1="84" v2="83" v3="85"/>
+     <triangle v1="84" v2="85" v3="86"/>
+     <triangle v1="84" v2="86" v3="81"/>
+     <triangle v1="81" v2="86" v3="87"/>
+     <triangle v1="81" v2="87" v3="88"/>
+     <triangle v1="88" v2="89" v3="81"/>
+     <triangle v1="81" v2="89" v3="90"/>
+     <triangle v1="81" v2="90" v3="91"/>
+     <triangle v1="91" v2="92" v3="81"/>
+     <triangle v1="81" v2="92" v3="93"/>
+     <triangle v1="81" v2="93" v3="94"/>
+     <triangle v1="94" v2="95" v3="81"/>
+     <triangle v1="81" v2="95" v3="96"/>
+     <triangle v1="81" v2="96" v3="97"/>
+     <triangle v1="97" v2="98" v3="81"/>
+     <triangle v1="81" v2="98" v3="99"/>
+     <triangle v1="81" v2="99" v3="100"/>
+     <triangle v1="100" v2="101" v3="81"/>
+     <triangle v1="81" v2="101" v3="102"/>
+     <triangle v1="81" v2="102" v3="103"/>
+     <triangle v1="103" v2="104" v3="81"/>
+     <triangle v1="52" v2="54" v3="81"/>
+     <triangle v1="81" v2="54" v3="66"/>
+     <triangle v1="81" v2="66" v3="71"/>
+     <triangle v1="105" v2="3" v3="52"/>
+     <triangle v1="52" v2="3" v3="1"/>
+     <triangle v1="52" v2="1" v3="47"/>
+     <triangle v1="106" v2="15" v3="105"/>
+     <triangle v1="105" v2="15" v3="13"/>
+     <triangle v1="105" v2="13" v3="11"/>
+     <triangle v1="107" v2="27" v3="106"/>
+     <triangle v1="106" v2="27" v3="25"/>
+     <triangle v1="106" v2="25" v3="23"/>
+     <triangle v1="108" v2="33" v3="107"/>
+     <triangle v1="107" v2="33" v3="31"/>
+     <triangle v1="107" v2="31" v3="29"/>
+     <triangle v1="108" v2="109" v3="33"/>
+     <triangle v1="33" v2="109" v3="110"/>
+     <triangle v1="33" v2="110" v3="35"/>
+     <triangle v1="35" v2="110" v3="111"/>
+     <triangle v1="35" v2="111" v3="112"/>
+     <triangle v1="112" v2="113" v3="35"/>
+     <triangle v1="35" v2="113" v3="37"/>
+     <triangle v1="113" v2="114" v3="37"/>
+     <triangle v1="37" v2="114" v3="115"/>
+     <triangle v1="37" v2="115" v3="116"/>
+     <triangle v1="116" v2="117" v3="37"/>
+     <triangle v1="37" v2="117" v3="39"/>
+     <triangle v1="117" v2="118" v3="39"/>
+     <triangle v1="39" v2="118" v3="119"/>
+     <triangle v1="39" v2="119" v3="41"/>
+     <triangle v1="44" v2="120" v3="42"/>
+     <triangle v1="42" v2="120" v3="121"/>
+     <triangle v1="42" v2="121" v3="122"/>
+     <triangle v1="123" v2="124" v3="122"/>
+     <triangle v1="122" v2="124" v3="125"/>
+     <triangle v1="122" v2="125" v3="42"/>
+     <triangle v1="42" v2="125" v3="40"/>
+     <triangle v1="123" v2="126" v3="124"/>
+     <triangle v1="124" v2="126" v3="127"/>
+     <triangle v1="124" v2="127" v3="128"/>
+     <triangle v1="128" v2="129" v3="124"/>
+     <triangle v1="124" v2="129" v3="130"/>
+     <triangle v1="130" v2="129" v3="131"/>
+     <triangle v1="130" v2="131" v3="132"/>
+     <triangle v1="132" v2="133" v3="130"/>
+     <triangle v1="130" v2="133" v3="134"/>
+     <triangle v1="130" v2="134" v3="135"/>
+     <triangle v1="135" v2="134" v3="136"/>
+     <triangle v1="135" v2="136" v3="137"/>
+     <triangle v1="137" v2="138" v3="135"/>
+     <triangle v1="135" v2="138" v3="139"/>
+     <triangle v1="135" v2="139" v3="140"/>
+     <triangle v1="135" v2="140" v3="141"/>
+     <triangle v1="141" v2="140" v3="142"/>
+     <triangle v1="141" v2="142" v3="143"/>
+     <triangle v1="143" v2="144" v3="141"/>
+     <triangle v1="141" v2="144" v3="145"/>
+     <triangle v1="145" v2="144" v3="146"/>
+     <triangle v1="145" v2="146" v3="147"/>
+     <triangle v1="147" v2="148" v3="145"/>
+     <triangle v1="145" v2="148" v3="149"/>
+     <triangle v1="145" v2="149" v3="150"/>
+     <triangle v1="150" v2="149" v3="151"/>
+     <triangle v1="150" v2="151" v3="152"/>
+     <triangle v1="152" v2="153" v3="150"/>
+     <triangle v1="150" v2="153" v3="154"/>
+     <triangle v1="150" v2="154" v3="155"/>
+     <triangle v1="155" v2="154" v3="156"/>
+     <triangle v1="155" v2="156" v3="157"/>
+     <triangle v1="157" v2="158" v3="155"/>
+     <triangle v1="155" v2="158" v3="159"/>
+     <triangle v1="159" v2="158" v3="160"/>
+     <triangle v1="159" v2="160" v3="161"/>
+     <triangle v1="161" v2="162" v3="159"/>
+     <triangle v1="159" v2="162" v3="163"/>
+     <triangle v1="159" v2="163" v3="164"/>
+     <triangle v1="27" v2="107" v3="29"/>
+     <triangle v1="23" v2="21" v3="106"/>
+     <triangle v1="106" v2="21" v3="19"/>
+     <triangle v1="106" v2="19" v3="17"/>
+     <triangle v1="11" v2="9" v3="105"/>
+     <triangle v1="105" v2="9" v3="7"/>
+     <triangle v1="105" v2="7" v3="5"/>
+     <triangle v1="76" v2="81" v3="71"/>
+     <triangle v1="3" v2="105" v3="5"/>
+     <triangle v1="15" v2="106" v3="17"/>
+     <triangle v1="107" v2="106" v3="165"/>
+     <triangle v1="165" v2="106" v3="105"/>
+     <triangle v1="165" v2="105" v3="52"/>
+     <triangle v1="52" v2="81" v3="165"/>
+     <triangle v1="165" v2="81" v3="104"/>
+     <triangle v1="165" v2="104" v3="166"/>
+     <triangle v1="167" v2="166" v3="168"/>
+     <triangle v1="168" v2="166" v3="104"/>
+     <triangle v1="168" v2="104" v3="169"/>
+     <triangle v1="169" v2="104" v3="103"/>
+     <triangle v1="169" v2="103" v3="170"/>
+     <triangle v1="170" v2="103" v3="102"/>
+     <triangle v1="170" v2="102" v3="171"/>
+     <triangle v1="171" v2="102" v3="101"/>
+     <triangle v1="171" v2="101" v3="172"/>
+     <triangle v1="172" v2="101" v3="173"/>
+     <triangle v1="173" v2="101" v3="100"/>
+     <triangle v1="173" v2="100" v3="174"/>
+     <triangle v1="174" v2="100" v3="99"/>
+     <triangle v1="174" v2="99" v3="175"/>
+     <triangle v1="175" v2="99" v3="98"/>
+     <triangle v1="175" v2="98" v3="176"/>
+     <triangle v1="176" v2="98" v3="97"/>
+     <triangle v1="176" v2="97" v3="177"/>
+     <triangle v1="177" v2="97" v3="178"/>
+     <triangle v1="178" v2="97" v3="96"/>
+     <triangle v1="178" v2="96" v3="179"/>
+     <triangle v1="179" v2="96" v3="95"/>
+     <triangle v1="179" v2="95" v3="180"/>
+     <triangle v1="180" v2="95" v3="94"/>
+     <triangle v1="180" v2="94" v3="181"/>
+     <triangle v1="181" v2="94" v3="182"/>
+     <triangle v1="182" v2="94" v3="93"/>
+     <triangle v1="182" v2="93" v3="183"/>
+     <triangle v1="183" v2="93" v3="92"/>
+     <triangle v1="183" v2="92" v3="184"/>
+     <triangle v1="184" v2="92" v3="91"/>
+     <triangle v1="184" v2="91" v3="185"/>
+     <triangle v1="185" v2="91" v3="90"/>
+     <triangle v1="185" v2="90" v3="186"/>
+     <triangle v1="186" v2="90" v3="89"/>
+     <triangle v1="186" v2="89" v3="88"/>
+     <triangle v1="186" v2="88" v3="187"/>
+     <triangle v1="187" v2="88" v3="87"/>
+     <triangle v1="187" v2="87" v3="188"/>
+     <triangle v1="188" v2="87" v3="86"/>
+     <triangle v1="188" v2="86" v3="85"/>
+     <triangle v1="83" v2="189" v3="85"/>
+     <triangle v1="85" v2="189" v3="190"/>
+     <triangle v1="85" v2="190" v3="188"/>
+     <triangle v1="189" v2="83" v3="191"/>
+     <triangle v1="191" v2="83" v3="82"/>
+     <triangle v1="191" v2="82" v3="80"/>
+     <triangle v1="191" v2="80" v3="192"/>
+     <triangle v1="192" v2="80" v3="79"/>
+     <triangle v1="192" v2="79" v3="193"/>
+     <triangle v1="193" v2="79" v3="78"/>
+     <triangle v1="193" v2="78" v3="77"/>
+     <triangle v1="193" v2="77" v3="194"/>
+     <triangle v1="194" v2="77" v3="75"/>
+     <triangle v1="194" v2="75" v3="195"/>
+     <triangle v1="195" v2="75" v3="74"/>
+     <triangle v1="195" v2="74" v3="196"/>
+     <triangle v1="196" v2="74" v3="73"/>
+     <triangle v1="196" v2="73" v3="72"/>
+     <triangle v1="196" v2="72" v3="197"/>
+     <triangle v1="197" v2="72" v3="70"/>
+     <triangle v1="197" v2="70" v3="198"/>
+     <triangle v1="198" v2="70" v3="69"/>
+     <triangle v1="198" v2="69" v3="199"/>
+     <triangle v1="199" v2="69" v3="68"/>
+     <triangle v1="199" v2="68" v3="200"/>
+     <triangle v1="200" v2="68" v3="67"/>
+     <triangle v1="200" v2="67" v3="65"/>
+     <triangle v1="200" v2="65" v3="201"/>
+     <triangle v1="201" v2="65" v3="64"/>
+     <triangle v1="201" v2="64" v3="202"/>
+     <triangle v1="202" v2="64" v3="63"/>
+     <triangle v1="202" v2="63" v3="203"/>
+     <triangle v1="203" v2="63" v3="56"/>
+     <triangle v1="203" v2="56" v3="204"/>
+     <triangle v1="204" v2="56" v3="55"/>
+     <triangle v1="204" v2="55" v3="205"/>
+     <triangle v1="205" v2="55" v3="62"/>
+     <triangle v1="205" v2="62" v3="206"/>
+     <triangle v1="206" v2="62" v3="61"/>
+     <triangle v1="206" v2="61" v3="60"/>
+     <triangle v1="206" v2="60" v3="207"/>
+     <triangle v1="207" v2="60" v3="59"/>
+     <triangle v1="207" v2="59" v3="208"/>
+     <triangle v1="208" v2="59" v3="58"/>
+     <triangle v1="208" v2="58" v3="209"/>
+     <triangle v1="209" v2="58" v3="57"/>
+     <triangle v1="209" v2="57" v3="210"/>
+     <triangle v1="210" v2="57" v3="50"/>
+     <triangle v1="210" v2="50" v3="211"/>
+     <triangle v1="211" v2="50" v3="49"/>
+     <triangle v1="211" v2="49" v3="48"/>
+     <triangle v1="211" v2="48" v3="212"/>
+     <triangle v1="212" v2="48" v3="46"/>
+     <triangle v1="212" v2="46" v3="213"/>
+     <triangle v1="213" v2="46" v3="45"/>
+     <triangle v1="213" v2="45" v3="214"/>
+     <triangle v1="214" v2="45" v3="0"/>
+     <triangle v1="214" v2="0" v3="2"/>
+     <triangle v1="214" v2="2" v3="215"/>
+     <triangle v1="215" v2="2" v3="216"/>
+     <triangle v1="215" v2="216" v3="217"/>
+     <triangle v1="215" v2="217" v3="218"/>
+     <triangle v1="218" v2="217" v3="219"/>
+     <triangle v1="218" v2="219" v3="220"/>
+     <triangle v1="220" v2="219" v3="221"/>
+     <triangle v1="220" v2="221" v3="222"/>
+     <triangle v1="220" v2="222" v3="223"/>
+     <triangle v1="223" v2="222" v3="224"/>
+     <triangle v1="223" v2="224" v3="225"/>
+     <triangle v1="223" v2="225" v3="226"/>
+     <triangle v1="226" v2="225" v3="227"/>
+     <triangle v1="226" v2="227" v3="228"/>
+     <triangle v1="228" v2="227" v3="229"/>
+     <triangle v1="228" v2="229" v3="230"/>
+     <triangle v1="230" v2="229" v3="231"/>
+     <triangle v1="230" v2="231" v3="232"/>
+     <triangle v1="232" v2="231" v3="233"/>
+     <triangle v1="232" v2="233" v3="234"/>
+     <triangle v1="234" v2="233" v3="235"/>
+     <triangle v1="234" v2="235" v3="236"/>
+     <triangle v1="234" v2="236" v3="237"/>
+     <triangle v1="237" v2="236" v3="238"/>
+     <triangle v1="237" v2="238" v3="239"/>
+     <triangle v1="239" v2="238" v3="240"/>
+     <triangle v1="239" v2="240" v3="241"/>
+     <triangle v1="239" v2="241" v3="242"/>
+     <triangle v1="242" v2="241" v3="243"/>
+     <triangle v1="242" v2="243" v3="244"/>
+     <triangle v1="244" v2="243" v3="245"/>
+     <triangle v1="244" v2="245" v3="246"/>
+     <triangle v1="246" v2="245" v3="247"/>
+     <triangle v1="246" v2="247" v3="248"/>
+     <triangle v1="248" v2="247" v3="249"/>
+     <triangle v1="248" v2="249" v3="250"/>
+     <triangle v1="250" v2="249" v3="251"/>
+     <triangle v1="250" v2="251" v3="252"/>
+     <triangle v1="252" v2="251" v3="253"/>
+     <triangle v1="252" v2="253" v3="254"/>
+     <triangle v1="254" v2="253" v3="255"/>
+     <triangle v1="254" v2="255" v3="256"/>
+     <triangle v1="256" v2="255" v3="257"/>
+     <triangle v1="256" v2="257" v3="258"/>
+     <triangle v1="258" v2="257" v3="259"/>
+     <triangle v1="258" v2="259" v3="260"/>
+     <triangle v1="260" v2="259" v3="261"/>
+     <triangle v1="260" v2="261" v3="262"/>
+     <triangle v1="262" v2="261" v3="263"/>
+     <triangle v1="262" v2="263" v3="264"/>
+     <triangle v1="264" v2="263" v3="265"/>
+     <triangle v1="264" v2="265" v3="266"/>
+     <triangle v1="266" v2="265" v3="267"/>
+     <triangle v1="266" v2="267" v3="268"/>
+     <triangle v1="268" v2="267" v3="269"/>
+     <triangle v1="268" v2="269" v3="270"/>
+     <triangle v1="270" v2="269" v3="271"/>
+     <triangle v1="270" v2="271" v3="272"/>
+     <triangle v1="2" v2="4" v3="216"/>
+     <triangle v1="216" v2="4" v3="217"/>
+     <triangle v1="217" v2="4" v3="6"/>
+     <triangle v1="217" v2="6" v3="219"/>
+     <triangle v1="219" v2="6" v3="221"/>
+     <triangle v1="221" v2="6" v3="8"/>
+     <triangle v1="221" v2="8" v3="222"/>
+     <triangle v1="222" v2="8" v3="10"/>
+     <triangle v1="222" v2="10" v3="224"/>
+     <triangle v1="224" v2="10" v3="12"/>
+     <triangle v1="224" v2="12" v3="225"/>
+     <triangle v1="225" v2="12" v3="14"/>
+     <triangle v1="225" v2="14" v3="227"/>
+     <triangle v1="227" v2="14" v3="16"/>
+     <triangle v1="227" v2="16" v3="229"/>
+     <triangle v1="229" v2="16" v3="18"/>
+     <triangle v1="229" v2="18" v3="231"/>
+     <triangle v1="231" v2="18" v3="20"/>
+     <triangle v1="231" v2="20" v3="233"/>
+     <triangle v1="233" v2="20" v3="22"/>
+     <triangle v1="233" v2="22" v3="235"/>
+     <triangle v1="235" v2="22" v3="24"/>
+     <triangle v1="235" v2="24" v3="26"/>
+     <triangle v1="26" v2="28" v3="235"/>
+     <triangle v1="235" v2="28" v3="236"/>
+     <triangle v1="236" v2="28" v3="30"/>
+     <triangle v1="236" v2="30" v3="238"/>
+     <triangle v1="238" v2="30" v3="32"/>
+     <triangle v1="238" v2="32" v3="34"/>
+     <triangle v1="238" v2="34" v3="240"/>
+     <triangle v1="240" v2="34" v3="36"/>
+     <triangle v1="240" v2="36" v3="38"/>
+     <triangle v1="38" v2="40" v3="240"/>
+     <triangle v1="240" v2="40" v3="241"/>
+     <triangle v1="241" v2="40" v3="125"/>
+     <triangle v1="241" v2="125" v3="124"/>
+     <triangle v1="124" v2="130" v3="241"/>
+     <triangle v1="241" v2="130" v3="135"/>
+     <triangle v1="241" v2="135" v3="141"/>
+     <triangle v1="241" v2="141" v3="243"/>
+     <triangle v1="243" v2="141" v3="145"/>
+     <triangle v1="243" v2="145" v3="273"/>
+     <triangle v1="273" v2="145" v3="150"/>
+     <triangle v1="273" v2="150" v3="155"/>
+     <triangle v1="155" v2="159" v3="273"/>
+     <triangle v1="273" v2="159" v3="164"/>
+     <triangle v1="273" v2="274" v3="243"/>
+     <triangle v1="243" v2="274" v3="275"/>
+     <triangle v1="243" v2="275" v3="245"/>
+     <triangle v1="245" v2="275" v3="276"/>
+     <triangle v1="245" v2="276" v3="277"/>
+     <triangle v1="277" v2="278" v3="245"/>
+     <triangle v1="245" v2="278" v3="247"/>
+     <triangle v1="247" v2="278" v3="279"/>
+     <triangle v1="247" v2="279" v3="280"/>
+     <triangle v1="281" v2="282" v3="280"/>
+     <triangle v1="280" v2="282" v3="283"/>
+     <triangle v1="280" v2="283" v3="284"/>
+     <triangle v1="285" v2="286" v3="281"/>
+     <triangle v1="281" v2="286" v3="287"/>
+     <triangle v1="281" v2="287" v3="288"/>
+     <triangle v1="289" v2="290" v3="285"/>
+     <triangle v1="285" v2="290" v3="291"/>
+     <triangle v1="285" v2="291" v3="286"/>
+     <triangle v1="290" v2="289" v3="292"/>
+     <triangle v1="292" v2="289" v3="293"/>
+     <triangle v1="292" v2="293" v3="294"/>
+     <triangle v1="294" v2="293" v3="295"/>
+     <triangle v1="294" v2="295" v3="296"/>
+     <triangle v1="296" v2="295" v3="297"/>
+     <triangle v1="296" v2="297" v3="298"/>
+     <triangle v1="298" v2="297" v3="299"/>
+     <triangle v1="298" v2="299" v3="300"/>
+     <triangle v1="300" v2="299" v3="301"/>
+     <triangle v1="300" v2="301" v3="302"/>
+     <triangle v1="302" v2="301" v3="303"/>
+     <triangle v1="302" v2="303" v3="304"/>
+     <triangle v1="304" v2="303" v3="305"/>
+     <triangle v1="304" v2="305" v3="306"/>
+     <triangle v1="306" v2="305" v3="307"/>
+     <triangle v1="306" v2="307" v3="308"/>
+     <triangle v1="308" v2="307" v3="309"/>
+     <triangle v1="308" v2="309" v3="310"/>
+     <triangle v1="310" v2="309" v3="311"/>
+     <triangle v1="310" v2="311" v3="312"/>
+     <triangle v1="312" v2="311" v3="313"/>
+     <triangle v1="312" v2="313" v3="314"/>
+     <triangle v1="314" v2="313" v3="315"/>
+     <triangle v1="314" v2="315" v3="316"/>
+     <triangle v1="316" v2="315" v3="317"/>
+     <triangle v1="316" v2="317" v3="318"/>
+     <triangle v1="318" v2="317" v3="319"/>
+     <triangle v1="318" v2="319" v3="320"/>
+     <triangle v1="320" v2="319" v3="321"/>
+     <triangle v1="320" v2="321" v3="322"/>
+     <triangle v1="322" v2="321" v3="323"/>
+     <triangle v1="322" v2="323" v3="324"/>
+     <triangle v1="288" v2="325" v3="281"/>
+     <triangle v1="281" v2="325" v3="326"/>
+     <triangle v1="281" v2="326" v3="282"/>
+     <triangle v1="284" v2="327" v3="280"/>
+     <triangle v1="280" v2="327" v3="328"/>
+     <triangle v1="280" v2="328" v3="249"/>
+     <triangle v1="249" v2="328" v3="251"/>
+     <triangle v1="251" v2="328" v3="329"/>
+     <triangle v1="251" v2="329" v3="330"/>
+     <triangle v1="251" v2="330" v3="253"/>
+     <triangle v1="253" v2="330" v3="331"/>
+     <triangle v1="253" v2="331" v3="255"/>
+     <triangle v1="255" v2="331" v3="332"/>
+     <triangle v1="255" v2="332" v3="257"/>
+     <triangle v1="249" v2="247" v3="280"/>
+     <triangle v1="258" v2="260" v3="333"/>
+     <triangle v1="333" v2="260" v3="262"/>
+     <triangle v1="333" v2="262" v3="264"/>
+     <triangle v1="264" v2="266" v3="333"/>
+     <triangle v1="333" v2="266" v3="334"/>
+     <triangle v1="334" v2="266" v3="268"/>
+     <triangle v1="334" v2="268" v3="270"/>
+     <triangle v1="334" v2="270" v3="335"/>
+     <triangle v1="335" v2="270" v3="272"/>
+     <triangle v1="335" v2="272" v3="336"/>
+     <triangle v1="335" v2="336" v3="337"/>
+     <triangle v1="337" v2="336" v3="338"/>
+     <triangle v1="337" v2="338" v3="339"/>
+     <triangle v1="339" v2="338" v3="340"/>
+     <triangle v1="339" v2="340" v3="341"/>
+     <triangle v1="341" v2="340" v3="342"/>
+     <triangle v1="341" v2="342" v3="343"/>
+     <triangle v1="343" v2="342" v3="344"/>
+     <triangle v1="343" v2="344" v3="345"/>
+     <triangle v1="345" v2="344" v3="346"/>
+     <triangle v1="345" v2="346" v3="347"/>
+     <triangle v1="347" v2="346" v3="348"/>
+     <triangle v1="347" v2="348" v3="349"/>
+     <triangle v1="349" v2="348" v3="350"/>
+     <triangle v1="349" v2="350" v3="351"/>
+     <triangle v1="351" v2="350" v3="352"/>
+     <triangle v1="351" v2="352" v3="353"/>
+     <triangle v1="353" v2="352" v3="354"/>
+     <triangle v1="353" v2="354" v3="355"/>
+     <triangle v1="355" v2="354" v3="356"/>
+     <triangle v1="355" v2="356" v3="357"/>
+     <triangle v1="357" v2="356" v3="358"/>
+     <triangle v1="357" v2="358" v3="359"/>
+     <triangle v1="359" v2="358" v3="360"/>
+     <triangle v1="359" v2="360" v3="361"/>
+     <triangle v1="361" v2="360" v3="362"/>
+     <triangle v1="361" v2="362" v3="363"/>
+     <triangle v1="363" v2="362" v3="364"/>
+     <triangle v1="363" v2="364" v3="365"/>
+     <triangle v1="365" v2="364" v3="366"/>
+     <triangle v1="365" v2="366" v3="367"/>
+     <triangle v1="367" v2="366" v3="368"/>
+     <triangle v1="367" v2="368" v3="369"/>
+     <triangle v1="369" v2="368" v3="370"/>
+     <triangle v1="369" v2="370" v3="371"/>
+     <triangle v1="371" v2="370" v3="372"/>
+     <triangle v1="371" v2="372" v3="373"/>
+     <triangle v1="373" v2="372" v3="374"/>
+     <triangle v1="373" v2="374" v3="375"/>
+     <triangle v1="375" v2="374" v3="376"/>
+     <triangle v1="375" v2="376" v3="377"/>
+     <triangle v1="377" v2="376" v3="378"/>
+     <triangle v1="377" v2="378" v3="379"/>
+     <triangle v1="379" v2="378" v3="380"/>
+     <triangle v1="379" v2="380" v3="381"/>
+     <triangle v1="381" v2="380" v3="382"/>
+     <triangle v1="381" v2="382" v3="383"/>
+     <triangle v1="383" v2="382" v3="384"/>
+     <triangle v1="383" v2="384" v3="385"/>
+     <triangle v1="385" v2="384" v3="386"/>
+     <triangle v1="385" v2="386" v3="387"/>
+     <triangle v1="387" v2="386" v3="388"/>
+     <triangle v1="387" v2="388" v3="389"/>
+     <triangle v1="389" v2="388" v3="390"/>
+     <triangle v1="389" v2="390" v3="391"/>
+     <triangle v1="391" v2="390" v3="392"/>
+     <triangle v1="391" v2="392" v3="393"/>
+     <triangle v1="393" v2="392" v3="394"/>
+     <triangle v1="393" v2="394" v3="395"/>
+     <triangle v1="395" v2="394" v3="396"/>
+     <triangle v1="395" v2="396" v3="397"/>
+     <triangle v1="397" v2="396" v3="398"/>
+     <triangle v1="397" v2="398" v3="399"/>
+     <triangle v1="399" v2="398" v3="400"/>
+     <triangle v1="400" v2="398" v3="401"/>
+     <triangle v1="401" v2="398" v3="402"/>
+     <triangle v1="401" v2="402" v3="403"/>
+     <triangle v1="403" v2="402" v3="404"/>
+     <triangle v1="404" v2="402" v3="405"/>
+     <triangle v1="406" v2="405" v3="407"/>
+     <triangle v1="407" v2="405" v3="402"/>
+     <triangle v1="407" v2="402" v3="408"/>
+     <triangle v1="408" v2="402" v3="398"/>
+     <triangle v1="408" v2="398" v3="409"/>
+     <triangle v1="409" v2="398" v3="396"/>
+     <triangle v1="409" v2="396" v3="410"/>
+     <triangle v1="410" v2="396" v3="394"/>
+     <triangle v1="410" v2="394" v3="411"/>
+     <triangle v1="411" v2="394" v3="392"/>
+     <triangle v1="411" v2="392" v3="412"/>
+     <triangle v1="412" v2="392" v3="390"/>
+     <triangle v1="412" v2="390" v3="413"/>
+     <triangle v1="413" v2="390" v3="388"/>
+     <triangle v1="413" v2="388" v3="414"/>
+     <triangle v1="414" v2="388" v3="386"/>
+     <triangle v1="414" v2="386" v3="415"/>
+     <triangle v1="415" v2="386" v3="384"/>
+     <triangle v1="415" v2="384" v3="416"/>
+     <triangle v1="416" v2="384" v3="382"/>
+     <triangle v1="416" v2="382" v3="417"/>
+     <triangle v1="417" v2="382" v3="380"/>
+     <triangle v1="417" v2="380" v3="418"/>
+     <triangle v1="418" v2="380" v3="378"/>
+     <triangle v1="418" v2="378" v3="419"/>
+     <triangle v1="419" v2="378" v3="376"/>
+     <triangle v1="419" v2="376" v3="420"/>
+     <triangle v1="420" v2="376" v3="374"/>
+     <triangle v1="420" v2="374" v3="421"/>
+     <triangle v1="421" v2="374" v3="372"/>
+     <triangle v1="421" v2="372" v3="422"/>
+     <triangle v1="422" v2="372" v3="370"/>
+     <triangle v1="422" v2="370" v3="423"/>
+     <triangle v1="423" v2="370" v3="368"/>
+     <triangle v1="423" v2="368" v3="424"/>
+     <triangle v1="424" v2="368" v3="366"/>
+     <triangle v1="424" v2="366" v3="425"/>
+     <triangle v1="425" v2="366" v3="364"/>
+     <triangle v1="425" v2="364" v3="426"/>
+     <triangle v1="426" v2="364" v3="362"/>
+     <triangle v1="426" v2="362" v3="427"/>
+     <triangle v1="427" v2="362" v3="360"/>
+     <triangle v1="427" v2="360" v3="428"/>
+     <triangle v1="428" v2="360" v3="358"/>
+     <triangle v1="428" v2="358" v3="429"/>
+     <triangle v1="429" v2="358" v3="356"/>
+     <triangle v1="429" v2="356" v3="430"/>
+     <triangle v1="430" v2="356" v3="354"/>
+     <triangle v1="430" v2="354" v3="431"/>
+     <triangle v1="431" v2="354" v3="352"/>
+     <triangle v1="431" v2="352" v3="432"/>
+     <triangle v1="432" v2="352" v3="350"/>
+     <triangle v1="432" v2="350" v3="433"/>
+     <triangle v1="433" v2="350" v3="348"/>
+     <triangle v1="433" v2="348" v3="434"/>
+     <triangle v1="434" v2="348" v3="346"/>
+     <triangle v1="434" v2="346" v3="435"/>
+     <triangle v1="435" v2="346" v3="344"/>
+     <triangle v1="435" v2="344" v3="436"/>
+     <triangle v1="436" v2="344" v3="342"/>
+     <triangle v1="436" v2="342" v3="437"/>
+     <triangle v1="437" v2="342" v3="340"/>
+     <triangle v1="437" v2="340" v3="438"/>
+     <triangle v1="438" v2="340" v3="338"/>
+     <triangle v1="438" v2="338" v3="439"/>
+     <triangle v1="439" v2="338" v3="336"/>
+     <triangle v1="439" v2="336" v3="271"/>
+     <triangle v1="271" v2="336" v3="272"/>
+     <triangle v1="439" v2="271" v3="330"/>
+     <triangle v1="330" v2="271" v3="269"/>
+     <triangle v1="330" v2="269" v3="331"/>
+     <triangle v1="331" v2="269" v3="267"/>
+     <triangle v1="331" v2="267" v3="265"/>
+     <triangle v1="331" v2="265" v3="332"/>
+     <triangle v1="332" v2="265" v3="263"/>
+     <triangle v1="332" v2="263" v3="261"/>
+     <triangle v1="261" v2="259" v3="332"/>
+     <triangle v1="332" v2="259" v3="257"/>
+     <triangle v1="330" v2="329" v3="439"/>
+     <triangle v1="439" v2="329" v3="438"/>
+     <triangle v1="438" v2="329" v3="328"/>
+     <triangle v1="438" v2="328" v3="437"/>
+     <triangle v1="437" v2="328" v3="327"/>
+     <triangle v1="437" v2="327" v3="436"/>
+     <triangle v1="436" v2="327" v3="284"/>
+     <triangle v1="436" v2="284" v3="435"/>
+     <triangle v1="435" v2="284" v3="283"/>
+     <triangle v1="435" v2="283" v3="434"/>
+     <triangle v1="434" v2="283" v3="282"/>
+     <triangle v1="434" v2="282" v3="433"/>
+     <triangle v1="433" v2="282" v3="326"/>
+     <triangle v1="433" v2="326" v3="432"/>
+     <triangle v1="432" v2="326" v3="325"/>
+     <triangle v1="432" v2="325" v3="431"/>
+     <triangle v1="431" v2="325" v3="288"/>
+     <triangle v1="431" v2="288" v3="430"/>
+     <triangle v1="430" v2="288" v3="287"/>
+     <triangle v1="430" v2="287" v3="429"/>
+     <triangle v1="429" v2="287" v3="286"/>
+     <triangle v1="429" v2="286" v3="428"/>
+     <triangle v1="428" v2="286" v3="291"/>
+     <triangle v1="428" v2="291" v3="427"/>
+     <triangle v1="427" v2="291" v3="290"/>
+     <triangle v1="427" v2="290" v3="426"/>
+     <triangle v1="426" v2="290" v3="292"/>
+     <triangle v1="426" v2="292" v3="425"/>
+     <triangle v1="425" v2="292" v3="294"/>
+     <triangle v1="425" v2="294" v3="424"/>
+     <triangle v1="424" v2="294" v3="296"/>
+     <triangle v1="424" v2="296" v3="423"/>
+     <triangle v1="423" v2="296" v3="298"/>
+     <triangle v1="423" v2="298" v3="422"/>
+     <triangle v1="422" v2="298" v3="300"/>
+     <triangle v1="422" v2="300" v3="421"/>
+     <triangle v1="421" v2="300" v3="302"/>
+     <triangle v1="421" v2="302" v3="420"/>
+     <triangle v1="420" v2="302" v3="304"/>
+     <triangle v1="420" v2="304" v3="419"/>
+     <triangle v1="419" v2="304" v3="306"/>
+     <triangle v1="419" v2="306" v3="418"/>
+     <triangle v1="418" v2="306" v3="308"/>
+     <triangle v1="418" v2="308" v3="417"/>
+     <triangle v1="417" v2="308" v3="310"/>
+     <triangle v1="417" v2="310" v3="416"/>
+     <triangle v1="416" v2="310" v3="312"/>
+     <triangle v1="416" v2="312" v3="415"/>
+     <triangle v1="415" v2="312" v3="314"/>
+     <triangle v1="415" v2="314" v3="414"/>
+     <triangle v1="414" v2="314" v3="316"/>
+     <triangle v1="414" v2="316" v3="413"/>
+     <triangle v1="413" v2="316" v3="318"/>
+     <triangle v1="413" v2="318" v3="412"/>
+     <triangle v1="412" v2="318" v3="320"/>
+     <triangle v1="412" v2="320" v3="411"/>
+     <triangle v1="411" v2="320" v3="322"/>
+     <triangle v1="411" v2="322" v3="410"/>
+     <triangle v1="410" v2="322" v3="324"/>
+     <triangle v1="410" v2="324" v3="409"/>
+     <triangle v1="409" v2="324" v3="440"/>
+     <triangle v1="409" v2="440" v3="408"/>
+     <triangle v1="408" v2="440" v3="441"/>
+     <triangle v1="408" v2="441" v3="442"/>
+     <triangle v1="442" v2="443" v3="408"/>
+     <triangle v1="408" v2="443" v3="407"/>
+     <triangle v1="407" v2="443" v3="444"/>
+     <triangle v1="407" v2="444" v3="445"/>
+     <triangle v1="445" v2="406" v3="407"/>
+     <triangle v1="165" v2="446" v3="107"/>
+     <triangle v1="107" v2="446" v3="447"/>
+     <triangle v1="107" v2="447" v3="108"/>
+     <triangle v1="108" v2="447" v3="448"/>
+     <triangle v1="108" v2="448" v3="449"/>
+     <triangle v1="166" v2="167" v3="165"/>
+     <triangle v1="165" v2="167" v3="446"/>
+     <triangle v1="108" v2="449" v3="109"/>
+     <triangle v1="109" v2="449" v3="450"/>
+     <triangle v1="109" v2="450" v3="451"/>
+     <triangle v1="109" v2="451" v3="110"/>
+     <triangle v1="110" v2="451" v3="452"/>
+     <triangle v1="110" v2="452" v3="111"/>
+     <triangle v1="111" v2="452" v3="453"/>
+     <triangle v1="111" v2="453" v3="454"/>
+     <triangle v1="111" v2="454" v3="112"/>
+     <triangle v1="112" v2="454" v3="455"/>
+     <triangle v1="112" v2="455" v3="113"/>
+     <triangle v1="113" v2="455" v3="456"/>
+     <triangle v1="113" v2="456" v3="114"/>
+     <triangle v1="114" v2="456" v3="457"/>
+     <triangle v1="114" v2="457" v3="458"/>
+     <triangle v1="114" v2="458" v3="115"/>
+     <triangle v1="115" v2="458" v3="459"/>
+     <triangle v1="115" v2="459" v3="116"/>
+     <triangle v1="116" v2="459" v3="460"/>
+     <triangle v1="116" v2="460" v3="461"/>
+     <triangle v1="116" v2="461" v3="117"/>
+     <triangle v1="117" v2="461" v3="462"/>
+     <triangle v1="117" v2="462" v3="118"/>
+     <triangle v1="118" v2="462" v3="463"/>
+     <triangle v1="118" v2="463" v3="119"/>
+     <triangle v1="119" v2="463" v3="464"/>
+     <triangle v1="119" v2="464" v3="465"/>
+     <triangle v1="119" v2="465" v3="41"/>
+     <triangle v1="41" v2="465" v3="466"/>
+     <triangle v1="41" v2="466" v3="43"/>
+     <triangle v1="43" v2="466" v3="44"/>
+     <triangle v1="44" v2="466" v3="467"/>
+     <triangle v1="44" v2="467" v3="120"/>
+     <triangle v1="120" v2="467" v3="121"/>
+     <triangle v1="121" v2="467" v3="468"/>
+     <triangle v1="121" v2="468" v3="122"/>
+     <triangle v1="122" v2="468" v3="469"/>
+     <triangle v1="122" v2="469" v3="123"/>
+     <triangle v1="123" v2="469" v3="126"/>
+     <triangle v1="126" v2="469" v3="470"/>
+     <triangle v1="126" v2="470" v3="127"/>
+     <triangle v1="127" v2="470" v3="471"/>
+     <triangle v1="127" v2="471" v3="128"/>
+     <triangle v1="128" v2="471" v3="129"/>
+     <triangle v1="129" v2="471" v3="472"/>
+     <triangle v1="129" v2="472" v3="131"/>
+     <triangle v1="131" v2="472" v3="473"/>
+     <triangle v1="131" v2="473" v3="132"/>
+     <triangle v1="132" v2="473" v3="474"/>
+     <triangle v1="132" v2="474" v3="133"/>
+     <triangle v1="133" v2="474" v3="134"/>
+     <triangle v1="134" v2="474" v3="475"/>
+     <triangle v1="134" v2="475" v3="136"/>
+     <triangle v1="136" v2="475" v3="476"/>
+     <triangle v1="136" v2="476" v3="137"/>
+     <triangle v1="137" v2="476" v3="138"/>
+     <triangle v1="138" v2="476" v3="477"/>
+     <triangle v1="138" v2="477" v3="139"/>
+     <triangle v1="139" v2="477" v3="478"/>
+     <triangle v1="139" v2="478" v3="140"/>
+     <triangle v1="140" v2="478" v3="479"/>
+     <triangle v1="140" v2="479" v3="142"/>
+     <triangle v1="142" v2="479" v3="480"/>
+     <triangle v1="142" v2="480" v3="143"/>
+     <triangle v1="143" v2="480" v3="144"/>
+     <triangle v1="144" v2="480" v3="481"/>
+     <triangle v1="144" v2="481" v3="146"/>
+     <triangle v1="146" v2="481" v3="482"/>
+     <triangle v1="146" v2="482" v3="147"/>
+     <triangle v1="147" v2="482" v3="483"/>
+     <triangle v1="147" v2="483" v3="148"/>
+     <triangle v1="148" v2="483" v3="484"/>
+     <triangle v1="148" v2="484" v3="149"/>
+     <triangle v1="149" v2="484" v3="151"/>
+     <triangle v1="151" v2="484" v3="485"/>
+     <triangle v1="151" v2="485" v3="152"/>
+     <triangle v1="152" v2="485" v3="486"/>
+     <triangle v1="152" v2="486" v3="153"/>
+     <triangle v1="153" v2="486" v3="487"/>
+     <triangle v1="153" v2="487" v3="154"/>
+     <triangle v1="154" v2="487" v3="488"/>
+     <triangle v1="154" v2="488" v3="156"/>
+     <triangle v1="156" v2="488" v3="489"/>
+     <triangle v1="156" v2="489" v3="157"/>
+     <triangle v1="157" v2="489" v3="158"/>
+     <triangle v1="158" v2="489" v3="490"/>
+     <triangle v1="158" v2="490" v3="160"/>
+     <triangle v1="160" v2="490" v3="491"/>
+     <triangle v1="160" v2="491" v3="492"/>
+     <triangle v1="160" v2="492" v3="161"/>
+     <triangle v1="161" v2="492" v3="493"/>
+     <triangle v1="161" v2="493" v3="162"/>
+     <triangle v1="162" v2="493" v3="494"/>
+     <triangle v1="162" v2="494" v3="495"/>
+     <triangle v1="162" v2="495" v3="163"/>
+     <triangle v1="163" v2="495" v3="496"/>
+     <triangle v1="163" v2="496" v3="164"/>
+     <triangle v1="164" v2="496" v3="497"/>
+     <triangle v1="164" v2="497" v3="273"/>
+     <triangle v1="273" v2="497" v3="498"/>
+     <triangle v1="273" v2="498" v3="274"/>
+     <triangle v1="274" v2="498" v3="499"/>
+     <triangle v1="274" v2="499" v3="275"/>
+     <triangle v1="275" v2="499" v3="500"/>
+     <triangle v1="275" v2="500" v3="276"/>
+     <triangle v1="276" v2="500" v3="501"/>
+     <triangle v1="276" v2="501" v3="277"/>
+     <triangle v1="277" v2="501" v3="502"/>
+     <triangle v1="277" v2="502" v3="278"/>
+     <triangle v1="278" v2="502" v3="503"/>
+     <triangle v1="278" v2="503" v3="279"/>
+     <triangle v1="279" v2="503" v3="504"/>
+     <triangle v1="279" v2="504" v3="280"/>
+     <triangle v1="280" v2="504" v3="505"/>
+     <triangle v1="280" v2="505" v3="281"/>
+     <triangle v1="281" v2="505" v3="506"/>
+     <triangle v1="281" v2="506" v3="285"/>
+     <triangle v1="285" v2="506" v3="507"/>
+     <triangle v1="285" v2="507" v3="289"/>
+     <triangle v1="289" v2="507" v3="293"/>
+     <triangle v1="293" v2="507" v3="508"/>
+     <triangle v1="293" v2="508" v3="295"/>
+     <triangle v1="295" v2="508" v3="509"/>
+     <triangle v1="295" v2="509" v3="297"/>
+     <triangle v1="297" v2="509" v3="299"/>
+     <triangle v1="299" v2="509" v3="510"/>
+     <triangle v1="299" v2="510" v3="301"/>
+     <triangle v1="301" v2="510" v3="511"/>
+     <triangle v1="301" v2="511" v3="303"/>
+     <triangle v1="303" v2="511" v3="512"/>
+     <triangle v1="303" v2="512" v3="305"/>
+     <triangle v1="305" v2="512" v3="513"/>
+     <triangle v1="305" v2="513" v3="307"/>
+     <triangle v1="307" v2="513" v3="514"/>
+     <triangle v1="307" v2="514" v3="309"/>
+     <triangle v1="309" v2="514" v3="515"/>
+     <triangle v1="309" v2="515" v3="311"/>
+     <triangle v1="311" v2="515" v3="516"/>
+     <triangle v1="311" v2="516" v3="313"/>
+     <triangle v1="313" v2="516" v3="517"/>
+     <triangle v1="313" v2="517" v3="315"/>
+     <triangle v1="315" v2="517" v3="518"/>
+     <triangle v1="315" v2="518" v3="317"/>
+     <triangle v1="317" v2="518" v3="519"/>
+     <triangle v1="317" v2="519" v3="319"/>
+     <triangle v1="319" v2="519" v3="520"/>
+     <triangle v1="319" v2="520" v3="321"/>
+     <triangle v1="321" v2="520" v3="521"/>
+     <triangle v1="321" v2="521" v3="323"/>
+     <triangle v1="323" v2="521" v3="395"/>
+     <triangle v1="323" v2="395" v3="324"/>
+     <triangle v1="324" v2="395" v3="397"/>
+     <triangle v1="324" v2="397" v3="440"/>
+     <triangle v1="440" v2="397" v3="441"/>
+     <triangle v1="441" v2="397" v3="399"/>
+     <triangle v1="441" v2="399" v3="400"/>
+     <triangle v1="441" v2="400" v3="442"/>
+     <triangle v1="442" v2="400" v3="401"/>
+     <triangle v1="442" v2="401" v3="443"/>
+     <triangle v1="443" v2="401" v3="444"/>
+     <triangle v1="444" v2="401" v3="403"/>
+     <triangle v1="444" v2="403" v3="404"/>
+     <triangle v1="444" v2="404" v3="445"/>
+     <triangle v1="445" v2="404" v3="405"/>
+     <triangle v1="445" v2="405" v3="406"/>
+     <triangle v1="258" v2="333" v3="256"/>
+     <triangle v1="256" v2="333" v3="254"/>
+     <triangle v1="254" v2="333" v3="334"/>
+     <triangle v1="254" v2="334" v3="252"/>
+     <triangle v1="252" v2="334" v3="250"/>
+     <triangle v1="250" v2="334" v3="335"/>
+     <triangle v1="250" v2="335" v3="248"/>
+     <triangle v1="248" v2="335" v3="246"/>
+     <triangle v1="246" v2="335" v3="337"/>
+     <triangle v1="246" v2="337" v3="244"/>
+     <triangle v1="244" v2="337" v3="339"/>
+     <triangle v1="244" v2="339" v3="341"/>
+     <triangle v1="341" v2="343" v3="244"/>
+     <triangle v1="244" v2="343" v3="345"/>
+     <triangle v1="244" v2="345" v3="347"/>
+     <triangle v1="244" v2="347" v3="498"/>
+     <triangle v1="498" v2="347" v3="349"/>
+     <triangle v1="498" v2="349" v3="351"/>
+     <triangle v1="351" v2="353" v3="498"/>
+     <triangle v1="498" v2="353" v3="355"/>
+     <triangle v1="498" v2="355" v3="357"/>
+     <triangle v1="357" v2="359" v3="498"/>
+     <triangle v1="498" v2="359" v3="361"/>
+     <triangle v1="498" v2="361" v3="363"/>
+     <triangle v1="363" v2="365" v3="498"/>
+     <triangle v1="498" v2="365" v3="367"/>
+     <triangle v1="498" v2="367" v3="369"/>
+     <triangle v1="369" v2="371" v3="498"/>
+     <triangle v1="498" v2="371" v3="499"/>
+     <triangle v1="499" v2="371" v3="500"/>
+     <triangle v1="500" v2="371" v3="373"/>
+     <triangle v1="500" v2="373" v3="501"/>
+     <triangle v1="501" v2="373" v3="502"/>
+     <triangle v1="502" v2="373" v3="375"/>
+     <triangle v1="502" v2="375" v3="503"/>
+     <triangle v1="503" v2="375" v3="504"/>
+     <triangle v1="504" v2="375" v3="505"/>
+     <triangle v1="505" v2="375" v3="377"/>
+     <triangle v1="505" v2="377" v3="506"/>
+     <triangle v1="506" v2="377" v3="507"/>
+     <triangle v1="507" v2="377" v3="379"/>
+     <triangle v1="507" v2="379" v3="508"/>
+     <triangle v1="508" v2="379" v3="509"/>
+     <triangle v1="509" v2="379" v3="381"/>
+     <triangle v1="509" v2="381" v3="510"/>
+     <triangle v1="510" v2="381" v3="383"/>
+     <triangle v1="510" v2="383" v3="511"/>
+     <triangle v1="511" v2="383" v3="512"/>
+     <triangle v1="512" v2="383" v3="513"/>
+     <triangle v1="513" v2="383" v3="385"/>
+     <triangle v1="513" v2="385" v3="514"/>
+     <triangle v1="514" v2="385" v3="515"/>
+     <triangle v1="515" v2="385" v3="387"/>
+     <triangle v1="515" v2="387" v3="516"/>
+     <triangle v1="516" v2="387" v3="517"/>
+     <triangle v1="517" v2="387" v3="389"/>
+     <triangle v1="517" v2="389" v3="518"/>
+     <triangle v1="518" v2="389" v3="391"/>
+     <triangle v1="518" v2="391" v3="519"/>
+     <triangle v1="519" v2="391" v3="393"/>
+     <triangle v1="519" v2="393" v3="520"/>
+     <triangle v1="520" v2="393" v3="521"/>
+     <triangle v1="521" v2="393" v3="395"/>
+     <triangle v1="498" v2="497" v3="244"/>
+     <triangle v1="244" v2="497" v3="242"/>
+     <triangle v1="242" v2="497" v3="496"/>
+     <triangle v1="242" v2="496" v3="239"/>
+     <triangle v1="239" v2="496" v3="495"/>
+     <triangle v1="239" v2="495" v3="494"/>
+     <triangle v1="239" v2="494" v3="237"/>
+     <triangle v1="237" v2="494" v3="493"/>
+     <triangle v1="237" v2="493" v3="492"/>
+     <triangle v1="492" v2="491" v3="237"/>
+     <triangle v1="237" v2="491" v3="234"/>
+     <triangle v1="234" v2="491" v3="490"/>
+     <triangle v1="234" v2="490" v3="489"/>
+     <triangle v1="234" v2="489" v3="232"/>
+     <triangle v1="232" v2="489" v3="488"/>
+     <triangle v1="232" v2="488" v3="487"/>
+     <triangle v1="486" v2="228" v3="487"/>
+     <triangle v1="487" v2="228" v3="230"/>
+     <triangle v1="487" v2="230" v3="232"/>
+     <triangle v1="228" v2="486" v3="226"/>
+     <triangle v1="226" v2="486" v3="485"/>
+     <triangle v1="226" v2="485" v3="223"/>
+     <triangle v1="223" v2="485" v3="220"/>
+     <triangle v1="220" v2="485" v3="484"/>
+     <triangle v1="220" v2="484" v3="483"/>
+     <triangle v1="220" v2="483" v3="218"/>
+     <triangle v1="218" v2="483" v3="482"/>
+     <triangle v1="218" v2="482" v3="215"/>
+     <triangle v1="215" v2="482" v3="481"/>
+     <triangle v1="215" v2="481" v3="214"/>
+     <triangle v1="214" v2="481" v3="480"/>
+     <triangle v1="214" v2="480" v3="213"/>
+     <triangle v1="213" v2="480" v3="479"/>
+     <triangle v1="213" v2="479" v3="478"/>
+     <triangle v1="213" v2="478" v3="212"/>
+     <triangle v1="212" v2="478" v3="477"/>
+     <triangle v1="212" v2="477" v3="211"/>
+     <triangle v1="211" v2="477" v3="476"/>
+     <triangle v1="211" v2="476" v3="210"/>
+     <triangle v1="210" v2="476" v3="475"/>
+     <triangle v1="210" v2="475" v3="209"/>
+     <triangle v1="209" v2="475" v3="208"/>
+     <triangle v1="208" v2="475" v3="474"/>
+     <triangle v1="208" v2="474" v3="207"/>
+     <triangle v1="207" v2="474" v3="473"/>
+     <triangle v1="207" v2="473" v3="206"/>
+     <triangle v1="206" v2="473" v3="472"/>
+     <triangle v1="206" v2="472" v3="205"/>
+     <triangle v1="205" v2="472" v3="471"/>
+     <triangle v1="205" v2="471" v3="204"/>
+     <triangle v1="204" v2="471" v3="203"/>
+     <triangle v1="203" v2="471" v3="470"/>
+     <triangle v1="203" v2="470" v3="202"/>
+     <triangle v1="202" v2="470" v3="469"/>
+     <triangle v1="202" v2="469" v3="201"/>
+     <triangle v1="201" v2="469" v3="200"/>
+     <triangle v1="200" v2="469" v3="468"/>
+     <triangle v1="200" v2="468" v3="199"/>
+     <triangle v1="199" v2="468" v3="467"/>
+     <triangle v1="199" v2="467" v3="198"/>
+     <triangle v1="198" v2="467" v3="197"/>
+     <triangle v1="197" v2="467" v3="466"/>
+     <triangle v1="197" v2="466" v3="196"/>
+     <triangle v1="196" v2="466" v3="465"/>
+     <triangle v1="196" v2="465" v3="195"/>
+     <triangle v1="195" v2="465" v3="464"/>
+     <triangle v1="195" v2="464" v3="194"/>
+     <triangle v1="194" v2="464" v3="193"/>
+     <triangle v1="193" v2="464" v3="463"/>
+     <triangle v1="193" v2="463" v3="192"/>
+     <triangle v1="192" v2="463" v3="462"/>
+     <triangle v1="192" v2="462" v3="191"/>
+     <triangle v1="191" v2="462" v3="461"/>
+     <triangle v1="191" v2="461" v3="189"/>
+     <triangle v1="189" v2="461" v3="190"/>
+     <triangle v1="190" v2="461" v3="460"/>
+     <triangle v1="190" v2="460" v3="188"/>
+     <triangle v1="188" v2="460" v3="187"/>
+     <triangle v1="187" v2="460" v3="459"/>
+     <triangle v1="187" v2="459" v3="186"/>
+     <triangle v1="186" v2="459" v3="458"/>
+     <triangle v1="186" v2="458" v3="185"/>
+     <triangle v1="185" v2="458" v3="184"/>
+     <triangle v1="184" v2="458" v3="457"/>
+     <triangle v1="184" v2="457" v3="183"/>
+     <triangle v1="183" v2="457" v3="456"/>
+     <triangle v1="183" v2="456" v3="182"/>
+     <triangle v1="182" v2="456" v3="455"/>
+     <triangle v1="182" v2="455" v3="181"/>
+     <triangle v1="181" v2="455" v3="180"/>
+     <triangle v1="180" v2="455" v3="454"/>
+     <triangle v1="180" v2="454" v3="179"/>
+     <triangle v1="179" v2="454" v3="453"/>
+     <triangle v1="179" v2="453" v3="178"/>
+     <triangle v1="178" v2="453" v3="452"/>
+     <triangle v1="178" v2="452" v3="177"/>
+     <triangle v1="177" v2="452" v3="176"/>
+     <triangle v1="176" v2="452" v3="451"/>
+     <triangle v1="176" v2="451" v3="175"/>
+     <triangle v1="175" v2="451" v3="450"/>
+     <triangle v1="175" v2="450" v3="174"/>
+     <triangle v1="174" v2="450" v3="173"/>
+     <triangle v1="173" v2="450" v3="449"/>
+     <triangle v1="173" v2="449" v3="172"/>
+     <triangle v1="172" v2="449" v3="448"/>
+     <triangle v1="172" v2="448" v3="171"/>
+     <triangle v1="171" v2="448" v3="447"/>
+     <triangle v1="171" v2="447" v3="170"/>
+     <triangle v1="170" v2="447" v3="169"/>
+     <triangle v1="169" v2="447" v3="446"/>
+     <triangle v1="169" v2="446" v3="168"/>
+     <triangle v1="168" v2="446" v3="167"/>
+    </triangles>
+   </mesh>
+  </object>
+  <object id="2" p:UUID="00030001-81cb-4c03-9d28-80fed5dfa1dc" type="model">
+   <mesh>
+    <vertices>
+     <vertex x="-2.85169315" y="-4.26346397" z="2.5"/>
+     <vertex x="-2.88140774" y="-4.50708771" z="2.5"/>
+     <vertex x="1.34584045" y="-4.94680882" z="1.5"/>
+     <vertex x="-2.77043629" y="-4.59016991" z="2.47201109"/>
+     <vertex x="1.33369732" y="-5.07175446" z="1.5"/>
+     <vertex x="-2.65853596" y="-4.670825" z="2.44399261"/>
+     <vertex x="-2.54568291" y="-4.74905872" z="2.4159317"/>
+     <vertex x="-2.43185806" y="-4.82487679" z="2.38781595"/>
+     <vertex x="-2.31703949" y="-4.89828587" z="2.35963249"/>
+     <vertex x="1.32502985" y="-5.19724083" z="1.5"/>
+     <vertex x="-2.20120716" y="-4.96929073" z="2.33136797"/>
+     <vertex x="-2.08433962" y="-5.03789711" z="2.30301046"/>
+     <vertex x="-1.96641588" y="-5.10411072" z="2.2745471"/>
+     <vertex x="-1.84741592" y="-5.16793728" z="2.245965"/>
+     <vertex x="1.31987667" y="-5.32279491" z="1.5"/>
+     <vertex x="-1.72731781" y="-5.22938251" z="2.2172513"/>
+     <vertex x="-1.60610151" y="-5.28845215" z="2.18839359"/>
+     <vertex x="-1.48374557" y="-5.3451519" z="2.15937853"/>
+     <vertex x="1.31823158" y="-5.4487648" z="1.5"/>
+     <vertex x="5.56870937" y="-5.42905903" z="0.5"/>
+     <vertex x="1.32009506" y="-5.57408905" z="1.5"/>
+     <vertex x="5.56935978" y="-5.46828365" z="0.5"/>
+     <vertex x="1.32546568" y="-5.69963455" z="1.5"/>
+     <vertex x="1.3343401" y="-5.82497978" z="1.5"/>
+     <vertex x="0.213959217" y="-5.86809826" z="1.76353788"/>
+     <vertex x="0.350520134" y="-5.89172745" z="1.73191977"/>
+     <vertex x="-1.36022949" y="-5.3994875" z="2.13019466"/>
+     <vertex x="-1.23553181" y="-5.4514637" z="2.10082769"/>
+     <vertex x="-1.10963249" y="-5.50108719" z="2.07126617"/>
+     <vertex x="-0.98251009" y="-5.54836369" z="2.04149675"/>
+     <vertex x="-0.85414362" y="-5.59329891" z="2.01150703"/>
+     <vertex x="-0.7245121" y="-5.63589764" z="1.98128366"/>
+     <vertex x="-0.593595505" y="-5.67616653" z="1.95081472"/>
+     <vertex x="-0.461372375" y="-5.71411133" z="1.92008686"/>
+     <vertex x="-0.327821255" y="-5.74973679" z="1.88908768"/>
+     <vertex x="-0.193140984" y="-5.78299618" z="1.85785389"/>
+     <vertex x="-0.0579099655" y="-5.81378078" z="1.82651091"/>
+     <vertex x="0.0778026581" y="-5.84213161" z="1.79507017"/>
+     <vertex x="0.487447739" y="-5.91307068" z="1.70022058"/>
+     <vertex x="0.62470293" y="-5.93217564" z="1.66844606"/>
+     <vertex x="0.762246609" y="-5.94909096" z="1.63660192"/>
+     <vertex x="0.900040627" y="-5.96386623" z="1.60469389"/>
+     <vertex x="1.34671068" y="-5.95002937" z="1.5"/>
+     <vertex x="1.03804588" y="-5.9765501" z="1.57272673"/>
+     <vertex x="1.17622423" y="-5.98719215" z="1.54070711"/>
+     <vertex x="1.31453657" y="-5.99584103" z="1.50863934"/>
+     <vertex x="1.45294476" y="-6.00254536" z="1.4765296"/>
+     <vertex x="1.59140968" y="-6.00735378" z="1.44438314"/>
+     <vertex x="1.72989225" y="-6.0103159" z="1.4122057"/>
+     <vertex x="2.00675821" y="-6.01089668" z="1.34777951"/>
+     <vertex x="2.28323269" y="-6.00467777" z="1.28329539"/>
+     <vertex x="2.55900645" y="-5.99205303" z="1.21879721"/>
+     <vertex x="2.8343749" y="-5.97336388" z="1.15419626"/>
+     <vertex x="3.11031556" y="-5.94882584" z="1.08926749"/>
+     <vertex x="3.3865943" y="-5.9186945" z="1.0240643"/>
+     <vertex x="3.66293764" y="-5.88322353" z="0.958648682"/>
+     <vertex x="3.93907118" y="-5.84266949" z="0.89308238"/>
+     <vertex x="4.21472168" y="-5.79728889" z="0.827427626"/>
+     <vertex x="4.48961449" y="-5.74733543" z="0.761746407"/>
+     <vertex x="4.76347685" y="-5.6930666" z="0.696100712"/>
+     <vertex x="5.03603363" y="-5.63473797" z="0.63055253"/>
+     <vertex x="5.3070116" y="-5.57260513" z="0.565164089"/>
+     <vertex x="5.57613802" y="-5.50692272" z="0.5"/>
+     <vertex x="5.57420349" y="-5.39021587" z="0.5"/>
+     <vertex x="1.36148167" y="-4.82212639" z="1.5"/>
+     <vertex x="5.58570576" y="-5.35271072" z="0.5"/>
+     <vertex x="1.52769327" y="-4.08759594" z="1.5"/>
+     <vertex x="1.49147797" y="-4.20792389" z="1.5"/>
+     <vertex x="1.45863628" y="-4.329216" z="1.5"/>
+     <vertex x="-2.60146141" y="-3.06308985" z="2.5"/>
+     <vertex x="-2.66493988" y="-3.30016756" z="2.5"/>
+     <vertex x="5.60293388" y="-5.31746674" z="0.5"/>
+     <vertex x="1.75829887" y="-3.50367427" z="1.5"/>
+     <vertex x="1.70568943" y="-3.61779094" z="1.5"/>
+     <vertex x="1.65628719" y="-3.7333324" z="1.5"/>
+     <vertex x="-2.18588543" y="-1.90948153" z="2.5"/>
+     <vertex x="-2.28188229" y="-2.13535762" z="2.5"/>
+     <vertex x="5.36683083" y="-5.17400551" z="0.565002441"/>
+     <vertex x="1.93494487" y="-3.17075491" z="1.5"/>
+     <vertex x="1.8729713" y="-3.28006911" z="1.5"/>
+     <vertex x="1.81407356" y="-3.39107108" z="1.5"/>
+     <vertex x="-1.8604393" y="-1.24924016" z="2.5"/>
+     <vertex x="-1.97508144" y="-1.46624851" z="2.5"/>
+     <vertex x="5.13272047" y="-5.02725506" z="0.630006313"/>
+     <vertex x="1.99994683" y="-3.06321359" z="1.5"/>
+     <vertex x="-1.61312723" y="-0.825293779" z="2.5"/>
+     <vertex x="-1.48065138" y="-0.618689299" z="2.5"/>
+     <vertex x="2.06792617" y="-2.95752931" z="1.5"/>
+     <vertex x="-1.34243298" y="-0.415881395" z="2.5"/>
+     <vertex x="2.13882971" y="-2.85378432" z="1.5"/>
+     <vertex x="-1.19858122" y="-0.21702981" z="2.5"/>
+     <vertex x="2.93424058" y="-3.35191274" z="1.27955532"/>
+     <vertex x="2.21260262" y="-2.75205946" z="1.5"/>
+     <vertex x="2.73350859" y="-3.16052675" z="1.34423256"/>
+     <vertex x="2.5373075" y="-2.96402979" z="1.40885448"/>
+     <vertex x="4.90070486" y="-4.8771019" z="0.695014715"/>
+     <vertex x="4.67086649" y="-4.72340107" z="0.760039568"/>
+     <vertex x="4.44354343" y="-4.56616592" z="0.825023651"/>
+     <vertex x="4.21870089" y="-4.40513706" z="0.890016556"/>
+     <vertex x="3.99625611" y="-4.23997974" z="0.955092192"/>
+     <vertex x="3.77663732" y="-4.07070255" z="1.02018261"/>
+     <vertex x="3.56027412" y="-3.89731765" z="1.08521938"/>
+     <vertex x="3.34759617" y="-3.71983719" z="1.15013456"/>
+     <vertex x="3.13900304" y="-3.53824544" z="1.21486783"/>
+     <vertex x="2.44106245" y="-2.86384654" z="1.44113088"/>
+     <vertex x="2.34613776" y="-2.76236391" z="1.47337651"/>
+     <vertex x="2.2525959" y="-2.65957475" z="1.50558567"/>
+     <vertex x="2.16049957" y="-2.5554719" z="1.53775358"/>
+     <vertex x="-1.04920864" y="-0.0222909451" z="2.5"/>
+     <vertex x="2.06991124" y="-2.45004773" z="1.56987333"/>
+     <vertex x="1.98089361" y="-2.34329557" z="1.60194016"/>
+     <vertex x="1.89350891" y="-2.23520756" z="1.63394833"/>
+     <vertex x="-0.894433498" y="0.168182135" z="2.5"/>
+     <vertex x="1.80781984" y="-2.12577701" z="1.66589212"/>
+     <vertex x="1.72388935" y="-2.01499653" z="1.6977663"/>
+     <vertex x="1.64177942" y="-1.90285897" z="1.72956467"/>
+     <vertex x="1.56155252" y="-1.78935695" z="1.76128149"/>
+     <vertex x="-0.734376907" y="0.354239225" z="2.5"/>
+     <vertex x="1.4832716" y="-1.67448354" z="1.79291201"/>
+     <vertex x="1.40699959" y="-1.55823112" z="1.82444954"/>
+     <vertex x="1.332798" y="-1.44059253" z="1.8558898"/>
+     <vertex x="1.26073933" y="-1.32157683" z="1.88722181"/>
+     <vertex x="-0.56916523" y="0.535734415" z="2.5"/>
+     <vertex x="1.19114637" y="-1.20165038" z="1.9183259"/>
+     <vertex x="1.12414742" y="-1.08102012" z="1.94915581"/>
+     <vertex x="1.05973101" y="-0.959666967" z="1.97972536"/>
+     <vertex x="0.997886658" y="-0.837571383" z="2.01004648"/>
+     <vertex x="0.938603401" y="-0.714715719" z="2.040133"/>
+     <vertex x="-0.398928642" y="0.712524176" z="2.5"/>
+     <vertex x="0.881870747" y="-0.59107995" z="2.06999683"/>
+     <vertex x="0.82767725" y="-0.466645479" z="2.09965086"/>
+     <vertex x="0.776011944" y="-0.341393232" z="2.12910891"/>
+     <vertex x="-0.223800182" y="0.884470224" z="2.5"/>
+     <vertex x="0.726864815" y="-0.215304613" z="2.15838242"/>
+     <vertex x="0.680224895" y="-0.088360548" z="2.18748522"/>
+     <vertex x="0.636080742" y="0.0394585133" z="2.21643019"/>
+     <vertex x="0.594421387" y="0.168170691" z="2.24522924"/>
+     <vertex x="-0.0439181328" y="1.05143714" z="2.5"/>
+     <vertex x="0.555236816" y="0.297795057" z="2.27389622"/>
+     <vertex x="0.518516064" y="0.428351164" z="2.30244303"/>
+     <vertex x="0.484247684" y="0.55985713" z="2.3308835"/>
+     <vertex x="0.452420712" y="0.692332506" z="2.35922956"/>
+     <vertex x="0.140575409" y="1.21329284" z="2.5"/>
+     <vertex x="0.423025608" y="0.825796366" z="2.38749456"/>
+     <vertex x="0.396049976" y="0.960266829" z="2.41569138"/>
+     <vertex x="0.371483803" y="1.09576344" z="2.44383287"/>
+     <vertex x="0.34931612" y="1.23230529" z="2.47193146"/>
+     <vertex x="0.329536438" y="1.36991096" z="2.5"/>
+     <vertex x="-1.73975611" y="-1.03553271" z="2.5"/>
+     <vertex x="-2.08359194" y="-1.68638682" z="2.5"/>
+     <vertex x="1.61012983" y="-3.85020757" z="1.5"/>
+     <vertex x="-2.37150574" y="-2.36383724" z="2.5"/>
+     <vertex x="1.56725407" y="-3.96832633" z="1.5"/>
+     <vertex x="-2.45468616" y="-2.59474039" z="2.5"/>
+     <vertex x="-2.53135872" y="-2.82788587" z="2.5"/>
+     <vertex x="1.42919445" y="-4.45137787" z="1.5"/>
+     <vertex x="-2.72174454" y="-3.53893209" z="2.5"/>
+     <vertex x="1.40317488" y="-4.57431412" z="1.5"/>
+     <vertex x="-2.77183056" y="-3.77919602" z="2.5"/>
+     <vertex x="1.38059807" y="-4.69792938" z="1.5"/>
+     <vertex x="-2.81515789" y="-4.02077007" z="2.5"/>
+     <vertex x="5.71154261" y="-5.38202953" z="0.5"/>
+     <vertex x="5.81822968" y="-5.44454002" z="0.5"/>
+     <vertex x="5.81822968" y="-5.44454002" z="-2.5"/>
+     <vertex x="5.58640862" y="-5.5043726" z="-2.5"/>
+     <vertex x="5.35634851" y="-5.56097889" z="-2.5"/>
+     <vertex x="5.12806416" y="-5.61433887" z="-2.5"/>
+     <vertex x="4.9015727" y="-5.66443348" z="-2.5"/>
+     <vertex x="4.67688894" y="-5.71124363" z="-2.5"/>
+     <vertex x="4.45402908" y="-5.75474739" z="-2.5"/>
+     <vertex x="4.23300838" y="-5.7949276" z="-2.5"/>
+     <vertex x="4.01384401" y="-5.83176422" z="-2.5"/>
+     <vertex x="3.79655051" y="-5.86523628" z="-2.5"/>
+     <vertex x="3.58114433" y="-5.89532661" z="-2.5"/>
+     <vertex x="3.36764121" y="-5.92201328" z="-2.5"/>
+     <vertex x="3.15605664" y="-5.94527721" z="-2.5"/>
+     <vertex x="2.94640708" y="-5.96510029" z="-2.5"/>
+     <vertex x="2.73870778" y="-5.98146057" z="-2.5"/>
+     <vertex x="2.53297472" y="-5.9943409" z="-2.5"/>
+     <vertex x="2.32922411" y="-6.00372028" z="-2.5"/>
+     <vertex x="2.12747121" y="-6.00957966" z="-2.5"/>
+     <vertex x="1.92773223" y="-6.01189899" z="-2.5"/>
+     <vertex x="1.73002291" y="-6.01065826" z="-2.5"/>
+     <vertex x="1.53435898" y="-6.00583935" z="-2.5"/>
+     <vertex x="1.34075642" y="-5.99742222" z="-2.5"/>
+     <vertex x="1.14923096" y="-5.98538589" z="-2.5"/>
+     <vertex x="0.959798336" y="-5.96971226" z="-2.5"/>
+     <vertex x="0.773265839" y="-5.95045757" z="-2.5"/>
+     <vertex x="0.590792179" y="-5.92778111" z="-2.5"/>
+     <vertex x="0.412304401" y="-5.90176964" z="-2.5"/>
+     <vertex x="0.237718105" y="-5.8725071" z="-2.5"/>
+     <vertex x="0.0669465065" y="-5.84008026" z="-2.5"/>
+     <vertex x="-0.100095749" y="-5.80457497" z="-2.5"/>
+     <vertex x="-0.263493538" y="-5.76607513" z="-2.5"/>
+     <vertex x="-0.423332691" y="-5.7246666" z="-2.5"/>
+     <vertex x="-0.579699516" y="-5.68043518" z="-2.5"/>
+     <vertex x="-0.732678413" y="-5.63346577" z="-2.5"/>
+     <vertex x="-0.88235569" y="-5.58384418" z="-2.5"/>
+     <vertex x="-1.02881622" y="-5.53165531" z="-2.5"/>
+     <vertex x="-1.1721468" y="-5.47698593" z="-2.5"/>
+     <vertex x="-1.31243134" y="-5.41991997" z="-2.5"/>
+     <vertex x="-1.44975662" y="-5.36054325" z="-2.5"/>
+     <vertex x="-1.58420801" y="-5.29894066" z="-2.5"/>
+     <vertex x="-1.71589327" y="-5.23518848" z="-2.5"/>
+     <vertex x="-1.84795856" y="-5.16781521" z="-2.5"/>
+     <vertex x="-1.98251581" y="-5.09553242" z="-2.5"/>
+     <vertex x="-2.11946678" y="-5.01804161" z="-2.5"/>
+     <vertex x="-2.25871181" y="-4.93504524" z="-2.5"/>
+     <vertex x="-2.40015316" y="-4.84624386" z="-2.5"/>
+     <vertex x="-2.54369164" y="-4.75133991" z="-2.5"/>
+     <vertex x="-2.68922806" y="-4.65003395" z="-2.5"/>
+     <vertex x="-2.76271439" y="-4.59688854" z="-2.5"/>
+     <vertex x="-2.8366642" y="-4.54202938" z="-2.5"/>
+     <vertex x="-2.91106319" y="-4.48542213" z="-2.5"/>
+     <vertex x="-2.95833397" y="-4.44764996" z="2.5"/>
+     <vertex x="-2.98590088" y="-4.42702675" z="-2.5"/>
+     <vertex x="-3.03562641" y="-4.38638401" z="2.5"/>
+     <vertex x="-3.0611639" y="-4.36680794" z="-2.5"/>
+     <vertex x="-3.11327362" y="-4.32324791" z="2.5"/>
+     <vertex x="-3.13683987" y="-4.30472851" z="-2.5"/>
+     <vertex x="-3.19126511" y="-4.25820351" z="2.5"/>
+     <vertex x="-3.21291637" y="-4.24075031" z="-2.5"/>
+     <vertex x="-3.26958847" y="-4.1912117" z="2.5"/>
+     <vertex x="-3.28938198" y="-4.17483521" z="-2.5"/>
+     <vertex x="-3.34823418" y="-4.12223244" z="2.5"/>
+     <vertex x="-3.36622334" y="-4.1069479" z="-2.5"/>
+     <vertex x="-3.42718983" y="-4.05122566" z="2.5"/>
+     <vertex x="-3.44342899" y="-4.03704929" z="-2.5"/>
+     <vertex x="-3.50644493" y="-3.97815299" z="2.5"/>
+     <vertex x="-3.5209856" y="-3.96510386" z="-2.5"/>
+     <vertex x="-3.585989" y="-3.90297389" z="2.5"/>
+     <vertex x="-3.59888172" y="-3.89107299" z="-2.5"/>
+     <vertex x="-3.66580963" y="-3.8256495" z="2.5"/>
+     <vertex x="-3.677104" y="-3.81491971" z="-2.5"/>
+     <vertex x="-3.74589634" y="-3.74613976" z="2.5"/>
+     <vertex x="-3.75564098" y="-3.73660684" z="-2.5"/>
+     <vertex x="-3.82623768" y="-3.66440558" z="2.5"/>
+     <vertex x="-3.83447933" y="-3.65609717" z="-2.5"/>
+     <vertex x="-3.91360855" y="-3.57335329" z="-2.5"/>
+     <vertex x="-3.98590851" y="-3.49623418" z="2.5"/>
+     <vertex x="-3.99301434" y="-3.48833776" z="-2.5"/>
+     <vertex x="-4.06258583" y="-3.41301775" z="2.5"/>
+     <vertex x="-4.07268524" y="-3.40101361" z="-2.5"/>
+     <vertex x="-4.13699818" y="-3.33062315" z="2.5"/>
+     <vertex x="-4.1525383" y="-3.31143308" z="-2.5"/>
+     <vertex x="-4.20930767" y="-3.24889159" z="2.5"/>
+     <vertex x="-4.23053741" y="-3.22213626" z="-2.5"/>
+     <vertex x="-4.27967739" y="-3.16766477" z="2.5"/>
+     <vertex x="-4.30592251" y="-3.13411593" z="-2.5"/>
+     <vertex x="-4.37892246" y="-3.04712749" z="-2.5"/>
+     <vertex x="-4.41524601" y="-3.00608993" z="2.5"/>
+     <vertex x="-4.44976521" y="-2.96092582" z="-2.5"/>
+     <vertex x="-4.54500389" y="-2.84462929" z="2.5"/>
+     <vertex x="-4.51868057" y="-2.87526631" z="-2.5"/>
+     <vertex x="-4.65164185" y="-2.70459414" z="-2.5"/>
+     <vertex x="-4.67024899" y="-2.68201375" z="2.5"/>
+     <vertex x="-4.79228115" y="-2.51697373" z="2.5"/>
+     <vertex x="-4.77963543" y="-2.53315187" z="-2.5"/>
+     <vertex x="-4.91240025" y="-2.34824038" z="2.5"/>
+     <vertex x="-4.90448856" y="-2.35898066" z="-2.5"/>
+     <vertex x="-5.0280323" y="-2.18012166" z="-2.5"/>
+     <vertex x="-5.03190517" y="-2.1745441" z="2.5"/>
+     <vertex x="-5.08988476" y="-2.08832192" z="-2.5"/>
+     <vertex x="-5.15209484" y="-1.99461579" z="2.5"/>
+     <vertex x="-5.15209484" y="-1.99461579" z="-2.5"/>
+     <vertex x="-5.24043179" y="-1.85890961" z="2.37456131"/>
+     <vertex x="-5.24043179" y="-1.85890961" z="-2.37456155"/>
+     <vertex x="-5.32731438" y="-1.72200179" z="2.24922514"/>
+     <vertex x="-5.32731438" y="-1.72200179" z="-2.24922514"/>
+     <vertex x="-5.41274643" y="-1.58396077" z="2.12400293"/>
+     <vertex x="-5.41274643" y="-1.58396077" z="-2.1240027"/>
+     <vertex x="-5.49672985" y="-1.4448545" z="1.99890566"/>
+     <vertex x="-5.49672985" y="-1.4448545" z="-1.99890554"/>
+     <vertex x="-5.66036129" y="-1.16372085" z="1.74913311"/>
+     <vertex x="-5.66036129" y="-1.16372085" z="-1.74913311"/>
+     <vertex x="-5.81822968" y="-0.879148245" z="1.5"/>
+     <vertex x="-5.81822968" y="-0.879148245" z="-1.5"/>
+     <vertex x="-4.86857796" y="-1.19693637" z="2.5"/>
+     <vertex x="-4.96960068" y="-1.46048307" z="2.5"/>
+     <vertex x="-4.40078068" y="-0.169899702" z="2.5"/>
+     <vertex x="-4.52714825" y="-0.422275305" z="2.5"/>
+     <vertex x="-4.64728546" y="-0.677675962" z="2.5"/>
+     <vertex x="-4.12965679" y="0.325169802" z="2.5"/>
+     <vertex x="-4.26825619" y="0.0792987347" z="2.5"/>
+     <vertex x="-3.83456802" y="0.806339979" z="2.5"/>
+     <vertex x="-3.98506451" y="0.56756568" z="2.5"/>
+     <vertex x="-3.67825603" y="1.0413487" z="2.5"/>
+     <vertex x="-3.51622486" y="1.27245069" z="2.5"/>
+     <vertex x="-3.34856987" y="1.49950671" z="2.5"/>
+     <vertex x="-3.1753931" y="1.72237992" z="2.5"/>
+     <vertex x="-2.99679947" y="1.94093585" z="2.5"/>
+     <vertex x="-2.81289577" y="2.15504289" z="2.5"/>
+     <vertex x="-2.6237936" y="2.36457276" z="2.5"/>
+     <vertex x="-2.42960548" y="2.56939864" z="2.5"/>
+     <vertex x="-2.23044968" y="2.76939654" z="2.5"/>
+     <vertex x="-2.02644539" y="2.96444678" z="2.5"/>
+     <vertex x="-1.81771612" y="3.15443301" z="2.5"/>
+     <vertex x="-1.60438681" y="3.33923793" z="2.5"/>
+     <vertex x="-1.38658667" y="3.51875281" z="2.5"/>
+     <vertex x="-1.16444635" y="3.69286799" z="2.5"/>
+     <vertex x="0.258517265" y="2.29428267" z="2.5"/>
+     <vertex x="0.261611938" y="2.185004" z="2.5"/>
+     <vertex x="0.265988827" y="2.07741523" z="2.5"/>
+     <vertex x="0.271612167" y="1.97149539" z="2.5"/>
+     <vertex x="0.278446674" y="1.86722493" z="2.5"/>
+     <vertex x="0.286456585" y="1.76458335" z="2.5"/>
+     <vertex x="0.295606136" y="1.66355157" z="2.5"/>
+     <vertex x="0.305860043" y="1.56410909" z="2.5"/>
+     <vertex x="0.317181587" y="1.4662354" z="2.5"/>
+     <vertex x="0.256741047" y="2.40527081" z="2.5"/>
+     <vertex x="-0.938100338" y="3.86147952" z="2.5"/>
+     <vertex x="0.256319046" y="2.51798797" z="2.5"/>
+     <vertex x="0.257286072" y="2.63245463" z="2.5"/>
+     <vertex x="-0.70768404" y="4.02448559" z="2.5"/>
+     <vertex x="0.26333189" y="2.86441875" z="2.5"/>
+     <vertex x="0.268114567" y="2.97828364" z="2.5"/>
+     <vertex x="0.274002552" y="3.09039664" z="2.5"/>
+     <vertex x="-0.473337173" y="4.18178749" z="2.5"/>
+     <vertex x="0.280972958" y="3.20088649" z="2.5"/>
+     <vertex x="0.289004803" y="3.30988479" z="2.5"/>
+     <vertex x="0.308162689" y="3.52392554" z="2.5"/>
+     <vertex x="-0.235200405" y="4.33329105" z="2.5"/>
+     <vertex x="0.331299782" y="3.73356032" z="2.5"/>
+     <vertex x="0.00658273697" y="4.47890472" z="2.5"/>
+     <vertex x="0.358240128" y="3.93983245" z="2.5"/>
+     <vertex x="0.38880682" y="4.14378166" z="2.5"/>
+     <vertex x="0.251866817" y="4.61854172" z="2.5"/>
+     <vertex x="0.422823906" y="4.34645081" z="2.5"/>
+     <vertex x="0.460114956" y="4.54888153" z="2.5"/>
+     <vertex x="0.50050354" y="4.7521162" z="2.5"/>
+     <vertex x="-4.76111794" y="-0.935948133" z="2.5"/>
+     <vertex x="-5.06412506" y="-1.7264297" z="2.5"/>
+     <vertex x="-5.06412506" y="-1.7264297" z="-2.5"/>
+     <vertex x="-4.96960068" y="-1.46048307" z="-2.5"/>
+     <vertex x="-4.86857796" y="-1.19693637" z="-2.5"/>
+     <vertex x="-5.70967484" y="-0.611588717" z="-1.5"/>
+     <vertex x="-4.76111794" y="-0.935948133" z="-2.5"/>
+     <vertex x="-5.59496784" y="-0.346607924" z="-1.5"/>
+     <vertex x="-4.64728546" y="-0.677675962" z="-2.5"/>
+     <vertex x="-5.47417164" y="-0.0843470097" z="-1.5"/>
+     <vertex x="-4.52714825" y="-0.422275305" z="-2.5"/>
+     <vertex x="-5.34735012" y="0.175053358" z="-1.5"/>
+     <vertex x="-4.40078068" y="-0.169899702" z="-2.5"/>
+     <vertex x="-5.21457005" y="0.431455851" z="-1.5"/>
+     <vertex x="-4.26825619" y="0.0792987347" z="-2.5"/>
+     <vertex x="-5.07590389" y="0.684722185" z="-1.5"/>
+     <vertex x="-4.12965679" y="0.325169802" z="-2.5"/>
+     <vertex x="-4.93142414" y="0.934718847" z="-1.5"/>
+     <vertex x="-3.98506451" y="0.56756568" z="-2.5"/>
+     <vertex x="-4.78120899" y="1.18131089" z="-1.5"/>
+     <vertex x="-3.83456802" y="0.806339979" z="-2.5"/>
+     <vertex x="-4.6253376" y="1.42436814" z="-1.5"/>
+     <vertex x="-3.67825603" y="1.0413487" z="-2.5"/>
+     <vertex x="-4.46389389" y="1.66375995" z="-1.5"/>
+     <vertex x="-3.51622486" y="1.27245069" z="-2.5"/>
+     <vertex x="-4.29696465" y="1.89935899" z="-1.5"/>
+     <vertex x="-3.34856987" y="1.49950671" z="-2.5"/>
+     <vertex x="-4.12463665" y="2.1310389" z="-1.5"/>
+     <vertex x="-3.1753931" y="1.72237992" z="-2.5"/>
+     <vertex x="-3.94700432" y="2.35867715" z="-1.5"/>
+     <vertex x="-2.99679947" y="1.94093585" z="-2.5"/>
+     <vertex x="-3.76416111" y="2.58215213" z="-1.5"/>
+     <vertex x="-3.57620525" y="2.80134368" z="-1.5"/>
+     <vertex x="-2.81289577" y="2.15504289" z="-2.5"/>
+     <vertex x="-3.38323593" y="3.01613498" z="-1.5"/>
+     <vertex x="-2.6237936" y="2.36457276" z="-2.5"/>
+     <vertex x="-3.18535709" y="3.22641253" z="-1.5"/>
+     <vertex x="-2.42960548" y="2.56939864" z="-2.5"/>
+     <vertex x="-2.9826746" y="3.43206286" z="-1.5"/>
+     <vertex x="-2.23044968" y="2.76939654" z="-2.5"/>
+     <vertex x="-2.77529621" y="3.63297725" z="-1.5"/>
+     <vertex x="-2.02644539" y="2.96444678" z="-2.5"/>
+     <vertex x="-2.5633316" y="3.82904696" z="-1.5"/>
+     <vertex x="-1.81771612" y="3.15443301" z="-2.5"/>
+     <vertex x="-2.34689522" y="4.02017021" z="-1.5"/>
+     <vertex x="-1.60438681" y="3.33923793" z="-2.5"/>
+     <vertex x="-2.12610197" y="4.20624161" z="-1.5"/>
+     <vertex x="-1.38658667" y="3.51875281" z="-2.5"/>
+     <vertex x="-1.90106964" y="4.38716412" z="-1.5"/>
+     <vertex x="-1.16444635" y="3.69286799" z="-2.5"/>
+     <vertex x="-1.67191887" y="4.56284142" z="-1.5"/>
+     <vertex x="-0.938100338" y="3.86147952" z="-2.5"/>
+     <vertex x="-1.43877125" y="4.73317814" z="-1.5"/>
+     <vertex x="-0.70768404" y="4.02448559" z="-2.5"/>
+     <vertex x="-1.20175123" y="4.89808369" z="-1.5"/>
+     <vertex x="-0.473337173" y="4.18178749" z="-2.5"/>
+     <vertex x="-0.960985184" y="5.05747128" z="-1.5"/>
+     <vertex x="-0.235200405" y="4.33329105" z="-2.5"/>
+     <vertex x="-0.716602325" y="5.21125507" z="-1.5"/>
+     <vertex x="0.00658273697" y="4.47890472" z="-2.5"/>
+     <vertex x="-0.468732357" y="5.35935307" z="-1.5"/>
+     <vertex x="0.251866817" y="4.61854172" z="-2.5"/>
+     <vertex x="-0.217508316" y="5.5016861" z="-1.5"/>
+     <vertex x="0.50050354" y="4.7521162" z="-2.5"/>
+     <vertex x="0.0369367599" y="5.63817883" z="-1.5"/>
+     <vertex x="0.533998966" y="4.91053772" z="-2.37456155"/>
+     <vertex x="0.294466972" y="5.76875782" z="-1.5"/>
+     <vertex x="0.569372177" y="5.06878185" z="-2.24922514"/>
+     <vertex x="0.606572628" y="5.22680092" z="-2.1240027"/>
+     <vertex x="0.645550251" y="5.38454914" z="-1.99890554"/>
+     <vertex x="0.554944038" y="5.89335346" z="-1.5"/>
+     <vertex x="0.728636265" y="5.69904613" z="-1.74913311"/>
+     <vertex x="0.818229675" y="6.01189899" z="-1.5"/>
+     <vertex x="0.818229675" y="6.01189899" z="1.5"/>
+     <vertex x="0.554944038" y="5.89335346" z="1.5"/>
+     <vertex x="0.294466972" y="5.76875782" z="1.5"/>
+     <vertex x="0.0369367599" y="5.63817883" z="1.5"/>
+     <vertex x="-0.217508316" y="5.5016861" z="1.5"/>
+     <vertex x="-0.468732357" y="5.35935307" z="1.5"/>
+     <vertex x="-0.716602325" y="5.21125507" z="1.5"/>
+     <vertex x="-0.960985184" y="5.05747128" z="1.5"/>
+     <vertex x="-1.20175123" y="4.89808369" z="1.5"/>
+     <vertex x="-1.43877125" y="4.73317814" z="1.5"/>
+     <vertex x="-1.67191887" y="4.56284142" z="1.5"/>
+     <vertex x="-1.90106964" y="4.38716412" z="1.5"/>
+     <vertex x="-2.12610197" y="4.20624161" z="1.5"/>
+     <vertex x="-2.34689522" y="4.02017021" z="1.5"/>
+     <vertex x="-2.5633316" y="3.82904696" z="1.5"/>
+     <vertex x="-2.77529621" y="3.63297725" z="1.5"/>
+     <vertex x="-2.9826746" y="3.43206286" z="1.5"/>
+     <vertex x="-3.18535709" y="3.22641253" z="1.5"/>
+     <vertex x="-3.38323593" y="3.01613498" z="1.5"/>
+     <vertex x="-3.57620525" y="2.80134368" z="1.5"/>
+     <vertex x="-3.76416111" y="2.58215213" z="1.5"/>
+     <vertex x="-3.94700432" y="2.35867715" z="1.5"/>
+     <vertex x="-4.12463665" y="2.1310389" z="1.5"/>
+     <vertex x="-4.29696465" y="1.89935899" z="1.5"/>
+     <vertex x="-4.46389389" y="1.66375995" z="1.5"/>
+     <vertex x="-4.6253376" y="1.42436814" z="1.5"/>
+     <vertex x="-4.78120899" y="1.18131089" z="1.5"/>
+     <vertex x="-4.93142414" y="0.934718847" z="1.5"/>
+     <vertex x="-5.07590389" y="0.684722185" z="1.5"/>
+     <vertex x="-5.21457005" y="0.431455851" z="1.5"/>
+     <vertex x="-5.34735012" y="0.175053358" z="1.5"/>
+     <vertex x="-5.47417164" y="-0.0843470097" z="1.5"/>
+     <vertex x="-5.59496784" y="-0.346607924" z="1.5"/>
+     <vertex x="-5.70967484" y="-0.611588717" z="1.5"/>
+     <vertex x="0.533998966" y="4.91053772" z="2.37456131"/>
+     <vertex x="0.569372177" y="5.06878185" z="2.24922514"/>
+     <vertex x="0.606572628" y="5.22680092" z="2.12400293"/>
+     <vertex x="0.645550251" y="5.38454914" z="1.99890566"/>
+     <vertex x="0.728636265" y="5.69904613" z="1.74913311"/>
+     <vertex x="0.854960442" y="-0.530390978" z="-2.5"/>
+     <vertex x="0.919365406" y="-0.673749685" z="-2.5"/>
+     <vertex x="0.988265038" y="-0.818276167" z="-2.5"/>
+     <vertex x="1.06183863" y="-0.963948011" z="-2.5"/>
+     <vertex x="1.14026737" y="-1.11074424" z="-2.5"/>
+     <vertex x="1.22373152" y="-1.25864387" z="-2.5"/>
+     <vertex x="1.31241083" y="-1.40762496" z="-2.5"/>
+     <vertex x="0.794802666" y="-0.388059378" z="-2.5"/>
+     <vertex x="0.737440586" y="-0.243419409" z="-2.5"/>
+     <vertex x="0.682466984" y="-0.09506917" z="-2.5"/>
+     <vertex x="0.630048275" y="0.0570833683" z="-2.5"/>
+     <vertex x="0.580349922" y="0.213130713" z="-2.5"/>
+     <vertex x="0.533538342" y="0.373164892" z="-2.5"/>
+     <vertex x="0.489779472" y="0.537277937" z="-2.5"/>
+     <vertex x="0.449239254" y="0.705562353" z="-2.5"/>
+     <vertex x="0.412083149" y="0.878109694" z="-2.5"/>
+     <vertex x="0.37847805" y="1.05501294" z="-2.5"/>
+     <vertex x="0.348588943" y="1.23636317" z="-2.5"/>
+     <vertex x="0.322582245" y="1.42225385" z="-2.5"/>
+     <vertex x="0.300623894" y="1.61277604" z="-2.5"/>
+     <vertex x="0.282879829" y="1.80802226" z="-2.5"/>
+     <vertex x="0.269515991" y="2.00808501" z="-2.5"/>
+     <vertex x="0.260698318" y="2.21305585" z="-2.5"/>
+     <vertex x="0.256592751" y="2.42302728" z="-2.5"/>
+     <vertex x="0.257137299" y="2.63496566" z="-2.5"/>
+     <vertex x="0.261795521" y="2.84186149" z="-2.5"/>
+     <vertex x="0.270397663" y="3.04401755" z="-2.5"/>
+     <vertex x="0.282793045" y="3.24205184" z="-2.5"/>
+     <vertex x="0.298832417" y="3.43658233" z="-2.5"/>
+     <vertex x="0.31836462" y="3.62822795" z="-2.5"/>
+     <vertex x="0.341239929" y="3.81760573" z="-2.5"/>
+     <vertex x="0.36730814" y="4.0053339" z="-2.5"/>
+     <vertex x="0.396418571" y="4.19203091" z="-2.5"/>
+     <vertex x="0.428421497" y="4.37831497" z="-2.5"/>
+     <vertex x="0.463166714" y="4.56480408" z="-2.5"/>
+     <vertex x="1.40648699" y="-1.55766654" z="-2.5"/>
+     <vertex x="1.50613928" y="-1.70874691" z="-2.5"/>
+     <vertex x="1.61154842" y="-1.86084485" z="-2.5"/>
+     <vertex x="1.72289515" y="-2.01393867" z="-2.5"/>
+     <vertex x="1.84035969" y="-2.16800737" z="-2.5"/>
+     <vertex x="1.9641223" y="-2.32302928" z="-2.5"/>
+     <vertex x="2.09436345" y="-2.47898316" z="-2.5"/>
+     <vertex x="2.23126364" y="-2.63584757" z="-2.5"/>
+     <vertex x="2.37486935" y="-2.79345536" z="-2.5"/>
+     <vertex x="2.52310371" y="-2.94944739" z="-2.5"/>
+     <vertex x="2.67504811" y="-3.10299969" z="-2.5"/>
+     <vertex x="2.83050442" y="-3.25410795" z="-2.5"/>
+     <vertex x="2.98927402" y="-3.40276742" z="-2.5"/>
+     <vertex x="3.15115809" y="-3.54897332" z="-2.5"/>
+     <vertex x="3.31595874" y="-3.69272161" z="-2.5"/>
+     <vertex x="3.48347712" y="-3.83400702" z="-2.5"/>
+     <vertex x="3.65351486" y="-3.97282577" z="-2.5"/>
+     <vertex x="3.82587337" y="-4.10917282" z="-2.5"/>
+     <vertex x="4.00035477" y="-4.24304295" z="-2.5"/>
+     <vertex x="4.17675924" y="-4.37443256" z="-2.5"/>
+     <vertex x="4.35488987" y="-4.50333595" z="-2.5"/>
+     <vertex x="4.53454685" y="-4.62975025" z="-2.5"/>
+     <vertex x="4.71553278" y="-4.75366974" z="-2.5"/>
+     <vertex x="4.89764833" y="-4.87508965" z="-2.5"/>
+     <vertex x="5.08069563" y="-4.99400616" z="-2.5"/>
+     <vertex x="5.26447582" y="-5.11041355" z="-2.5"/>
+     <vertex x="5.44879055" y="-5.22430801" z="-2.5"/>
+     <vertex x="5.63344145" y="-5.33568573" z="-2.5"/>
+    </vertices>
+    <triangles>
+     <triangle v1="0" v2="1" v3="2"/>
+     <triangle v1="2" v2="1" v3="3"/>
+     <triangle v1="2" v2="3" v3="4"/>
+     <triangle v1="4" v2="3" v3="5"/>
+     <triangle v1="4" v2="5" v3="6"/>
+     <triangle v1="6" v2="7" v3="4"/>
+     <triangle v1="4" v2="7" v3="8"/>
+     <triangle v1="4" v2="8" v3="9"/>
+     <triangle v1="9" v2="8" v3="10"/>
+     <triangle v1="9" v2="10" v3="11"/>
+     <triangle v1="11" v2="12" v3="9"/>
+     <triangle v1="9" v2="12" v3="13"/>
+     <triangle v1="9" v2="13" v3="14"/>
+     <triangle v1="14" v2="13" v3="15"/>
+     <triangle v1="14" v2="15" v3="16"/>
+     <triangle v1="16" v2="17" v3="14"/>
+     <triangle v1="14" v2="17" v3="18"/>
+     <triangle v1="14" v2="18" v3="19"/>
+     <triangle v1="19" v2="18" v3="20"/>
+     <triangle v1="19" v2="20" v3="21"/>
+     <triangle v1="21" v2="20" v3="22"/>
+     <triangle v1="21" v2="22" v3="23"/>
+     <triangle v1="23" v2="22" v3="24"/>
+     <triangle v1="23" v2="24" v3="25"/>
+     <triangle v1="17" v2="26" v3="18"/>
+     <triangle v1="18" v2="26" v3="27"/>
+     <triangle v1="18" v2="27" v3="28"/>
+     <triangle v1="28" v2="29" v3="18"/>
+     <triangle v1="18" v2="29" v3="20"/>
+     <triangle v1="29" v2="30" v3="20"/>
+     <triangle v1="20" v2="30" v3="31"/>
+     <triangle v1="20" v2="31" v3="32"/>
+     <triangle v1="32" v2="33" v3="20"/>
+     <triangle v1="20" v2="33" v3="22"/>
+     <triangle v1="33" v2="34" v3="22"/>
+     <triangle v1="22" v2="34" v3="35"/>
+     <triangle v1="22" v2="35" v3="36"/>
+     <triangle v1="36" v2="37" v3="22"/>
+     <triangle v1="22" v2="37" v3="24"/>
+     <triangle v1="25" v2="38" v3="23"/>
+     <triangle v1="23" v2="38" v3="39"/>
+     <triangle v1="23" v2="39" v3="40"/>
+     <triangle v1="23" v2="40" v3="21"/>
+     <triangle v1="21" v2="40" v3="41"/>
+     <triangle v1="21" v2="41" v3="42"/>
+     <triangle v1="42" v2="41" v3="43"/>
+     <triangle v1="42" v2="43" v3="44"/>
+     <triangle v1="44" v2="45" v3="42"/>
+     <triangle v1="42" v2="45" v3="21"/>
+     <triangle v1="45" v2="46" v3="21"/>
+     <triangle v1="21" v2="46" v3="47"/>
+     <triangle v1="21" v2="47" v3="48"/>
+     <triangle v1="48" v2="49" v3="21"/>
+     <triangle v1="21" v2="49" v3="50"/>
+     <triangle v1="21" v2="50" v3="51"/>
+     <triangle v1="51" v2="52" v3="21"/>
+     <triangle v1="21" v2="52" v3="53"/>
+     <triangle v1="21" v2="53" v3="54"/>
+     <triangle v1="54" v2="55" v3="21"/>
+     <triangle v1="21" v2="55" v3="56"/>
+     <triangle v1="21" v2="56" v3="57"/>
+     <triangle v1="57" v2="58" v3="21"/>
+     <triangle v1="21" v2="58" v3="59"/>
+     <triangle v1="21" v2="59" v3="60"/>
+     <triangle v1="60" v2="61" v3="21"/>
+     <triangle v1="21" v2="61" v3="62"/>
+     <triangle v1="63" v2="64" v3="19"/>
+     <triangle v1="19" v2="64" v3="2"/>
+     <triangle v1="19" v2="2" v3="4"/>
+     <triangle v1="65" v2="66" v3="63"/>
+     <triangle v1="63" v2="66" v3="67"/>
+     <triangle v1="63" v2="67" v3="68"/>
+     <triangle v1="68" v2="67" v3="69"/>
+     <triangle v1="68" v2="69" v3="70"/>
+     <triangle v1="71" v2="72" v3="65"/>
+     <triangle v1="65" v2="72" v3="73"/>
+     <triangle v1="65" v2="73" v3="74"/>
+     <triangle v1="74" v2="73" v3="75"/>
+     <triangle v1="74" v2="75" v3="76"/>
+     <triangle v1="77" v2="78" v3="71"/>
+     <triangle v1="71" v2="78" v3="79"/>
+     <triangle v1="71" v2="79" v3="80"/>
+     <triangle v1="80" v2="79" v3="81"/>
+     <triangle v1="80" v2="81" v3="82"/>
+     <triangle v1="77" v2="83" v3="78"/>
+     <triangle v1="78" v2="83" v3="84"/>
+     <triangle v1="78" v2="84" v3="85"/>
+     <triangle v1="85" v2="84" v3="86"/>
+     <triangle v1="86" v2="84" v3="87"/>
+     <triangle v1="86" v2="87" v3="88"/>
+     <triangle v1="88" v2="87" v3="89"/>
+     <triangle v1="88" v2="89" v3="90"/>
+     <triangle v1="90" v2="89" v3="91"/>
+     <triangle v1="90" v2="91" v3="92"/>
+     <triangle v1="92" v2="91" v3="93"/>
+     <triangle v1="92" v2="93" v3="94"/>
+     <triangle v1="83" v2="95" v3="84"/>
+     <triangle v1="84" v2="95" v3="96"/>
+     <triangle v1="84" v2="96" v3="97"/>
+     <triangle v1="84" v2="97" v3="87"/>
+     <triangle v1="87" v2="97" v3="98"/>
+     <triangle v1="87" v2="98" v3="99"/>
+     <triangle v1="99" v2="100" v3="87"/>
+     <triangle v1="87" v2="100" v3="101"/>
+     <triangle v1="87" v2="101" v3="89"/>
+     <triangle v1="89" v2="101" v3="102"/>
+     <triangle v1="89" v2="102" v3="103"/>
+     <triangle v1="103" v2="91" v3="89"/>
+     <triangle v1="94" v2="104" v3="92"/>
+     <triangle v1="92" v2="104" v3="105"/>
+     <triangle v1="92" v2="105" v3="106"/>
+     <triangle v1="107" v2="108" v3="106"/>
+     <triangle v1="106" v2="108" v3="90"/>
+     <triangle v1="106" v2="90" v3="92"/>
+     <triangle v1="107" v2="109" v3="108"/>
+     <triangle v1="108" v2="109" v3="110"/>
+     <triangle v1="108" v2="110" v3="111"/>
+     <triangle v1="108" v2="111" v3="112"/>
+     <triangle v1="112" v2="111" v3="113"/>
+     <triangle v1="112" v2="113" v3="114"/>
+     <triangle v1="114" v2="115" v3="112"/>
+     <triangle v1="112" v2="115" v3="116"/>
+     <triangle v1="112" v2="116" v3="117"/>
+     <triangle v1="117" v2="116" v3="118"/>
+     <triangle v1="117" v2="118" v3="119"/>
+     <triangle v1="119" v2="120" v3="117"/>
+     <triangle v1="117" v2="120" v3="121"/>
+     <triangle v1="117" v2="121" v3="122"/>
+     <triangle v1="122" v2="121" v3="123"/>
+     <triangle v1="122" v2="123" v3="124"/>
+     <triangle v1="124" v2="125" v3="122"/>
+     <triangle v1="122" v2="125" v3="126"/>
+     <triangle v1="122" v2="126" v3="127"/>
+     <triangle v1="122" v2="127" v3="128"/>
+     <triangle v1="128" v2="127" v3="129"/>
+     <triangle v1="128" v2="129" v3="130"/>
+     <triangle v1="130" v2="131" v3="128"/>
+     <triangle v1="128" v2="131" v3="132"/>
+     <triangle v1="132" v2="131" v3="133"/>
+     <triangle v1="132" v2="133" v3="134"/>
+     <triangle v1="134" v2="135" v3="132"/>
+     <triangle v1="132" v2="135" v3="136"/>
+     <triangle v1="132" v2="136" v3="137"/>
+     <triangle v1="137" v2="136" v3="138"/>
+     <triangle v1="137" v2="138" v3="139"/>
+     <triangle v1="139" v2="140" v3="137"/>
+     <triangle v1="137" v2="140" v3="141"/>
+     <triangle v1="137" v2="141" v3="142"/>
+     <triangle v1="142" v2="141" v3="143"/>
+     <triangle v1="142" v2="143" v3="144"/>
+     <triangle v1="144" v2="145" v3="142"/>
+     <triangle v1="142" v2="145" v3="146"/>
+     <triangle v1="142" v2="146" v3="147"/>
+     <triangle v1="85" v2="148" v3="78"/>
+     <triangle v1="78" v2="148" v3="79"/>
+     <triangle v1="148" v2="81" v3="79"/>
+     <triangle v1="80" v2="82" v3="72"/>
+     <triangle v1="72" v2="82" v3="149"/>
+     <triangle v1="72" v2="149" v3="73"/>
+     <triangle v1="73" v2="149" v3="75"/>
+     <triangle v1="74" v2="76" v3="150"/>
+     <triangle v1="150" v2="76" v3="151"/>
+     <triangle v1="150" v2="151" v3="152"/>
+     <triangle v1="152" v2="151" v3="153"/>
+     <triangle v1="152" v2="153" v3="66"/>
+     <triangle v1="66" v2="153" v3="154"/>
+     <triangle v1="66" v2="154" v3="67"/>
+     <triangle v1="67" v2="154" v3="69"/>
+     <triangle v1="68" v2="70" v3="155"/>
+     <triangle v1="155" v2="70" v3="156"/>
+     <triangle v1="155" v2="156" v3="157"/>
+     <triangle v1="157" v2="156" v3="158"/>
+     <triangle v1="157" v2="158" v3="159"/>
+     <triangle v1="159" v2="158" v3="160"/>
+     <triangle v1="159" v2="160" v3="64"/>
+     <triangle v1="64" v2="160" v3="0"/>
+     <triangle v1="64" v2="0" v3="2"/>
+     <triangle v1="74" v2="150" v3="65"/>
+     <triangle v1="65" v2="150" v3="152"/>
+     <triangle v1="65" v2="152" v3="66"/>
+     <triangle v1="155" v2="157" v3="63"/>
+     <triangle v1="63" v2="157" v3="159"/>
+     <triangle v1="63" v2="159" v3="64"/>
+     <triangle v1="4" v2="9" v3="19"/>
+     <triangle v1="19" v2="9" v3="14"/>
+     <triangle v1="68" v2="155" v3="63"/>
+     <triangle v1="72" v2="71" v3="80"/>
+     <triangle v1="71" v2="65" v3="161"/>
+     <triangle v1="161" v2="65" v3="63"/>
+     <triangle v1="161" v2="63" v3="19"/>
+     <triangle v1="19" v2="21" v3="161"/>
+     <triangle v1="161" v2="21" v3="62"/>
+     <triangle v1="161" v2="62" v3="162"/>
+     <triangle v1="163" v2="162" v3="164"/>
+     <triangle v1="164" v2="162" v3="62"/>
+     <triangle v1="164" v2="62" v3="165"/>
+     <triangle v1="165" v2="62" v3="61"/>
+     <triangle v1="165" v2="61" v3="166"/>
+     <triangle v1="166" v2="61" v3="60"/>
+     <triangle v1="166" v2="60" v3="167"/>
+     <triangle v1="167" v2="60" v3="59"/>
+     <triangle v1="167" v2="59" v3="168"/>
+     <triangle v1="168" v2="59" v3="58"/>
+     <triangle v1="168" v2="58" v3="169"/>
+     <triangle v1="169" v2="58" v3="57"/>
+     <triangle v1="169" v2="57" v3="170"/>
+     <triangle v1="170" v2="57" v3="171"/>
+     <triangle v1="171" v2="57" v3="56"/>
+     <triangle v1="171" v2="56" v3="172"/>
+     <triangle v1="172" v2="56" v3="55"/>
+     <triangle v1="172" v2="55" v3="173"/>
+     <triangle v1="173" v2="55" v3="54"/>
+     <triangle v1="173" v2="54" v3="174"/>
+     <triangle v1="174" v2="54" v3="175"/>
+     <triangle v1="175" v2="54" v3="53"/>
+     <triangle v1="175" v2="53" v3="176"/>
+     <triangle v1="176" v2="53" v3="52"/>
+     <triangle v1="176" v2="52" v3="177"/>
+     <triangle v1="177" v2="52" v3="51"/>
+     <triangle v1="177" v2="51" v3="178"/>
+     <triangle v1="178" v2="51" v3="179"/>
+     <triangle v1="179" v2="51" v3="50"/>
+     <triangle v1="179" v2="50" v3="180"/>
+     <triangle v1="180" v2="50" v3="49"/>
+     <triangle v1="180" v2="49" v3="181"/>
+     <triangle v1="181" v2="49" v3="48"/>
+     <triangle v1="181" v2="48" v3="182"/>
+     <triangle v1="182" v2="48" v3="47"/>
+     <triangle v1="182" v2="47" v3="183"/>
+     <triangle v1="183" v2="47" v3="46"/>
+     <triangle v1="183" v2="46" v3="184"/>
+     <triangle v1="184" v2="46" v3="45"/>
+     <triangle v1="184" v2="45" v3="185"/>
+     <triangle v1="185" v2="45" v3="44"/>
+     <triangle v1="185" v2="44" v3="43"/>
+     <triangle v1="185" v2="43" v3="186"/>
+     <triangle v1="186" v2="43" v3="41"/>
+     <triangle v1="186" v2="41" v3="187"/>
+     <triangle v1="187" v2="41" v3="40"/>
+     <triangle v1="187" v2="40" v3="39"/>
+     <triangle v1="187" v2="39" v3="188"/>
+     <triangle v1="188" v2="39" v3="38"/>
+     <triangle v1="188" v2="38" v3="189"/>
+     <triangle v1="189" v2="38" v3="25"/>
+     <triangle v1="189" v2="25" v3="190"/>
+     <triangle v1="190" v2="25" v3="24"/>
+     <triangle v1="190" v2="24" v3="191"/>
+     <triangle v1="191" v2="24" v3="37"/>
+     <triangle v1="191" v2="37" v3="36"/>
+     <triangle v1="191" v2="36" v3="192"/>
+     <triangle v1="192" v2="36" v3="35"/>
+     <triangle v1="192" v2="35" v3="193"/>
+     <triangle v1="193" v2="35" v3="34"/>
+     <triangle v1="193" v2="34" v3="194"/>
+     <triangle v1="194" v2="34" v3="33"/>
+     <triangle v1="194" v2="33" v3="195"/>
+     <triangle v1="195" v2="33" v3="32"/>
+     <triangle v1="195" v2="32" v3="196"/>
+     <triangle v1="196" v2="32" v3="31"/>
+     <triangle v1="196" v2="31" v3="30"/>
+     <triangle v1="196" v2="30" v3="197"/>
+     <triangle v1="197" v2="30" v3="29"/>
+     <triangle v1="197" v2="29" v3="198"/>
+     <triangle v1="198" v2="29" v3="28"/>
+     <triangle v1="198" v2="28" v3="199"/>
+     <triangle v1="199" v2="28" v3="27"/>
+     <triangle v1="199" v2="27" v3="200"/>
+     <triangle v1="200" v2="27" v3="26"/>
+     <triangle v1="200" v2="26" v3="201"/>
+     <triangle v1="201" v2="26" v3="17"/>
+     <triangle v1="201" v2="17" v3="202"/>
+     <triangle v1="202" v2="17" v3="16"/>
+     <triangle v1="202" v2="16" v3="203"/>
+     <triangle v1="203" v2="16" v3="15"/>
+     <triangle v1="203" v2="15" v3="204"/>
+     <triangle v1="204" v2="15" v3="13"/>
+     <triangle v1="204" v2="13" v3="12"/>
+     <triangle v1="204" v2="12" v3="205"/>
+     <triangle v1="205" v2="12" v3="11"/>
+     <triangle v1="205" v2="11" v3="206"/>
+     <triangle v1="206" v2="11" v3="10"/>
+     <triangle v1="206" v2="10" v3="207"/>
+     <triangle v1="207" v2="10" v3="8"/>
+     <triangle v1="207" v2="8" v3="208"/>
+     <triangle v1="208" v2="8" v3="7"/>
+     <triangle v1="208" v2="7" v3="209"/>
+     <triangle v1="209" v2="7" v3="6"/>
+     <triangle v1="209" v2="6" v3="5"/>
+     <triangle v1="209" v2="5" v3="210"/>
+     <triangle v1="210" v2="5" v3="3"/>
+     <triangle v1="210" v2="3" v3="211"/>
+     <triangle v1="211" v2="3" v3="212"/>
+     <triangle v1="212" v2="3" v3="1"/>
+     <triangle v1="212" v2="1" v3="213"/>
+     <triangle v1="213" v2="1" v3="214"/>
+     <triangle v1="213" v2="214" v3="215"/>
+     <triangle v1="215" v2="214" v3="216"/>
+     <triangle v1="215" v2="216" v3="217"/>
+     <triangle v1="217" v2="216" v3="218"/>
+     <triangle v1="217" v2="218" v3="219"/>
+     <triangle v1="219" v2="218" v3="220"/>
+     <triangle v1="219" v2="220" v3="221"/>
+     <triangle v1="221" v2="220" v3="222"/>
+     <triangle v1="221" v2="222" v3="223"/>
+     <triangle v1="223" v2="222" v3="224"/>
+     <triangle v1="223" v2="224" v3="225"/>
+     <triangle v1="225" v2="224" v3="226"/>
+     <triangle v1="225" v2="226" v3="227"/>
+     <triangle v1="227" v2="226" v3="228"/>
+     <triangle v1="227" v2="228" v3="229"/>
+     <triangle v1="229" v2="228" v3="230"/>
+     <triangle v1="229" v2="230" v3="231"/>
+     <triangle v1="231" v2="230" v3="232"/>
+     <triangle v1="231" v2="232" v3="233"/>
+     <triangle v1="233" v2="232" v3="234"/>
+     <triangle v1="233" v2="234" v3="235"/>
+     <triangle v1="235" v2="234" v3="236"/>
+     <triangle v1="235" v2="236" v3="237"/>
+     <triangle v1="237" v2="236" v3="238"/>
+     <triangle v1="238" v2="236" v3="239"/>
+     <triangle v1="238" v2="239" v3="240"/>
+     <triangle v1="240" v2="239" v3="241"/>
+     <triangle v1="240" v2="241" v3="242"/>
+     <triangle v1="242" v2="241" v3="243"/>
+     <triangle v1="242" v2="243" v3="244"/>
+     <triangle v1="244" v2="243" v3="245"/>
+     <triangle v1="244" v2="245" v3="246"/>
+     <triangle v1="246" v2="245" v3="247"/>
+     <triangle v1="246" v2="247" v3="248"/>
+     <triangle v1="248" v2="247" v3="249"/>
+     <triangle v1="249" v2="247" v3="250"/>
+     <triangle v1="249" v2="250" v3="251"/>
+     <triangle v1="251" v2="250" v3="252"/>
+     <triangle v1="251" v2="252" v3="253"/>
+     <triangle v1="253" v2="252" v3="254"/>
+     <triangle v1="254" v2="252" v3="255"/>
+     <triangle v1="254" v2="255" v3="256"/>
+     <triangle v1="254" v2="256" v3="257"/>
+     <triangle v1="257" v2="256" v3="258"/>
+     <triangle v1="257" v2="258" v3="259"/>
+     <triangle v1="259" v2="258" v3="260"/>
+     <triangle v1="260" v2="258" v3="261"/>
+     <triangle v1="260" v2="261" v3="262"/>
+     <triangle v1="262" v2="261" v3="263"/>
+     <triangle v1="262" v2="263" v3="264"/>
+     <triangle v1="264" v2="263" v3="265"/>
+     <triangle v1="264" v2="265" v3="266"/>
+     <triangle v1="266" v2="265" v3="267"/>
+     <triangle v1="266" v2="267" v3="268"/>
+     <triangle v1="268" v2="267" v3="269"/>
+     <triangle v1="268" v2="269" v3="270"/>
+     <triangle v1="270" v2="269" v3="271"/>
+     <triangle v1="270" v2="271" v3="272"/>
+     <triangle v1="272" v2="271" v3="273"/>
+     <triangle v1="272" v2="273" v3="274"/>
+     <triangle v1="274" v2="273" v3="275"/>
+     <triangle v1="274" v2="275" v3="276"/>
+     <triangle v1="0" v2="218" v3="1"/>
+     <triangle v1="1" v2="218" v3="216"/>
+     <triangle v1="1" v2="216" v3="214"/>
+     <triangle v1="160" v2="226" v3="0"/>
+     <triangle v1="0" v2="226" v3="224"/>
+     <triangle v1="0" v2="224" v3="222"/>
+     <triangle v1="158" v2="232" v3="160"/>
+     <triangle v1="160" v2="232" v3="230"/>
+     <triangle v1="160" v2="230" v3="228"/>
+     <triangle v1="156" v2="236" v3="158"/>
+     <triangle v1="158" v2="236" v3="234"/>
+     <triangle v1="158" v2="234" v3="232"/>
+     <triangle v1="70" v2="243" v3="156"/>
+     <triangle v1="156" v2="243" v3="241"/>
+     <triangle v1="156" v2="241" v3="239"/>
+     <triangle v1="69" v2="247" v3="70"/>
+     <triangle v1="70" v2="247" v3="245"/>
+     <triangle v1="70" v2="245" v3="243"/>
+     <triangle v1="154" v2="252" v3="69"/>
+     <triangle v1="69" v2="252" v3="250"/>
+     <triangle v1="69" v2="250" v3="247"/>
+     <triangle v1="252" v2="154" v3="255"/>
+     <triangle v1="255" v2="154" v3="153"/>
+     <triangle v1="255" v2="153" v3="256"/>
+     <triangle v1="256" v2="153" v3="151"/>
+     <triangle v1="256" v2="151" v3="258"/>
+     <triangle v1="258" v2="151" v3="261"/>
+     <triangle v1="261" v2="151" v3="277"/>
+     <triangle v1="261" v2="277" v3="278"/>
+     <triangle v1="76" v2="279" v3="151"/>
+     <triangle v1="151" v2="279" v3="280"/>
+     <triangle v1="151" v2="280" v3="281"/>
+     <triangle v1="75" v2="282" v3="76"/>
+     <triangle v1="76" v2="282" v3="283"/>
+     <triangle v1="76" v2="283" v3="279"/>
+     <triangle v1="149" v2="284" v3="75"/>
+     <triangle v1="75" v2="284" v3="285"/>
+     <triangle v1="75" v2="285" v3="282"/>
+     <triangle v1="284" v2="149" v3="286"/>
+     <triangle v1="286" v2="149" v3="82"/>
+     <triangle v1="286" v2="82" v3="287"/>
+     <triangle v1="287" v2="82" v3="81"/>
+     <triangle v1="287" v2="81" v3="288"/>
+     <triangle v1="288" v2="81" v3="148"/>
+     <triangle v1="288" v2="148" v3="289"/>
+     <triangle v1="289" v2="148" v3="85"/>
+     <triangle v1="289" v2="85" v3="290"/>
+     <triangle v1="290" v2="85" v3="86"/>
+     <triangle v1="290" v2="86" v3="291"/>
+     <triangle v1="291" v2="86" v3="88"/>
+     <triangle v1="291" v2="88" v3="292"/>
+     <triangle v1="292" v2="88" v3="90"/>
+     <triangle v1="292" v2="90" v3="293"/>
+     <triangle v1="293" v2="90" v3="294"/>
+     <triangle v1="294" v2="90" v3="108"/>
+     <triangle v1="294" v2="108" v3="295"/>
+     <triangle v1="295" v2="108" v3="112"/>
+     <triangle v1="295" v2="112" v3="296"/>
+     <triangle v1="296" v2="112" v3="117"/>
+     <triangle v1="296" v2="117" v3="297"/>
+     <triangle v1="297" v2="117" v3="122"/>
+     <triangle v1="297" v2="122" v3="298"/>
+     <triangle v1="298" v2="122" v3="128"/>
+     <triangle v1="298" v2="128" v3="299"/>
+     <triangle v1="299" v2="128" v3="132"/>
+     <triangle v1="299" v2="132" v3="300"/>
+     <triangle v1="300" v2="132" v3="301"/>
+     <triangle v1="301" v2="132" v3="137"/>
+     <triangle v1="301" v2="137" v3="302"/>
+     <triangle v1="302" v2="137" v3="303"/>
+     <triangle v1="303" v2="137" v3="304"/>
+     <triangle v1="304" v2="137" v3="142"/>
+     <triangle v1="304" v2="142" v3="305"/>
+     <triangle v1="305" v2="142" v3="306"/>
+     <triangle v1="306" v2="142" v3="307"/>
+     <triangle v1="307" v2="142" v3="308"/>
+     <triangle v1="308" v2="142" v3="147"/>
+     <triangle v1="300" v2="309" v3="299"/>
+     <triangle v1="299" v2="309" v3="310"/>
+     <triangle v1="310" v2="309" v3="311"/>
+     <triangle v1="310" v2="311" v3="312"/>
+     <triangle v1="310" v2="312" v3="313"/>
+     <triangle v1="313" v2="312" v3="314"/>
+     <triangle v1="313" v2="314" v3="315"/>
+     <triangle v1="315" v2="316" v3="313"/>
+     <triangle v1="313" v2="316" v3="317"/>
+     <triangle v1="317" v2="316" v3="318"/>
+     <triangle v1="317" v2="318" v3="319"/>
+     <triangle v1="319" v2="320" v3="317"/>
+     <triangle v1="317" v2="320" v3="321"/>
+     <triangle v1="321" v2="320" v3="322"/>
+     <triangle v1="321" v2="322" v3="323"/>
+     <triangle v1="323" v2="322" v3="324"/>
+     <triangle v1="323" v2="324" v3="325"/>
+     <triangle v1="323" v2="325" v3="326"/>
+     <triangle v1="326" v2="325" v3="327"/>
+     <triangle v1="326" v2="327" v3="328"/>
+     <triangle v1="328" v2="329" v3="326"/>
+     <triangle v1="281" v2="330" v3="151"/>
+     <triangle v1="151" v2="330" v3="277"/>
+     <triangle v1="278" v2="331" v3="261"/>
+     <triangle v1="261" v2="331" v3="263"/>
+     <triangle v1="239" v2="236" v3="156"/>
+     <triangle v1="228" v2="226" v3="160"/>
+     <triangle v1="222" v2="220" v3="0"/>
+     <triangle v1="0" v2="220" v3="218"/>
+     <triangle v1="264" v2="266" v3="332"/>
+     <triangle v1="332" v2="266" v3="268"/>
+     <triangle v1="332" v2="268" v3="270"/>
+     <triangle v1="270" v2="272" v3="332"/>
+     <triangle v1="332" v2="272" v3="333"/>
+     <triangle v1="333" v2="272" v3="274"/>
+     <triangle v1="333" v2="274" v3="276"/>
+     <triangle v1="333" v2="276" v3="334"/>
+     <triangle v1="334" v2="276" v3="335"/>
+     <triangle v1="334" v2="335" v3="336"/>
+     <triangle v1="336" v2="335" v3="337"/>
+     <triangle v1="336" v2="337" v3="338"/>
+     <triangle v1="338" v2="337" v3="339"/>
+     <triangle v1="338" v2="339" v3="340"/>
+     <triangle v1="340" v2="339" v3="341"/>
+     <triangle v1="340" v2="341" v3="342"/>
+     <triangle v1="342" v2="341" v3="343"/>
+     <triangle v1="342" v2="343" v3="344"/>
+     <triangle v1="344" v2="343" v3="345"/>
+     <triangle v1="344" v2="345" v3="346"/>
+     <triangle v1="346" v2="345" v3="347"/>
+     <triangle v1="346" v2="347" v3="348"/>
+     <triangle v1="348" v2="347" v3="349"/>
+     <triangle v1="348" v2="349" v3="350"/>
+     <triangle v1="350" v2="349" v3="351"/>
+     <triangle v1="350" v2="351" v3="352"/>
+     <triangle v1="352" v2="351" v3="353"/>
+     <triangle v1="352" v2="353" v3="354"/>
+     <triangle v1="354" v2="353" v3="355"/>
+     <triangle v1="354" v2="355" v3="356"/>
+     <triangle v1="356" v2="355" v3="357"/>
+     <triangle v1="356" v2="357" v3="358"/>
+     <triangle v1="358" v2="357" v3="359"/>
+     <triangle v1="358" v2="359" v3="360"/>
+     <triangle v1="360" v2="359" v3="361"/>
+     <triangle v1="360" v2="361" v3="362"/>
+     <triangle v1="360" v2="362" v3="363"/>
+     <triangle v1="363" v2="362" v3="364"/>
+     <triangle v1="363" v2="364" v3="365"/>
+     <triangle v1="365" v2="364" v3="366"/>
+     <triangle v1="365" v2="366" v3="367"/>
+     <triangle v1="367" v2="366" v3="368"/>
+     <triangle v1="367" v2="368" v3="369"/>
+     <triangle v1="369" v2="368" v3="370"/>
+     <triangle v1="369" v2="370" v3="371"/>
+     <triangle v1="371" v2="370" v3="372"/>
+     <triangle v1="371" v2="372" v3="373"/>
+     <triangle v1="373" v2="372" v3="374"/>
+     <triangle v1="373" v2="374" v3="375"/>
+     <triangle v1="375" v2="374" v3="376"/>
+     <triangle v1="375" v2="376" v3="377"/>
+     <triangle v1="377" v2="376" v3="378"/>
+     <triangle v1="377" v2="378" v3="379"/>
+     <triangle v1="379" v2="378" v3="380"/>
+     <triangle v1="379" v2="380" v3="381"/>
+     <triangle v1="381" v2="380" v3="382"/>
+     <triangle v1="381" v2="382" v3="383"/>
+     <triangle v1="383" v2="382" v3="384"/>
+     <triangle v1="383" v2="384" v3="385"/>
+     <triangle v1="385" v2="384" v3="386"/>
+     <triangle v1="385" v2="386" v3="387"/>
+     <triangle v1="387" v2="386" v3="388"/>
+     <triangle v1="387" v2="388" v3="389"/>
+     <triangle v1="389" v2="388" v3="390"/>
+     <triangle v1="389" v2="390" v3="391"/>
+     <triangle v1="391" v2="390" v3="392"/>
+     <triangle v1="391" v2="392" v3="393"/>
+     <triangle v1="393" v2="392" v3="394"/>
+     <triangle v1="393" v2="394" v3="395"/>
+     <triangle v1="395" v2="394" v3="396"/>
+     <triangle v1="395" v2="396" v3="397"/>
+     <triangle v1="397" v2="396" v3="398"/>
+     <triangle v1="398" v2="396" v3="399"/>
+     <triangle v1="399" v2="396" v3="400"/>
+     <triangle v1="399" v2="400" v3="401"/>
+     <triangle v1="401" v2="400" v3="402"/>
+     <triangle v1="403" v2="402" v3="404"/>
+     <triangle v1="404" v2="402" v3="400"/>
+     <triangle v1="404" v2="400" v3="405"/>
+     <triangle v1="405" v2="400" v3="396"/>
+     <triangle v1="405" v2="396" v3="406"/>
+     <triangle v1="406" v2="396" v3="394"/>
+     <triangle v1="406" v2="394" v3="407"/>
+     <triangle v1="407" v2="394" v3="392"/>
+     <triangle v1="407" v2="392" v3="408"/>
+     <triangle v1="408" v2="392" v3="390"/>
+     <triangle v1="408" v2="390" v3="409"/>
+     <triangle v1="409" v2="390" v3="388"/>
+     <triangle v1="409" v2="388" v3="410"/>
+     <triangle v1="410" v2="388" v3="386"/>
+     <triangle v1="410" v2="386" v3="411"/>
+     <triangle v1="411" v2="386" v3="384"/>
+     <triangle v1="411" v2="384" v3="412"/>
+     <triangle v1="412" v2="384" v3="382"/>
+     <triangle v1="412" v2="382" v3="413"/>
+     <triangle v1="413" v2="382" v3="380"/>
+     <triangle v1="413" v2="380" v3="414"/>
+     <triangle v1="414" v2="380" v3="378"/>
+     <triangle v1="414" v2="378" v3="415"/>
+     <triangle v1="415" v2="378" v3="376"/>
+     <triangle v1="415" v2="376" v3="416"/>
+     <triangle v1="416" v2="376" v3="374"/>
+     <triangle v1="416" v2="374" v3="417"/>
+     <triangle v1="417" v2="374" v3="372"/>
+     <triangle v1="417" v2="372" v3="418"/>
+     <triangle v1="418" v2="372" v3="370"/>
+     <triangle v1="418" v2="370" v3="419"/>
+     <triangle v1="419" v2="370" v3="368"/>
+     <triangle v1="419" v2="368" v3="420"/>
+     <triangle v1="420" v2="368" v3="366"/>
+     <triangle v1="420" v2="366" v3="421"/>
+     <triangle v1="421" v2="366" v3="364"/>
+     <triangle v1="421" v2="364" v3="422"/>
+     <triangle v1="422" v2="364" v3="362"/>
+     <triangle v1="422" v2="362" v3="423"/>
+     <triangle v1="423" v2="362" v3="361"/>
+     <triangle v1="423" v2="361" v3="424"/>
+     <triangle v1="424" v2="361" v3="359"/>
+     <triangle v1="424" v2="359" v3="425"/>
+     <triangle v1="425" v2="359" v3="357"/>
+     <triangle v1="425" v2="357" v3="426"/>
+     <triangle v1="426" v2="357" v3="355"/>
+     <triangle v1="426" v2="355" v3="427"/>
+     <triangle v1="427" v2="355" v3="353"/>
+     <triangle v1="427" v2="353" v3="428"/>
+     <triangle v1="428" v2="353" v3="351"/>
+     <triangle v1="428" v2="351" v3="429"/>
+     <triangle v1="429" v2="351" v3="349"/>
+     <triangle v1="429" v2="349" v3="430"/>
+     <triangle v1="430" v2="349" v3="347"/>
+     <triangle v1="430" v2="347" v3="431"/>
+     <triangle v1="431" v2="347" v3="345"/>
+     <triangle v1="431" v2="345" v3="432"/>
+     <triangle v1="432" v2="345" v3="343"/>
+     <triangle v1="432" v2="343" v3="433"/>
+     <triangle v1="433" v2="343" v3="341"/>
+     <triangle v1="433" v2="341" v3="434"/>
+     <triangle v1="434" v2="341" v3="339"/>
+     <triangle v1="434" v2="339" v3="435"/>
+     <triangle v1="435" v2="339" v3="337"/>
+     <triangle v1="435" v2="337" v3="436"/>
+     <triangle v1="436" v2="337" v3="335"/>
+     <triangle v1="436" v2="335" v3="275"/>
+     <triangle v1="275" v2="335" v3="276"/>
+     <triangle v1="436" v2="275" v3="277"/>
+     <triangle v1="277" v2="275" v3="273"/>
+     <triangle v1="277" v2="273" v3="278"/>
+     <triangle v1="278" v2="273" v3="271"/>
+     <triangle v1="278" v2="271" v3="331"/>
+     <triangle v1="331" v2="271" v3="269"/>
+     <triangle v1="331" v2="269" v3="267"/>
+     <triangle v1="267" v2="265" v3="331"/>
+     <triangle v1="331" v2="265" v3="263"/>
+     <triangle v1="277" v2="330" v3="436"/>
+     <triangle v1="436" v2="330" v3="435"/>
+     <triangle v1="435" v2="330" v3="281"/>
+     <triangle v1="435" v2="281" v3="434"/>
+     <triangle v1="434" v2="281" v3="280"/>
+     <triangle v1="434" v2="280" v3="433"/>
+     <triangle v1="433" v2="280" v3="279"/>
+     <triangle v1="433" v2="279" v3="432"/>
+     <triangle v1="432" v2="279" v3="283"/>
+     <triangle v1="432" v2="283" v3="431"/>
+     <triangle v1="431" v2="283" v3="282"/>
+     <triangle v1="431" v2="282" v3="430"/>
+     <triangle v1="430" v2="282" v3="285"/>
+     <triangle v1="430" v2="285" v3="429"/>
+     <triangle v1="429" v2="285" v3="284"/>
+     <triangle v1="429" v2="284" v3="428"/>
+     <triangle v1="428" v2="284" v3="286"/>
+     <triangle v1="428" v2="286" v3="427"/>
+     <triangle v1="427" v2="286" v3="287"/>
+     <triangle v1="427" v2="287" v3="426"/>
+     <triangle v1="426" v2="287" v3="288"/>
+     <triangle v1="426" v2="288" v3="425"/>
+     <triangle v1="425" v2="288" v3="289"/>
+     <triangle v1="425" v2="289" v3="424"/>
+     <triangle v1="424" v2="289" v3="290"/>
+     <triangle v1="424" v2="290" v3="423"/>
+     <triangle v1="423" v2="290" v3="422"/>
+     <triangle v1="422" v2="290" v3="291"/>
+     <triangle v1="422" v2="291" v3="421"/>
+     <triangle v1="421" v2="291" v3="292"/>
+     <triangle v1="421" v2="292" v3="420"/>
+     <triangle v1="420" v2="292" v3="293"/>
+     <triangle v1="420" v2="293" v3="419"/>
+     <triangle v1="419" v2="293" v3="294"/>
+     <triangle v1="419" v2="294" v3="418"/>
+     <triangle v1="418" v2="294" v3="295"/>
+     <triangle v1="418" v2="295" v3="417"/>
+     <triangle v1="417" v2="295" v3="296"/>
+     <triangle v1="417" v2="296" v3="416"/>
+     <triangle v1="416" v2="296" v3="297"/>
+     <triangle v1="416" v2="297" v3="415"/>
+     <triangle v1="415" v2="297" v3="298"/>
+     <triangle v1="415" v2="298" v3="414"/>
+     <triangle v1="414" v2="298" v3="299"/>
+     <triangle v1="414" v2="299" v3="413"/>
+     <triangle v1="413" v2="299" v3="310"/>
+     <triangle v1="413" v2="310" v3="412"/>
+     <triangle v1="412" v2="310" v3="313"/>
+     <triangle v1="412" v2="313" v3="411"/>
+     <triangle v1="411" v2="313" v3="317"/>
+     <triangle v1="411" v2="317" v3="410"/>
+     <triangle v1="410" v2="317" v3="321"/>
+     <triangle v1="410" v2="321" v3="409"/>
+     <triangle v1="409" v2="321" v3="323"/>
+     <triangle v1="409" v2="323" v3="408"/>
+     <triangle v1="408" v2="323" v3="326"/>
+     <triangle v1="408" v2="326" v3="407"/>
+     <triangle v1="407" v2="326" v3="329"/>
+     <triangle v1="407" v2="329" v3="406"/>
+     <triangle v1="406" v2="329" v3="437"/>
+     <triangle v1="406" v2="437" v3="438"/>
+     <triangle v1="406" v2="438" v3="405"/>
+     <triangle v1="405" v2="438" v3="439"/>
+     <triangle v1="405" v2="439" v3="440"/>
+     <triangle v1="405" v2="440" v3="404"/>
+     <triangle v1="404" v2="440" v3="441"/>
+     <triangle v1="404" v2="441" v3="403"/>
+     <triangle v1="264" v2="332" v3="262"/>
+     <triangle v1="262" v2="332" v3="260"/>
+     <triangle v1="260" v2="332" v3="259"/>
+     <triangle v1="259" v2="332" v3="333"/>
+     <triangle v1="259" v2="333" v3="257"/>
+     <triangle v1="257" v2="333" v3="334"/>
+     <triangle v1="257" v2="334" v3="254"/>
+     <triangle v1="254" v2="334" v3="336"/>
+     <triangle v1="254" v2="336" v3="253"/>
+     <triangle v1="253" v2="336" v3="251"/>
+     <triangle v1="251" v2="336" v3="249"/>
+     <triangle v1="249" v2="336" v3="338"/>
+     <triangle v1="249" v2="338" v3="248"/>
+     <triangle v1="248" v2="338" v3="246"/>
+     <triangle v1="246" v2="338" v3="340"/>
+     <triangle v1="246" v2="340" v3="244"/>
+     <triangle v1="244" v2="340" v3="242"/>
+     <triangle v1="242" v2="340" v3="240"/>
+     <triangle v1="240" v2="340" v3="442"/>
+     <triangle v1="240" v2="442" v3="238"/>
+     <triangle v1="238" v2="442" v3="237"/>
+     <triangle v1="237" v2="442" v3="443"/>
+     <triangle v1="237" v2="443" v3="235"/>
+     <triangle v1="235" v2="443" v3="233"/>
+     <triangle v1="233" v2="443" v3="231"/>
+     <triangle v1="231" v2="443" v3="444"/>
+     <triangle v1="231" v2="444" v3="229"/>
+     <triangle v1="229" v2="444" v3="227"/>
+     <triangle v1="227" v2="444" v3="225"/>
+     <triangle v1="225" v2="444" v3="445"/>
+     <triangle v1="225" v2="445" v3="223"/>
+     <triangle v1="223" v2="445" v3="221"/>
+     <triangle v1="221" v2="445" v3="219"/>
+     <triangle v1="219" v2="445" v3="217"/>
+     <triangle v1="217" v2="445" v3="446"/>
+     <triangle v1="217" v2="446" v3="215"/>
+     <triangle v1="215" v2="446" v3="447"/>
+     <triangle v1="215" v2="447" v3="448"/>
+     <triangle v1="442" v2="340" v3="449"/>
+     <triangle v1="449" v2="340" v3="342"/>
+     <triangle v1="449" v2="342" v3="344"/>
+     <triangle v1="449" v2="344" v3="450"/>
+     <triangle v1="450" v2="344" v3="346"/>
+     <triangle v1="450" v2="346" v3="451"/>
+     <triangle v1="451" v2="346" v3="348"/>
+     <triangle v1="451" v2="348" v3="452"/>
+     <triangle v1="452" v2="348" v3="350"/>
+     <triangle v1="452" v2="350" v3="453"/>
+     <triangle v1="453" v2="350" v3="352"/>
+     <triangle v1="453" v2="352" v3="454"/>
+     <triangle v1="454" v2="352" v3="354"/>
+     <triangle v1="454" v2="354" v3="455"/>
+     <triangle v1="455" v2="354" v3="456"/>
+     <triangle v1="456" v2="354" v3="356"/>
+     <triangle v1="456" v2="356" v3="457"/>
+     <triangle v1="457" v2="356" v3="358"/>
+     <triangle v1="457" v2="358" v3="458"/>
+     <triangle v1="458" v2="358" v3="360"/>
+     <triangle v1="458" v2="360" v3="459"/>
+     <triangle v1="459" v2="360" v3="363"/>
+     <triangle v1="459" v2="363" v3="460"/>
+     <triangle v1="460" v2="363" v3="365"/>
+     <triangle v1="460" v2="365" v3="461"/>
+     <triangle v1="461" v2="365" v3="367"/>
+     <triangle v1="461" v2="367" v3="462"/>
+     <triangle v1="462" v2="367" v3="369"/>
+     <triangle v1="462" v2="369" v3="463"/>
+     <triangle v1="463" v2="369" v3="371"/>
+     <triangle v1="463" v2="371" v3="464"/>
+     <triangle v1="464" v2="371" v3="373"/>
+     <triangle v1="464" v2="373" v3="465"/>
+     <triangle v1="465" v2="373" v3="375"/>
+     <triangle v1="465" v2="375" v3="466"/>
+     <triangle v1="466" v2="375" v3="377"/>
+     <triangle v1="466" v2="377" v3="467"/>
+     <triangle v1="467" v2="377" v3="379"/>
+     <triangle v1="467" v2="379" v3="468"/>
+     <triangle v1="468" v2="379" v3="381"/>
+     <triangle v1="468" v2="381" v3="469"/>
+     <triangle v1="469" v2="381" v3="470"/>
+     <triangle v1="470" v2="381" v3="383"/>
+     <triangle v1="470" v2="383" v3="471"/>
+     <triangle v1="471" v2="383" v3="385"/>
+     <triangle v1="471" v2="385" v3="472"/>
+     <triangle v1="472" v2="385" v3="387"/>
+     <triangle v1="472" v2="387" v3="473"/>
+     <triangle v1="473" v2="387" v3="474"/>
+     <triangle v1="474" v2="387" v3="389"/>
+     <triangle v1="474" v2="389" v3="475"/>
+     <triangle v1="475" v2="389" v3="391"/>
+     <triangle v1="475" v2="391" v3="476"/>
+     <triangle v1="476" v2="391" v3="393"/>
+     <triangle v1="448" v2="477" v3="215"/>
+     <triangle v1="215" v2="477" v3="478"/>
+     <triangle v1="215" v2="478" v3="479"/>
+     <triangle v1="479" v2="480" v3="215"/>
+     <triangle v1="215" v2="480" v3="481"/>
+     <triangle v1="215" v2="481" v3="482"/>
+     <triangle v1="482" v2="483" v3="215"/>
+     <triangle v1="215" v2="483" v3="484"/>
+     <triangle v1="215" v2="484" v3="485"/>
+     <triangle v1="485" v2="486" v3="215"/>
+     <triangle v1="215" v2="486" v3="487"/>
+     <triangle v1="215" v2="487" v3="488"/>
+     <triangle v1="488" v2="489" v3="215"/>
+     <triangle v1="215" v2="489" v3="490"/>
+     <triangle v1="215" v2="490" v3="213"/>
+     <triangle v1="213" v2="490" v3="491"/>
+     <triangle v1="213" v2="491" v3="492"/>
+     <triangle v1="492" v2="493" v3="213"/>
+     <triangle v1="213" v2="493" v3="494"/>
+     <triangle v1="213" v2="494" v3="495"/>
+     <triangle v1="495" v2="496" v3="213"/>
+     <triangle v1="213" v2="496" v3="497"/>
+     <triangle v1="213" v2="497" v3="212"/>
+     <triangle v1="212" v2="497" v3="498"/>
+     <triangle v1="212" v2="498" v3="211"/>
+     <triangle v1="211" v2="498" v3="210"/>
+     <triangle v1="210" v2="498" v3="499"/>
+     <triangle v1="210" v2="499" v3="209"/>
+     <triangle v1="209" v2="499" v3="208"/>
+     <triangle v1="208" v2="499" v3="500"/>
+     <triangle v1="208" v2="500" v3="207"/>
+     <triangle v1="207" v2="500" v3="501"/>
+     <triangle v1="207" v2="501" v3="206"/>
+     <triangle v1="206" v2="501" v3="502"/>
+     <triangle v1="206" v2="502" v3="205"/>
+     <triangle v1="205" v2="502" v3="204"/>
+     <triangle v1="204" v2="502" v3="503"/>
+     <triangle v1="204" v2="503" v3="203"/>
+     <triangle v1="203" v2="503" v3="504"/>
+     <triangle v1="203" v2="504" v3="202"/>
+     <triangle v1="202" v2="504" v3="201"/>
+     <triangle v1="201" v2="504" v3="163"/>
+     <triangle v1="201" v2="163" v3="200"/>
+     <triangle v1="200" v2="163" v3="199"/>
+     <triangle v1="199" v2="163" v3="164"/>
+     <triangle v1="199" v2="164" v3="198"/>
+     <triangle v1="198" v2="164" v3="165"/>
+     <triangle v1="198" v2="165" v3="197"/>
+     <triangle v1="197" v2="165" v3="166"/>
+     <triangle v1="197" v2="166" v3="196"/>
+     <triangle v1="196" v2="166" v3="167"/>
+     <triangle v1="196" v2="167" v3="195"/>
+     <triangle v1="195" v2="167" v3="168"/>
+     <triangle v1="195" v2="168" v3="194"/>
+     <triangle v1="194" v2="168" v3="169"/>
+     <triangle v1="194" v2="169" v3="193"/>
+     <triangle v1="193" v2="169" v3="170"/>
+     <triangle v1="193" v2="170" v3="192"/>
+     <triangle v1="192" v2="170" v3="171"/>
+     <triangle v1="192" v2="171" v3="191"/>
+     <triangle v1="191" v2="171" v3="172"/>
+     <triangle v1="191" v2="172" v3="190"/>
+     <triangle v1="190" v2="172" v3="173"/>
+     <triangle v1="190" v2="173" v3="189"/>
+     <triangle v1="189" v2="173" v3="174"/>
+     <triangle v1="189" v2="174" v3="188"/>
+     <triangle v1="188" v2="174" v3="175"/>
+     <triangle v1="188" v2="175" v3="187"/>
+     <triangle v1="187" v2="175" v3="176"/>
+     <triangle v1="187" v2="176" v3="186"/>
+     <triangle v1="186" v2="176" v3="177"/>
+     <triangle v1="186" v2="177" v3="185"/>
+     <triangle v1="185" v2="177" v3="178"/>
+     <triangle v1="185" v2="178" v3="184"/>
+     <triangle v1="184" v2="178" v3="179"/>
+     <triangle v1="184" v2="179" v3="183"/>
+     <triangle v1="183" v2="179" v3="180"/>
+     <triangle v1="183" v2="180" v3="182"/>
+     <triangle v1="182" v2="180" v3="181"/>
+     <triangle v1="161" v2="504" v3="71"/>
+     <triangle v1="71" v2="504" v3="503"/>
+     <triangle v1="71" v2="503" v3="77"/>
+     <triangle v1="77" v2="503" v3="502"/>
+     <triangle v1="77" v2="502" v3="83"/>
+     <triangle v1="83" v2="502" v3="501"/>
+     <triangle v1="83" v2="501" v3="95"/>
+     <triangle v1="95" v2="501" v3="500"/>
+     <triangle v1="95" v2="500" v3="499"/>
+     <triangle v1="162" v2="163" v3="161"/>
+     <triangle v1="161" v2="163" v3="504"/>
+     <triangle v1="95" v2="499" v3="96"/>
+     <triangle v1="96" v2="499" v3="498"/>
+     <triangle v1="96" v2="498" v3="97"/>
+     <triangle v1="97" v2="498" v3="497"/>
+     <triangle v1="97" v2="497" v3="98"/>
+     <triangle v1="98" v2="497" v3="496"/>
+     <triangle v1="98" v2="496" v3="99"/>
+     <triangle v1="99" v2="496" v3="495"/>
+     <triangle v1="99" v2="495" v3="494"/>
+     <triangle v1="99" v2="494" v3="100"/>
+     <triangle v1="100" v2="494" v3="493"/>
+     <triangle v1="100" v2="493" v3="101"/>
+     <triangle v1="101" v2="493" v3="492"/>
+     <triangle v1="101" v2="492" v3="102"/>
+     <triangle v1="102" v2="492" v3="491"/>
+     <triangle v1="102" v2="491" v3="103"/>
+     <triangle v1="103" v2="491" v3="490"/>
+     <triangle v1="103" v2="490" v3="489"/>
+     <triangle v1="103" v2="489" v3="91"/>
+     <triangle v1="91" v2="489" v3="488"/>
+     <triangle v1="91" v2="488" v3="93"/>
+     <triangle v1="93" v2="488" v3="487"/>
+     <triangle v1="93" v2="487" v3="94"/>
+     <triangle v1="94" v2="487" v3="486"/>
+     <triangle v1="94" v2="486" v3="104"/>
+     <triangle v1="104" v2="486" v3="485"/>
+     <triangle v1="104" v2="485" v3="105"/>
+     <triangle v1="105" v2="485" v3="484"/>
+     <triangle v1="105" v2="484" v3="106"/>
+     <triangle v1="106" v2="484" v3="107"/>
+     <triangle v1="107" v2="484" v3="483"/>
+     <triangle v1="107" v2="483" v3="109"/>
+     <triangle v1="109" v2="483" v3="482"/>
+     <triangle v1="109" v2="482" v3="110"/>
+     <triangle v1="110" v2="482" v3="111"/>
+     <triangle v1="111" v2="482" v3="481"/>
+     <triangle v1="111" v2="481" v3="113"/>
+     <triangle v1="113" v2="481" v3="480"/>
+     <triangle v1="113" v2="480" v3="114"/>
+     <triangle v1="114" v2="480" v3="115"/>
+     <triangle v1="115" v2="480" v3="479"/>
+     <triangle v1="115" v2="479" v3="116"/>
+     <triangle v1="116" v2="479" v3="478"/>
+     <triangle v1="116" v2="478" v3="118"/>
+     <triangle v1="118" v2="478" v3="477"/>
+     <triangle v1="118" v2="477" v3="119"/>
+     <triangle v1="119" v2="477" v3="120"/>
+     <triangle v1="120" v2="477" v3="448"/>
+     <triangle v1="120" v2="448" v3="121"/>
+     <triangle v1="121" v2="448" v3="447"/>
+     <triangle v1="121" v2="447" v3="123"/>
+     <triangle v1="123" v2="447" v3="446"/>
+     <triangle v1="123" v2="446" v3="124"/>
+     <triangle v1="124" v2="446" v3="445"/>
+     <triangle v1="124" v2="445" v3="125"/>
+     <triangle v1="125" v2="445" v3="126"/>
+     <triangle v1="126" v2="445" v3="444"/>
+     <triangle v1="126" v2="444" v3="127"/>
+     <triangle v1="127" v2="444" v3="443"/>
+     <triangle v1="127" v2="443" v3="129"/>
+     <triangle v1="129" v2="443" v3="442"/>
+     <triangle v1="129" v2="442" v3="130"/>
+     <triangle v1="130" v2="442" v3="449"/>
+     <triangle v1="130" v2="449" v3="131"/>
+     <triangle v1="131" v2="449" v3="450"/>
+     <triangle v1="131" v2="450" v3="133"/>
+     <triangle v1="133" v2="450" v3="451"/>
+     <triangle v1="133" v2="451" v3="134"/>
+     <triangle v1="134" v2="451" v3="135"/>
+     <triangle v1="135" v2="451" v3="452"/>
+     <triangle v1="135" v2="452" v3="136"/>
+     <triangle v1="136" v2="452" v3="453"/>
+     <triangle v1="136" v2="453" v3="138"/>
+     <triangle v1="138" v2="453" v3="454"/>
+     <triangle v1="138" v2="454" v3="139"/>
+     <triangle v1="139" v2="454" v3="455"/>
+     <triangle v1="139" v2="455" v3="140"/>
+     <triangle v1="140" v2="455" v3="456"/>
+     <triangle v1="140" v2="456" v3="141"/>
+     <triangle v1="141" v2="456" v3="143"/>
+     <triangle v1="143" v2="456" v3="457"/>
+     <triangle v1="143" v2="457" v3="144"/>
+     <triangle v1="144" v2="457" v3="458"/>
+     <triangle v1="144" v2="458" v3="145"/>
+     <triangle v1="145" v2="458" v3="459"/>
+     <triangle v1="145" v2="459" v3="146"/>
+     <triangle v1="146" v2="459" v3="147"/>
+     <triangle v1="147" v2="459" v3="460"/>
+     <triangle v1="147" v2="460" v3="308"/>
+     <triangle v1="308" v2="460" v3="307"/>
+     <triangle v1="307" v2="460" v3="461"/>
+     <triangle v1="307" v2="461" v3="306"/>
+     <triangle v1="306" v2="461" v3="462"/>
+     <triangle v1="306" v2="462" v3="305"/>
+     <triangle v1="305" v2="462" v3="304"/>
+     <triangle v1="304" v2="462" v3="463"/>
+     <triangle v1="304" v2="463" v3="303"/>
+     <triangle v1="303" v2="463" v3="302"/>
+     <triangle v1="302" v2="463" v3="464"/>
+     <triangle v1="302" v2="464" v3="301"/>
+     <triangle v1="301" v2="464" v3="300"/>
+     <triangle v1="300" v2="464" v3="465"/>
+     <triangle v1="300" v2="465" v3="309"/>
+     <triangle v1="309" v2="465" v3="311"/>
+     <triangle v1="311" v2="465" v3="466"/>
+     <triangle v1="311" v2="466" v3="312"/>
+     <triangle v1="312" v2="466" v3="467"/>
+     <triangle v1="312" v2="467" v3="314"/>
+     <triangle v1="314" v2="467" v3="315"/>
+     <triangle v1="315" v2="467" v3="468"/>
+     <triangle v1="315" v2="468" v3="316"/>
+     <triangle v1="316" v2="468" v3="469"/>
+     <triangle v1="316" v2="469" v3="318"/>
+     <triangle v1="318" v2="469" v3="319"/>
+     <triangle v1="319" v2="469" v3="470"/>
+     <triangle v1="319" v2="470" v3="320"/>
+     <triangle v1="320" v2="470" v3="471"/>
+     <triangle v1="320" v2="471" v3="322"/>
+     <triangle v1="322" v2="471" v3="472"/>
+     <triangle v1="322" v2="472" v3="324"/>
+     <triangle v1="324" v2="472" v3="473"/>
+     <triangle v1="324" v2="473" v3="325"/>
+     <triangle v1="325" v2="473" v3="474"/>
+     <triangle v1="325" v2="474" v3="327"/>
+     <triangle v1="327" v2="474" v3="475"/>
+     <triangle v1="327" v2="475" v3="328"/>
+     <triangle v1="328" v2="475" v3="476"/>
+     <triangle v1="328" v2="476" v3="329"/>
+     <triangle v1="329" v2="476" v3="393"/>
+     <triangle v1="329" v2="393" v3="395"/>
+     <triangle v1="397" v2="438" v3="395"/>
+     <triangle v1="395" v2="438" v3="437"/>
+     <triangle v1="395" v2="437" v3="329"/>
+     <triangle v1="397" v2="398" v3="438"/>
+     <triangle v1="438" v2="398" v3="439"/>
+     <triangle v1="439" v2="398" v3="399"/>
+     <triangle v1="439" v2="399" v3="440"/>
+     <triangle v1="440" v2="399" v3="401"/>
+     <triangle v1="440" v2="401" v3="441"/>
+     <triangle v1="441" v2="401" v3="402"/>
+     <triangle v1="441" v2="402" v3="403"/>
+    </triangles>
+   </mesh>
+  </object>
+  <object id="3" p:UUID="00030002-81cb-4c03-9d28-80fed5dfa1dc" type="model">
+   <mesh>
+    <vertices>
+     <vertex x="2.85169315" y="4.26361561" z="2.5"/>
+     <vertex x="2.88140774" y="4.50723839" z="2.5"/>
+     <vertex x="-1.34584045" y="4.9469595" z="1.5"/>
+     <vertex x="2.77043629" y="4.59032059" z="2.47201109"/>
+     <vertex x="-1.33369732" y="5.07190514" z="1.5"/>
+     <vertex x="2.65853596" y="4.67097569" z="2.44399261"/>
+     <vertex x="2.54568291" y="4.7492094" z="2.4159317"/>
+     <vertex x="2.43185806" y="4.82502747" z="2.38781595"/>
+     <vertex x="2.31703949" y="4.89843655" z="2.35963249"/>
+     <vertex x="-1.32502985" y="5.19739151" z="1.5"/>
+     <vertex x="2.20120716" y="4.96944141" z="2.33136797"/>
+     <vertex x="2.08433962" y="5.03804779" z="2.30301046"/>
+     <vertex x="1.96641588" y="5.1042614" z="2.2745471"/>
+     <vertex x="1.84741592" y="5.16808796" z="2.245965"/>
+     <vertex x="-1.31987667" y="5.32294559" z="1.5"/>
+     <vertex x="1.72731781" y="5.2295332" z="2.2172513"/>
+     <vertex x="1.60610151" y="5.28860283" z="2.18839359"/>
+     <vertex x="1.48374557" y="5.34530258" z="2.15937853"/>
+     <vertex x="-1.31823158" y="5.44891548" z="1.5"/>
+     <vertex x="-5.56870937" y="5.42920971" z="0.5"/>
+     <vertex x="-1.32009506" y="5.57423973" z="1.5"/>
+     <vertex x="-5.56935978" y="5.46843433" z="0.5"/>
+     <vertex x="-1.32546568" y="5.69978523" z="1.5"/>
+     <vertex x="-1.3343401" y="5.82513046" z="1.5"/>
+     <vertex x="-0.213959217" y="5.86824894" z="1.76353788"/>
+     <vertex x="-0.350520134" y="5.89187813" z="1.73191977"/>
+     <vertex x="1.36022949" y="5.39963818" z="2.13019466"/>
+     <vertex x="1.23553181" y="5.45161438" z="2.10082769"/>
+     <vertex x="1.10963249" y="5.50123787" z="2.07126617"/>
+     <vertex x="0.98251009" y="5.54851437" z="2.04149675"/>
+     <vertex x="0.85414362" y="5.59344959" z="2.01150703"/>
+     <vertex x="0.7245121" y="5.63604832" z="1.98128366"/>
+     <vertex x="0.593595505" y="5.67631721" z="1.95081472"/>
+     <vertex x="0.461372375" y="5.71426201" z="1.92008686"/>
+     <vertex x="0.327821255" y="5.74988747" z="1.88908768"/>
+     <vertex x="0.193140984" y="5.78314686" z="1.85785389"/>
+     <vertex x="0.0579099655" y="5.81393147" z="1.82651091"/>
+     <vertex x="-0.0778026581" y="5.8422823" z="1.79507017"/>
+     <vertex x="-0.487447739" y="5.91322136" z="1.70022058"/>
+     <vertex x="-0.62470293" y="5.93232632" z="1.66844606"/>
+     <vertex x="-0.762246609" y="5.94924164" z="1.63660192"/>
+     <vertex x="-0.900040627" y="5.96401691" z="1.60469389"/>
+     <vertex x="-1.34671068" y="5.95018005" z="1.5"/>
+     <vertex x="-1.03804588" y="5.97670174" z="1.57272673"/>
+     <vertex x="-1.17622423" y="5.98734283" z="1.54070711"/>
+     <vertex x="-1.31453657" y="5.99599171" z="1.50863934"/>
+     <vertex x="-1.45294476" y="6.00269604" z="1.4765296"/>
+     <vertex x="-1.59140968" y="6.00750446" z="1.44438314"/>
+     <vertex x="-1.72989225" y="6.01046658" z="1.4122057"/>
+     <vertex x="-2.00675821" y="6.01104736" z="1.34777951"/>
+     <vertex x="-2.28323269" y="6.00482941" z="1.28329539"/>
+     <vertex x="-2.55900645" y="5.99220371" z="1.21879721"/>
+     <vertex x="-2.8343749" y="5.97351456" z="1.15419626"/>
+     <vertex x="-3.11031556" y="5.94897652" z="1.08926749"/>
+     <vertex x="-3.3865943" y="5.91884518" z="1.0240643"/>
+     <vertex x="-3.66293764" y="5.88337421" z="0.958648682"/>
+     <vertex x="-3.93907118" y="5.84282017" z="0.89308238"/>
+     <vertex x="-4.21472168" y="5.79743958" z="0.827427626"/>
+     <vertex x="-4.48961449" y="5.74748611" z="0.761746407"/>
+     <vertex x="-4.76347685" y="5.69321728" z="0.696100712"/>
+     <vertex x="-5.03603363" y="5.63488865" z="0.63055253"/>
+     <vertex x="-5.3070116" y="5.57275581" z="0.565164089"/>
+     <vertex x="-5.57613802" y="5.5070734" z="0.5"/>
+     <vertex x="-5.57420349" y="5.39036655" z="0.5"/>
+     <vertex x="-1.36148167" y="4.82227707" z="1.5"/>
+     <vertex x="-5.58570576" y="5.3528614" z="0.5"/>
+     <vertex x="-1.52769327" y="4.08774662" z="1.5"/>
+     <vertex x="-1.49147797" y="4.20807457" z="1.5"/>
+     <vertex x="-1.45863628" y="4.32936668" z="1.5"/>
+     <vertex x="2.60146141" y="3.06324053" z="2.5"/>
+     <vertex x="2.66493988" y="3.30031824" z="2.5"/>
+     <vertex x="-5.60293388" y="5.31761742" z="0.5"/>
+     <vertex x="-1.75829887" y="3.50382495" z="1.5"/>
+     <vertex x="-1.70568943" y="3.61794162" z="1.5"/>
+     <vertex x="-1.65628719" y="3.73348308" z="1.5"/>
+     <vertex x="2.18588543" y="1.90963221" z="2.5"/>
+     <vertex x="2.28188229" y="2.1355083" z="2.5"/>
+     <vertex x="-5.36683083" y="5.17415619" z="0.565002441"/>
+     <vertex x="-1.93494487" y="3.17090559" z="1.5"/>
+     <vertex x="-1.8729713" y="3.28021979" z="1.5"/>
+     <vertex x="-1.81407356" y="3.39122176" z="1.5"/>
+     <vertex x="1.8604393" y="1.24939084" z="2.5"/>
+     <vertex x="1.97508144" y="1.46639919" z="2.5"/>
+     <vertex x="-5.13272047" y="5.02740574" z="0.630006313"/>
+     <vertex x="-1.99994683" y="3.06336427" z="1.5"/>
+     <vertex x="1.61312723" y="0.82544446" z="2.5"/>
+     <vertex x="1.48065138" y="0.618839979" z="2.5"/>
+     <vertex x="-2.06792617" y="2.95767999" z="1.5"/>
+     <vertex x="1.34243298" y="0.416032076" z="2.5"/>
+     <vertex x="-2.13882971" y="2.853935" z="1.5"/>
+     <vertex x="1.19858122" y="0.21718049" z="2.5"/>
+     <vertex x="-2.93424058" y="3.35206342" z="1.27955532"/>
+     <vertex x="-2.21260262" y="2.75221014" z="1.5"/>
+     <vertex x="-2.73350859" y="3.16067743" z="1.34423256"/>
+     <vertex x="-2.5373075" y="2.96418047" z="1.40885448"/>
+     <vertex x="-4.90070486" y="4.87725258" z="0.695014715"/>
+     <vertex x="-4.67086649" y="4.72355175" z="0.760039568"/>
+     <vertex x="-4.44354343" y="4.5663166" z="0.825023651"/>
+     <vertex x="-4.21870089" y="4.40528774" z="0.890016556"/>
+     <vertex x="-3.99625611" y="4.24013042" z="0.955092192"/>
+     <vertex x="-3.77663732" y="4.07085323" z="1.02018261"/>
+     <vertex x="-3.56027412" y="3.89746833" z="1.08521938"/>
+     <vertex x="-3.34759617" y="3.71998787" z="1.15013456"/>
+     <vertex x="-3.13900304" y="3.53839612" z="1.21486783"/>
+     <vertex x="-2.44106245" y="2.86399722" z="1.44113088"/>
+     <vertex x="-2.34613776" y="2.76251459" z="1.47337651"/>
+     <vertex x="-2.2525959" y="2.65972543" z="1.50558567"/>
+     <vertex x="-2.16049957" y="2.55562258" z="1.53775358"/>
+     <vertex x="1.04920864" y="0.0224416256" z="2.5"/>
+     <vertex x="-2.06991124" y="2.45019841" z="1.56987333"/>
+     <vertex x="-1.98089361" y="2.34344625" z="1.60194016"/>
+     <vertex x="-1.89350891" y="2.23535824" z="1.63394833"/>
+     <vertex x="0.894433498" y="-0.168031454" z="2.5"/>
+     <vertex x="-1.80781984" y="2.12592769" z="1.66589212"/>
+     <vertex x="-1.72388935" y="2.01514721" z="1.6977663"/>
+     <vertex x="-1.64177942" y="1.90300965" z="1.72956467"/>
+     <vertex x="-1.56155252" y="1.78950763" z="1.76128149"/>
+     <vertex x="0.734376907" y="-0.354088545" z="2.5"/>
+     <vertex x="-1.4832716" y="1.67463422" z="1.79291201"/>
+     <vertex x="-1.40699959" y="1.5583818" z="1.82444954"/>
+     <vertex x="-1.332798" y="1.44074321" z="1.8558898"/>
+     <vertex x="-1.26073933" y="1.32172751" z="1.88722181"/>
+     <vertex x="0.56916523" y="-0.535583735" z="2.5"/>
+     <vertex x="-1.19114637" y="1.20180106" z="1.9183259"/>
+     <vertex x="-1.12414742" y="1.0811708" z="1.94915581"/>
+     <vertex x="-1.05973101" y="0.959817648" z="1.97972536"/>
+     <vertex x="-0.997886658" y="0.837722063" z="2.01004648"/>
+     <vertex x="-0.938603401" y="0.7148664" z="2.040133"/>
+     <vertex x="0.398928642" y="-0.712373495" z="2.5"/>
+     <vertex x="-0.881870747" y="0.591230631" z="2.06999683"/>
+     <vertex x="-0.82767725" y="0.46679616" z="2.09965086"/>
+     <vertex x="-0.776011944" y="0.341543913" z="2.12910891"/>
+     <vertex x="0.223800182" y="-0.884319544" z="2.5"/>
+     <vertex x="-0.726864815" y="0.215455294" z="2.15838242"/>
+     <vertex x="-0.680224895" y="0.0885112286" z="2.18748522"/>
+     <vertex x="-0.636080742" y="-0.0393078327" z="2.21643019"/>
+     <vertex x="-0.594421387" y="-0.16802001" z="2.24522924"/>
+     <vertex x="0.0439181328" y="-1.05128646" z="2.5"/>
+     <vertex x="-0.555236816" y="-0.297644377" z="2.27389622"/>
+     <vertex x="-0.518516064" y="-0.428200483" z="2.30244303"/>
+     <vertex x="-0.484247684" y="-0.55970645" z="2.3308835"/>
+     <vertex x="-0.452420712" y="-0.692181826" z="2.35922956"/>
+     <vertex x="-0.140575409" y="-1.21314216" z="2.5"/>
+     <vertex x="-0.423025608" y="-0.825645685" z="2.38749456"/>
+     <vertex x="-0.396049976" y="-0.960116148" z="2.41569138"/>
+     <vertex x="-0.371483803" y="-1.09561276" z="2.44383287"/>
+     <vertex x="-0.34931612" y="-1.23215461" z="2.47193146"/>
+     <vertex x="-0.329536438" y="-1.36976027" z="2.5"/>
+     <vertex x="1.73975611" y="1.03568339" z="2.5"/>
+     <vertex x="2.08359194" y="1.6865375" z="2.5"/>
+     <vertex x="-1.61012983" y="3.85035825" z="1.5"/>
+     <vertex x="2.37150574" y="2.36398792" z="2.5"/>
+     <vertex x="-1.56725407" y="3.96847701" z="1.5"/>
+     <vertex x="2.45468616" y="2.59489107" z="2.5"/>
+     <vertex x="2.53135872" y="2.82803655" z="2.5"/>
+     <vertex x="-1.42919445" y="4.45152855" z="1.5"/>
+     <vertex x="2.72174454" y="3.53908277" z="2.5"/>
+     <vertex x="-1.40317488" y="4.57446575" z="1.5"/>
+     <vertex x="2.77183056" y="3.7793467" z="2.5"/>
+     <vertex x="-1.38059807" y="4.69808006" z="1.5"/>
+     <vertex x="2.81515789" y="4.02092075" z="2.5"/>
+     <vertex x="-5.71154261" y="5.38218021" z="0.5"/>
+     <vertex x="-5.81822968" y="5.4446907" z="0.5"/>
+     <vertex x="-0.339845181" y="-1.29151559" z="-2.5"/>
+     <vertex x="-0.326357365" y="-1.38904786" z="-2.5"/>
+     <vertex x="-0.316542625" y="-1.47135472" z="2.5"/>
+     <vertex x="-0.313941002" y="-1.48819518" z="-2.5"/>
+     <vertex x="-0.304740429" y="-1.57430673" z="2.5"/>
+     <vertex x="-0.302632809" y="-1.58897901" z="-2.5"/>
+     <vertex x="-0.294156551" y="-1.67863059" z="2.5"/>
+     <vertex x="-0.292468071" y="-1.69142032" z="-2.5"/>
+     <vertex x="-0.284818172" y="-1.78434062" z="2.5"/>
+     <vertex x="-0.283482552" y="-1.79554105" z="-2.5"/>
+     <vertex x="-0.276751041" y="-1.89145207" z="2.5"/>
+     <vertex x="-0.275711536" y="-1.90136123" z="-2.5"/>
+     <vertex x="-0.269982338" y="-1.99997926" z="2.5"/>
+     <vertex x="-0.269191265" y="-2.00890326" z="-2.5"/>
+     <vertex x="-0.264538765" y="-2.10993695" z="2.5"/>
+     <vertex x="-0.263957024" y="-2.11818767" z="-2.5"/>
+     <vertex x="-0.260446548" y="-2.22133899" z="2.5"/>
+     <vertex x="-0.260044575" y="-2.22923589" z="-2.5"/>
+     <vertex x="-0.257732868" y="-2.3342011" z="2.5"/>
+     <vertex x="-0.257489681" y="-2.34206939" z="-2.5"/>
+     <vertex x="-0.256424427" y="-2.44853663" z="2.5"/>
+     <vertex x="-0.256328106" y="-2.45670915" z="-2.5"/>
+     <vertex x="-0.256479263" y="-2.56339717" z="2.5"/>
+     <vertex x="-0.256595135" y="-2.57317615" z="-2.5"/>
+     <vertex x="-0.257748127" y="-2.67671275" z="2.5"/>
+     <vertex x="-0.258327007" y="-2.6914928" z="-2.5"/>
+     <vertex x="-0.260201454" y="-2.7885015" z="2.5"/>
+     <vertex x="-0.261497498" y="-2.8109014" z="-2.5"/>
+     <vertex x="-0.263816357" y="-2.89886165" z="2.5"/>
+     <vertex x="-0.265885353" y="-2.92854953" z="-2.5"/>
+     <vertex x="-0.271446228" y="-3.04429412" z="-2.5"/>
+     <vertex x="-0.35436964" y="-1.19557738" z="-2.5"/>
+     <vertex x="-0.369894981" y="-1.10121179" z="-2.5"/>
+     <vertex x="-0.386385441" y="-1.00839734" z="-2.5"/>
+     <vertex x="-0.403804779" y="-0.917113543" z="-2.5"/>
+     <vertex x="-0.441289902" y="-0.739051104" z="-2.5"/>
+     <vertex x="-0.482064247" y="-0.566854239" z="-2.5"/>
+     <vertex x="-0.52584219" y="-0.40035367" z="-2.5"/>
+     <vertex x="-0.572339058" y="-0.239379168" z="-2.5"/>
+     <vertex x="-0.621269226" y="-0.0837609768" z="-2.5"/>
+     <vertex x="-0.672714233" y="0.0676596165" z="-2.5"/>
+     <vertex x="-0.728169441" y="0.219263792" z="-2.5"/>
+     <vertex x="-0.78797102" y="0.371545076" z="-2.5"/>
+     <vertex x="-0.852283001" y="0.524497271" z="-2.5"/>
+     <vertex x="-0.921269894" y="0.678113222" z="-2.5"/>
+     <vertex x="-0.995096207" y="0.832386255" z="-2.5"/>
+     <vertex x="-1.07392597" y="0.987308741" z="-2.5"/>
+     <vertex x="-1.15792465" y="1.14287448" z="-2.5"/>
+     <vertex x="-1.24725533" y="1.29907584" z="-2.5"/>
+     <vertex x="-1.34208345" y="1.45590663" z="-2.5"/>
+     <vertex x="-1.44257307" y="1.61335945" z="-2.5"/>
+     <vertex x="-1.54888821" y="1.77142739" z="-2.5"/>
+     <vertex x="-1.66119337" y="1.93010354" z="-2.5"/>
+     <vertex x="-1.77965355" y="2.08938098" z="-2.5"/>
+     <vertex x="-1.90443301" y="2.2492528" z="-2.5"/>
+     <vertex x="-2.03569555" y="2.40971208" z="-2.5"/>
+     <vertex x="-2.17359042" y="2.57073402" z="-2.5"/>
+     <vertex x="-2.31612349" y="2.72997379" z="-2.5"/>
+     <vertex x="-2.46161771" y="2.88579226" z="-2.5"/>
+     <vertex x="-2.60978007" y="3.03818774" z="-2.5"/>
+     <vertex x="-2.76031709" y="3.18715858" z="-2.5"/>
+     <vertex x="-2.91293597" y="3.33270288" z="-2.5"/>
+     <vertex x="-3.06734324" y="3.47481894" z="-2.5"/>
+     <vertex x="-3.22324562" y="3.61350513" z="-2.5"/>
+     <vertex x="-3.38035011" y="3.74875951" z="-2.5"/>
+     <vertex x="-3.53836346" y="3.88058066" z="-2.5"/>
+     <vertex x="-3.69699216" y="4.00896645" z="-2.5"/>
+     <vertex x="-3.8559432" y="4.13391495" z="-2.5"/>
+     <vertex x="-4.01492357" y="4.25542545" z="-2.5"/>
+     <vertex x="-4.17363977" y="4.3734951" z="-2.5"/>
+     <vertex x="-4.33179855" y="4.48812199" z="-2.5"/>
+     <vertex x="-4.48910713" y="4.59930611" z="-2.5"/>
+     <vertex x="-4.64527178" y="4.70704365" z="-2.5"/>
+     <vertex x="-4.79999924" y="4.81133366" z="-2.5"/>
+     <vertex x="-4.95299721" y="4.91217518" z="-2.5"/>
+     <vertex x="-5.10397148" y="5.00956535" z="-2.5"/>
+     <vertex x="-5.25262928" y="5.10350227" z="-2.5"/>
+     <vertex x="-5.39867687" y="5.19398594" z="-2.5"/>
+     <vertex x="-5.54182196" y="5.28101254" z="-2.5"/>
+     <vertex x="-5.68177032" y="5.36458206" z="-2.5"/>
+     <vertex x="-5.81822968" y="5.4446907" z="-2.5"/>
+     <vertex x="-0.27443552" y="-3.11568522" z="2.5"/>
+     <vertex x="-0.278155804" y="-3.15827537" z="-2.5"/>
+     <vertex x="-0.285990715" y="-3.27063346" z="-2.5"/>
+     <vertex x="-0.289416313" y="-3.32796168" z="2.5"/>
+     <vertex x="-0.304940701" y="-3.49104476" z="-2.5"/>
+     <vertex x="-0.308568954" y="-3.53646922" z="2.5"/>
+     <vertex x="-0.328106403" y="-3.7066505" z="-2.5"/>
+     <vertex x="-0.33170414" y="-3.74198604" z="2.5"/>
+     <vertex x="-0.355297089" y="-3.91857696" z="-2.5"/>
+     <vertex x="-0.358633518" y="-3.94529128" z="2.5"/>
+     <vertex x="-0.386322021" y="-4.12794685" z="-2.5"/>
+     <vertex x="-0.389167309" y="-4.14716339" z="2.5"/>
+     <vertex x="-0.420991898" y="-4.33588505" z="-2.5"/>
+     <vertex x="-0.423116684" y="-4.34838104" z="2.5"/>
+     <vertex x="-0.459115982" y="-4.54351711" z="-2.5"/>
+     <vertex x="-0.460291862" y="-4.54972172" z="2.5"/>
+     <vertex x="-0.50050354" y="-4.75196552" z="-2.5"/>
+     <vertex x="-0.50050354" y="-4.75196552" z="2.5"/>
+     <vertex x="-0.533998966" y="-4.91038704" z="-2.37456155"/>
+     <vertex x="-0.533998966" y="-4.91038704" z="2.37456131"/>
+     <vertex x="-0.569372177" y="-5.06863117" z="2.24922514"/>
+     <vertex x="-0.569372177" y="-5.06863117" z="-2.24922514"/>
+     <vertex x="-0.606572628" y="-5.22665024" z="-2.1240027"/>
+     <vertex x="-0.606572628" y="-5.22665024" z="2.12400293"/>
+     <vertex x="-0.645550251" y="-5.38439846" z="-1.99890554"/>
+     <vertex x="-0.645550251" y="-5.38439846" z="1.99890566"/>
+     <vertex x="-0.728636265" y="-5.69889545" z="-1.74913311"/>
+     <vertex x="-0.728636265" y="-5.69889545" z="1.74913311"/>
+     <vertex x="-0.818229675" y="-6.01174831" z="-1.5"/>
+     <vertex x="-0.818229675" y="-6.01174831" z="1.5"/>
+     <vertex x="-5.66505384" y="5.48454666" z="-2.5"/>
+     <vertex x="-5.50696182" y="5.52442265" z="-2.5"/>
+     <vertex x="-5.34416199" y="5.56411362" z="-2.5"/>
+     <vertex x="-5.17686367" y="5.60341358" z="-2.5"/>
+     <vertex x="-5.00527573" y="5.64211559" z="-2.5"/>
+     <vertex x="-4.82960606" y="5.6800127" z="-2.5"/>
+     <vertex x="-4.65006399" y="5.71690083" z="-2.5"/>
+     <vertex x="-4.46685791" y="5.75257206" z="-2.5"/>
+     <vertex x="-4.28019714" y="5.78682041" z="-2.5"/>
+     <vertex x="-4.09029007" y="5.81943893" z="-2.5"/>
+     <vertex x="-3.89734507" y="5.85022354" z="-2.5"/>
+     <vertex x="-3.70157123" y="5.87896633" z="-2.5"/>
+     <vertex x="-3.50317717" y="5.90546036" z="-2.5"/>
+     <vertex x="-3.30237174" y="5.92950153" z="-2.5"/>
+     <vertex x="-3.09936357" y="5.95088196" z="-2.5"/>
+     <vertex x="-2.89436126" y="5.96939564" z="-2.5"/>
+     <vertex x="-2.68757391" y="5.98483658" z="-2.5"/>
+     <vertex x="-2.4792099" y="5.99699879" z="-2.5"/>
+     <vertex x="-2.26947784" y="6.00567532" z="-2.5"/>
+     <vertex x="-2.05858707" y="6.01066017" z="-2.5"/>
+     <vertex x="-1.84674573" y="6.01174831" z="-2.5"/>
+     <vertex x="-1.63416243" y="6.00873089" z="-2.5"/>
+     <vertex x="-1.42104673" y="6.00140476" z="-2.5"/>
+     <vertex x="-1.20760679" y="5.98956108" z="-2.5"/>
+     <vertex x="-0.996216297" y="5.97317696" z="-2.5"/>
+     <vertex x="-0.789918423" y="5.95249939" z="-2.5"/>
+     <vertex x="-0.58862257" y="5.92765141" z="-2.5"/>
+     <vertex x="-0.392216206" y="5.89875507" z="-2.5"/>
+     <vertex x="-0.20058918" y="5.86593056" z="-2.5"/>
+     <vertex x="-0.0136294365" y="5.82929897" z="-2.5"/>
+     <vertex x="0.168774605" y="5.78898239" z="-2.5"/>
+     <vertex x="0.346734047" y="5.74510098" z="-2.5"/>
+     <vertex x="0.52036047" y="5.69777679" z="-2.5"/>
+     <vertex x="0.689765453" y="5.64713097" z="-2.5"/>
+     <vertex x="0.855059624" y="5.59328556" z="-2.5"/>
+     <vertex x="1.01635551" y="5.53635979" z="-2.5"/>
+     <vertex x="1.17376375" y="5.47647667" z="-2.5"/>
+     <vertex x="1.32739639" y="5.41375732" z="-2.5"/>
+     <vertex x="1.47736454" y="5.34832191" z="-2.5"/>
+     <vertex x="1.6237793" y="5.28029251" z="-2.5"/>
+     <vertex x="1.76725245" y="5.20954609" z="-2.5"/>
+     <vertex x="1.91194773" y="5.1340313" z="-2.5"/>
+     <vertex x="2.05871058" y="5.05300236" z="-2.5"/>
+     <vertex x="2.2074585" y="4.96613789" z="-2.5"/>
+     <vertex x="2.35810947" y="4.87311554" z="-2.5"/>
+     <vertex x="2.51058292" y="4.77361202" z="-2.5"/>
+     <vertex x="2.58747673" y="4.72132874" z="-2.5"/>
+     <vertex x="2.66479588" y="4.66730499" z="-2.5"/>
+     <vertex x="2.74252987" y="4.61149979" z="-2.5"/>
+     <vertex x="2.82066822" y="4.55387402" z="-2.5"/>
+     <vertex x="2.89920044" y="4.49438477" z="-2.5"/>
+     <vertex x="2.95448589" y="4.45081139" z="2.5"/>
+     <vertex x="2.97811604" y="4.43299484" z="-2.5"/>
+     <vertex x="3.02799606" y="4.39265537" z="2.5"/>
+     <vertex x="3.05740643" y="4.36966228" z="-2.5"/>
+     <vertex x="3.10192299" y="4.33273411" z="2.5"/>
+     <vertex x="3.13705921" y="4.30434608" z="-2.5"/>
+     <vertex x="3.17625523" y="4.2710104" z="2.5"/>
+     <vertex x="3.21706676" y="4.23700809" z="-2.5"/>
+     <vertex x="3.25097942" y="4.20744801" z="2.5"/>
+     <vertex x="3.29741669" y="4.16760635" z="-2.5"/>
+     <vertex x="3.32608223" y="4.14200878" z="2.5"/>
+     <vertex x="3.37809849" y="4.09610081" z="-2.5"/>
+     <vertex x="3.40155029" y="4.07465553" z="2.5"/>
+     <vertex x="3.45910454" y="4.02245235" z="-2.5"/>
+     <vertex x="3.47737122" y="4.00535202" z="2.5"/>
+     <vertex x="3.54042244" y="3.94661927" z="-2.5"/>
+     <vertex x="3.55353165" y="3.93406129" z="2.5"/>
+     <vertex x="3.62204266" y="3.86856198" z="-2.5"/>
+     <vertex x="3.63001919" y="3.86074519" z="2.5"/>
+     <vertex x="3.7039547" y="3.78824019" z="-2.5"/>
+     <vertex x="3.70681953" y="3.78536749" z="2.5"/>
+     <vertex x="3.78614807" y="3.70561337" z="-2.5"/>
+     <vertex x="3.78392124" y="3.70789075" z="2.5"/>
+     <vertex x="3.86131096" y="3.62827802" z="2.5"/>
+     <vertex x="3.9507122" y="3.53404617" z="-2.5"/>
+     <vertex x="3.93897438" y="3.54649234" z="2.5"/>
+     <vertex x="4.01690006" y="3.46249652" z="2.5"/>
+     <vertex x="4.0303669" y="3.44833589" z="-2.5"/>
+     <vertex x="4.0950737" y="3.37625313" z="2.5"/>
+     <vertex x="4.10756969" y="3.36355925" z="-2.5"/>
+     <vertex x="4.17325401" y="3.28801799" z="2.5"/>
+     <vertex x="4.18249702" y="3.27954602" z="-2.5"/>
+     <vertex x="4.24929714" y="3.20050144" z="2.5"/>
+     <vertex x="4.2553215" y="3.19612503" z="-2.5"/>
+     <vertex x="4.32285404" y="3.11418557" z="2.5"/>
+     <vertex x="4.32621861" y="3.1131258" z="-2.5"/>
+     <vertex x="4.39414215" y="3.02883649" z="2.5"/>
+     <vertex x="4.39536381" y="3.03037691" z="-2.5"/>
+     <vertex x="4.46338081" y="2.94421935" z="2.5"/>
+     <vertex x="4.52909756" y="2.86494827" z="-2.5"/>
+     <vertex x="4.53078842" y="2.86010051" z="2.5"/>
+     <vertex x="4.65792179" y="2.6984725" z="-2.5"/>
+     <vertex x="4.66097927" y="2.69241977" z="2.5"/>
+     <vertex x="4.7832346" y="2.52958298" z="-2.5"/>
+     <vertex x="4.78645992" y="2.52391982" z="2.5"/>
+     <vertex x="4.90643501" y="2.35691309" z="-2.5"/>
+     <vertex x="4.90897655" y="2.35272717" z="2.5"/>
+     <vertex x="5.02892208" y="2.1790967" z="-2.5"/>
+     <vertex x="5.03027344" y="2.17696738" z="2.5"/>
+     <vertex x="5.09033489" y="2.08783126" z="-2.5"/>
+     <vertex x="5.09100914" y="2.08678913" z="2.5"/>
+     <vertex x="5.15209484" y="1.99476647" z="-2.5"/>
+     <vertex x="5.15209484" y="1.99476647" z="2.5"/>
+     <vertex x="5.24043179" y="1.85906029" z="2.37456131"/>
+     <vertex x="5.24043179" y="1.85906029" z="-2.37456155"/>
+     <vertex x="5.32731438" y="1.72215247" z="2.24922514"/>
+     <vertex x="5.32731438" y="1.72215247" z="-2.24922514"/>
+     <vertex x="5.41274643" y="1.58411145" z="2.12400293"/>
+     <vertex x="5.41274643" y="1.58411145" z="-2.1240027"/>
+     <vertex x="5.49672985" y="1.44500518" z="1.99890566"/>
+     <vertex x="5.49672985" y="1.44500518" z="-1.99890554"/>
+     <vertex x="5.66036129" y="1.16387153" z="1.74913311"/>
+     <vertex x="5.66036129" y="1.16387153" z="-1.74913311"/>
+     <vertex x="5.81822968" y="0.879298925" z="1.5"/>
+     <vertex x="5.81822968" y="0.879298925" z="-1.5"/>
+     <vertex x="5.06412506" y="1.72658038" z="-2.5"/>
+     <vertex x="4.96960068" y="1.46063375" z="-2.5"/>
+     <vertex x="4.86857796" y="1.19708705" z="-2.5"/>
+     <vertex x="5.70967484" y="0.611739397" z="-1.5"/>
+     <vertex x="4.76111794" y="0.936098814" z="-2.5"/>
+     <vertex x="5.59496784" y="0.346758604" z="-1.5"/>
+     <vertex x="4.64728546" y="0.677826643" z="-2.5"/>
+     <vertex x="5.47417164" y="0.0844976902" z="-1.5"/>
+     <vertex x="4.52714825" y="0.422425985" z="-2.5"/>
+     <vertex x="5.34735012" y="-0.174902678" z="-1.5"/>
+     <vertex x="4.40078068" y="0.170050383" z="-2.5"/>
+     <vertex x="5.21457005" y="-0.43130517" z="-1.5"/>
+     <vertex x="4.26825619" y="-0.0791480541" z="-2.5"/>
+     <vertex x="5.07590389" y="-0.684571505" z="-1.5"/>
+     <vertex x="4.12965679" y="-0.325019121" z="-2.5"/>
+     <vertex x="4.93142414" y="-0.934568167" z="-1.5"/>
+     <vertex x="3.98506451" y="-0.567414999" z="-2.5"/>
+     <vertex x="4.78120899" y="-1.18116021" z="-1.5"/>
+     <vertex x="3.83456802" y="-0.806189299" z="-2.5"/>
+     <vertex x="4.6253376" y="-1.42421746" z="-1.5"/>
+     <vertex x="3.67825603" y="-1.04119802" z="-2.5"/>
+     <vertex x="4.46389389" y="-1.66360927" z="-1.5"/>
+     <vertex x="3.51622486" y="-1.2723" z="-2.5"/>
+     <vertex x="4.29696465" y="-1.89920831" z="-1.5"/>
+     <vertex x="3.34856987" y="-1.49935603" z="-2.5"/>
+     <vertex x="4.12463665" y="-2.13088822" z="-1.5"/>
+     <vertex x="3.1753931" y="-1.72222924" z="-2.5"/>
+     <vertex x="3.94700432" y="-2.35852647" z="-1.5"/>
+     <vertex x="2.99679947" y="-1.94078517" z="-2.5"/>
+     <vertex x="3.76416111" y="-2.58200145" z="-1.5"/>
+     <vertex x="3.57620525" y="-2.801193" z="-1.5"/>
+     <vertex x="2.81289577" y="-2.15489221" z="-2.5"/>
+     <vertex x="3.38323593" y="-3.0159843" z="-1.5"/>
+     <vertex x="2.6237936" y="-2.36442208" z="-2.5"/>
+     <vertex x="3.18535709" y="-3.22626185" z="-1.5"/>
+     <vertex x="2.42960548" y="-2.56924796" z="-2.5"/>
+     <vertex x="2.9826746" y="-3.43191218" z="-1.5"/>
+     <vertex x="2.23044968" y="-2.76924586" z="-2.5"/>
+     <vertex x="2.77529621" y="-3.63282657" z="-1.5"/>
+     <vertex x="2.02644539" y="-2.9642961" z="-2.5"/>
+     <vertex x="2.5633316" y="-3.82889628" z="-1.5"/>
+     <vertex x="1.81771612" y="-3.15428233" z="-2.5"/>
+     <vertex x="2.34689522" y="-4.02001953" z="-1.5"/>
+     <vertex x="1.60438681" y="-3.33908725" z="-2.5"/>
+     <vertex x="2.12610197" y="-4.20609093" z="-1.5"/>
+     <vertex x="1.38658667" y="-3.51860213" z="-2.5"/>
+     <vertex x="1.90106964" y="-4.38701344" z="-1.5"/>
+     <vertex x="1.16444635" y="-3.69271731" z="-2.5"/>
+     <vertex x="1.67191887" y="-4.56269073" z="-1.5"/>
+     <vertex x="0.938100338" y="-3.86132884" z="-2.5"/>
+     <vertex x="1.43877125" y="-4.73302746" z="-1.5"/>
+     <vertex x="0.70768404" y="-4.02433491" z="-2.5"/>
+     <vertex x="1.20175123" y="-4.89793301" z="-1.5"/>
+     <vertex x="0.473337173" y="-4.18163681" z="-2.5"/>
+     <vertex x="0.960985184" y="-5.05732059" z="-1.5"/>
+     <vertex x="0.235200405" y="-4.33314037" z="-2.5"/>
+     <vertex x="0.716602325" y="-5.21110439" z="-1.5"/>
+     <vertex x="-0.00658273697" y="-4.47875404" z="-2.5"/>
+     <vertex x="0.468732357" y="-5.35920238" z="-1.5"/>
+     <vertex x="-0.251866817" y="-4.61839104" z="-2.5"/>
+     <vertex x="0.217508316" y="-5.50153542" z="-1.5"/>
+     <vertex x="-0.0369367599" y="-5.63802814" z="-1.5"/>
+     <vertex x="-0.294466972" y="-5.76860714" z="-1.5"/>
+     <vertex x="-0.554944038" y="-5.89320278" z="-1.5"/>
+     <vertex x="-0.554944038" y="-5.89320278" z="1.5"/>
+     <vertex x="-0.294466972" y="-5.76860714" z="1.5"/>
+     <vertex x="-0.0369367599" y="-5.63802814" z="1.5"/>
+     <vertex x="0.217508316" y="-5.50153542" z="1.5"/>
+     <vertex x="0.468732357" y="-5.35920238" z="1.5"/>
+     <vertex x="0.716602325" y="-5.21110439" z="1.5"/>
+     <vertex x="0.960985184" y="-5.05732059" z="1.5"/>
+     <vertex x="1.20175123" y="-4.89793301" z="1.5"/>
+     <vertex x="1.43877125" y="-4.73302746" z="1.5"/>
+     <vertex x="1.67191887" y="-4.56269073" z="1.5"/>
+     <vertex x="1.90106964" y="-4.38701344" z="1.5"/>
+     <vertex x="2.12610197" y="-4.20609093" z="1.5"/>
+     <vertex x="2.34689522" y="-4.02001953" z="1.5"/>
+     <vertex x="2.5633316" y="-3.82889628" z="1.5"/>
+     <vertex x="2.77529621" y="-3.63282657" z="1.5"/>
+     <vertex x="2.9826746" y="-3.43191218" z="1.5"/>
+     <vertex x="3.18535709" y="-3.22626185" z="1.5"/>
+     <vertex x="3.38323593" y="-3.0159843" z="1.5"/>
+     <vertex x="3.57620525" y="-2.801193" z="1.5"/>
+     <vertex x="3.76416111" y="-2.58200145" z="1.5"/>
+     <vertex x="3.94700432" y="-2.35852647" z="1.5"/>
+     <vertex x="4.12463665" y="-2.13088822" z="1.5"/>
+     <vertex x="4.29696465" y="-1.89920831" z="1.5"/>
+     <vertex x="4.46389389" y="-1.66360927" z="1.5"/>
+     <vertex x="4.6253376" y="-1.42421746" z="1.5"/>
+     <vertex x="4.78120899" y="-1.18116021" z="1.5"/>
+     <vertex x="4.93142414" y="-0.934568167" z="1.5"/>
+     <vertex x="5.07590389" y="-0.684571505" z="1.5"/>
+     <vertex x="5.21457005" y="-0.43130517" z="1.5"/>
+     <vertex x="5.34735012" y="-0.174902678" z="1.5"/>
+     <vertex x="5.47417164" y="0.0844976902" z="1.5"/>
+     <vertex x="5.59496784" y="0.346758604" z="1.5"/>
+     <vertex x="5.70967484" y="0.611739397" z="1.5"/>
+     <vertex x="4.86857796" y="1.19708705" z="2.5"/>
+     <vertex x="4.96960068" y="1.46063375" z="2.5"/>
+     <vertex x="5.06412506" y="1.72658038" z="2.5"/>
+     <vertex x="4.76111794" y="0.936098814" z="2.5"/>
+     <vertex x="4.64728546" y="0.677826643" z="2.5"/>
+     <vertex x="4.52714825" y="0.422425985" z="2.5"/>
+     <vertex x="4.40078068" y="0.170050383" z="2.5"/>
+     <vertex x="4.26825619" y="-0.0791480541" z="2.5"/>
+     <vertex x="4.12965679" y="-0.325019121" z="2.5"/>
+     <vertex x="3.98506451" y="-0.567414999" z="2.5"/>
+     <vertex x="3.83456802" y="-0.806189299" z="2.5"/>
+     <vertex x="3.67825603" y="-1.04119802" z="2.5"/>
+     <vertex x="3.51622486" y="-1.2723" z="2.5"/>
+     <vertex x="3.34856987" y="-1.49935603" z="2.5"/>
+     <vertex x="3.1753931" y="-1.72222924" z="2.5"/>
+     <vertex x="2.99679947" y="-1.94078517" z="2.5"/>
+     <vertex x="2.81289577" y="-2.15489221" z="2.5"/>
+     <vertex x="2.6237936" y="-2.36442208" z="2.5"/>
+     <vertex x="2.42960548" y="-2.56924796" z="2.5"/>
+     <vertex x="2.23044968" y="-2.76924586" z="2.5"/>
+     <vertex x="2.02644539" y="-2.9642961" z="2.5"/>
+     <vertex x="1.81771612" y="-3.15428233" z="2.5"/>
+     <vertex x="1.60438681" y="-3.33908725" z="2.5"/>
+     <vertex x="1.38658667" y="-3.51860213" z="2.5"/>
+     <vertex x="1.16444635" y="-3.69271731" z="2.5"/>
+     <vertex x="0.938100338" y="-3.86132884" z="2.5"/>
+     <vertex x="0.70768404" y="-4.02433491" z="2.5"/>
+     <vertex x="0.473337173" y="-4.18163681" z="2.5"/>
+     <vertex x="0.235200405" y="-4.33314037" z="2.5"/>
+     <vertex x="-0.00658273697" y="-4.47875404" z="2.5"/>
+     <vertex x="-0.251866817" y="-4.61839104" z="2.5"/>
+    </vertices>
+    <triangles>
+     <triangle v1="0" v2="1" v3="2"/>
+     <triangle v1="2" v2="1" v3="3"/>
+     <triangle v1="2" v2="3" v3="4"/>
+     <triangle v1="4" v2="3" v3="5"/>
+     <triangle v1="4" v2="5" v3="6"/>
+     <triangle v1="6" v2="7" v3="4"/>
+     <triangle v1="4" v2="7" v3="8"/>
+     <triangle v1="4" v2="8" v3="9"/>
+     <triangle v1="9" v2="8" v3="10"/>
+     <triangle v1="9" v2="10" v3="11"/>
+     <triangle v1="11" v2="12" v3="9"/>
+     <triangle v1="9" v2="12" v3="13"/>
+     <triangle v1="9" v2="13" v3="14"/>
+     <triangle v1="14" v2="13" v3="15"/>
+     <triangle v1="14" v2="15" v3="16"/>
+     <triangle v1="16" v2="17" v3="14"/>
+     <triangle v1="14" v2="17" v3="18"/>
+     <triangle v1="14" v2="18" v3="19"/>
+     <triangle v1="19" v2="18" v3="20"/>
+     <triangle v1="19" v2="20" v3="21"/>
+     <triangle v1="21" v2="20" v3="22"/>
+     <triangle v1="21" v2="22" v3="23"/>
+     <triangle v1="23" v2="22" v3="24"/>
+     <triangle v1="23" v2="24" v3="25"/>
+     <triangle v1="17" v2="26" v3="18"/>
+     <triangle v1="18" v2="26" v3="27"/>
+     <triangle v1="18" v2="27" v3="28"/>
+     <triangle v1="28" v2="29" v3="18"/>
+     <triangle v1="18" v2="29" v3="20"/>
+     <triangle v1="29" v2="30" v3="20"/>
+     <triangle v1="20" v2="30" v3="31"/>
+     <triangle v1="20" v2="31" v3="32"/>
+     <triangle v1="32" v2="33" v3="20"/>
+     <triangle v1="20" v2="33" v3="22"/>
+     <triangle v1="33" v2="34" v3="22"/>
+     <triangle v1="22" v2="34" v3="35"/>
+     <triangle v1="22" v2="35" v3="36"/>
+     <triangle v1="36" v2="37" v3="22"/>
+     <triangle v1="22" v2="37" v3="24"/>
+     <triangle v1="25" v2="38" v3="23"/>
+     <triangle v1="23" v2="38" v3="39"/>
+     <triangle v1="23" v2="39" v3="40"/>
+     <triangle v1="23" v2="40" v3="21"/>
+     <triangle v1="21" v2="40" v3="41"/>
+     <triangle v1="21" v2="41" v3="42"/>
+     <triangle v1="42" v2="41" v3="43"/>
+     <triangle v1="42" v2="43" v3="44"/>
+     <triangle v1="44" v2="45" v3="42"/>
+     <triangle v1="42" v2="45" v3="21"/>
+     <triangle v1="45" v2="46" v3="21"/>
+     <triangle v1="21" v2="46" v3="47"/>
+     <triangle v1="21" v2="47" v3="48"/>
+     <triangle v1="48" v2="49" v3="21"/>
+     <triangle v1="21" v2="49" v3="50"/>
+     <triangle v1="21" v2="50" v3="51"/>
+     <triangle v1="51" v2="52" v3="21"/>
+     <triangle v1="21" v2="52" v3="53"/>
+     <triangle v1="21" v2="53" v3="54"/>
+     <triangle v1="54" v2="55" v3="21"/>
+     <triangle v1="21" v2="55" v3="56"/>
+     <triangle v1="21" v2="56" v3="57"/>
+     <triangle v1="57" v2="58" v3="21"/>
+     <triangle v1="21" v2="58" v3="59"/>
+     <triangle v1="21" v2="59" v3="60"/>
+     <triangle v1="60" v2="61" v3="21"/>
+     <triangle v1="21" v2="61" v3="62"/>
+     <triangle v1="63" v2="64" v3="19"/>
+     <triangle v1="19" v2="64" v3="2"/>
+     <triangle v1="19" v2="2" v3="4"/>
+     <triangle v1="65" v2="66" v3="63"/>
+     <triangle v1="63" v2="66" v3="67"/>
+     <triangle v1="63" v2="67" v3="68"/>
+     <triangle v1="68" v2="67" v3="69"/>
+     <triangle v1="68" v2="69" v3="70"/>
+     <triangle v1="71" v2="72" v3="65"/>
+     <triangle v1="65" v2="72" v3="73"/>
+     <triangle v1="65" v2="73" v3="74"/>
+     <triangle v1="74" v2="73" v3="75"/>
+     <triangle v1="74" v2="75" v3="76"/>
+     <triangle v1="77" v2="78" v3="71"/>
+     <triangle v1="71" v2="78" v3="79"/>
+     <triangle v1="71" v2="79" v3="80"/>
+     <triangle v1="80" v2="79" v3="81"/>
+     <triangle v1="80" v2="81" v3="82"/>
+     <triangle v1="77" v2="83" v3="78"/>
+     <triangle v1="78" v2="83" v3="84"/>
+     <triangle v1="78" v2="84" v3="85"/>
+     <triangle v1="85" v2="84" v3="86"/>
+     <triangle v1="86" v2="84" v3="87"/>
+     <triangle v1="86" v2="87" v3="88"/>
+     <triangle v1="88" v2="87" v3="89"/>
+     <triangle v1="88" v2="89" v3="90"/>
+     <triangle v1="90" v2="89" v3="91"/>
+     <triangle v1="90" v2="91" v3="92"/>
+     <triangle v1="92" v2="91" v3="93"/>
+     <triangle v1="92" v2="93" v3="94"/>
+     <triangle v1="83" v2="95" v3="84"/>
+     <triangle v1="84" v2="95" v3="96"/>
+     <triangle v1="84" v2="96" v3="97"/>
+     <triangle v1="84" v2="97" v3="87"/>
+     <triangle v1="87" v2="97" v3="98"/>
+     <triangle v1="87" v2="98" v3="99"/>
+     <triangle v1="99" v2="100" v3="87"/>
+     <triangle v1="87" v2="100" v3="101"/>
+     <triangle v1="87" v2="101" v3="89"/>
+     <triangle v1="89" v2="101" v3="102"/>
+     <triangle v1="89" v2="102" v3="103"/>
+     <triangle v1="103" v2="91" v3="89"/>
+     <triangle v1="94" v2="104" v3="92"/>
+     <triangle v1="92" v2="104" v3="105"/>
+     <triangle v1="92" v2="105" v3="106"/>
+     <triangle v1="107" v2="108" v3="106"/>
+     <triangle v1="106" v2="108" v3="90"/>
+     <triangle v1="106" v2="90" v3="92"/>
+     <triangle v1="107" v2="109" v3="108"/>
+     <triangle v1="108" v2="109" v3="110"/>
+     <triangle v1="108" v2="110" v3="111"/>
+     <triangle v1="108" v2="111" v3="112"/>
+     <triangle v1="112" v2="111" v3="113"/>
+     <triangle v1="112" v2="113" v3="114"/>
+     <triangle v1="114" v2="115" v3="112"/>
+     <triangle v1="112" v2="115" v3="116"/>
+     <triangle v1="112" v2="116" v3="117"/>
+     <triangle v1="117" v2="116" v3="118"/>
+     <triangle v1="117" v2="118" v3="119"/>
+     <triangle v1="119" v2="120" v3="117"/>
+     <triangle v1="117" v2="120" v3="121"/>
+     <triangle v1="117" v2="121" v3="122"/>
+     <triangle v1="122" v2="121" v3="123"/>
+     <triangle v1="122" v2="123" v3="124"/>
+     <triangle v1="124" v2="125" v3="122"/>
+     <triangle v1="122" v2="125" v3="126"/>
+     <triangle v1="122" v2="126" v3="127"/>
+     <triangle v1="122" v2="127" v3="128"/>
+     <triangle v1="128" v2="127" v3="129"/>
+     <triangle v1="128" v2="129" v3="130"/>
+     <triangle v1="130" v2="131" v3="128"/>
+     <triangle v1="128" v2="131" v3="132"/>
+     <triangle v1="132" v2="131" v3="133"/>
+     <triangle v1="132" v2="133" v3="134"/>
+     <triangle v1="134" v2="135" v3="132"/>
+     <triangle v1="132" v2="135" v3="136"/>
+     <triangle v1="132" v2="136" v3="137"/>
+     <triangle v1="137" v2="136" v3="138"/>
+     <triangle v1="137" v2="138" v3="139"/>
+     <triangle v1="139" v2="140" v3="137"/>
+     <triangle v1="137" v2="140" v3="141"/>
+     <triangle v1="137" v2="141" v3="142"/>
+     <triangle v1="142" v2="141" v3="143"/>
+     <triangle v1="142" v2="143" v3="144"/>
+     <triangle v1="144" v2="145" v3="142"/>
+     <triangle v1="142" v2="145" v3="146"/>
+     <triangle v1="142" v2="146" v3="147"/>
+     <triangle v1="85" v2="148" v3="78"/>
+     <triangle v1="78" v2="148" v3="79"/>
+     <triangle v1="148" v2="81" v3="79"/>
+     <triangle v1="80" v2="82" v3="72"/>
+     <triangle v1="72" v2="82" v3="149"/>
+     <triangle v1="72" v2="149" v3="73"/>
+     <triangle v1="73" v2="149" v3="75"/>
+     <triangle v1="74" v2="76" v3="150"/>
+     <triangle v1="150" v2="76" v3="151"/>
+     <triangle v1="150" v2="151" v3="152"/>
+     <triangle v1="152" v2="151" v3="153"/>
+     <triangle v1="152" v2="153" v3="66"/>
+     <triangle v1="66" v2="153" v3="154"/>
+     <triangle v1="66" v2="154" v3="67"/>
+     <triangle v1="67" v2="154" v3="69"/>
+     <triangle v1="68" v2="70" v3="155"/>
+     <triangle v1="155" v2="70" v3="156"/>
+     <triangle v1="155" v2="156" v3="157"/>
+     <triangle v1="157" v2="156" v3="158"/>
+     <triangle v1="157" v2="158" v3="159"/>
+     <triangle v1="159" v2="158" v3="160"/>
+     <triangle v1="159" v2="160" v3="64"/>
+     <triangle v1="64" v2="160" v3="0"/>
+     <triangle v1="64" v2="0" v3="2"/>
+     <triangle v1="74" v2="150" v3="65"/>
+     <triangle v1="65" v2="150" v3="152"/>
+     <triangle v1="65" v2="152" v3="66"/>
+     <triangle v1="155" v2="157" v3="63"/>
+     <triangle v1="63" v2="157" v3="159"/>
+     <triangle v1="63" v2="159" v3="64"/>
+     <triangle v1="4" v2="9" v3="19"/>
+     <triangle v1="19" v2="9" v3="14"/>
+     <triangle v1="68" v2="155" v3="63"/>
+     <triangle v1="72" v2="71" v3="80"/>
+     <triangle v1="71" v2="65" v3="161"/>
+     <triangle v1="161" v2="65" v3="63"/>
+     <triangle v1="161" v2="63" v3="19"/>
+     <triangle v1="19" v2="21" v3="161"/>
+     <triangle v1="161" v2="21" v3="62"/>
+     <triangle v1="161" v2="62" v3="162"/>
+     <triangle v1="146" v2="163" v3="147"/>
+     <triangle v1="147" v2="163" v3="164"/>
+     <triangle v1="147" v2="164" v3="165"/>
+     <triangle v1="165" v2="164" v3="166"/>
+     <triangle v1="165" v2="166" v3="167"/>
+     <triangle v1="167" v2="166" v3="168"/>
+     <triangle v1="167" v2="168" v3="169"/>
+     <triangle v1="169" v2="168" v3="170"/>
+     <triangle v1="169" v2="170" v3="171"/>
+     <triangle v1="171" v2="170" v3="172"/>
+     <triangle v1="171" v2="172" v3="173"/>
+     <triangle v1="173" v2="172" v3="174"/>
+     <triangle v1="173" v2="174" v3="175"/>
+     <triangle v1="175" v2="174" v3="176"/>
+     <triangle v1="175" v2="176" v3="177"/>
+     <triangle v1="177" v2="176" v3="178"/>
+     <triangle v1="177" v2="178" v3="179"/>
+     <triangle v1="179" v2="178" v3="180"/>
+     <triangle v1="179" v2="180" v3="181"/>
+     <triangle v1="181" v2="180" v3="182"/>
+     <triangle v1="181" v2="182" v3="183"/>
+     <triangle v1="183" v2="182" v3="184"/>
+     <triangle v1="183" v2="184" v3="185"/>
+     <triangle v1="185" v2="184" v3="186"/>
+     <triangle v1="185" v2="186" v3="187"/>
+     <triangle v1="187" v2="186" v3="188"/>
+     <triangle v1="187" v2="188" v3="189"/>
+     <triangle v1="189" v2="188" v3="190"/>
+     <triangle v1="189" v2="190" v3="191"/>
+     <triangle v1="191" v2="190" v3="192"/>
+     <triangle v1="191" v2="192" v3="193"/>
+     <triangle v1="163" v2="146" v3="194"/>
+     <triangle v1="194" v2="146" v3="145"/>
+     <triangle v1="194" v2="145" v3="195"/>
+     <triangle v1="195" v2="145" v3="196"/>
+     <triangle v1="196" v2="145" v3="144"/>
+     <triangle v1="196" v2="144" v3="197"/>
+     <triangle v1="197" v2="144" v3="143"/>
+     <triangle v1="197" v2="143" v3="198"/>
+     <triangle v1="198" v2="143" v3="141"/>
+     <triangle v1="198" v2="141" v3="199"/>
+     <triangle v1="199" v2="141" v3="140"/>
+     <triangle v1="199" v2="140" v3="139"/>
+     <triangle v1="199" v2="139" v3="200"/>
+     <triangle v1="200" v2="139" v3="138"/>
+     <triangle v1="200" v2="138" v3="201"/>
+     <triangle v1="201" v2="138" v3="136"/>
+     <triangle v1="201" v2="136" v3="202"/>
+     <triangle v1="202" v2="136" v3="135"/>
+     <triangle v1="202" v2="135" v3="203"/>
+     <triangle v1="203" v2="135" v3="134"/>
+     <triangle v1="203" v2="134" v3="204"/>
+     <triangle v1="204" v2="134" v3="133"/>
+     <triangle v1="204" v2="133" v3="131"/>
+     <triangle v1="204" v2="131" v3="205"/>
+     <triangle v1="205" v2="131" v3="130"/>
+     <triangle v1="205" v2="130" v3="206"/>
+     <triangle v1="206" v2="130" v3="129"/>
+     <triangle v1="206" v2="129" v3="207"/>
+     <triangle v1="207" v2="129" v3="127"/>
+     <triangle v1="207" v2="127" v3="208"/>
+     <triangle v1="208" v2="127" v3="126"/>
+     <triangle v1="208" v2="126" v3="125"/>
+     <triangle v1="208" v2="125" v3="209"/>
+     <triangle v1="209" v2="125" v3="124"/>
+     <triangle v1="209" v2="124" v3="210"/>
+     <triangle v1="210" v2="124" v3="123"/>
+     <triangle v1="210" v2="123" v3="211"/>
+     <triangle v1="211" v2="123" v3="121"/>
+     <triangle v1="211" v2="121" v3="212"/>
+     <triangle v1="212" v2="121" v3="120"/>
+     <triangle v1="212" v2="120" v3="119"/>
+     <triangle v1="212" v2="119" v3="213"/>
+     <triangle v1="213" v2="119" v3="118"/>
+     <triangle v1="213" v2="118" v3="214"/>
+     <triangle v1="214" v2="118" v3="116"/>
+     <triangle v1="214" v2="116" v3="115"/>
+     <triangle v1="214" v2="115" v3="215"/>
+     <triangle v1="215" v2="115" v3="114"/>
+     <triangle v1="215" v2="114" v3="216"/>
+     <triangle v1="216" v2="114" v3="113"/>
+     <triangle v1="216" v2="113" v3="217"/>
+     <triangle v1="217" v2="113" v3="111"/>
+     <triangle v1="217" v2="111" v3="110"/>
+     <triangle v1="217" v2="110" v3="218"/>
+     <triangle v1="218" v2="110" v3="109"/>
+     <triangle v1="218" v2="109" v3="219"/>
+     <triangle v1="219" v2="109" v3="107"/>
+     <triangle v1="219" v2="107" v3="106"/>
+     <triangle v1="219" v2="106" v3="220"/>
+     <triangle v1="220" v2="106" v3="105"/>
+     <triangle v1="220" v2="105" v3="221"/>
+     <triangle v1="221" v2="105" v3="104"/>
+     <triangle v1="221" v2="104" v3="94"/>
+     <triangle v1="221" v2="94" v3="222"/>
+     <triangle v1="222" v2="94" v3="93"/>
+     <triangle v1="222" v2="93" v3="223"/>
+     <triangle v1="223" v2="93" v3="91"/>
+     <triangle v1="223" v2="91" v3="224"/>
+     <triangle v1="224" v2="91" v3="225"/>
+     <triangle v1="225" v2="91" v3="103"/>
+     <triangle v1="225" v2="103" v3="226"/>
+     <triangle v1="226" v2="103" v3="102"/>
+     <triangle v1="226" v2="102" v3="227"/>
+     <triangle v1="227" v2="102" v3="101"/>
+     <triangle v1="227" v2="101" v3="228"/>
+     <triangle v1="228" v2="101" v3="229"/>
+     <triangle v1="229" v2="101" v3="100"/>
+     <triangle v1="229" v2="100" v3="230"/>
+     <triangle v1="230" v2="100" v3="99"/>
+     <triangle v1="230" v2="99" v3="231"/>
+     <triangle v1="231" v2="99" v3="232"/>
+     <triangle v1="232" v2="99" v3="98"/>
+     <triangle v1="232" v2="98" v3="233"/>
+     <triangle v1="233" v2="98" v3="97"/>
+     <triangle v1="233" v2="97" v3="234"/>
+     <triangle v1="234" v2="97" v3="96"/>
+     <triangle v1="234" v2="96" v3="235"/>
+     <triangle v1="235" v2="96" v3="236"/>
+     <triangle v1="236" v2="96" v3="95"/>
+     <triangle v1="236" v2="95" v3="237"/>
+     <triangle v1="237" v2="95" v3="83"/>
+     <triangle v1="237" v2="83" v3="238"/>
+     <triangle v1="238" v2="83" v3="239"/>
+     <triangle v1="239" v2="83" v3="77"/>
+     <triangle v1="239" v2="77" v3="240"/>
+     <triangle v1="240" v2="77" v3="241"/>
+     <triangle v1="241" v2="77" v3="71"/>
+     <triangle v1="241" v2="71" v3="242"/>
+     <triangle v1="242" v2="71" v3="161"/>
+     <triangle v1="242" v2="161" v3="243"/>
+     <triangle v1="243" v2="161" v3="162"/>
+     <triangle v1="191" v2="193" v3="244"/>
+     <triangle v1="244" v2="193" v3="245"/>
+     <triangle v1="244" v2="245" v3="246"/>
+     <triangle v1="244" v2="246" v3="247"/>
+     <triangle v1="247" v2="246" v3="248"/>
+     <triangle v1="247" v2="248" v3="249"/>
+     <triangle v1="249" v2="248" v3="250"/>
+     <triangle v1="249" v2="250" v3="251"/>
+     <triangle v1="251" v2="250" v3="252"/>
+     <triangle v1="251" v2="252" v3="253"/>
+     <triangle v1="253" v2="252" v3="254"/>
+     <triangle v1="253" v2="254" v3="255"/>
+     <triangle v1="255" v2="254" v3="256"/>
+     <triangle v1="255" v2="256" v3="257"/>
+     <triangle v1="257" v2="256" v3="258"/>
+     <triangle v1="257" v2="258" v3="259"/>
+     <triangle v1="259" v2="258" v3="260"/>
+     <triangle v1="259" v2="260" v3="261"/>
+     <triangle v1="261" v2="260" v3="262"/>
+     <triangle v1="261" v2="262" v3="263"/>
+     <triangle v1="263" v2="262" v3="264"/>
+     <triangle v1="264" v2="262" v3="265"/>
+     <triangle v1="264" v2="265" v3="266"/>
+     <triangle v1="264" v2="266" v3="267"/>
+     <triangle v1="267" v2="266" v3="268"/>
+     <triangle v1="267" v2="268" v3="269"/>
+     <triangle v1="269" v2="268" v3="270"/>
+     <triangle v1="269" v2="270" v3="271"/>
+     <triangle v1="271" v2="270" v3="272"/>
+     <triangle v1="271" v2="272" v3="273"/>
+     <triangle v1="243" v2="162" v3="274"/>
+     <triangle v1="274" v2="162" v3="62"/>
+     <triangle v1="274" v2="62" v3="275"/>
+     <triangle v1="275" v2="62" v3="61"/>
+     <triangle v1="275" v2="61" v3="276"/>
+     <triangle v1="276" v2="61" v3="277"/>
+     <triangle v1="277" v2="61" v3="60"/>
+     <triangle v1="277" v2="60" v3="278"/>
+     <triangle v1="278" v2="60" v3="279"/>
+     <triangle v1="279" v2="60" v3="59"/>
+     <triangle v1="279" v2="59" v3="280"/>
+     <triangle v1="280" v2="59" v3="58"/>
+     <triangle v1="280" v2="58" v3="281"/>
+     <triangle v1="281" v2="58" v3="282"/>
+     <triangle v1="282" v2="58" v3="57"/>
+     <triangle v1="282" v2="57" v3="283"/>
+     <triangle v1="283" v2="57" v3="56"/>
+     <triangle v1="283" v2="56" v3="284"/>
+     <triangle v1="284" v2="56" v3="55"/>
+     <triangle v1="284" v2="55" v3="285"/>
+     <triangle v1="285" v2="55" v3="286"/>
+     <triangle v1="286" v2="55" v3="54"/>
+     <triangle v1="286" v2="54" v3="287"/>
+     <triangle v1="287" v2="54" v3="53"/>
+     <triangle v1="287" v2="53" v3="288"/>
+     <triangle v1="288" v2="53" v3="289"/>
+     <triangle v1="289" v2="53" v3="52"/>
+     <triangle v1="289" v2="52" v3="290"/>
+     <triangle v1="290" v2="52" v3="51"/>
+     <triangle v1="290" v2="51" v3="291"/>
+     <triangle v1="291" v2="51" v3="50"/>
+     <triangle v1="291" v2="50" v3="292"/>
+     <triangle v1="292" v2="50" v3="293"/>
+     <triangle v1="293" v2="50" v3="49"/>
+     <triangle v1="293" v2="49" v3="294"/>
+     <triangle v1="294" v2="49" v3="48"/>
+     <triangle v1="294" v2="48" v3="295"/>
+     <triangle v1="295" v2="48" v3="47"/>
+     <triangle v1="295" v2="47" v3="296"/>
+     <triangle v1="296" v2="47" v3="46"/>
+     <triangle v1="296" v2="46" v3="45"/>
+     <triangle v1="296" v2="45" v3="297"/>
+     <triangle v1="297" v2="45" v3="44"/>
+     <triangle v1="297" v2="44" v3="43"/>
+     <triangle v1="297" v2="43" v3="298"/>
+     <triangle v1="298" v2="43" v3="41"/>
+     <triangle v1="298" v2="41" v3="299"/>
+     <triangle v1="299" v2="41" v3="40"/>
+     <triangle v1="299" v2="40" v3="39"/>
+     <triangle v1="299" v2="39" v3="300"/>
+     <triangle v1="300" v2="39" v3="38"/>
+     <triangle v1="300" v2="38" v3="301"/>
+     <triangle v1="301" v2="38" v3="25"/>
+     <triangle v1="301" v2="25" v3="302"/>
+     <triangle v1="302" v2="25" v3="24"/>
+     <triangle v1="302" v2="24" v3="37"/>
+     <triangle v1="302" v2="37" v3="303"/>
+     <triangle v1="303" v2="37" v3="36"/>
+     <triangle v1="303" v2="36" v3="304"/>
+     <triangle v1="304" v2="36" v3="35"/>
+     <triangle v1="304" v2="35" v3="305"/>
+     <triangle v1="305" v2="35" v3="34"/>
+     <triangle v1="305" v2="34" v3="33"/>
+     <triangle v1="305" v2="33" v3="306"/>
+     <triangle v1="306" v2="33" v3="32"/>
+     <triangle v1="306" v2="32" v3="307"/>
+     <triangle v1="307" v2="32" v3="31"/>
+     <triangle v1="307" v2="31" v3="308"/>
+     <triangle v1="308" v2="31" v3="30"/>
+     <triangle v1="308" v2="30" v3="29"/>
+     <triangle v1="308" v2="29" v3="309"/>
+     <triangle v1="309" v2="29" v3="28"/>
+     <triangle v1="309" v2="28" v3="310"/>
+     <triangle v1="310" v2="28" v3="27"/>
+     <triangle v1="310" v2="27" v3="311"/>
+     <triangle v1="311" v2="27" v3="26"/>
+     <triangle v1="311" v2="26" v3="312"/>
+     <triangle v1="312" v2="26" v3="17"/>
+     <triangle v1="312" v2="17" v3="16"/>
+     <triangle v1="312" v2="16" v3="313"/>
+     <triangle v1="313" v2="16" v3="15"/>
+     <triangle v1="313" v2="15" v3="314"/>
+     <triangle v1="314" v2="15" v3="13"/>
+     <triangle v1="314" v2="13" v3="315"/>
+     <triangle v1="315" v2="13" v3="12"/>
+     <triangle v1="315" v2="12" v3="316"/>
+     <triangle v1="316" v2="12" v3="11"/>
+     <triangle v1="316" v2="11" v3="317"/>
+     <triangle v1="317" v2="11" v3="10"/>
+     <triangle v1="317" v2="10" v3="8"/>
+     <triangle v1="317" v2="8" v3="318"/>
+     <triangle v1="318" v2="8" v3="7"/>
+     <triangle v1="318" v2="7" v3="319"/>
+     <triangle v1="319" v2="7" v3="6"/>
+     <triangle v1="319" v2="6" v3="320"/>
+     <triangle v1="320" v2="6" v3="5"/>
+     <triangle v1="320" v2="5" v3="321"/>
+     <triangle v1="321" v2="5" v3="322"/>
+     <triangle v1="322" v2="5" v3="3"/>
+     <triangle v1="322" v2="3" v3="323"/>
+     <triangle v1="323" v2="3" v3="1"/>
+     <triangle v1="323" v2="1" v3="324"/>
+     <triangle v1="324" v2="1" v3="325"/>
+     <triangle v1="324" v2="325" v3="326"/>
+     <triangle v1="326" v2="325" v3="327"/>
+     <triangle v1="326" v2="327" v3="328"/>
+     <triangle v1="328" v2="327" v3="329"/>
+     <triangle v1="328" v2="329" v3="330"/>
+     <triangle v1="330" v2="329" v3="331"/>
+     <triangle v1="330" v2="331" v3="332"/>
+     <triangle v1="332" v2="331" v3="333"/>
+     <triangle v1="332" v2="333" v3="334"/>
+     <triangle v1="334" v2="333" v3="335"/>
+     <triangle v1="334" v2="335" v3="336"/>
+     <triangle v1="336" v2="335" v3="337"/>
+     <triangle v1="336" v2="337" v3="338"/>
+     <triangle v1="338" v2="337" v3="339"/>
+     <triangle v1="338" v2="339" v3="340"/>
+     <triangle v1="340" v2="339" v3="341"/>
+     <triangle v1="340" v2="341" v3="342"/>
+     <triangle v1="342" v2="341" v3="343"/>
+     <triangle v1="342" v2="343" v3="344"/>
+     <triangle v1="344" v2="343" v3="345"/>
+     <triangle v1="344" v2="345" v3="346"/>
+     <triangle v1="346" v2="345" v3="347"/>
+     <triangle v1="346" v2="347" v3="348"/>
+     <triangle v1="346" v2="348" v3="349"/>
+     <triangle v1="349" v2="348" v3="350"/>
+     <triangle v1="349" v2="350" v3="351"/>
+     <triangle v1="349" v2="351" v3="352"/>
+     <triangle v1="352" v2="351" v3="353"/>
+     <triangle v1="352" v2="353" v3="354"/>
+     <triangle v1="354" v2="353" v3="355"/>
+     <triangle v1="354" v2="355" v3="356"/>
+     <triangle v1="356" v2="355" v3="357"/>
+     <triangle v1="356" v2="357" v3="358"/>
+     <triangle v1="358" v2="357" v3="359"/>
+     <triangle v1="358" v2="359" v3="360"/>
+     <triangle v1="360" v2="359" v3="361"/>
+     <triangle v1="360" v2="361" v3="362"/>
+     <triangle v1="362" v2="361" v3="363"/>
+     <triangle v1="362" v2="363" v3="364"/>
+     <triangle v1="364" v2="363" v3="365"/>
+     <triangle v1="364" v2="365" v3="366"/>
+     <triangle v1="366" v2="365" v3="367"/>
+     <triangle v1="366" v2="367" v3="368"/>
+     <triangle v1="368" v2="367" v3="369"/>
+     <triangle v1="368" v2="369" v3="370"/>
+     <triangle v1="370" v2="369" v3="371"/>
+     <triangle v1="370" v2="371" v3="372"/>
+     <triangle v1="372" v2="371" v3="373"/>
+     <triangle v1="372" v2="373" v3="374"/>
+     <triangle v1="374" v2="373" v3="375"/>
+     <triangle v1="374" v2="375" v3="376"/>
+     <triangle v1="376" v2="375" v3="377"/>
+     <triangle v1="376" v2="377" v3="378"/>
+     <triangle v1="376" v2="378" v3="379"/>
+     <triangle v1="379" v2="378" v3="380"/>
+     <triangle v1="379" v2="380" v3="381"/>
+     <triangle v1="381" v2="380" v3="382"/>
+     <triangle v1="381" v2="382" v3="383"/>
+     <triangle v1="383" v2="382" v3="384"/>
+     <triangle v1="383" v2="384" v3="385"/>
+     <triangle v1="385" v2="384" v3="386"/>
+     <triangle v1="385" v2="386" v3="387"/>
+     <triangle v1="387" v2="386" v3="388"/>
+     <triangle v1="387" v2="388" v3="389"/>
+     <triangle v1="376" v2="379" v3="390"/>
+     <triangle v1="390" v2="379" v3="381"/>
+     <triangle v1="390" v2="381" v3="383"/>
+     <triangle v1="383" v2="385" v3="390"/>
+     <triangle v1="390" v2="385" v3="391"/>
+     <triangle v1="391" v2="385" v3="387"/>
+     <triangle v1="391" v2="387" v3="389"/>
+     <triangle v1="391" v2="389" v3="392"/>
+     <triangle v1="392" v2="389" v3="393"/>
+     <triangle v1="392" v2="393" v3="394"/>
+     <triangle v1="394" v2="393" v3="395"/>
+     <triangle v1="394" v2="395" v3="396"/>
+     <triangle v1="396" v2="395" v3="397"/>
+     <triangle v1="396" v2="397" v3="398"/>
+     <triangle v1="398" v2="397" v3="399"/>
+     <triangle v1="398" v2="399" v3="400"/>
+     <triangle v1="400" v2="399" v3="401"/>
+     <triangle v1="400" v2="401" v3="402"/>
+     <triangle v1="402" v2="401" v3="403"/>
+     <triangle v1="402" v2="403" v3="404"/>
+     <triangle v1="404" v2="403" v3="405"/>
+     <triangle v1="404" v2="405" v3="406"/>
+     <triangle v1="406" v2="405" v3="407"/>
+     <triangle v1="406" v2="407" v3="408"/>
+     <triangle v1="408" v2="407" v3="409"/>
+     <triangle v1="408" v2="409" v3="410"/>
+     <triangle v1="410" v2="409" v3="411"/>
+     <triangle v1="410" v2="411" v3="412"/>
+     <triangle v1="412" v2="411" v3="413"/>
+     <triangle v1="412" v2="413" v3="414"/>
+     <triangle v1="414" v2="413" v3="415"/>
+     <triangle v1="414" v2="415" v3="416"/>
+     <triangle v1="416" v2="415" v3="417"/>
+     <triangle v1="416" v2="417" v3="418"/>
+     <triangle v1="418" v2="417" v3="419"/>
+     <triangle v1="418" v2="419" v3="420"/>
+     <triangle v1="418" v2="420" v3="421"/>
+     <triangle v1="421" v2="420" v3="422"/>
+     <triangle v1="421" v2="422" v3="423"/>
+     <triangle v1="423" v2="422" v3="424"/>
+     <triangle v1="423" v2="424" v3="425"/>
+     <triangle v1="425" v2="424" v3="426"/>
+     <triangle v1="425" v2="426" v3="427"/>
+     <triangle v1="427" v2="426" v3="428"/>
+     <triangle v1="427" v2="428" v3="429"/>
+     <triangle v1="429" v2="428" v3="430"/>
+     <triangle v1="429" v2="430" v3="431"/>
+     <triangle v1="431" v2="430" v3="432"/>
+     <triangle v1="431" v2="432" v3="433"/>
+     <triangle v1="433" v2="432" v3="434"/>
+     <triangle v1="433" v2="434" v3="435"/>
+     <triangle v1="435" v2="434" v3="436"/>
+     <triangle v1="435" v2="436" v3="437"/>
+     <triangle v1="437" v2="436" v3="438"/>
+     <triangle v1="437" v2="438" v3="439"/>
+     <triangle v1="439" v2="438" v3="440"/>
+     <triangle v1="439" v2="440" v3="441"/>
+     <triangle v1="441" v2="440" v3="442"/>
+     <triangle v1="441" v2="442" v3="443"/>
+     <triangle v1="443" v2="442" v3="444"/>
+     <triangle v1="443" v2="444" v3="445"/>
+     <triangle v1="445" v2="444" v3="446"/>
+     <triangle v1="445" v2="446" v3="447"/>
+     <triangle v1="447" v2="446" v3="448"/>
+     <triangle v1="447" v2="448" v3="449"/>
+     <triangle v1="449" v2="448" v3="450"/>
+     <triangle v1="449" v2="450" v3="260"/>
+     <triangle v1="260" v2="450" v3="451"/>
+     <triangle v1="260" v2="451" v3="262"/>
+     <triangle v1="262" v2="451" v3="452"/>
+     <triangle v1="262" v2="452" v3="265"/>
+     <triangle v1="265" v2="452" v3="266"/>
+     <triangle v1="266" v2="452" v3="268"/>
+     <triangle v1="268" v2="452" v3="453"/>
+     <triangle v1="268" v2="453" v3="270"/>
+     <triangle v1="270" v2="453" v3="272"/>
+     <triangle v1="273" v2="272" v3="454"/>
+     <triangle v1="454" v2="272" v3="453"/>
+     <triangle v1="454" v2="453" v3="455"/>
+     <triangle v1="455" v2="453" v3="452"/>
+     <triangle v1="455" v2="452" v3="456"/>
+     <triangle v1="456" v2="452" v3="451"/>
+     <triangle v1="456" v2="451" v3="457"/>
+     <triangle v1="457" v2="451" v3="450"/>
+     <triangle v1="457" v2="450" v3="458"/>
+     <triangle v1="458" v2="450" v3="448"/>
+     <triangle v1="458" v2="448" v3="459"/>
+     <triangle v1="459" v2="448" v3="446"/>
+     <triangle v1="459" v2="446" v3="460"/>
+     <triangle v1="460" v2="446" v3="444"/>
+     <triangle v1="460" v2="444" v3="461"/>
+     <triangle v1="461" v2="444" v3="442"/>
+     <triangle v1="461" v2="442" v3="462"/>
+     <triangle v1="462" v2="442" v3="440"/>
+     <triangle v1="462" v2="440" v3="463"/>
+     <triangle v1="463" v2="440" v3="438"/>
+     <triangle v1="463" v2="438" v3="464"/>
+     <triangle v1="464" v2="438" v3="436"/>
+     <triangle v1="464" v2="436" v3="465"/>
+     <triangle v1="465" v2="436" v3="434"/>
+     <triangle v1="465" v2="434" v3="466"/>
+     <triangle v1="466" v2="434" v3="432"/>
+     <triangle v1="466" v2="432" v3="467"/>
+     <triangle v1="467" v2="432" v3="430"/>
+     <triangle v1="467" v2="430" v3="468"/>
+     <triangle v1="468" v2="430" v3="428"/>
+     <triangle v1="468" v2="428" v3="469"/>
+     <triangle v1="469" v2="428" v3="426"/>
+     <triangle v1="469" v2="426" v3="470"/>
+     <triangle v1="470" v2="426" v3="424"/>
+     <triangle v1="470" v2="424" v3="471"/>
+     <triangle v1="471" v2="424" v3="422"/>
+     <triangle v1="471" v2="422" v3="472"/>
+     <triangle v1="472" v2="422" v3="420"/>
+     <triangle v1="472" v2="420" v3="473"/>
+     <triangle v1="473" v2="420" v3="419"/>
+     <triangle v1="473" v2="419" v3="474"/>
+     <triangle v1="474" v2="419" v3="417"/>
+     <triangle v1="474" v2="417" v3="475"/>
+     <triangle v1="475" v2="417" v3="415"/>
+     <triangle v1="475" v2="415" v3="476"/>
+     <triangle v1="476" v2="415" v3="413"/>
+     <triangle v1="476" v2="413" v3="477"/>
+     <triangle v1="477" v2="413" v3="411"/>
+     <triangle v1="477" v2="411" v3="478"/>
+     <triangle v1="478" v2="411" v3="409"/>
+     <triangle v1="478" v2="409" v3="479"/>
+     <triangle v1="479" v2="409" v3="407"/>
+     <triangle v1="479" v2="407" v3="480"/>
+     <triangle v1="480" v2="407" v3="405"/>
+     <triangle v1="480" v2="405" v3="481"/>
+     <triangle v1="481" v2="405" v3="403"/>
+     <triangle v1="481" v2="403" v3="482"/>
+     <triangle v1="482" v2="403" v3="401"/>
+     <triangle v1="482" v2="401" v3="483"/>
+     <triangle v1="483" v2="401" v3="399"/>
+     <triangle v1="483" v2="399" v3="484"/>
+     <triangle v1="484" v2="399" v3="397"/>
+     <triangle v1="484" v2="397" v3="485"/>
+     <triangle v1="485" v2="397" v3="395"/>
+     <triangle v1="485" v2="395" v3="486"/>
+     <triangle v1="486" v2="395" v3="393"/>
+     <triangle v1="486" v2="393" v3="388"/>
+     <triangle v1="388" v2="393" v3="389"/>
+     <triangle v1="486" v2="388" v3="487"/>
+     <triangle v1="487" v2="388" v3="386"/>
+     <triangle v1="487" v2="386" v3="488"/>
+     <triangle v1="488" v2="386" v3="384"/>
+     <triangle v1="488" v2="384" v3="489"/>
+     <triangle v1="489" v2="384" v3="382"/>
+     <triangle v1="489" v2="382" v3="380"/>
+     <triangle v1="380" v2="378" v3="489"/>
+     <triangle v1="489" v2="378" v3="377"/>
+     <triangle v1="487" v2="490" v3="486"/>
+     <triangle v1="486" v2="490" v3="485"/>
+     <triangle v1="485" v2="490" v3="491"/>
+     <triangle v1="485" v2="491" v3="484"/>
+     <triangle v1="484" v2="491" v3="492"/>
+     <triangle v1="484" v2="492" v3="483"/>
+     <triangle v1="483" v2="492" v3="493"/>
+     <triangle v1="483" v2="493" v3="482"/>
+     <triangle v1="482" v2="493" v3="494"/>
+     <triangle v1="482" v2="494" v3="481"/>
+     <triangle v1="481" v2="494" v3="495"/>
+     <triangle v1="481" v2="495" v3="480"/>
+     <triangle v1="480" v2="495" v3="496"/>
+     <triangle v1="480" v2="496" v3="479"/>
+     <triangle v1="479" v2="496" v3="497"/>
+     <triangle v1="479" v2="497" v3="478"/>
+     <triangle v1="478" v2="497" v3="498"/>
+     <triangle v1="478" v2="498" v3="477"/>
+     <triangle v1="477" v2="498" v3="499"/>
+     <triangle v1="477" v2="499" v3="476"/>
+     <triangle v1="476" v2="499" v3="500"/>
+     <triangle v1="476" v2="500" v3="475"/>
+     <triangle v1="475" v2="500" v3="501"/>
+     <triangle v1="475" v2="501" v3="474"/>
+     <triangle v1="474" v2="501" v3="502"/>
+     <triangle v1="474" v2="502" v3="473"/>
+     <triangle v1="473" v2="502" v3="472"/>
+     <triangle v1="472" v2="502" v3="503"/>
+     <triangle v1="472" v2="503" v3="471"/>
+     <triangle v1="471" v2="503" v3="504"/>
+     <triangle v1="471" v2="504" v3="470"/>
+     <triangle v1="470" v2="504" v3="505"/>
+     <triangle v1="470" v2="505" v3="469"/>
+     <triangle v1="469" v2="505" v3="506"/>
+     <triangle v1="469" v2="506" v3="468"/>
+     <triangle v1="468" v2="506" v3="507"/>
+     <triangle v1="468" v2="507" v3="467"/>
+     <triangle v1="467" v2="507" v3="508"/>
+     <triangle v1="467" v2="508" v3="466"/>
+     <triangle v1="466" v2="508" v3="509"/>
+     <triangle v1="466" v2="509" v3="465"/>
+     <triangle v1="465" v2="509" v3="510"/>
+     <triangle v1="465" v2="510" v3="464"/>
+     <triangle v1="464" v2="510" v3="511"/>
+     <triangle v1="464" v2="511" v3="463"/>
+     <triangle v1="463" v2="511" v3="512"/>
+     <triangle v1="463" v2="512" v3="462"/>
+     <triangle v1="462" v2="512" v3="513"/>
+     <triangle v1="462" v2="513" v3="461"/>
+     <triangle v1="461" v2="513" v3="514"/>
+     <triangle v1="461" v2="514" v3="460"/>
+     <triangle v1="460" v2="514" v3="515"/>
+     <triangle v1="460" v2="515" v3="459"/>
+     <triangle v1="459" v2="515" v3="516"/>
+     <triangle v1="459" v2="516" v3="458"/>
+     <triangle v1="458" v2="516" v3="517"/>
+     <triangle v1="458" v2="517" v3="457"/>
+     <triangle v1="457" v2="517" v3="261"/>
+     <triangle v1="457" v2="261" v3="456"/>
+     <triangle v1="456" v2="261" v3="263"/>
+     <triangle v1="456" v2="263" v3="264"/>
+     <triangle v1="456" v2="264" v3="455"/>
+     <triangle v1="455" v2="264" v3="267"/>
+     <triangle v1="455" v2="267" v3="269"/>
+     <triangle v1="455" v2="269" v3="454"/>
+     <triangle v1="454" v2="269" v3="271"/>
+     <triangle v1="454" v2="271" v3="273"/>
+     <triangle v1="1" v2="0" v3="325"/>
+     <triangle v1="325" v2="0" v3="327"/>
+     <triangle v1="327" v2="0" v3="329"/>
+     <triangle v1="329" v2="0" v3="160"/>
+     <triangle v1="329" v2="160" v3="331"/>
+     <triangle v1="331" v2="160" v3="333"/>
+     <triangle v1="333" v2="160" v3="158"/>
+     <triangle v1="333" v2="158" v3="335"/>
+     <triangle v1="335" v2="158" v3="337"/>
+     <triangle v1="337" v2="158" v3="156"/>
+     <triangle v1="337" v2="156" v3="339"/>
+     <triangle v1="339" v2="156" v3="341"/>
+     <triangle v1="341" v2="156" v3="70"/>
+     <triangle v1="341" v2="70" v3="343"/>
+     <triangle v1="343" v2="70" v3="345"/>
+     <triangle v1="345" v2="70" v3="69"/>
+     <triangle v1="345" v2="69" v3="347"/>
+     <triangle v1="347" v2="69" v3="348"/>
+     <triangle v1="348" v2="69" v3="350"/>
+     <triangle v1="350" v2="69" v3="154"/>
+     <triangle v1="350" v2="154" v3="351"/>
+     <triangle v1="351" v2="154" v3="353"/>
+     <triangle v1="353" v2="154" v3="153"/>
+     <triangle v1="353" v2="153" v3="355"/>
+     <triangle v1="355" v2="153" v3="357"/>
+     <triangle v1="357" v2="153" v3="492"/>
+     <triangle v1="357" v2="492" v3="359"/>
+     <triangle v1="359" v2="492" v3="361"/>
+     <triangle v1="361" v2="492" v3="491"/>
+     <triangle v1="361" v2="491" v3="363"/>
+     <triangle v1="363" v2="491" v3="365"/>
+     <triangle v1="365" v2="491" v3="490"/>
+     <triangle v1="365" v2="490" v3="367"/>
+     <triangle v1="367" v2="490" v3="487"/>
+     <triangle v1="367" v2="487" v3="369"/>
+     <triangle v1="369" v2="487" v3="488"/>
+     <triangle v1="369" v2="488" v3="371"/>
+     <triangle v1="371" v2="488" v3="489"/>
+     <triangle v1="371" v2="489" v3="373"/>
+     <triangle v1="373" v2="489" v3="375"/>
+     <triangle v1="375" v2="489" v3="377"/>
+     <triangle v1="492" v2="153" v3="493"/>
+     <triangle v1="493" v2="153" v3="151"/>
+     <triangle v1="493" v2="151" v3="494"/>
+     <triangle v1="494" v2="151" v3="76"/>
+     <triangle v1="494" v2="76" v3="495"/>
+     <triangle v1="495" v2="76" v3="75"/>
+     <triangle v1="495" v2="75" v3="496"/>
+     <triangle v1="496" v2="75" v3="497"/>
+     <triangle v1="497" v2="75" v3="149"/>
+     <triangle v1="497" v2="149" v3="498"/>
+     <triangle v1="498" v2="149" v3="82"/>
+     <triangle v1="498" v2="82" v3="499"/>
+     <triangle v1="499" v2="82" v3="81"/>
+     <triangle v1="499" v2="81" v3="500"/>
+     <triangle v1="500" v2="81" v3="148"/>
+     <triangle v1="500" v2="148" v3="501"/>
+     <triangle v1="501" v2="148" v3="85"/>
+     <triangle v1="501" v2="85" v3="502"/>
+     <triangle v1="502" v2="85" v3="86"/>
+     <triangle v1="502" v2="86" v3="503"/>
+     <triangle v1="503" v2="86" v3="88"/>
+     <triangle v1="503" v2="88" v3="504"/>
+     <triangle v1="504" v2="88" v3="90"/>
+     <triangle v1="504" v2="90" v3="505"/>
+     <triangle v1="505" v2="90" v3="506"/>
+     <triangle v1="506" v2="90" v3="108"/>
+     <triangle v1="506" v2="108" v3="507"/>
+     <triangle v1="507" v2="108" v3="112"/>
+     <triangle v1="507" v2="112" v3="508"/>
+     <triangle v1="508" v2="112" v3="117"/>
+     <triangle v1="508" v2="117" v3="509"/>
+     <triangle v1="509" v2="117" v3="122"/>
+     <triangle v1="509" v2="122" v3="510"/>
+     <triangle v1="510" v2="122" v3="128"/>
+     <triangle v1="510" v2="128" v3="511"/>
+     <triangle v1="511" v2="128" v3="132"/>
+     <triangle v1="511" v2="132" v3="181"/>
+     <triangle v1="181" v2="132" v3="179"/>
+     <triangle v1="179" v2="132" v3="177"/>
+     <triangle v1="177" v2="132" v3="137"/>
+     <triangle v1="177" v2="137" v3="175"/>
+     <triangle v1="175" v2="137" v3="173"/>
+     <triangle v1="173" v2="137" v3="171"/>
+     <triangle v1="171" v2="137" v3="142"/>
+     <triangle v1="171" v2="142" v3="169"/>
+     <triangle v1="169" v2="142" v3="167"/>
+     <triangle v1="167" v2="142" v3="165"/>
+     <triangle v1="165" v2="142" v3="147"/>
+     <triangle v1="181" v2="183" v3="511"/>
+     <triangle v1="511" v2="183" v3="512"/>
+     <triangle v1="512" v2="183" v3="185"/>
+     <triangle v1="512" v2="185" v3="187"/>
+     <triangle v1="187" v2="189" v3="512"/>
+     <triangle v1="512" v2="189" v3="513"/>
+     <triangle v1="513" v2="189" v3="191"/>
+     <triangle v1="513" v2="191" v3="244"/>
+     <triangle v1="513" v2="244" v3="514"/>
+     <triangle v1="514" v2="244" v3="247"/>
+     <triangle v1="514" v2="247" v3="249"/>
+     <triangle v1="514" v2="249" v3="515"/>
+     <triangle v1="515" v2="249" v3="251"/>
+     <triangle v1="515" v2="251" v3="516"/>
+     <triangle v1="516" v2="251" v3="253"/>
+     <triangle v1="516" v2="253" v3="255"/>
+     <triangle v1="255" v2="257" v3="516"/>
+     <triangle v1="516" v2="257" v3="259"/>
+     <triangle v1="516" v2="259" v3="517"/>
+     <triangle v1="517" v2="259" v3="261"/>
+     <triangle v1="374" v2="376" v3="215"/>
+     <triangle v1="215" v2="376" v3="390"/>
+     <triangle v1="215" v2="390" v3="214"/>
+     <triangle v1="214" v2="390" v3="213"/>
+     <triangle v1="213" v2="390" v3="391"/>
+     <triangle v1="213" v2="391" v3="212"/>
+     <triangle v1="212" v2="391" v3="392"/>
+     <triangle v1="212" v2="392" v3="211"/>
+     <triangle v1="211" v2="392" v3="210"/>
+     <triangle v1="210" v2="392" v3="394"/>
+     <triangle v1="210" v2="394" v3="209"/>
+     <triangle v1="209" v2="394" v3="208"/>
+     <triangle v1="208" v2="394" v3="396"/>
+     <triangle v1="208" v2="396" v3="207"/>
+     <triangle v1="207" v2="396" v3="206"/>
+     <triangle v1="206" v2="396" v3="398"/>
+     <triangle v1="206" v2="398" v3="205"/>
+     <triangle v1="205" v2="398" v3="400"/>
+     <triangle v1="205" v2="400" v3="204"/>
+     <triangle v1="204" v2="400" v3="203"/>
+     <triangle v1="203" v2="400" v3="402"/>
+     <triangle v1="203" v2="402" v3="202"/>
+     <triangle v1="202" v2="402" v3="404"/>
+     <triangle v1="202" v2="404" v3="201"/>
+     <triangle v1="201" v2="404" v3="200"/>
+     <triangle v1="200" v2="404" v3="406"/>
+     <triangle v1="200" v2="406" v3="199"/>
+     <triangle v1="199" v2="406" v3="198"/>
+     <triangle v1="198" v2="406" v3="408"/>
+     <triangle v1="198" v2="408" v3="197"/>
+     <triangle v1="197" v2="408" v3="410"/>
+     <triangle v1="197" v2="410" v3="196"/>
+     <triangle v1="196" v2="410" v3="195"/>
+     <triangle v1="195" v2="410" v3="412"/>
+     <triangle v1="195" v2="412" v3="194"/>
+     <triangle v1="194" v2="412" v3="163"/>
+     <triangle v1="163" v2="412" v3="414"/>
+     <triangle v1="163" v2="414" v3="164"/>
+     <triangle v1="164" v2="414" v3="166"/>
+     <triangle v1="166" v2="414" v3="168"/>
+     <triangle v1="168" v2="414" v3="416"/>
+     <triangle v1="168" v2="416" v3="170"/>
+     <triangle v1="170" v2="416" v3="172"/>
+     <triangle v1="172" v2="416" v3="418"/>
+     <triangle v1="172" v2="418" v3="174"/>
+     <triangle v1="174" v2="418" v3="176"/>
+     <triangle v1="176" v2="418" v3="421"/>
+     <triangle v1="176" v2="421" v3="178"/>
+     <triangle v1="178" v2="421" v3="180"/>
+     <triangle v1="180" v2="421" v3="423"/>
+     <triangle v1="180" v2="423" v3="182"/>
+     <triangle v1="182" v2="423" v3="184"/>
+     <triangle v1="184" v2="423" v3="425"/>
+     <triangle v1="184" v2="425" v3="186"/>
+     <triangle v1="186" v2="425" v3="427"/>
+     <triangle v1="186" v2="427" v3="188"/>
+     <triangle v1="188" v2="427" v3="190"/>
+     <triangle v1="190" v2="427" v3="429"/>
+     <triangle v1="190" v2="429" v3="192"/>
+     <triangle v1="192" v2="429" v3="193"/>
+     <triangle v1="193" v2="429" v3="431"/>
+     <triangle v1="193" v2="431" v3="245"/>
+     <triangle v1="245" v2="431" v3="433"/>
+     <triangle v1="245" v2="433" v3="246"/>
+     <triangle v1="246" v2="433" v3="248"/>
+     <triangle v1="248" v2="433" v3="435"/>
+     <triangle v1="248" v2="435" v3="250"/>
+     <triangle v1="250" v2="435" v3="437"/>
+     <triangle v1="250" v2="437" v3="439"/>
+     <triangle v1="250" v2="439" v3="252"/>
+     <triangle v1="252" v2="439" v3="441"/>
+     <triangle v1="252" v2="441" v3="254"/>
+     <triangle v1="254" v2="441" v3="443"/>
+     <triangle v1="254" v2="443" v3="256"/>
+     <triangle v1="256" v2="443" v3="445"/>
+     <triangle v1="256" v2="445" v3="447"/>
+     <triangle v1="256" v2="447" v3="258"/>
+     <triangle v1="258" v2="447" v3="449"/>
+     <triangle v1="258" v2="449" v3="260"/>
+     <triangle v1="215" v2="216" v3="374"/>
+     <triangle v1="374" v2="216" v3="372"/>
+     <triangle v1="372" v2="216" v3="217"/>
+     <triangle v1="372" v2="217" v3="370"/>
+     <triangle v1="370" v2="217" v3="218"/>
+     <triangle v1="370" v2="218" v3="368"/>
+     <triangle v1="368" v2="218" v3="219"/>
+     <triangle v1="368" v2="219" v3="366"/>
+     <triangle v1="366" v2="219" v3="220"/>
+     <triangle v1="366" v2="220" v3="364"/>
+     <triangle v1="364" v2="220" v3="221"/>
+     <triangle v1="364" v2="221" v3="362"/>
+     <triangle v1="362" v2="221" v3="222"/>
+     <triangle v1="362" v2="222" v3="360"/>
+     <triangle v1="360" v2="222" v3="223"/>
+     <triangle v1="360" v2="223" v3="358"/>
+     <triangle v1="358" v2="223" v3="356"/>
+     <triangle v1="356" v2="223" v3="224"/>
+     <triangle v1="356" v2="224" v3="354"/>
+     <triangle v1="354" v2="224" v3="352"/>
+     <triangle v1="352" v2="224" v3="225"/>
+     <triangle v1="352" v2="225" v3="349"/>
+     <triangle v1="349" v2="225" v3="226"/>
+     <triangle v1="349" v2="226" v3="346"/>
+     <triangle v1="346" v2="226" v3="227"/>
+     <triangle v1="346" v2="227" v3="344"/>
+     <triangle v1="344" v2="227" v3="342"/>
+     <triangle v1="342" v2="227" v3="228"/>
+     <triangle v1="342" v2="228" v3="340"/>
+     <triangle v1="340" v2="228" v3="229"/>
+     <triangle v1="340" v2="229" v3="338"/>
+     <triangle v1="338" v2="229" v3="336"/>
+     <triangle v1="336" v2="229" v3="334"/>
+     <triangle v1="334" v2="229" v3="332"/>
+     <triangle v1="332" v2="229" v3="330"/>
+     <triangle v1="330" v2="229" v3="328"/>
+     <triangle v1="328" v2="229" v3="326"/>
+     <triangle v1="326" v2="229" v3="324"/>
+     <triangle v1="324" v2="229" v3="323"/>
+     <triangle v1="323" v2="229" v3="322"/>
+     <triangle v1="322" v2="229" v3="321"/>
+     <triangle v1="321" v2="229" v3="320"/>
+     <triangle v1="320" v2="229" v3="319"/>
+     <triangle v1="319" v2="229" v3="318"/>
+     <triangle v1="318" v2="229" v3="317"/>
+     <triangle v1="317" v2="229" v3="316"/>
+     <triangle v1="316" v2="229" v3="315"/>
+     <triangle v1="315" v2="229" v3="314"/>
+     <triangle v1="314" v2="229" v3="313"/>
+     <triangle v1="313" v2="229" v3="312"/>
+     <triangle v1="312" v2="229" v3="311"/>
+     <triangle v1="311" v2="229" v3="310"/>
+     <triangle v1="310" v2="229" v3="309"/>
+     <triangle v1="309" v2="229" v3="308"/>
+     <triangle v1="308" v2="229" v3="307"/>
+     <triangle v1="307" v2="229" v3="306"/>
+     <triangle v1="306" v2="229" v3="305"/>
+     <triangle v1="305" v2="229" v3="304"/>
+     <triangle v1="304" v2="229" v3="303"/>
+     <triangle v1="303" v2="229" v3="302"/>
+     <triangle v1="302" v2="229" v3="301"/>
+     <triangle v1="301" v2="229" v3="300"/>
+     <triangle v1="300" v2="229" v3="299"/>
+     <triangle v1="299" v2="229" v3="298"/>
+     <triangle v1="298" v2="229" v3="297"/>
+     <triangle v1="297" v2="229" v3="296"/>
+     <triangle v1="296" v2="229" v3="295"/>
+     <triangle v1="295" v2="229" v3="294"/>
+     <triangle v1="294" v2="229" v3="293"/>
+     <triangle v1="293" v2="229" v3="292"/>
+     <triangle v1="292" v2="229" v3="291"/>
+     <triangle v1="291" v2="229" v3="290"/>
+     <triangle v1="290" v2="229" v3="289"/>
+     <triangle v1="289" v2="229" v3="288"/>
+     <triangle v1="288" v2="229" v3="287"/>
+     <triangle v1="287" v2="229" v3="230"/>
+     <triangle v1="287" v2="230" v3="286"/>
+     <triangle v1="286" v2="230" v3="231"/>
+     <triangle v1="286" v2="231" v3="285"/>
+     <triangle v1="285" v2="231" v3="232"/>
+     <triangle v1="285" v2="232" v3="284"/>
+     <triangle v1="284" v2="232" v3="233"/>
+     <triangle v1="284" v2="233" v3="283"/>
+     <triangle v1="283" v2="233" v3="234"/>
+     <triangle v1="283" v2="234" v3="282"/>
+     <triangle v1="282" v2="234" v3="235"/>
+     <triangle v1="282" v2="235" v3="281"/>
+     <triangle v1="281" v2="235" v3="236"/>
+     <triangle v1="281" v2="236" v3="280"/>
+     <triangle v1="280" v2="236" v3="237"/>
+     <triangle v1="280" v2="237" v3="279"/>
+     <triangle v1="279" v2="237" v3="238"/>
+     <triangle v1="279" v2="238" v3="278"/>
+     <triangle v1="278" v2="238" v3="239"/>
+     <triangle v1="278" v2="239" v3="277"/>
+     <triangle v1="277" v2="239" v3="240"/>
+     <triangle v1="277" v2="240" v3="276"/>
+     <triangle v1="276" v2="240" v3="241"/>
+     <triangle v1="276" v2="241" v3="275"/>
+     <triangle v1="275" v2="241" v3="242"/>
+     <triangle v1="275" v2="242" v3="274"/>
+     <triangle v1="274" v2="242" v3="243"/>
+    </triangles>
+   </mesh>
+  </object>
+  <object id="4" p:UUID="00030003-81cb-4c03-9d28-80fed5dfa1dc" type="model">
+   <mesh>
+    <vertices>
+     <vertex x="-0.427292824" y="-4.97071362" z="2.47201109"/>
+     <vertex x="2.75996065" y="-2.34251976" z="1.5"/>
+     <vertex x="-0.564508438" y="-4.99043369" z="2.5"/>
+     <vertex x="2.68382621" y="-2.24633765" z="1.5"/>
+     <vertex x="-0.710639954" y="-4.80389023" z="2.5"/>
+     <vertex x="2.61034179" y="-2.14811635" z="1.5"/>
+     <vertex x="-0.851666451" y="-4.61345768" z="2.5"/>
+     <vertex x="2.53956175" y="-2.04792833" z="1.5"/>
+     <vertex x="-0.987483978" y="-4.41927528" z="2.5"/>
+     <vertex x="2.47153878" y="-1.94584846" z="1.5"/>
+     <vertex x="-1.11799383" y="-4.22148705" z="2.5"/>
+     <vertex x="2.40632343" y="-1.84195232" z="1.5"/>
+     <vertex x="-1.24309969" y="-4.02023697" z="2.5"/>
+     <vertex x="2.34396434" y="-1.73631716" z="1.5"/>
+     <vertex x="-1.36271" y="-3.81567359" z="2.5"/>
+     <vertex x="2.28450775" y="-1.62902164" z="1.5"/>
+     <vertex x="-1.47673702" y="-3.60794568" z="2.5"/>
+     <vertex x="2.22799778" y="-1.52014542" z="1.5"/>
+     <vertex x="-1.58509731" y="-3.39720583" z="2.5"/>
+     <vertex x="2.17447615" y="-1.40976918" z="1.5"/>
+     <vertex x="-1.68771076" y="-3.18360925" z="2.5"/>
+     <vertex x="2.12398338" y="-1.2979753" z="1.5"/>
+     <vertex x="-1.78450298" y="-2.96731234" z="2.5"/>
+     <vertex x="2.07655621" y="-1.18484652" z="1.5"/>
+     <vertex x="-1.8754015" y="-2.74847364" z="2.5"/>
+     <vertex x="2.03223038" y="-1.07046711" z="1.5"/>
+     <vertex x="-1.96034145" y="-2.52725363" z="2.5"/>
+     <vertex x="1.9910388" y="-0.95492208" z="1.5"/>
+     <vertex x="-2.03925991" y="-2.30381465" z="2.5"/>
+     <vertex x="1.95301151" y="-0.838297129" z="1.5"/>
+     <vertex x="-2.11209869" y="-2.07832074" z="2.5"/>
+     <vertex x="1.9181776" y="-0.720678926" z="1.5"/>
+     <vertex x="-2.1788044" y="-1.85093689" z="2.5"/>
+     <vertex x="1.88656235" y="-0.602155089" z="1.5"/>
+     <vertex x="-2.23932838" y="-1.62183022" z="2.5"/>
+     <vertex x="1.85818958" y="-0.482813478" z="1.5"/>
+     <vertex x="-2.29362583" y="-1.39116848" z="2.5"/>
+     <vertex x="1.83308029" y="-0.362742901" z="1.5"/>
+     <vertex x="-2.34165764" y="-1.15912092" z="2.5"/>
+     <vertex x="1.81125307" y="-0.242032468" z="1.5"/>
+     <vertex x="-2.38338757" y="-0.925857902" z="2.5"/>
+     <vertex x="2.45367408" y="-0.0679264069" z="1.34423256"/>
+     <vertex x="1.79274797" y="-0.120944083" z="1.5"/>
+     <vertex x="2.31486607" y="-0.0686986446" z="1.3765533"/>
+     <vertex x="2.1759944" y="-0.067717135" z="1.40885448"/>
+     <vertex x="-0.291134834" y="-4.94861889" z="2.44399261"/>
+     <vertex x="-0.15601635" y="-4.92413998" z="2.4159317"/>
+     <vertex x="2.83862734" y="-2.43651962" z="1.5"/>
+     <vertex x="-0.02191782" y="-4.89726543" z="2.38781595"/>
+     <vertex x="0.111178875" y="-4.86798477" z="2.35963249"/>
+     <vertex x="0.243292332" y="-4.83628654" z="2.33136797"/>
+     <vertex x="2.9199512" y="-2.52848101" z="1.5"/>
+     <vertex x="6.06255865" y="0.332768738" z="0.5"/>
+     <vertex x="3.00368834" y="-2.6181221" z="1.5"/>
+     <vertex x="3.08983779" y="-2.70544744" z="1.5"/>
+     <vertex x="1.14214802" y="-4.54582024" z="2.13019466"/>
+     <vertex x="1.26707554" y="-4.49439907" z="2.10082769"/>
+     <vertex x="0.374442101" y="-4.80216122" z="2.30301046"/>
+     <vertex x="0.504646778" y="-4.76559639" z="2.2745471"/>
+     <vertex x="0.633924961" y="-4.72658253" z="2.245965"/>
+     <vertex x="0.762295246" y="-4.68510914" z="2.2172513"/>
+     <vertex x="0.889776707" y="-4.64116478" z="2.18839359"/>
+     <vertex x="1.01638842" y="-4.59473896" z="2.15937853"/>
+     <vertex x="1.39118958" y="-4.44046402" z="2.07126617"/>
+     <vertex x="1.51450825" y="-4.38400459" z="2.04149675"/>
+     <vertex x="1.63705063" y="-4.32500935" z="2.01150703"/>
+     <vertex x="3.17833543" y="-2.79039216" z="1.5"/>
+     <vertex x="1.75883579" y="-4.26346874" z="1.98128366"/>
+     <vertex x="1.87988234" y="-4.19937038" z="1.95081472"/>
+     <vertex x="2.00020933" y="-4.13270473" z="1.92008686"/>
+     <vertex x="2.1198349" y="-4.0634613" z="1.88908768"/>
+     <vertex x="3.26911545" y="-2.8728931" z="1.5"/>
+     <vertex x="2.23858643" y="-3.99174619" z="1.85785389"/>
+     <vertex x="2.3559773" y="-3.91789174" z="1.82651091"/>
+     <vertex x="2.47198772" y="-3.84197545" z="1.79507017"/>
+     <vertex x="2.58662558" y="-3.76405883" z="1.76353788"/>
+     <vertex x="3.36211038" y="-2.95288897" z="1.5"/>
+     <vertex x="2.69989777" y="-3.68420434" z="1.73191977"/>
+     <vertex x="2.81181169" y="-3.6024735" z="1.70022058"/>
+     <vertex x="2.92237473" y="-3.51892877" z="1.66844606"/>
+     <vertex x="3.03159404" y="-3.4336319" z="1.63660192"/>
+     <vertex x="6.09075403" y="0.305492818" z="0.5"/>
+     <vertex x="3.13947678" y="-3.34664464" z="1.60469389"/>
+     <vertex x="3.24603057" y="-3.25802922" z="1.57272673"/>
+     <vertex x="3.45725155" y="-3.03032041" z="1.5"/>
+     <vertex x="3.35126233" y="-3.16784739" z="1.54070711"/>
+     <vertex x="3.45517945" y="-3.07616091" z="1.50863934"/>
+     <vertex x="3.55778909" y="-2.98303223" z="1.4765296"/>
+     <vertex x="3.65909886" y="-2.8885231" z="1.44438314"/>
+     <vertex x="3.7591157" y="-2.79269552" z="1.4122057"/>
+     <vertex x="3.85784674" y="-2.69561124" z="1.38000274"/>
+     <vertex x="3.95529985" y="-2.59733224" z="1.34777951"/>
+     <vertex x="4.14639997" y="-2.39743829" z="1.28329539"/>
+     <vertex x="4.33247375" y="-2.19350958" z="1.21879721"/>
+     <vertex x="4.51397324" y="-1.98557925" z="1.15419626"/>
+     <vertex x="4.69174194" y="-1.7731092" z="1.08926749"/>
+     <vertex x="4.86579418" y="-1.55644393" z="1.0240643"/>
+     <vertex x="5.03611708" y="-1.33595812" z="0.958648682"/>
+     <vertex x="5.2026968" y="-1.11202621" z="0.89308238"/>
+     <vertex x="5.36552191" y="-0.885022759" z="0.827427626"/>
+     <vertex x="5.52457905" y="-0.655322075" z="0.761746407"/>
+     <vertex x="5.67985487" y="-0.423298657" z="0.696100712"/>
+     <vertex x="5.83133698" y="-0.189327061" z="0.63055253"/>
+     <vertex x="5.97901249" y="0.046218276" z="0.565164089"/>
+     <vertex x="6.12286901" y="0.282963485" z="0.5"/>
+     <vertex x="6.03897715" y="0.36411953" z="0.5"/>
+     <vertex x="6.02059031" y="0.398773313" z="0.5"/>
+     <vertex x="6.00785112" y="0.435876787" z="0.5"/>
+     <vertex x="5.73945856" y="0.370368958" z="0.565002441"/>
+     <vertex x="5.47014952" y="0.308596164" z="0.630006313"/>
+     <vertex x="5.19991541" y="0.250710964" z="0.695014715"/>
+     <vertex x="4.92871189" y="0.196873635" z="0.760039568"/>
+     <vertex x="4.65678835" y="0.147313952" z="0.825023651"/>
+     <vertex x="4.38393641" y="0.102190405" z="0.890016556"/>
+     <vertex x="4.10985994" y="0.0616825223" z="0.955092192"/>
+     <vertex x="3.83486891" y="0.0260855556" z="1.02018261"/>
+     <vertex x="3.55927563" y="-0.00430488586" z="1.08521938"/>
+     <vertex x="3.28339195" y="-0.0291931629" z="1.15013456"/>
+     <vertex x="3.00748944" y="-0.0482860208" z="1.21486783"/>
+     <vertex x="2.73094344" y="-0.0613178015" z="1.27955532"/>
+     <vertex x="2.03709888" y="-0.0649325252" z="1.44113088"/>
+     <vertex x="1.89821815" y="-0.0602954626" z="1.47337651"/>
+     <vertex x="1.75939083" y="-0.0537565947" z="1.50558567"/>
+     <vertex x="1.62065697" y="-0.0452665687" z="1.53775358"/>
+     <vertex x="-2.44782639" y="-0.456370294" z="2.5"/>
+     <vertex x="-2.41878605" y="-0.691550493" z="2.5"/>
+     <vertex x="1.48205566" y="-0.0347760916" z="1.56987333"/>
+     <vertex x="1.34362507" y="-0.0222358704" z="1.60194016"/>
+     <vertex x="1.20540524" y="-0.00759649277" z="1.63394833"/>
+     <vertex x="1.06743479" y="0.00919133425" z="1.66589212"/>
+     <vertex x="-2.47048759" y="-0.220489979" z="2.5"/>
+     <vertex x="0.929753304" y="0.0281769633" z="1.6977663"/>
+     <vertex x="0.792399406" y="0.0494097173" z="1.72956467"/>
+     <vertex x="0.655412674" y="0.0729389191" z="1.76128149"/>
+     <vertex x="0.51883173" y="0.0988139212" z="1.79291201"/>
+     <vertex x="-2.48675251" y="0.01591748" z="2.5"/>
+     <vertex x="0.382696152" y="0.127084047" z="1.82444954"/>
+     <vertex x="0.24704504" y="0.157798618" z="1.8558898"/>
+     <vertex x="0.111934662" y="0.191002369" z="1.88722181"/>
+     <vertex x="-0.0220756531" y="0.226593584" z="1.9183259"/>
+     <vertex x="-0.154749393" y="0.264516592" z="1.94915581"/>
+     <vertex x="-2.49661064" y="0.252678692" z="2.5"/>
+     <vertex x="-0.286108494" y="0.304777086" z="1.97972536"/>
+     <vertex x="-0.416173458" y="0.347380817" z="2.01004648"/>
+     <vertex x="-0.544965267" y="0.392333567" z="2.040133"/>
+     <vertex x="-2.50005341" y="0.48962003" z="2.5"/>
+     <vertex x="-0.672504902" y="0.439640969" z="2.06999683"/>
+     <vertex x="-0.79881382" y="0.489308834" z="2.09965086"/>
+     <vertex x="-0.923913002" y="0.541342854" z="2.12910891"/>
+     <vertex x="-1.04782391" y="0.595748723" z="2.15838242"/>
+     <vertex x="-2.49707794" y="0.726567686" z="2.5"/>
+     <vertex x="-1.17056656" y="0.65253222" z="2.18748522"/>
+     <vertex x="-1.29216242" y="0.711699069" z="2.21643019"/>
+     <vertex x="-1.41263342" y="0.773254991" z="2.24522924"/>
+     <vertex x="-1.53199911" y="0.837205768" z="2.27389622"/>
+     <vertex x="-2.48768806" y="0.963347912" z="2.5"/>
+     <vertex x="-1.65028191" y="0.903556943" z="2.30244303"/>
+     <vertex x="-1.76750278" y="0.972314477" z="2.3308835"/>
+     <vertex x="-1.8836813" y="1.04348397" z="2.35922956"/>
+     <vertex x="-2.4718895" y="1.19978702" z="2.5"/>
+     <vertex x="-1.99884033" y="1.11707115" z="2.38749456"/>
+     <vertex x="-2.11299992" y="1.19308186" z="2.41569138"/>
+     <vertex x="-2.22618103" y="1.27152157" z="2.44383287"/>
+     <vertex x="-2.33840561" y="1.35239625" z="2.47193146"/>
+     <vertex x="-2.44969463" y="1.43571162" z="2.5"/>
+     <vertex x="6.12999964" y="0.466945499" z="0.5"/>
+     <vertex x="6.24994278" y="0.498259306" z="0.5"/>
+     <vertex x="6.24994278" y="0.498259306" z="-2.5"/>
+     <vertex x="6.14108801" y="0.3134709" z="-2.5"/>
+     <vertex x="6.02971077" y="0.128820091" z="-2.5"/>
+     <vertex x="5.91581631" y="-0.0554946661" z="-2.5"/>
+     <vertex x="5.79940844" y="-0.239274859" z="-2.5"/>
+     <vertex x="5.6804924" y="-0.422322035" z="-2.5"/>
+     <vertex x="5.55907202" y="-0.604437709" z="-2.5"/>
+     <vertex x="5.43515301" y="-0.785423398" z="-2.5"/>
+     <vertex x="5.30873871" y="-0.965080738" z="-2.5"/>
+     <vertex x="5.17983484" y="-1.14321101" z="-2.5"/>
+     <vertex x="5.04844522" y="-1.31961584" z="-2.5"/>
+     <vertex x="4.9145751" y="-1.49409688" z="-2.5"/>
+     <vertex x="4.77822828" y="-1.66645551" z="-2.5"/>
+     <vertex x="4.63940954" y="-1.83649325" z="-2.5"/>
+     <vertex x="4.49812412" y="-2.00401163" z="-2.5"/>
+     <vertex x="4.35437584" y="-2.16881227" z="-2.5"/>
+     <vertex x="4.20816994" y="-2.33069634" z="-2.5"/>
+     <vertex x="4.05951023" y="-2.48946595" z="-2.5"/>
+     <vertex x="3.9084022" y="-2.64492226" z="-2.5"/>
+     <vertex x="3.75484991" y="-2.79686666" z="-2.5"/>
+     <vertex x="3.59885788" y="-2.94510102" z="-2.5"/>
+     <vertex x="3.44125009" y="-3.08870673" z="-2.5"/>
+     <vertex x="3.28438568" y="-3.22560692" z="-2.5"/>
+     <vertex x="3.36270547" y="-3.15800047" z="-2.5"/>
+     <vertex x="3.1284318" y="-3.35584807" z="-2.5"/>
+     <vertex x="2.97340989" y="-3.47961068" z="-2.5"/>
+     <vertex x="2.81934118" y="-3.59707522" z="-2.5"/>
+     <vertex x="2.66624737" y="-3.70842195" z="-2.5"/>
+     <vertex x="2.51414943" y="-3.81383109" z="-2.5"/>
+     <vertex x="2.36306906" y="-3.91348338" z="-2.5"/>
+     <vertex x="2.21302748" y="-4.00755978" z="-2.5"/>
+     <vertex x="2.06404638" y="-4.09623909" z="-2.5"/>
+     <vertex x="1.91614676" y="-4.17970276" z="-2.5"/>
+     <vertex x="1.76935053" y="-4.25813198" z="-2.5"/>
+     <vertex x="1.62367868" y="-4.33170509" z="-2.5"/>
+     <vertex x="1.4791522" y="-4.4006052" z="-2.5"/>
+     <vertex x="1.3357935" y="-4.46500969" z="-2.5"/>
+     <vertex x="1.19346189" y="-4.52516747" z="-2.5"/>
+     <vertex x="1.04882193" y="-4.58253002" z="-2.5"/>
+     <vertex x="0.900471687" y="-4.63750362" z="-2.5"/>
+     <vertex x="0.748319149" y="-4.68992233" z="-2.5"/>
+     <vertex x="0.592271805" y="-4.73962021" z="-2.5"/>
+     <vertex x="0.432237625" y="-4.78643227" z="-2.5"/>
+     <vertex x="0.26812458" y="-4.83019066" z="-2.5"/>
+     <vertex x="0.0998401642" y="-4.87073135" z="-2.5"/>
+     <vertex x="-0.0727071762" y="-4.90788746" z="-2.5"/>
+     <vertex x="-0.249610424" y="-4.94149208" z="-2.5"/>
+     <vertex x="-0.430960655" y="-4.97138119" z="-2.5"/>
+     <vertex x="-0.61685133" y="-4.99738789" z="-2.5"/>
+     <vertex x="-0.660832882" y="-5.00278854" z="2.5"/>
+     <vertex x="-0.75870657" y="-5.01411057" z="2.5"/>
+     <vertex x="-0.807373524" y="-5.01934624" z="-2.5"/>
+     <vertex x="-0.858149052" y="-5.02436447" z="2.5"/>
+     <vertex x="-1.00261974" y="-5.0370903" z="-2.5"/>
+     <vertex x="-0.959180832" y="-5.03351402" z="2.5"/>
+     <vertex x="-1.06182241" y="-5.04152393" z="2.5"/>
+     <vertex x="-1.2026825" y="-5.05045414" z="-2.5"/>
+     <vertex x="-1.16609287" y="-5.04835796" z="2.5"/>
+     <vertex x="-1.27201271" y="-5.05398178" z="2.5"/>
+     <vertex x="-1.30454874" y="-5.05544186" z="-2.5"/>
+     <vertex x="-1.37960148" y="-5.05835819" z="2.5"/>
+     <vertex x="-1.40765333" y="-5.05927181" z="-2.5"/>
+     <vertex x="-1.48888016" y="-5.06145287" z="2.5"/>
+     <vertex x="-1.51200819" y="-5.06192398" z="-2.5"/>
+     <vertex x="-1.5998683" y="-5.06322956" z="2.5"/>
+     <vertex x="-1.61762476" y="-5.06337738" z="-2.5"/>
+     <vertex x="-1.71258545" y="-5.06365108" z="2.5"/>
+     <vertex x="-1.82956314" y="-5.06283283" z="-2.5"/>
+     <vertex x="-1.82705212" y="-5.06268406" z="2.5"/>
+     <vertex x="-2.05901623" y="-5.05663872" z="2.5"/>
+     <vertex x="-2.03645897" y="-5.05817509" z="-2.5"/>
+     <vertex x="-2.17288113" y="-5.05185604" z="2.5"/>
+     <vertex x="-2.23861504" y="-5.04957294" z="-2.5"/>
+     <vertex x="-2.28499413" y="-5.04596806" z="2.5"/>
+     <vertex x="-2.39548397" y="-5.03899765" z="2.5"/>
+     <vertex x="-2.43664932" y="-5.03717709" z="-2.5"/>
+     <vertex x="-2.50448227" y="-5.03096581" z="2.5"/>
+     <vertex x="-2.63117981" y="-5.02113819" z="-2.5"/>
+     <vertex x="-2.71852303" y="-5.01180744" z="2.5"/>
+     <vertex x="-2.82282543" y="-5.00160599" z="-2.5"/>
+     <vertex x="-2.92815781" y="-4.98867035" z="2.5"/>
+     <vertex x="-3.01220322" y="-4.9787302" z="-2.5"/>
+     <vertex x="-3.13442993" y="-4.96173" z="2.5"/>
+     <vertex x="-3.19993114" y="-4.95266247" z="-2.5"/>
+     <vertex x="-3.33837891" y="-4.93116379" z="2.5"/>
+     <vertex x="-3.38662815" y="-4.92355156" z="-2.5"/>
+     <vertex x="-3.54104805" y="-4.89714622" z="2.5"/>
+     <vertex x="-3.57291222" y="-4.89154911" z="-2.5"/>
+     <vertex x="-3.74347878" y="-4.85985565" z="2.5"/>
+     <vertex x="-3.75940132" y="-4.85680389" z="-2.5"/>
+     <vertex x="-3.94671345" y="-4.81946659" z="2.5"/>
+     <vertex x="-3.94671345" y="-4.81946659" z="-2.5"/>
+     <vertex x="-4.10513496" y="-4.78597164" z="2.37456131"/>
+     <vertex x="-4.10513496" y="-4.78597164" z="-2.37456155"/>
+     <vertex x="-4.2633791" y="-4.75059795" z="2.24922514"/>
+     <vertex x="-4.2633791" y="-4.75059795" z="-2.24922514"/>
+     <vertex x="-4.42139816" y="-4.71339798" z="2.12400293"/>
+     <vertex x="-4.42139816" y="-4.71339798" z="-2.1240027"/>
+     <vertex x="-4.57914639" y="-4.67442036" z="1.99890566"/>
+     <vertex x="-4.57914639" y="-4.67442036" z="-1.99890554"/>
+     <vertex x="-4.73657703" y="-4.63371563" z="1.87394524"/>
+     <vertex x="-4.73657703" y="-4.63371563" z="-1.87394524"/>
+     <vertex x="-4.89364338" y="-4.59133434" z="1.74913311"/>
+     <vertex x="-4.89364338" y="-4.59133434" z="-1.74913311"/>
+     <vertex x="-5.20649624" y="-4.50174046" z="1.5"/>
+     <vertex x="-5.20649624" y="-4.50174046" z="-1.5"/>
+     <vertex x="-4.07037449" y="-4.57530403" z="-2.5"/>
+     <vertex x="-4.18819141" y="-4.3282671" z="-2.5"/>
+     <vertex x="-4.30009556" y="-4.07849693" z="-2.5"/>
+     <vertex x="-5.31892967" y="-4.23578739" z="-1.5"/>
+     <vertex x="-4.40602398" y="-3.82613397" z="-2.5"/>
+     <vertex x="-5.42518902" y="-3.96730781" z="-1.5"/>
+     <vertex x="-4.5059166" y="-3.57132173" z="-2.5"/>
+     <vertex x="-5.52521992" y="-3.69644523" z="-1.5"/>
+     <vertex x="-4.59971714" y="-3.31420445" z="-2.5"/>
+     <vertex x="-5.61896706" y="-3.42334485" z="-1.5"/>
+     <vertex x="-4.68737221" y="-3.05492783" z="-2.5"/>
+     <vertex x="-5.7063818" y="-3.14815164" z="-1.5"/>
+     <vertex x="-4.76883221" y="-2.79363871" z="-2.5"/>
+     <vertex x="-5.7874155" y="-2.87101293" z="-1.5"/>
+     <vertex x="-4.84405136" y="-2.53048491" z="-2.5"/>
+     <vertex x="-5.86202717" y="-2.59207654" z="-1.5"/>
+     <vertex x="-4.91298676" y="-2.2656157" z="-2.5"/>
+     <vertex x="-5.93017673" y="-2.31149101" z="-1.5"/>
+     <vertex x="-4.97559929" y="-1.99918079" z="-2.5"/>
+     <vertex x="-5.99182606" y="-2.02940631" z="-1.5"/>
+     <vertex x="-5.03185368" y="-1.73133159" z="-2.5"/>
+     <vertex x="-6.04694366" y="-1.74597287" z="-1.5"/>
+     <vertex x="-5.08171749" y="-1.46221924" z="-2.5"/>
+     <vertex x="-6.09549999" y="-1.4613421" z="-1.5"/>
+     <vertex x="-5.12516308" y="-1.19199669" z="-2.5"/>
+     <vertex x="-6.13746929" y="-1.17566562" z="-1.5"/>
+     <vertex x="-5.16216564" y="-0.92081666" z="-2.5"/>
+     <vertex x="-6.17282867" y="-0.889095902" z="-1.5"/>
+     <vertex x="-5.1927042" y="-0.648832798" z="-2.5"/>
+     <vertex x="-6.20155907" y="-0.601785898" z="-1.5"/>
+     <vertex x="-5.21676254" y="-0.376199305" z="-2.5"/>
+     <vertex x="-6.22364616" y="-0.313889027" z="-1.5"/>
+     <vertex x="-5.23432446" y="-0.103070498" z="-2.5"/>
+     <vertex x="-6.23907661" y="-0.0255587101" z="-1.5"/>
+     <vertex x="-5.24538231" y="0.170398951" z="-2.5"/>
+     <vertex x="-6.24784374" y="0.263051033" z="-1.5"/>
+     <vertex x="-5.24992943" y="0.444054097" z="-2.5"/>
+     <vertex x="-6.24994278" y="0.551786304" z="-1.5"/>
+     <vertex x="-5.24796295" y="0.71773994" z="-2.5"/>
+     <vertex x="-6.24537182" y="0.840493083" z="-1.5"/>
+     <vertex x="-5.23948288" y="0.991301417" z="-2.5"/>
+     <vertex x="-6.23413277" y="1.12901711" z="-1.5"/>
+     <vertex x="-5.22449589" y="1.26458371" z="-2.5"/>
+     <vertex x="-6.21623325" y="1.41720462" z="-1.5"/>
+     <vertex x="-5.20300961" y="1.53743184" z="-2.5"/>
+     <vertex x="-6.19168186" y="1.70490193" z="-1.5"/>
+     <vertex x="-5.17503643" y="1.80969143" z="-2.5"/>
+     <vertex x="-6.16049099" y="1.99195528" z="-1.5"/>
+     <vertex x="-5.14059162" y="2.08120823" z="-2.5"/>
+     <vertex x="-6.12267876" y="2.27821159" z="-1.5"/>
+     <vertex x="-5.09969521" y="2.35182858" z="-2.5"/>
+     <vertex x="-6.07826519" y="2.56351829" z="-1.5"/>
+     <vertex x="-5.05237007" y="2.62139869" z="-2.5"/>
+     <vertex x="-6.02727318" y="2.84772277" z="-1.5"/>
+     <vertex x="-4.99864388" y="2.88976645" z="-2.5"/>
+     <vertex x="-5.96972942" y="3.13067389" z="-1.5"/>
+     <vertex x="-4.93854523" y="3.15677977" z="-2.5"/>
+     <vertex x="-5.90566635" y="3.41222024" z="-1.5"/>
+     <vertex x="-4.87211037" y="3.42228699" z="-2.5"/>
+     <vertex x="-5.83511734" y="3.69221163" z="-1.5"/>
+     <vertex x="-4.79937553" y="3.68613815" z="-2.5"/>
+     <vertex x="-5.75811958" y="3.97049904" z="-1.5"/>
+     <vertex x="-4.72038174" y="3.94818377" z="-2.5"/>
+     <vertex x="-5.67471409" y="4.24693346" z="-1.5"/>
+     <vertex x="-4.80871868" y="4.08388996" z="-2.37456155"/>
+     <vertex x="-5.58494663" y="4.52136803" z="-1.5"/>
+     <vertex x="-4.89560127" y="4.22079754" z="-2.24922514"/>
+     <vertex x="-4.98103333" y="4.35883904" z="-2.1240027"/>
+     <vertex x="-5.06501675" y="4.49794483" z="-1.99890554"/>
+     <vertex x="-5.48886299" y="4.7936554" z="-1.5"/>
+     <vertex x="-5.1475544" y="4.63804722" z="-1.87394524"/>
+     <vertex x="-5.22864819" y="4.77907848" z="-1.74913311"/>
+     <vertex x="-5.38651657" y="5.06365108" z="-1.5"/>
+     <vertex x="6.01812172" y="0.438426614" z="-2.5"/>
+     <vertex x="5.78806162" y="0.38182041" z="-2.5"/>
+     <vertex x="5.55977726" y="0.328460217" z="-2.5"/>
+     <vertex x="5.33328581" y="0.278365672" z="-2.5"/>
+     <vertex x="5.10860205" y="0.231556326" z="-2.5"/>
+     <vertex x="4.88574219" y="0.18805179" z="-2.5"/>
+     <vertex x="4.66472149" y="0.147871643" z="-2.5"/>
+     <vertex x="4.44555712" y="0.111035466" z="-2.5"/>
+     <vertex x="4.22826385" y="0.0775628388" z="-2.5"/>
+     <vertex x="4.01285744" y="0.047473371" z="-2.5"/>
+     <vertex x="3.79935431" y="0.0207866132" z="-2.5"/>
+     <vertex x="3.58776975" y="-0.00247782469" z="-2.5"/>
+     <vertex x="3.37812018" y="-0.0223003626" z="-2.5"/>
+     <vertex x="3.17042089" y="-0.0386614799" z="-2.5"/>
+     <vertex x="2.96468782" y="-0.0515414476" z="-2.5"/>
+     <vertex x="2.76093721" y="-0.0609207749" z="-2.5"/>
+     <vertex x="2.55918431" y="-0.0667799115" z="-2.5"/>
+     <vertex x="2.35944533" y="-0.0690991879" z="-2.5"/>
+     <vertex x="2.16173601" y="-0.0678590536" z="-2.5"/>
+     <vertex x="1.96607208" y="-0.0630399585" z="-2.5"/>
+     <vertex x="1.77246952" y="-0.0546222925" z="-2.5"/>
+     <vertex x="1.58094406" y="-0.0425863862" z="-2.5"/>
+     <vertex x="1.39151144" y="-0.0269128084" z="-2.5"/>
+     <vertex x="1.20497894" y="-0.00765824318" z="-2.5"/>
+     <vertex x="1.02250528" y="0.0150181651" z="-2.5"/>
+     <vertex x="0.844017506" y="0.0410300791" z="-2.5"/>
+     <vertex x="0.66943121" y="0.0702921152" z="-2.5"/>
+     <vertex x="0.498659611" y="0.10271883" z="-2.5"/>
+     <vertex x="0.331617355" y="0.13822484" z="-2.5"/>
+     <vertex x="0.168219566" y="0.176724762" z="-2.5"/>
+     <vertex x="0.00838041306" y="0.218133181" z="-2.5"/>
+     <vertex x="-0.147986412" y="0.262364686" z="-2.5"/>
+     <vertex x="-0.300965309" y="0.30933392" z="-2.5"/>
+     <vertex x="-0.450642586" y="0.358955443" z="-2.5"/>
+     <vertex x="-0.597103119" y="0.411143839" z="-2.5"/>
+     <vertex x="-0.740433693" y="0.465813756" z="-2.5"/>
+     <vertex x="-0.880718231" y="0.522879779" z="-2.5"/>
+     <vertex x="-1.01804352" y="0.582256496" z="-2.5"/>
+     <vertex x="-1.15249491" y="0.643858492" z="-2.5"/>
+     <vertex x="-1.28418016" y="0.707611203" z="-2.5"/>
+     <vertex x="-1.41624546" y="0.7749843" z="-2.5"/>
+     <vertex x="-1.55080271" y="0.847266972" z="-2.5"/>
+     <vertex x="-1.68775368" y="0.9247576" z="-2.5"/>
+     <vertex x="-1.82699871" y="1.00775433" z="-2.5"/>
+     <vertex x="-1.96844006" y="1.09655571" z="-2.5"/>
+     <vertex x="-2.11197853" y="1.19145989" z="-2.5"/>
+     <vertex x="-2.1845026" y="1.24129367" z="-2.5"/>
+     <vertex x="-2.25751495" y="1.29276514" z="-2.5"/>
+     <vertex x="-2.33100128" y="1.3459115" z="-2.5"/>
+     <vertex x="-2.4049511" y="1.40076995" z="-2.5"/>
+     <vertex x="-2.47935009" y="1.45737779" z="-2.5"/>
+     <vertex x="-2.52662086" y="1.49514914" z="2.5"/>
+     <vertex x="-2.55418777" y="1.51577246" z="-2.5"/>
+     <vertex x="-2.60391331" y="1.55641592" z="2.5"/>
+     <vertex x="-2.6294508" y="1.57599115" z="-2.5"/>
+     <vertex x="-2.68156052" y="1.61955166" z="2.5"/>
+     <vertex x="-2.70512676" y="1.63807106" z="-2.5"/>
+     <vertex x="-2.759552" y="1.6845957" z="2.5"/>
+     <vertex x="-2.78120327" y="1.70204961" z="-2.5"/>
+     <vertex x="-2.83787537" y="1.75158775" z="2.5"/>
+     <vertex x="-2.85766888" y="1.76796412" z="-2.5"/>
+     <vertex x="-2.91652107" y="1.82056725" z="2.5"/>
+     <vertex x="-2.93451023" y="1.83585167" z="-2.5"/>
+     <vertex x="-2.99547672" y="1.89157367" z="2.5"/>
+     <vertex x="-3.01171589" y="1.9057498" z="-2.5"/>
+     <vertex x="-3.07473183" y="1.9646467" z="2.5"/>
+     <vertex x="-3.0892725" y="1.97769558" z="-2.5"/>
+     <vertex x="-3.15427589" y="2.03982544" z="2.5"/>
+     <vertex x="-3.16716862" y="2.05172634" z="-2.5"/>
+     <vertex x="-3.23409653" y="2.11715031" z="2.5"/>
+     <vertex x="-3.24539089" y="2.12787962" z="-2.5"/>
+     <vertex x="-3.31418324" y="2.19665956" z="2.5"/>
+     <vertex x="-3.32392788" y="2.20619249" z="-2.5"/>
+     <vertex x="-3.39452457" y="2.27839398" z="2.5"/>
+     <vertex x="-3.40276623" y="2.28670216" z="-2.5"/>
+     <vertex x="-3.48189545" y="2.36944628" z="-2.5"/>
+     <vertex x="-3.5541954" y="2.44656563" z="2.5"/>
+     <vertex x="-3.56130123" y="2.45446157" z="-2.5"/>
+     <vertex x="-3.64097214" y="2.54178596" z="-2.5"/>
+     <vertex x="-3.63087273" y="2.52978182" z="2.5"/>
+     <vertex x="-3.7208252" y="2.63136649" z="-2.5"/>
+     <vertex x="-3.70528507" y="2.61217642" z="2.5"/>
+     <vertex x="-3.79882431" y="2.72066331" z="-2.5"/>
+     <vertex x="-3.77759457" y="2.69390798" z="2.5"/>
+     <vertex x="-3.8742094" y="2.80868363" z="-2.5"/>
+     <vertex x="-3.84796429" y="2.7751348" z="2.5"/>
+     <vertex x="-3.94720936" y="2.89567208" z="-2.5"/>
+     <vertex x="-3.98353291" y="2.93670964" z="2.5"/>
+     <vertex x="-4.0180521" y="2.98187375" z="-2.5"/>
+     <vertex x="-4.08696747" y="3.06753325" z="-2.5"/>
+     <vertex x="-4.11329079" y="3.09817028" z="2.5"/>
+     <vertex x="-4.21992874" y="3.23820543" z="-2.5"/>
+     <vertex x="-4.23853588" y="3.26078582" z="2.5"/>
+     <vertex x="-4.34792233" y="3.4096477" z="-2.5"/>
+     <vertex x="-4.36056805" y="3.42582583" z="2.5"/>
+     <vertex x="-4.47277546" y="3.58381891" z="-2.5"/>
+     <vertex x="-4.48068714" y="3.59455919" z="2.5"/>
+     <vertex x="-4.5963192" y="3.76267791" z="-2.5"/>
+     <vertex x="-4.60019207" y="3.76825547" z="2.5"/>
+     <vertex x="-4.65817165" y="3.85447764" z="-2.5"/>
+     <vertex x="-4.66012001" y="3.85736132" z="2.5"/>
+     <vertex x="-4.72038174" y="3.94818377" z="2.5"/>
+     <vertex x="-4.80871868" y="4.08388996" z="2.37456131"/>
+     <vertex x="-4.89560127" y="4.22079754" z="2.24922514"/>
+     <vertex x="-4.98103333" y="4.35883904" z="2.12400293"/>
+     <vertex x="-5.06501675" y="4.49794483" z="1.99890566"/>
+     <vertex x="-5.1475544" y="4.63804722" z="1.87394524"/>
+     <vertex x="-5.22864819" y="4.77907848" z="1.74913311"/>
+     <vertex x="-5.38651657" y="5.06365108" z="1.5"/>
+     <vertex x="-5.48886299" y="4.7936554" z="1.5"/>
+     <vertex x="-5.58494663" y="4.52136803" z="1.5"/>
+     <vertex x="-5.67471409" y="4.24693346" z="1.5"/>
+     <vertex x="-5.75811958" y="3.97049904" z="1.5"/>
+     <vertex x="-5.83511734" y="3.69221163" z="1.5"/>
+     <vertex x="-5.90566635" y="3.41222024" z="1.5"/>
+     <vertex x="-5.96972942" y="3.13067389" z="1.5"/>
+     <vertex x="-6.02727318" y="2.84772277" z="1.5"/>
+     <vertex x="-6.07826519" y="2.56351829" z="1.5"/>
+     <vertex x="-6.12267876" y="2.27821159" z="1.5"/>
+     <vertex x="-6.16049099" y="1.99195528" z="1.5"/>
+     <vertex x="-6.19168186" y="1.70490193" z="1.5"/>
+     <vertex x="-6.21623325" y="1.41720462" z="1.5"/>
+     <vertex x="-6.23413277" y="1.12901711" z="1.5"/>
+     <vertex x="-6.24537182" y="0.840493083" z="1.5"/>
+     <vertex x="-6.24994278" y="0.551786304" z="1.5"/>
+     <vertex x="-6.24784374" y="0.263051033" z="1.5"/>
+     <vertex x="-6.23907661" y="-0.0255587101" z="1.5"/>
+     <vertex x="-6.22364616" y="-0.313889027" z="1.5"/>
+     <vertex x="-6.20155907" y="-0.601785898" z="1.5"/>
+     <vertex x="-6.17282867" y="-0.889095902" z="1.5"/>
+     <vertex x="-6.13746929" y="-1.17566562" z="1.5"/>
+     <vertex x="-6.09549999" y="-1.4613421" z="1.5"/>
+     <vertex x="-6.04694366" y="-1.74597287" z="1.5"/>
+     <vertex x="-5.99182606" y="-2.02940631" z="1.5"/>
+     <vertex x="-5.93017673" y="-2.31149101" z="1.5"/>
+     <vertex x="-5.86202717" y="-2.59207654" z="1.5"/>
+     <vertex x="-5.7874155" y="-2.87101293" z="1.5"/>
+     <vertex x="-5.7063818" y="-3.14815164" z="1.5"/>
+     <vertex x="-5.61896706" y="-3.42334485" z="1.5"/>
+     <vertex x="-5.52521992" y="-3.69644523" z="1.5"/>
+     <vertex x="-5.42518902" y="-3.96730781" z="1.5"/>
+     <vertex x="-5.31892967" y="-4.23578739" z="1.5"/>
+     <vertex x="-4.30009556" y="-4.07849693" z="2.5"/>
+     <vertex x="-4.18819141" y="-4.3282671" z="2.5"/>
+     <vertex x="-4.07037449" y="-4.57530403" z="2.5"/>
+     <vertex x="-4.40602398" y="-3.82613397" z="2.5"/>
+     <vertex x="-4.5059166" y="-3.57132173" z="2.5"/>
+     <vertex x="-4.59971714" y="-3.31420445" z="2.5"/>
+     <vertex x="-4.68737221" y="-3.05492783" z="2.5"/>
+     <vertex x="-4.76883221" y="-2.79363871" z="2.5"/>
+     <vertex x="-4.84405136" y="-2.53048491" z="2.5"/>
+     <vertex x="-4.91298676" y="-2.2656157" z="2.5"/>
+     <vertex x="-4.97559929" y="-1.99918079" z="2.5"/>
+     <vertex x="-5.03185368" y="-1.73133159" z="2.5"/>
+     <vertex x="-5.08171749" y="-1.46221924" z="2.5"/>
+     <vertex x="-5.12516308" y="-1.19199669" z="2.5"/>
+     <vertex x="-5.16216564" y="-0.92081666" z="2.5"/>
+     <vertex x="-5.1927042" y="-0.648832798" z="2.5"/>
+     <vertex x="-5.21676254" y="-0.376199305" z="2.5"/>
+     <vertex x="-5.23432446" y="-0.103070498" z="2.5"/>
+     <vertex x="-5.24538231" y="0.170398951" z="2.5"/>
+     <vertex x="-5.24992943" y="0.444054097" z="2.5"/>
+     <vertex x="-5.24796295" y="0.71773994" z="2.5"/>
+     <vertex x="-5.23948288" y="0.991301417" z="2.5"/>
+     <vertex x="-5.22449589" y="1.26458371" z="2.5"/>
+     <vertex x="-5.20300961" y="1.53743184" z="2.5"/>
+     <vertex x="-5.17503643" y="1.80969143" z="2.5"/>
+     <vertex x="-5.14059162" y="2.08120823" z="2.5"/>
+     <vertex x="-5.09969521" y="2.35182858" z="2.5"/>
+     <vertex x="-5.05237007" y="2.62139869" z="2.5"/>
+     <vertex x="-4.99864388" y="2.88976645" z="2.5"/>
+     <vertex x="-4.93854523" y="3.15677977" z="2.5"/>
+     <vertex x="-4.87211037" y="3.42228699" z="2.5"/>
+     <vertex x="-4.79937553" y="3.68613815" z="2.5"/>
+    </vertices>
+    <triangles>
+     <triangle v1="0" v2="1" v3="2"/>
+     <triangle v1="2" v2="1" v3="3"/>
+     <triangle v1="2" v2="3" v3="4"/>
+     <triangle v1="4" v2="3" v3="5"/>
+     <triangle v1="4" v2="5" v3="6"/>
+     <triangle v1="6" v2="5" v3="7"/>
+     <triangle v1="6" v2="7" v3="8"/>
+     <triangle v1="8" v2="7" v3="9"/>
+     <triangle v1="8" v2="9" v3="10"/>
+     <triangle v1="10" v2="9" v3="11"/>
+     <triangle v1="10" v2="11" v3="12"/>
+     <triangle v1="12" v2="11" v3="13"/>
+     <triangle v1="12" v2="13" v3="14"/>
+     <triangle v1="14" v2="13" v3="15"/>
+     <triangle v1="14" v2="15" v3="16"/>
+     <triangle v1="16" v2="15" v3="17"/>
+     <triangle v1="16" v2="17" v3="18"/>
+     <triangle v1="18" v2="17" v3="19"/>
+     <triangle v1="18" v2="19" v3="20"/>
+     <triangle v1="20" v2="19" v3="21"/>
+     <triangle v1="20" v2="21" v3="22"/>
+     <triangle v1="22" v2="21" v3="23"/>
+     <triangle v1="22" v2="23" v3="24"/>
+     <triangle v1="24" v2="23" v3="25"/>
+     <triangle v1="24" v2="25" v3="26"/>
+     <triangle v1="26" v2="25" v3="27"/>
+     <triangle v1="26" v2="27" v3="28"/>
+     <triangle v1="28" v2="27" v3="29"/>
+     <triangle v1="28" v2="29" v3="30"/>
+     <triangle v1="30" v2="29" v3="31"/>
+     <triangle v1="30" v2="31" v3="32"/>
+     <triangle v1="32" v2="31" v3="33"/>
+     <triangle v1="32" v2="33" v3="34"/>
+     <triangle v1="34" v2="33" v3="35"/>
+     <triangle v1="34" v2="35" v3="36"/>
+     <triangle v1="36" v2="35" v3="37"/>
+     <triangle v1="36" v2="37" v3="38"/>
+     <triangle v1="38" v2="37" v3="39"/>
+     <triangle v1="38" v2="39" v3="40"/>
+     <triangle v1="40" v2="39" v3="41"/>
+     <triangle v1="40" v2="41" v3="42"/>
+     <triangle v1="42" v2="41" v3="43"/>
+     <triangle v1="42" v2="43" v3="44"/>
+     <triangle v1="0" v2="45" v3="1"/>
+     <triangle v1="1" v2="45" v3="46"/>
+     <triangle v1="1" v2="46" v3="47"/>
+     <triangle v1="47" v2="46" v3="48"/>
+     <triangle v1="47" v2="48" v3="49"/>
+     <triangle v1="49" v2="50" v3="47"/>
+     <triangle v1="47" v2="50" v3="51"/>
+     <triangle v1="47" v2="51" v3="52"/>
+     <triangle v1="52" v2="51" v3="53"/>
+     <triangle v1="52" v2="53" v3="54"/>
+     <triangle v1="54" v2="53" v3="55"/>
+     <triangle v1="54" v2="55" v3="56"/>
+     <triangle v1="50" v2="57" v3="51"/>
+     <triangle v1="51" v2="57" v3="58"/>
+     <triangle v1="51" v2="58" v3="59"/>
+     <triangle v1="51" v2="59" v3="53"/>
+     <triangle v1="53" v2="59" v3="60"/>
+     <triangle v1="53" v2="60" v3="61"/>
+     <triangle v1="61" v2="62" v3="53"/>
+     <triangle v1="53" v2="62" v3="55"/>
+     <triangle v1="56" v2="63" v3="54"/>
+     <triangle v1="54" v2="63" v3="64"/>
+     <triangle v1="54" v2="64" v3="65"/>
+     <triangle v1="54" v2="65" v3="66"/>
+     <triangle v1="66" v2="65" v3="67"/>
+     <triangle v1="66" v2="67" v3="68"/>
+     <triangle v1="68" v2="69" v3="66"/>
+     <triangle v1="66" v2="69" v3="70"/>
+     <triangle v1="66" v2="70" v3="71"/>
+     <triangle v1="71" v2="70" v3="72"/>
+     <triangle v1="71" v2="72" v3="73"/>
+     <triangle v1="73" v2="74" v3="71"/>
+     <triangle v1="71" v2="74" v3="75"/>
+     <triangle v1="71" v2="75" v3="76"/>
+     <triangle v1="76" v2="75" v3="77"/>
+     <triangle v1="76" v2="77" v3="78"/>
+     <triangle v1="78" v2="79" v3="76"/>
+     <triangle v1="76" v2="79" v3="80"/>
+     <triangle v1="76" v2="80" v3="81"/>
+     <triangle v1="81" v2="80" v3="82"/>
+     <triangle v1="81" v2="82" v3="83"/>
+     <triangle v1="81" v2="83" v3="84"/>
+     <triangle v1="84" v2="83" v3="85"/>
+     <triangle v1="84" v2="85" v3="86"/>
+     <triangle v1="84" v2="86" v3="81"/>
+     <triangle v1="81" v2="86" v3="87"/>
+     <triangle v1="81" v2="87" v3="88"/>
+     <triangle v1="88" v2="89" v3="81"/>
+     <triangle v1="81" v2="89" v3="90"/>
+     <triangle v1="81" v2="90" v3="91"/>
+     <triangle v1="91" v2="92" v3="81"/>
+     <triangle v1="81" v2="92" v3="93"/>
+     <triangle v1="81" v2="93" v3="94"/>
+     <triangle v1="94" v2="95" v3="81"/>
+     <triangle v1="81" v2="95" v3="96"/>
+     <triangle v1="81" v2="96" v3="97"/>
+     <triangle v1="97" v2="98" v3="81"/>
+     <triangle v1="81" v2="98" v3="99"/>
+     <triangle v1="81" v2="99" v3="100"/>
+     <triangle v1="100" v2="101" v3="81"/>
+     <triangle v1="81" v2="101" v3="102"/>
+     <triangle v1="81" v2="102" v3="103"/>
+     <triangle v1="103" v2="104" v3="81"/>
+     <triangle v1="52" v2="54" v3="81"/>
+     <triangle v1="81" v2="54" v3="66"/>
+     <triangle v1="81" v2="66" v3="71"/>
+     <triangle v1="105" v2="3" v3="52"/>
+     <triangle v1="52" v2="3" v3="1"/>
+     <triangle v1="52" v2="1" v3="47"/>
+     <triangle v1="106" v2="15" v3="105"/>
+     <triangle v1="105" v2="15" v3="13"/>
+     <triangle v1="105" v2="13" v3="11"/>
+     <triangle v1="107" v2="27" v3="106"/>
+     <triangle v1="106" v2="27" v3="25"/>
+     <triangle v1="106" v2="25" v3="23"/>
+     <triangle v1="108" v2="33" v3="107"/>
+     <triangle v1="107" v2="33" v3="31"/>
+     <triangle v1="107" v2="31" v3="29"/>
+     <triangle v1="108" v2="109" v3="33"/>
+     <triangle v1="33" v2="109" v3="110"/>
+     <triangle v1="33" v2="110" v3="35"/>
+     <triangle v1="35" v2="110" v3="111"/>
+     <triangle v1="35" v2="111" v3="112"/>
+     <triangle v1="112" v2="113" v3="35"/>
+     <triangle v1="35" v2="113" v3="37"/>
+     <triangle v1="113" v2="114" v3="37"/>
+     <triangle v1="37" v2="114" v3="115"/>
+     <triangle v1="37" v2="115" v3="116"/>
+     <triangle v1="116" v2="117" v3="37"/>
+     <triangle v1="37" v2="117" v3="39"/>
+     <triangle v1="117" v2="118" v3="39"/>
+     <triangle v1="39" v2="118" v3="119"/>
+     <triangle v1="39" v2="119" v3="41"/>
+     <triangle v1="44" v2="120" v3="42"/>
+     <triangle v1="42" v2="120" v3="121"/>
+     <triangle v1="42" v2="121" v3="122"/>
+     <triangle v1="123" v2="124" v3="122"/>
+     <triangle v1="122" v2="124" v3="125"/>
+     <triangle v1="122" v2="125" v3="42"/>
+     <triangle v1="42" v2="125" v3="40"/>
+     <triangle v1="123" v2="126" v3="124"/>
+     <triangle v1="124" v2="126" v3="127"/>
+     <triangle v1="124" v2="127" v3="128"/>
+     <triangle v1="128" v2="129" v3="124"/>
+     <triangle v1="124" v2="129" v3="130"/>
+     <triangle v1="130" v2="129" v3="131"/>
+     <triangle v1="130" v2="131" v3="132"/>
+     <triangle v1="132" v2="133" v3="130"/>
+     <triangle v1="130" v2="133" v3="134"/>
+     <triangle v1="130" v2="134" v3="135"/>
+     <triangle v1="135" v2="134" v3="136"/>
+     <triangle v1="135" v2="136" v3="137"/>
+     <triangle v1="137" v2="138" v3="135"/>
+     <triangle v1="135" v2="138" v3="139"/>
+     <triangle v1="135" v2="139" v3="140"/>
+     <triangle v1="135" v2="140" v3="141"/>
+     <triangle v1="141" v2="140" v3="142"/>
+     <triangle v1="141" v2="142" v3="143"/>
+     <triangle v1="143" v2="144" v3="141"/>
+     <triangle v1="141" v2="144" v3="145"/>
+     <triangle v1="145" v2="144" v3="146"/>
+     <triangle v1="145" v2="146" v3="147"/>
+     <triangle v1="147" v2="148" v3="145"/>
+     <triangle v1="145" v2="148" v3="149"/>
+     <triangle v1="145" v2="149" v3="150"/>
+     <triangle v1="150" v2="149" v3="151"/>
+     <triangle v1="150" v2="151" v3="152"/>
+     <triangle v1="152" v2="153" v3="150"/>
+     <triangle v1="150" v2="153" v3="154"/>
+     <triangle v1="150" v2="154" v3="155"/>
+     <triangle v1="155" v2="154" v3="156"/>
+     <triangle v1="155" v2="156" v3="157"/>
+     <triangle v1="157" v2="158" v3="155"/>
+     <triangle v1="155" v2="158" v3="159"/>
+     <triangle v1="159" v2="158" v3="160"/>
+     <triangle v1="159" v2="160" v3="161"/>
+     <triangle v1="161" v2="162" v3="159"/>
+     <triangle v1="159" v2="162" v3="163"/>
+     <triangle v1="159" v2="163" v3="164"/>
+     <triangle v1="27" v2="107" v3="29"/>
+     <triangle v1="23" v2="21" v3="106"/>
+     <triangle v1="106" v2="21" v3="19"/>
+     <triangle v1="106" v2="19" v3="17"/>
+     <triangle v1="11" v2="9" v3="105"/>
+     <triangle v1="105" v2="9" v3="7"/>
+     <triangle v1="105" v2="7" v3="5"/>
+     <triangle v1="76" v2="81" v3="71"/>
+     <triangle v1="3" v2="105" v3="5"/>
+     <triangle v1="15" v2="106" v3="17"/>
+     <triangle v1="107" v2="106" v3="165"/>
+     <triangle v1="165" v2="106" v3="105"/>
+     <triangle v1="165" v2="105" v3="52"/>
+     <triangle v1="52" v2="81" v3="165"/>
+     <triangle v1="165" v2="81" v3="104"/>
+     <triangle v1="165" v2="104" v3="166"/>
+     <triangle v1="167" v2="166" v3="168"/>
+     <triangle v1="168" v2="166" v3="104"/>
+     <triangle v1="168" v2="104" v3="169"/>
+     <triangle v1="169" v2="104" v3="103"/>
+     <triangle v1="169" v2="103" v3="170"/>
+     <triangle v1="170" v2="103" v3="102"/>
+     <triangle v1="170" v2="102" v3="171"/>
+     <triangle v1="171" v2="102" v3="101"/>
+     <triangle v1="171" v2="101" v3="172"/>
+     <triangle v1="172" v2="101" v3="173"/>
+     <triangle v1="173" v2="101" v3="100"/>
+     <triangle v1="173" v2="100" v3="174"/>
+     <triangle v1="174" v2="100" v3="99"/>
+     <triangle v1="174" v2="99" v3="175"/>
+     <triangle v1="175" v2="99" v3="98"/>
+     <triangle v1="175" v2="98" v3="176"/>
+     <triangle v1="176" v2="98" v3="97"/>
+     <triangle v1="176" v2="97" v3="177"/>
+     <triangle v1="177" v2="97" v3="178"/>
+     <triangle v1="178" v2="97" v3="96"/>
+     <triangle v1="178" v2="96" v3="179"/>
+     <triangle v1="179" v2="96" v3="95"/>
+     <triangle v1="179" v2="95" v3="180"/>
+     <triangle v1="180" v2="95" v3="94"/>
+     <triangle v1="180" v2="94" v3="181"/>
+     <triangle v1="181" v2="94" v3="182"/>
+     <triangle v1="182" v2="94" v3="93"/>
+     <triangle v1="182" v2="93" v3="183"/>
+     <triangle v1="183" v2="93" v3="92"/>
+     <triangle v1="183" v2="92" v3="184"/>
+     <triangle v1="184" v2="92" v3="91"/>
+     <triangle v1="184" v2="91" v3="185"/>
+     <triangle v1="185" v2="91" v3="90"/>
+     <triangle v1="185" v2="90" v3="186"/>
+     <triangle v1="186" v2="90" v3="89"/>
+     <triangle v1="186" v2="89" v3="88"/>
+     <triangle v1="186" v2="88" v3="187"/>
+     <triangle v1="187" v2="88" v3="87"/>
+     <triangle v1="187" v2="87" v3="188"/>
+     <triangle v1="188" v2="87" v3="86"/>
+     <triangle v1="188" v2="86" v3="85"/>
+     <triangle v1="83" v2="189" v3="85"/>
+     <triangle v1="85" v2="189" v3="190"/>
+     <triangle v1="85" v2="190" v3="188"/>
+     <triangle v1="189" v2="83" v3="191"/>
+     <triangle v1="191" v2="83" v3="82"/>
+     <triangle v1="191" v2="82" v3="80"/>
+     <triangle v1="191" v2="80" v3="192"/>
+     <triangle v1="192" v2="80" v3="79"/>
+     <triangle v1="192" v2="79" v3="193"/>
+     <triangle v1="193" v2="79" v3="78"/>
+     <triangle v1="193" v2="78" v3="77"/>
+     <triangle v1="193" v2="77" v3="194"/>
+     <triangle v1="194" v2="77" v3="75"/>
+     <triangle v1="194" v2="75" v3="195"/>
+     <triangle v1="195" v2="75" v3="74"/>
+     <triangle v1="195" v2="74" v3="196"/>
+     <triangle v1="196" v2="74" v3="73"/>
+     <triangle v1="196" v2="73" v3="72"/>
+     <triangle v1="196" v2="72" v3="197"/>
+     <triangle v1="197" v2="72" v3="70"/>
+     <triangle v1="197" v2="70" v3="198"/>
+     <triangle v1="198" v2="70" v3="69"/>
+     <triangle v1="198" v2="69" v3="199"/>
+     <triangle v1="199" v2="69" v3="68"/>
+     <triangle v1="199" v2="68" v3="200"/>
+     <triangle v1="200" v2="68" v3="67"/>
+     <triangle v1="200" v2="67" v3="65"/>
+     <triangle v1="200" v2="65" v3="201"/>
+     <triangle v1="201" v2="65" v3="64"/>
+     <triangle v1="201" v2="64" v3="202"/>
+     <triangle v1="202" v2="64" v3="63"/>
+     <triangle v1="202" v2="63" v3="203"/>
+     <triangle v1="203" v2="63" v3="56"/>
+     <triangle v1="203" v2="56" v3="204"/>
+     <triangle v1="204" v2="56" v3="55"/>
+     <triangle v1="204" v2="55" v3="205"/>
+     <triangle v1="205" v2="55" v3="62"/>
+     <triangle v1="205" v2="62" v3="206"/>
+     <triangle v1="206" v2="62" v3="61"/>
+     <triangle v1="206" v2="61" v3="60"/>
+     <triangle v1="206" v2="60" v3="207"/>
+     <triangle v1="207" v2="60" v3="59"/>
+     <triangle v1="207" v2="59" v3="208"/>
+     <triangle v1="208" v2="59" v3="58"/>
+     <triangle v1="208" v2="58" v3="209"/>
+     <triangle v1="209" v2="58" v3="57"/>
+     <triangle v1="209" v2="57" v3="210"/>
+     <triangle v1="210" v2="57" v3="50"/>
+     <triangle v1="210" v2="50" v3="211"/>
+     <triangle v1="211" v2="50" v3="49"/>
+     <triangle v1="211" v2="49" v3="48"/>
+     <triangle v1="211" v2="48" v3="212"/>
+     <triangle v1="212" v2="48" v3="46"/>
+     <triangle v1="212" v2="46" v3="213"/>
+     <triangle v1="213" v2="46" v3="45"/>
+     <triangle v1="213" v2="45" v3="214"/>
+     <triangle v1="214" v2="45" v3="0"/>
+     <triangle v1="214" v2="0" v3="2"/>
+     <triangle v1="214" v2="2" v3="215"/>
+     <triangle v1="215" v2="2" v3="216"/>
+     <triangle v1="215" v2="216" v3="217"/>
+     <triangle v1="215" v2="217" v3="218"/>
+     <triangle v1="218" v2="217" v3="219"/>
+     <triangle v1="218" v2="219" v3="220"/>
+     <triangle v1="220" v2="219" v3="221"/>
+     <triangle v1="220" v2="221" v3="222"/>
+     <triangle v1="220" v2="222" v3="223"/>
+     <triangle v1="223" v2="222" v3="224"/>
+     <triangle v1="223" v2="224" v3="225"/>
+     <triangle v1="223" v2="225" v3="226"/>
+     <triangle v1="226" v2="225" v3="227"/>
+     <triangle v1="226" v2="227" v3="228"/>
+     <triangle v1="228" v2="227" v3="229"/>
+     <triangle v1="228" v2="229" v3="230"/>
+     <triangle v1="230" v2="229" v3="231"/>
+     <triangle v1="230" v2="231" v3="232"/>
+     <triangle v1="232" v2="231" v3="233"/>
+     <triangle v1="232" v2="233" v3="234"/>
+     <triangle v1="234" v2="233" v3="235"/>
+     <triangle v1="234" v2="235" v3="236"/>
+     <triangle v1="234" v2="236" v3="237"/>
+     <triangle v1="237" v2="236" v3="238"/>
+     <triangle v1="237" v2="238" v3="239"/>
+     <triangle v1="239" v2="238" v3="240"/>
+     <triangle v1="239" v2="240" v3="241"/>
+     <triangle v1="239" v2="241" v3="242"/>
+     <triangle v1="242" v2="241" v3="243"/>
+     <triangle v1="242" v2="243" v3="244"/>
+     <triangle v1="244" v2="243" v3="245"/>
+     <triangle v1="244" v2="245" v3="246"/>
+     <triangle v1="246" v2="245" v3="247"/>
+     <triangle v1="246" v2="247" v3="248"/>
+     <triangle v1="248" v2="247" v3="249"/>
+     <triangle v1="248" v2="249" v3="250"/>
+     <triangle v1="250" v2="249" v3="251"/>
+     <triangle v1="250" v2="251" v3="252"/>
+     <triangle v1="252" v2="251" v3="253"/>
+     <triangle v1="252" v2="253" v3="254"/>
+     <triangle v1="254" v2="253" v3="255"/>
+     <triangle v1="254" v2="255" v3="256"/>
+     <triangle v1="256" v2="255" v3="257"/>
+     <triangle v1="256" v2="257" v3="258"/>
+     <triangle v1="258" v2="257" v3="259"/>
+     <triangle v1="258" v2="259" v3="260"/>
+     <triangle v1="260" v2="259" v3="261"/>
+     <triangle v1="260" v2="261" v3="262"/>
+     <triangle v1="262" v2="261" v3="263"/>
+     <triangle v1="262" v2="263" v3="264"/>
+     <triangle v1="264" v2="263" v3="265"/>
+     <triangle v1="264" v2="265" v3="266"/>
+     <triangle v1="266" v2="265" v3="267"/>
+     <triangle v1="266" v2="267" v3="268"/>
+     <triangle v1="268" v2="267" v3="269"/>
+     <triangle v1="268" v2="269" v3="270"/>
+     <triangle v1="270" v2="269" v3="271"/>
+     <triangle v1="270" v2="271" v3="272"/>
+     <triangle v1="258" v2="260" v3="273"/>
+     <triangle v1="273" v2="260" v3="262"/>
+     <triangle v1="273" v2="262" v3="264"/>
+     <triangle v1="264" v2="266" v3="273"/>
+     <triangle v1="273" v2="266" v3="274"/>
+     <triangle v1="274" v2="266" v3="268"/>
+     <triangle v1="274" v2="268" v3="270"/>
+     <triangle v1="274" v2="270" v3="275"/>
+     <triangle v1="275" v2="270" v3="272"/>
+     <triangle v1="275" v2="272" v3="276"/>
+     <triangle v1="275" v2="276" v3="277"/>
+     <triangle v1="277" v2="276" v3="278"/>
+     <triangle v1="277" v2="278" v3="279"/>
+     <triangle v1="279" v2="278" v3="280"/>
+     <triangle v1="279" v2="280" v3="281"/>
+     <triangle v1="281" v2="280" v3="282"/>
+     <triangle v1="281" v2="282" v3="283"/>
+     <triangle v1="283" v2="282" v3="284"/>
+     <triangle v1="283" v2="284" v3="285"/>
+     <triangle v1="285" v2="284" v3="286"/>
+     <triangle v1="285" v2="286" v3="287"/>
+     <triangle v1="287" v2="286" v3="288"/>
+     <triangle v1="287" v2="288" v3="289"/>
+     <triangle v1="289" v2="288" v3="290"/>
+     <triangle v1="289" v2="290" v3="291"/>
+     <triangle v1="291" v2="290" v3="292"/>
+     <triangle v1="291" v2="292" v3="293"/>
+     <triangle v1="293" v2="292" v3="294"/>
+     <triangle v1="293" v2="294" v3="295"/>
+     <triangle v1="295" v2="294" v3="296"/>
+     <triangle v1="295" v2="296" v3="297"/>
+     <triangle v1="297" v2="296" v3="298"/>
+     <triangle v1="297" v2="298" v3="299"/>
+     <triangle v1="299" v2="298" v3="300"/>
+     <triangle v1="299" v2="300" v3="301"/>
+     <triangle v1="301" v2="300" v3="302"/>
+     <triangle v1="301" v2="302" v3="303"/>
+     <triangle v1="303" v2="302" v3="304"/>
+     <triangle v1="303" v2="304" v3="305"/>
+     <triangle v1="305" v2="304" v3="306"/>
+     <triangle v1="305" v2="306" v3="307"/>
+     <triangle v1="307" v2="306" v3="308"/>
+     <triangle v1="307" v2="308" v3="309"/>
+     <triangle v1="309" v2="308" v3="310"/>
+     <triangle v1="309" v2="310" v3="311"/>
+     <triangle v1="311" v2="310" v3="312"/>
+     <triangle v1="311" v2="312" v3="313"/>
+     <triangle v1="313" v2="312" v3="314"/>
+     <triangle v1="313" v2="314" v3="315"/>
+     <triangle v1="315" v2="314" v3="316"/>
+     <triangle v1="315" v2="316" v3="317"/>
+     <triangle v1="317" v2="316" v3="318"/>
+     <triangle v1="317" v2="318" v3="319"/>
+     <triangle v1="319" v2="318" v3="320"/>
+     <triangle v1="319" v2="320" v3="321"/>
+     <triangle v1="321" v2="320" v3="322"/>
+     <triangle v1="321" v2="322" v3="323"/>
+     <triangle v1="323" v2="322" v3="324"/>
+     <triangle v1="323" v2="324" v3="325"/>
+     <triangle v1="325" v2="324" v3="326"/>
+     <triangle v1="325" v2="326" v3="327"/>
+     <triangle v1="327" v2="326" v3="328"/>
+     <triangle v1="327" v2="328" v3="329"/>
+     <triangle v1="329" v2="328" v3="330"/>
+     <triangle v1="329" v2="330" v3="331"/>
+     <triangle v1="331" v2="330" v3="332"/>
+     <triangle v1="331" v2="332" v3="333"/>
+     <triangle v1="333" v2="332" v3="334"/>
+     <triangle v1="333" v2="334" v3="335"/>
+     <triangle v1="335" v2="334" v3="336"/>
+     <triangle v1="335" v2="336" v3="337"/>
+     <triangle v1="337" v2="336" v3="338"/>
+     <triangle v1="337" v2="338" v3="339"/>
+     <triangle v1="339" v2="338" v3="340"/>
+     <triangle v1="340" v2="338" v3="341"/>
+     <triangle v1="341" v2="338" v3="342"/>
+     <triangle v1="341" v2="342" v3="343"/>
+     <triangle v1="343" v2="342" v3="344"/>
+     <triangle v1="344" v2="342" v3="345"/>
+     <triangle v1="165" v2="346" v3="107"/>
+     <triangle v1="107" v2="346" v3="347"/>
+     <triangle v1="107" v2="347" v3="108"/>
+     <triangle v1="108" v2="347" v3="348"/>
+     <triangle v1="108" v2="348" v3="109"/>
+     <triangle v1="109" v2="348" v3="349"/>
+     <triangle v1="109" v2="349" v3="110"/>
+     <triangle v1="110" v2="349" v3="350"/>
+     <triangle v1="110" v2="350" v3="111"/>
+     <triangle v1="111" v2="350" v3="351"/>
+     <triangle v1="111" v2="351" v3="112"/>
+     <triangle v1="112" v2="351" v3="352"/>
+     <triangle v1="112" v2="352" v3="353"/>
+     <triangle v1="166" v2="167" v3="165"/>
+     <triangle v1="165" v2="167" v3="346"/>
+     <triangle v1="112" v2="353" v3="113"/>
+     <triangle v1="113" v2="353" v3="354"/>
+     <triangle v1="113" v2="354" v3="114"/>
+     <triangle v1="114" v2="354" v3="355"/>
+     <triangle v1="114" v2="355" v3="115"/>
+     <triangle v1="115" v2="355" v3="356"/>
+     <triangle v1="115" v2="356" v3="116"/>
+     <triangle v1="116" v2="356" v3="357"/>
+     <triangle v1="116" v2="357" v3="358"/>
+     <triangle v1="116" v2="358" v3="117"/>
+     <triangle v1="117" v2="358" v3="359"/>
+     <triangle v1="117" v2="359" v3="118"/>
+     <triangle v1="118" v2="359" v3="360"/>
+     <triangle v1="118" v2="360" v3="119"/>
+     <triangle v1="119" v2="360" v3="361"/>
+     <triangle v1="119" v2="361" v3="362"/>
+     <triangle v1="119" v2="362" v3="41"/>
+     <triangle v1="41" v2="362" v3="363"/>
+     <triangle v1="41" v2="363" v3="43"/>
+     <triangle v1="43" v2="363" v3="364"/>
+     <triangle v1="43" v2="364" v3="44"/>
+     <triangle v1="44" v2="364" v3="120"/>
+     <triangle v1="120" v2="364" v3="365"/>
+     <triangle v1="120" v2="365" v3="121"/>
+     <triangle v1="121" v2="365" v3="366"/>
+     <triangle v1="121" v2="366" v3="122"/>
+     <triangle v1="122" v2="366" v3="123"/>
+     <triangle v1="123" v2="366" v3="367"/>
+     <triangle v1="123" v2="367" v3="126"/>
+     <triangle v1="126" v2="367" v3="368"/>
+     <triangle v1="126" v2="368" v3="127"/>
+     <triangle v1="127" v2="368" v3="369"/>
+     <triangle v1="127" v2="369" v3="128"/>
+     <triangle v1="128" v2="369" v3="129"/>
+     <triangle v1="129" v2="369" v3="370"/>
+     <triangle v1="129" v2="370" v3="131"/>
+     <triangle v1="131" v2="370" v3="371"/>
+     <triangle v1="131" v2="371" v3="132"/>
+     <triangle v1="132" v2="371" v3="372"/>
+     <triangle v1="132" v2="372" v3="133"/>
+     <triangle v1="133" v2="372" v3="134"/>
+     <triangle v1="134" v2="372" v3="373"/>
+     <triangle v1="134" v2="373" v3="136"/>
+     <triangle v1="136" v2="373" v3="374"/>
+     <triangle v1="136" v2="374" v3="137"/>
+     <triangle v1="137" v2="374" v3="375"/>
+     <triangle v1="137" v2="375" v3="138"/>
+     <triangle v1="138" v2="375" v3="376"/>
+     <triangle v1="138" v2="376" v3="139"/>
+     <triangle v1="139" v2="376" v3="377"/>
+     <triangle v1="139" v2="377" v3="140"/>
+     <triangle v1="140" v2="377" v3="142"/>
+     <triangle v1="142" v2="377" v3="378"/>
+     <triangle v1="142" v2="378" v3="143"/>
+     <triangle v1="143" v2="378" v3="379"/>
+     <triangle v1="143" v2="379" v3="144"/>
+     <triangle v1="144" v2="379" v3="380"/>
+     <triangle v1="144" v2="380" v3="146"/>
+     <triangle v1="146" v2="380" v3="381"/>
+     <triangle v1="146" v2="381" v3="147"/>
+     <triangle v1="147" v2="381" v3="382"/>
+     <triangle v1="147" v2="382" v3="148"/>
+     <triangle v1="148" v2="382" v3="383"/>
+     <triangle v1="148" v2="383" v3="149"/>
+     <triangle v1="149" v2="383" v3="384"/>
+     <triangle v1="149" v2="384" v3="151"/>
+     <triangle v1="151" v2="384" v3="385"/>
+     <triangle v1="151" v2="385" v3="152"/>
+     <triangle v1="152" v2="385" v3="386"/>
+     <triangle v1="152" v2="386" v3="153"/>
+     <triangle v1="153" v2="386" v3="154"/>
+     <triangle v1="154" v2="386" v3="387"/>
+     <triangle v1="154" v2="387" v3="156"/>
+     <triangle v1="156" v2="387" v3="388"/>
+     <triangle v1="156" v2="388" v3="157"/>
+     <triangle v1="157" v2="388" v3="389"/>
+     <triangle v1="157" v2="389" v3="158"/>
+     <triangle v1="158" v2="389" v3="390"/>
+     <triangle v1="158" v2="390" v3="160"/>
+     <triangle v1="160" v2="390" v3="391"/>
+     <triangle v1="160" v2="391" v3="161"/>
+     <triangle v1="161" v2="391" v3="392"/>
+     <triangle v1="161" v2="392" v3="162"/>
+     <triangle v1="162" v2="392" v3="393"/>
+     <triangle v1="162" v2="393" v3="163"/>
+     <triangle v1="163" v2="393" v3="394"/>
+     <triangle v1="163" v2="394" v3="395"/>
+     <triangle v1="163" v2="395" v3="164"/>
+     <triangle v1="164" v2="395" v3="396"/>
+     <triangle v1="164" v2="396" v3="397"/>
+     <triangle v1="397" v2="396" v3="398"/>
+     <triangle v1="397" v2="398" v3="399"/>
+     <triangle v1="399" v2="398" v3="400"/>
+     <triangle v1="399" v2="400" v3="401"/>
+     <triangle v1="401" v2="400" v3="402"/>
+     <triangle v1="401" v2="402" v3="403"/>
+     <triangle v1="403" v2="402" v3="404"/>
+     <triangle v1="403" v2="404" v3="405"/>
+     <triangle v1="405" v2="404" v3="406"/>
+     <triangle v1="405" v2="406" v3="407"/>
+     <triangle v1="407" v2="406" v3="408"/>
+     <triangle v1="407" v2="408" v3="409"/>
+     <triangle v1="409" v2="408" v3="410"/>
+     <triangle v1="409" v2="410" v3="411"/>
+     <triangle v1="411" v2="410" v3="412"/>
+     <triangle v1="411" v2="412" v3="413"/>
+     <triangle v1="413" v2="412" v3="414"/>
+     <triangle v1="413" v2="414" v3="415"/>
+     <triangle v1="415" v2="414" v3="416"/>
+     <triangle v1="415" v2="416" v3="417"/>
+     <triangle v1="417" v2="416" v3="418"/>
+     <triangle v1="417" v2="418" v3="419"/>
+     <triangle v1="419" v2="418" v3="420"/>
+     <triangle v1="419" v2="420" v3="421"/>
+     <triangle v1="419" v2="421" v3="422"/>
+     <triangle v1="422" v2="421" v3="423"/>
+     <triangle v1="422" v2="423" v3="424"/>
+     <triangle v1="422" v2="424" v3="425"/>
+     <triangle v1="425" v2="424" v3="426"/>
+     <triangle v1="425" v2="426" v3="427"/>
+     <triangle v1="427" v2="426" v3="428"/>
+     <triangle v1="427" v2="428" v3="429"/>
+     <triangle v1="429" v2="428" v3="430"/>
+     <triangle v1="429" v2="430" v3="431"/>
+     <triangle v1="431" v2="430" v3="432"/>
+     <triangle v1="431" v2="432" v3="433"/>
+     <triangle v1="433" v2="432" v3="434"/>
+     <triangle v1="433" v2="434" v3="435"/>
+     <triangle v1="433" v2="435" v3="436"/>
+     <triangle v1="436" v2="435" v3="437"/>
+     <triangle v1="436" v2="437" v3="438"/>
+     <triangle v1="438" v2="437" v3="439"/>
+     <triangle v1="438" v2="439" v3="440"/>
+     <triangle v1="440" v2="439" v3="441"/>
+     <triangle v1="440" v2="441" v3="442"/>
+     <triangle v1="442" v2="441" v3="443"/>
+     <triangle v1="442" v2="443" v3="444"/>
+     <triangle v1="444" v2="443" v3="445"/>
+     <triangle v1="444" v2="445" v3="446"/>
+     <triangle v1="446" v2="445" v3="335"/>
+     <triangle v1="446" v2="335" v3="447"/>
+     <triangle v1="447" v2="335" v3="337"/>
+     <triangle v1="447" v2="337" v3="448"/>
+     <triangle v1="448" v2="337" v3="449"/>
+     <triangle v1="449" v2="337" v3="339"/>
+     <triangle v1="449" v2="339" v3="340"/>
+     <triangle v1="449" v2="340" v3="450"/>
+     <triangle v1="450" v2="340" v3="341"/>
+     <triangle v1="450" v2="341" v3="451"/>
+     <triangle v1="451" v2="341" v3="452"/>
+     <triangle v1="452" v2="341" v3="343"/>
+     <triangle v1="452" v2="343" v3="344"/>
+     <triangle v1="452" v2="344" v3="453"/>
+     <triangle v1="453" v2="344" v3="345"/>
+     <triangle v1="453" v2="345" v3="454"/>
+     <triangle v1="454" v2="345" v3="455"/>
+     <triangle v1="455" v2="345" v3="342"/>
+     <triangle v1="455" v2="342" v3="456"/>
+     <triangle v1="456" v2="342" v3="338"/>
+     <triangle v1="456" v2="338" v3="457"/>
+     <triangle v1="457" v2="338" v3="336"/>
+     <triangle v1="457" v2="336" v3="458"/>
+     <triangle v1="458" v2="336" v3="334"/>
+     <triangle v1="458" v2="334" v3="459"/>
+     <triangle v1="459" v2="334" v3="332"/>
+     <triangle v1="459" v2="332" v3="460"/>
+     <triangle v1="460" v2="332" v3="330"/>
+     <triangle v1="460" v2="330" v3="461"/>
+     <triangle v1="461" v2="330" v3="328"/>
+     <triangle v1="461" v2="328" v3="462"/>
+     <triangle v1="462" v2="328" v3="326"/>
+     <triangle v1="462" v2="326" v3="463"/>
+     <triangle v1="463" v2="326" v3="324"/>
+     <triangle v1="463" v2="324" v3="464"/>
+     <triangle v1="464" v2="324" v3="322"/>
+     <triangle v1="464" v2="322" v3="465"/>
+     <triangle v1="465" v2="322" v3="320"/>
+     <triangle v1="465" v2="320" v3="466"/>
+     <triangle v1="466" v2="320" v3="318"/>
+     <triangle v1="466" v2="318" v3="467"/>
+     <triangle v1="467" v2="318" v3="316"/>
+     <triangle v1="467" v2="316" v3="468"/>
+     <triangle v1="468" v2="316" v3="314"/>
+     <triangle v1="468" v2="314" v3="469"/>
+     <triangle v1="469" v2="314" v3="312"/>
+     <triangle v1="469" v2="312" v3="470"/>
+     <triangle v1="470" v2="312" v3="310"/>
+     <triangle v1="470" v2="310" v3="471"/>
+     <triangle v1="471" v2="310" v3="308"/>
+     <triangle v1="471" v2="308" v3="472"/>
+     <triangle v1="472" v2="308" v3="306"/>
+     <triangle v1="472" v2="306" v3="473"/>
+     <triangle v1="473" v2="306" v3="304"/>
+     <triangle v1="473" v2="304" v3="474"/>
+     <triangle v1="474" v2="304" v3="302"/>
+     <triangle v1="474" v2="302" v3="475"/>
+     <triangle v1="475" v2="302" v3="300"/>
+     <triangle v1="475" v2="300" v3="476"/>
+     <triangle v1="476" v2="300" v3="298"/>
+     <triangle v1="476" v2="298" v3="477"/>
+     <triangle v1="477" v2="298" v3="296"/>
+     <triangle v1="477" v2="296" v3="478"/>
+     <triangle v1="478" v2="296" v3="294"/>
+     <triangle v1="478" v2="294" v3="479"/>
+     <triangle v1="479" v2="294" v3="292"/>
+     <triangle v1="479" v2="292" v3="480"/>
+     <triangle v1="480" v2="292" v3="290"/>
+     <triangle v1="480" v2="290" v3="481"/>
+     <triangle v1="481" v2="290" v3="288"/>
+     <triangle v1="481" v2="288" v3="482"/>
+     <triangle v1="482" v2="288" v3="286"/>
+     <triangle v1="482" v2="286" v3="483"/>
+     <triangle v1="483" v2="286" v3="284"/>
+     <triangle v1="483" v2="284" v3="484"/>
+     <triangle v1="484" v2="284" v3="282"/>
+     <triangle v1="484" v2="282" v3="485"/>
+     <triangle v1="485" v2="282" v3="280"/>
+     <triangle v1="485" v2="280" v3="486"/>
+     <triangle v1="486" v2="280" v3="278"/>
+     <triangle v1="486" v2="278" v3="487"/>
+     <triangle v1="487" v2="278" v3="276"/>
+     <triangle v1="487" v2="276" v3="271"/>
+     <triangle v1="271" v2="276" v3="272"/>
+     <triangle v1="487" v2="271" v3="488"/>
+     <triangle v1="488" v2="271" v3="269"/>
+     <triangle v1="488" v2="269" v3="489"/>
+     <triangle v1="489" v2="269" v3="267"/>
+     <triangle v1="489" v2="267" v3="265"/>
+     <triangle v1="489" v2="265" v3="490"/>
+     <triangle v1="490" v2="265" v3="263"/>
+     <triangle v1="490" v2="263" v3="261"/>
+     <triangle v1="261" v2="259" v3="490"/>
+     <triangle v1="490" v2="259" v3="257"/>
+     <triangle v1="488" v2="491" v3="487"/>
+     <triangle v1="487" v2="491" v3="486"/>
+     <triangle v1="486" v2="491" v3="492"/>
+     <triangle v1="486" v2="492" v3="485"/>
+     <triangle v1="485" v2="492" v3="493"/>
+     <triangle v1="485" v2="493" v3="484"/>
+     <triangle v1="484" v2="493" v3="494"/>
+     <triangle v1="484" v2="494" v3="483"/>
+     <triangle v1="483" v2="494" v3="495"/>
+     <triangle v1="483" v2="495" v3="482"/>
+     <triangle v1="482" v2="495" v3="496"/>
+     <triangle v1="482" v2="496" v3="481"/>
+     <triangle v1="481" v2="496" v3="497"/>
+     <triangle v1="481" v2="497" v3="480"/>
+     <triangle v1="480" v2="497" v3="498"/>
+     <triangle v1="480" v2="498" v3="479"/>
+     <triangle v1="479" v2="498" v3="499"/>
+     <triangle v1="479" v2="499" v3="478"/>
+     <triangle v1="478" v2="499" v3="500"/>
+     <triangle v1="478" v2="500" v3="477"/>
+     <triangle v1="477" v2="500" v3="501"/>
+     <triangle v1="477" v2="501" v3="476"/>
+     <triangle v1="476" v2="501" v3="502"/>
+     <triangle v1="476" v2="502" v3="475"/>
+     <triangle v1="475" v2="502" v3="503"/>
+     <triangle v1="475" v2="503" v3="474"/>
+     <triangle v1="474" v2="503" v3="504"/>
+     <triangle v1="474" v2="504" v3="473"/>
+     <triangle v1="473" v2="504" v3="505"/>
+     <triangle v1="473" v2="505" v3="472"/>
+     <triangle v1="472" v2="505" v3="506"/>
+     <triangle v1="472" v2="506" v3="471"/>
+     <triangle v1="471" v2="506" v3="507"/>
+     <triangle v1="471" v2="507" v3="470"/>
+     <triangle v1="470" v2="507" v3="508"/>
+     <triangle v1="470" v2="508" v3="469"/>
+     <triangle v1="469" v2="508" v3="509"/>
+     <triangle v1="469" v2="509" v3="468"/>
+     <triangle v1="468" v2="509" v3="510"/>
+     <triangle v1="468" v2="510" v3="467"/>
+     <triangle v1="467" v2="510" v3="511"/>
+     <triangle v1="467" v2="511" v3="466"/>
+     <triangle v1="466" v2="511" v3="512"/>
+     <triangle v1="466" v2="512" v3="465"/>
+     <triangle v1="465" v2="512" v3="513"/>
+     <triangle v1="465" v2="513" v3="464"/>
+     <triangle v1="464" v2="513" v3="514"/>
+     <triangle v1="464" v2="514" v3="463"/>
+     <triangle v1="463" v2="514" v3="515"/>
+     <triangle v1="463" v2="515" v3="462"/>
+     <triangle v1="462" v2="515" v3="516"/>
+     <triangle v1="462" v2="516" v3="461"/>
+     <triangle v1="461" v2="516" v3="517"/>
+     <triangle v1="461" v2="517" v3="460"/>
+     <triangle v1="460" v2="517" v3="518"/>
+     <triangle v1="460" v2="518" v3="459"/>
+     <triangle v1="459" v2="518" v3="519"/>
+     <triangle v1="459" v2="519" v3="458"/>
+     <triangle v1="458" v2="519" v3="447"/>
+     <triangle v1="458" v2="447" v3="457"/>
+     <triangle v1="457" v2="447" v3="448"/>
+     <triangle v1="457" v2="448" v3="456"/>
+     <triangle v1="456" v2="448" v3="449"/>
+     <triangle v1="456" v2="449" v3="450"/>
+     <triangle v1="450" v2="451" v3="456"/>
+     <triangle v1="456" v2="451" v3="455"/>
+     <triangle v1="455" v2="451" v3="452"/>
+     <triangle v1="455" v2="452" v3="453"/>
+     <triangle v1="453" v2="454" v3="455"/>
+     <triangle v1="258" v2="273" v3="256"/>
+     <triangle v1="256" v2="273" v3="254"/>
+     <triangle v1="254" v2="273" v3="274"/>
+     <triangle v1="254" v2="274" v3="252"/>
+     <triangle v1="252" v2="274" v3="250"/>
+     <triangle v1="250" v2="274" v3="275"/>
+     <triangle v1="250" v2="275" v3="248"/>
+     <triangle v1="248" v2="275" v3="246"/>
+     <triangle v1="246" v2="275" v3="277"/>
+     <triangle v1="246" v2="277" v3="244"/>
+     <triangle v1="244" v2="277" v3="242"/>
+     <triangle v1="242" v2="277" v3="239"/>
+     <triangle v1="239" v2="277" v3="279"/>
+     <triangle v1="239" v2="279" v3="237"/>
+     <triangle v1="237" v2="279" v3="234"/>
+     <triangle v1="234" v2="279" v3="281"/>
+     <triangle v1="234" v2="281" v3="232"/>
+     <triangle v1="232" v2="281" v3="230"/>
+     <triangle v1="230" v2="281" v3="228"/>
+     <triangle v1="228" v2="281" v3="283"/>
+     <triangle v1="228" v2="283" v3="226"/>
+     <triangle v1="226" v2="283" v3="223"/>
+     <triangle v1="223" v2="283" v3="220"/>
+     <triangle v1="220" v2="283" v3="218"/>
+     <triangle v1="218" v2="283" v3="285"/>
+     <triangle v1="218" v2="285" v3="215"/>
+     <triangle v1="215" v2="285" v3="214"/>
+     <triangle v1="214" v2="285" v3="213"/>
+     <triangle v1="213" v2="285" v3="287"/>
+     <triangle v1="213" v2="287" v3="212"/>
+     <triangle v1="212" v2="287" v3="365"/>
+     <triangle v1="212" v2="365" v3="211"/>
+     <triangle v1="211" v2="365" v3="210"/>
+     <triangle v1="210" v2="365" v3="209"/>
+     <triangle v1="209" v2="365" v3="208"/>
+     <triangle v1="208" v2="365" v3="207"/>
+     <triangle v1="207" v2="365" v3="206"/>
+     <triangle v1="206" v2="365" v3="205"/>
+     <triangle v1="205" v2="365" v3="204"/>
+     <triangle v1="204" v2="365" v3="203"/>
+     <triangle v1="203" v2="365" v3="202"/>
+     <triangle v1="202" v2="365" v3="201"/>
+     <triangle v1="201" v2="365" v3="200"/>
+     <triangle v1="200" v2="365" v3="199"/>
+     <triangle v1="199" v2="365" v3="198"/>
+     <triangle v1="198" v2="365" v3="197"/>
+     <triangle v1="197" v2="365" v3="196"/>
+     <triangle v1="196" v2="365" v3="195"/>
+     <triangle v1="195" v2="365" v3="194"/>
+     <triangle v1="194" v2="365" v3="193"/>
+     <triangle v1="193" v2="365" v3="192"/>
+     <triangle v1="192" v2="365" v3="191"/>
+     <triangle v1="191" v2="365" v3="189"/>
+     <triangle v1="189" v2="365" v3="190"/>
+     <triangle v1="190" v2="365" v3="188"/>
+     <triangle v1="188" v2="365" v3="187"/>
+     <triangle v1="187" v2="365" v3="186"/>
+     <triangle v1="186" v2="365" v3="364"/>
+     <triangle v1="186" v2="364" v3="185"/>
+     <triangle v1="185" v2="364" v3="363"/>
+     <triangle v1="185" v2="363" v3="184"/>
+     <triangle v1="184" v2="363" v3="362"/>
+     <triangle v1="184" v2="362" v3="183"/>
+     <triangle v1="183" v2="362" v3="361"/>
+     <triangle v1="183" v2="361" v3="182"/>
+     <triangle v1="182" v2="361" v3="360"/>
+     <triangle v1="182" v2="360" v3="181"/>
+     <triangle v1="181" v2="360" v3="359"/>
+     <triangle v1="181" v2="359" v3="180"/>
+     <triangle v1="180" v2="359" v3="358"/>
+     <triangle v1="180" v2="358" v3="179"/>
+     <triangle v1="179" v2="358" v3="357"/>
+     <triangle v1="179" v2="357" v3="178"/>
+     <triangle v1="178" v2="357" v3="356"/>
+     <triangle v1="178" v2="356" v3="177"/>
+     <triangle v1="177" v2="356" v3="355"/>
+     <triangle v1="177" v2="355" v3="176"/>
+     <triangle v1="176" v2="355" v3="354"/>
+     <triangle v1="176" v2="354" v3="175"/>
+     <triangle v1="175" v2="354" v3="353"/>
+     <triangle v1="175" v2="353" v3="174"/>
+     <triangle v1="174" v2="353" v3="352"/>
+     <triangle v1="174" v2="352" v3="173"/>
+     <triangle v1="173" v2="352" v3="351"/>
+     <triangle v1="173" v2="351" v3="172"/>
+     <triangle v1="172" v2="351" v3="350"/>
+     <triangle v1="172" v2="350" v3="171"/>
+     <triangle v1="171" v2="350" v3="349"/>
+     <triangle v1="171" v2="349" v3="170"/>
+     <triangle v1="170" v2="349" v3="348"/>
+     <triangle v1="170" v2="348" v3="169"/>
+     <triangle v1="169" v2="348" v3="347"/>
+     <triangle v1="169" v2="347" v3="168"/>
+     <triangle v1="168" v2="347" v3="346"/>
+     <triangle v1="168" v2="346" v3="167"/>
+     <triangle v1="287" v2="289" v3="365"/>
+     <triangle v1="365" v2="289" v3="291"/>
+     <triangle v1="365" v2="291" v3="293"/>
+     <triangle v1="293" v2="295" v3="365"/>
+     <triangle v1="365" v2="295" v3="297"/>
+     <triangle v1="365" v2="297" v3="299"/>
+     <triangle v1="299" v2="301" v3="365"/>
+     <triangle v1="365" v2="301" v3="366"/>
+     <triangle v1="366" v2="301" v3="367"/>
+     <triangle v1="367" v2="301" v3="368"/>
+     <triangle v1="368" v2="301" v3="369"/>
+     <triangle v1="369" v2="301" v3="370"/>
+     <triangle v1="370" v2="301" v3="371"/>
+     <triangle v1="371" v2="301" v3="372"/>
+     <triangle v1="372" v2="301" v3="373"/>
+     <triangle v1="373" v2="301" v3="374"/>
+     <triangle v1="374" v2="301" v3="375"/>
+     <triangle v1="375" v2="301" v3="376"/>
+     <triangle v1="376" v2="301" v3="303"/>
+     <triangle v1="376" v2="303" v3="377"/>
+     <triangle v1="377" v2="303" v3="378"/>
+     <triangle v1="378" v2="303" v3="379"/>
+     <triangle v1="379" v2="303" v3="380"/>
+     <triangle v1="380" v2="303" v3="381"/>
+     <triangle v1="381" v2="303" v3="382"/>
+     <triangle v1="382" v2="303" v3="383"/>
+     <triangle v1="383" v2="303" v3="384"/>
+     <triangle v1="384" v2="303" v3="385"/>
+     <triangle v1="385" v2="303" v3="386"/>
+     <triangle v1="386" v2="303" v3="387"/>
+     <triangle v1="387" v2="303" v3="388"/>
+     <triangle v1="388" v2="303" v3="389"/>
+     <triangle v1="389" v2="303" v3="390"/>
+     <triangle v1="390" v2="303" v3="305"/>
+     <triangle v1="390" v2="305" v3="391"/>
+     <triangle v1="391" v2="305" v3="307"/>
+     <triangle v1="391" v2="307" v3="392"/>
+     <triangle v1="392" v2="307" v3="393"/>
+     <triangle v1="393" v2="307" v3="394"/>
+     <triangle v1="394" v2="307" v3="309"/>
+     <triangle v1="394" v2="309" v3="395"/>
+     <triangle v1="395" v2="309" v3="396"/>
+     <triangle v1="396" v2="309" v3="311"/>
+     <triangle v1="396" v2="311" v3="398"/>
+     <triangle v1="398" v2="311" v3="400"/>
+     <triangle v1="400" v2="311" v3="402"/>
+     <triangle v1="402" v2="311" v3="313"/>
+     <triangle v1="402" v2="313" v3="404"/>
+     <triangle v1="404" v2="313" v3="406"/>
+     <triangle v1="406" v2="313" v3="315"/>
+     <triangle v1="406" v2="315" v3="408"/>
+     <triangle v1="408" v2="315" v3="410"/>
+     <triangle v1="410" v2="315" v3="412"/>
+     <triangle v1="412" v2="315" v3="317"/>
+     <triangle v1="412" v2="317" v3="414"/>
+     <triangle v1="414" v2="317" v3="416"/>
+     <triangle v1="416" v2="317" v3="319"/>
+     <triangle v1="416" v2="319" v3="418"/>
+     <triangle v1="418" v2="319" v3="420"/>
+     <triangle v1="420" v2="319" v3="321"/>
+     <triangle v1="420" v2="321" v3="421"/>
+     <triangle v1="421" v2="321" v3="423"/>
+     <triangle v1="423" v2="321" v3="424"/>
+     <triangle v1="424" v2="321" v3="323"/>
+     <triangle v1="424" v2="323" v3="426"/>
+     <triangle v1="426" v2="323" v3="428"/>
+     <triangle v1="428" v2="323" v3="325"/>
+     <triangle v1="428" v2="325" v3="430"/>
+     <triangle v1="430" v2="325" v3="432"/>
+     <triangle v1="432" v2="325" v3="434"/>
+     <triangle v1="434" v2="325" v3="327"/>
+     <triangle v1="434" v2="327" v3="435"/>
+     <triangle v1="435" v2="327" v3="437"/>
+     <triangle v1="437" v2="327" v3="329"/>
+     <triangle v1="437" v2="329" v3="439"/>
+     <triangle v1="439" v2="329" v3="331"/>
+     <triangle v1="439" v2="331" v3="441"/>
+     <triangle v1="441" v2="331" v3="333"/>
+     <triangle v1="441" v2="333" v3="443"/>
+     <triangle v1="443" v2="333" v3="445"/>
+     <triangle v1="445" v2="333" v3="335"/>
+     <triangle v1="2" v2="4" v3="216"/>
+     <triangle v1="216" v2="4" v3="217"/>
+     <triangle v1="217" v2="4" v3="6"/>
+     <triangle v1="217" v2="6" v3="219"/>
+     <triangle v1="219" v2="6" v3="8"/>
+     <triangle v1="219" v2="8" v3="10"/>
+     <triangle v1="219" v2="10" v3="243"/>
+     <triangle v1="243" v2="10" v3="12"/>
+     <triangle v1="243" v2="12" v3="14"/>
+     <triangle v1="14" v2="16" v3="243"/>
+     <triangle v1="243" v2="16" v3="18"/>
+     <triangle v1="243" v2="18" v3="20"/>
+     <triangle v1="20" v2="22" v3="243"/>
+     <triangle v1="243" v2="22" v3="24"/>
+     <triangle v1="243" v2="24" v3="26"/>
+     <triangle v1="243" v2="26" v3="245"/>
+     <triangle v1="245" v2="26" v3="28"/>
+     <triangle v1="245" v2="28" v3="247"/>
+     <triangle v1="247" v2="28" v3="30"/>
+     <triangle v1="247" v2="30" v3="249"/>
+     <triangle v1="249" v2="30" v3="32"/>
+     <triangle v1="249" v2="32" v3="251"/>
+     <triangle v1="251" v2="32" v3="34"/>
+     <triangle v1="251" v2="34" v3="253"/>
+     <triangle v1="253" v2="34" v3="488"/>
+     <triangle v1="253" v2="488" v3="489"/>
+     <triangle v1="34" v2="36" v3="488"/>
+     <triangle v1="488" v2="36" v3="491"/>
+     <triangle v1="491" v2="36" v3="492"/>
+     <triangle v1="492" v2="36" v3="38"/>
+     <triangle v1="492" v2="38" v3="493"/>
+     <triangle v1="493" v2="38" v3="494"/>
+     <triangle v1="494" v2="38" v3="40"/>
+     <triangle v1="494" v2="40" v3="495"/>
+     <triangle v1="495" v2="40" v3="125"/>
+     <triangle v1="495" v2="125" v3="496"/>
+     <triangle v1="496" v2="125" v3="497"/>
+     <triangle v1="497" v2="125" v3="124"/>
+     <triangle v1="497" v2="124" v3="498"/>
+     <triangle v1="498" v2="124" v3="499"/>
+     <triangle v1="499" v2="124" v3="130"/>
+     <triangle v1="499" v2="130" v3="500"/>
+     <triangle v1="500" v2="130" v3="501"/>
+     <triangle v1="501" v2="130" v3="135"/>
+     <triangle v1="501" v2="135" v3="502"/>
+     <triangle v1="502" v2="135" v3="503"/>
+     <triangle v1="503" v2="135" v3="415"/>
+     <triangle v1="503" v2="415" v3="417"/>
+     <triangle v1="415" v2="135" v3="413"/>
+     <triangle v1="413" v2="135" v3="141"/>
+     <triangle v1="413" v2="141" v3="411"/>
+     <triangle v1="411" v2="141" v3="409"/>
+     <triangle v1="409" v2="141" v3="145"/>
+     <triangle v1="409" v2="145" v3="407"/>
+     <triangle v1="407" v2="145" v3="405"/>
+     <triangle v1="405" v2="145" v3="150"/>
+     <triangle v1="405" v2="150" v3="403"/>
+     <triangle v1="403" v2="150" v3="155"/>
+     <triangle v1="403" v2="155" v3="401"/>
+     <triangle v1="401" v2="155" v3="399"/>
+     <triangle v1="399" v2="155" v3="159"/>
+     <triangle v1="399" v2="159" v3="397"/>
+     <triangle v1="397" v2="159" v3="164"/>
+     <triangle v1="503" v2="417" v3="504"/>
+     <triangle v1="504" v2="417" v3="419"/>
+     <triangle v1="504" v2="419" v3="505"/>
+     <triangle v1="505" v2="419" v3="506"/>
+     <triangle v1="506" v2="419" v3="422"/>
+     <triangle v1="506" v2="422" v3="507"/>
+     <triangle v1="507" v2="422" v3="508"/>
+     <triangle v1="508" v2="422" v3="425"/>
+     <triangle v1="508" v2="425" v3="509"/>
+     <triangle v1="509" v2="425" v3="427"/>
+     <triangle v1="509" v2="427" v3="510"/>
+     <triangle v1="510" v2="427" v3="429"/>
+     <triangle v1="510" v2="429" v3="511"/>
+     <triangle v1="511" v2="429" v3="431"/>
+     <triangle v1="511" v2="431" v3="512"/>
+     <triangle v1="512" v2="431" v3="433"/>
+     <triangle v1="512" v2="433" v3="513"/>
+     <triangle v1="513" v2="433" v3="514"/>
+     <triangle v1="514" v2="433" v3="436"/>
+     <triangle v1="514" v2="436" v3="515"/>
+     <triangle v1="515" v2="436" v3="438"/>
+     <triangle v1="515" v2="438" v3="516"/>
+     <triangle v1="516" v2="438" v3="440"/>
+     <triangle v1="516" v2="440" v3="517"/>
+     <triangle v1="517" v2="440" v3="442"/>
+     <triangle v1="517" v2="442" v3="518"/>
+     <triangle v1="518" v2="442" v3="444"/>
+     <triangle v1="518" v2="444" v3="519"/>
+     <triangle v1="519" v2="444" v3="446"/>
+     <triangle v1="519" v2="446" v3="447"/>
+     <triangle v1="253" v2="489" v3="255"/>
+     <triangle v1="255" v2="489" v3="490"/>
+     <triangle v1="255" v2="490" v3="257"/>
+     <triangle v1="219" v2="243" v3="221"/>
+     <triangle v1="221" v2="243" v3="241"/>
+     <triangle v1="221" v2="241" v3="222"/>
+     <triangle v1="222" v2="241" v3="240"/>
+     <triangle v1="222" v2="240" v3="224"/>
+     <triangle v1="224" v2="240" v3="238"/>
+     <triangle v1="224" v2="238" v3="225"/>
+     <triangle v1="225" v2="238" v3="236"/>
+     <triangle v1="225" v2="236" v3="227"/>
+     <triangle v1="227" v2="236" v3="235"/>
+     <triangle v1="227" v2="235" v3="229"/>
+     <triangle v1="229" v2="235" v3="231"/>
+     <triangle v1="231" v2="235" v3="233"/>
+    </triangles>
+   </mesh>
+  </object>
+  <object id="5" p:UUID="00030004-81cb-4c03-9d28-80fed5dfa1dc" type="model">
+   <mesh>
+    <vertices>
+     <vertex x="-4.26361561" y="2.85169315" z="2.5"/>
+     <vertex x="-4.50723839" y="2.88140774" z="2.5"/>
+     <vertex x="-4.9469595" y="-1.34584045" z="1.5"/>
+     <vertex x="-4.59032059" y="2.77043629" z="2.47201109"/>
+     <vertex x="-5.07190514" y="-1.33369732" z="1.5"/>
+     <vertex x="-4.67097569" y="2.65853596" z="2.44399261"/>
+     <vertex x="-4.7492094" y="2.54568291" z="2.4159317"/>
+     <vertex x="-4.82502747" y="2.43185806" z="2.38781595"/>
+     <vertex x="-4.89843655" y="2.31703949" z="2.35963249"/>
+     <vertex x="-5.19739151" y="-1.32502985" z="1.5"/>
+     <vertex x="-4.96944141" y="2.20120716" z="2.33136797"/>
+     <vertex x="-5.03804779" y="2.08433962" z="2.30301046"/>
+     <vertex x="-5.1042614" y="1.96641588" z="2.2745471"/>
+     <vertex x="-5.16808796" y="1.84741592" z="2.245965"/>
+     <vertex x="-5.32294559" y="-1.31987667" z="1.5"/>
+     <vertex x="-5.2295332" y="1.72731781" z="2.2172513"/>
+     <vertex x="-5.28860283" y="1.60610151" z="2.18839359"/>
+     <vertex x="-5.34530258" y="1.48374557" z="2.15937853"/>
+     <vertex x="-5.44891548" y="-1.31823158" z="1.5"/>
+     <vertex x="-5.42920971" y="-5.56870937" z="0.5"/>
+     <vertex x="-5.57423973" y="-1.32009506" z="1.5"/>
+     <vertex x="-5.46843433" y="-5.56935978" z="0.5"/>
+     <vertex x="-5.69978523" y="-1.32546568" z="1.5"/>
+     <vertex x="-5.82513046" y="-1.3343401" z="1.5"/>
+     <vertex x="-5.86824894" y="-0.213959217" z="1.76353788"/>
+     <vertex x="-5.89187813" y="-0.350520134" z="1.73191977"/>
+     <vertex x="-5.39963818" y="1.36022949" z="2.13019466"/>
+     <vertex x="-5.45161438" y="1.23553181" z="2.10082769"/>
+     <vertex x="-5.50123787" y="1.10963249" z="2.07126617"/>
+     <vertex x="-5.54851437" y="0.98251009" z="2.04149675"/>
+     <vertex x="-5.59344959" y="0.85414362" z="2.01150703"/>
+     <vertex x="-5.63604832" y="0.7245121" z="1.98128366"/>
+     <vertex x="-5.67631721" y="0.593595505" z="1.95081472"/>
+     <vertex x="-5.71426201" y="0.461372375" z="1.92008686"/>
+     <vertex x="-5.74988747" y="0.327821255" z="1.88908768"/>
+     <vertex x="-5.78314686" y="0.193140984" z="1.85785389"/>
+     <vertex x="-5.81393147" y="0.0579099655" z="1.82651091"/>
+     <vertex x="-5.8422823" y="-0.0778026581" z="1.79507017"/>
+     <vertex x="-5.91322136" y="-0.487447739" z="1.70022058"/>
+     <vertex x="-5.93232632" y="-0.62470293" z="1.66844606"/>
+     <vertex x="-5.94924164" y="-0.762246609" z="1.63660192"/>
+     <vertex x="-5.96401691" y="-0.900040627" z="1.60469389"/>
+     <vertex x="-5.95018005" y="-1.34671068" z="1.5"/>
+     <vertex x="-5.97670174" y="-1.03804588" z="1.57272673"/>
+     <vertex x="-5.98734283" y="-1.17622423" z="1.54070711"/>
+     <vertex x="-5.99599171" y="-1.31453657" z="1.50863934"/>
+     <vertex x="-6.00269604" y="-1.45294476" z="1.4765296"/>
+     <vertex x="-6.00750446" y="-1.59140968" z="1.44438314"/>
+     <vertex x="-6.01046658" y="-1.72989225" z="1.4122057"/>
+     <vertex x="-6.01104736" y="-2.00675821" z="1.34777951"/>
+     <vertex x="-6.00482941" y="-2.28323269" z="1.28329539"/>
+     <vertex x="-5.99220371" y="-2.55900645" z="1.21879721"/>
+     <vertex x="-5.97351456" y="-2.8343749" z="1.15419626"/>
+     <vertex x="-5.94897652" y="-3.11031556" z="1.08926749"/>
+     <vertex x="-5.91884518" y="-3.3865943" z="1.0240643"/>
+     <vertex x="-5.88337421" y="-3.66293764" z="0.958648682"/>
+     <vertex x="-5.84282017" y="-3.93907118" z="0.89308238"/>
+     <vertex x="-5.79743958" y="-4.21472168" z="0.827427626"/>
+     <vertex x="-5.74748611" y="-4.48961449" z="0.761746407"/>
+     <vertex x="-5.69321728" y="-4.76347685" z="0.696100712"/>
+     <vertex x="-5.63488865" y="-5.03603363" z="0.63055253"/>
+     <vertex x="-5.57275581" y="-5.3070116" z="0.565164089"/>
+     <vertex x="-5.5070734" y="-5.57613802" z="0.5"/>
+     <vertex x="-5.39036655" y="-5.57420349" z="0.5"/>
+     <vertex x="-4.82227707" y="-1.36148167" z="1.5"/>
+     <vertex x="-5.3528614" y="-5.58570576" z="0.5"/>
+     <vertex x="-4.08774662" y="-1.52769327" z="1.5"/>
+     <vertex x="-4.20807457" y="-1.49147797" z="1.5"/>
+     <vertex x="-4.32936668" y="-1.45863628" z="1.5"/>
+     <vertex x="-3.06324053" y="2.60146141" z="2.5"/>
+     <vertex x="-3.30031824" y="2.66493988" z="2.5"/>
+     <vertex x="-5.31761742" y="-5.60293388" z="0.5"/>
+     <vertex x="-3.50382495" y="-1.75829887" z="1.5"/>
+     <vertex x="-3.61794162" y="-1.70568943" z="1.5"/>
+     <vertex x="-3.73348308" y="-1.65628719" z="1.5"/>
+     <vertex x="-1.90963221" y="2.18588543" z="2.5"/>
+     <vertex x="-2.1355083" y="2.28188229" z="2.5"/>
+     <vertex x="-5.17415619" y="-5.36683083" z="0.565002441"/>
+     <vertex x="-3.17090559" y="-1.93494487" z="1.5"/>
+     <vertex x="-3.28021979" y="-1.87297106" z="1.5"/>
+     <vertex x="-3.39122176" y="-1.81407356" z="1.5"/>
+     <vertex x="-1.24939084" y="1.8604393" z="2.5"/>
+     <vertex x="-1.46639919" y="1.97508144" z="2.5"/>
+     <vertex x="-5.02740574" y="-5.13272047" z="0.630006313"/>
+     <vertex x="-3.06336427" y="-1.99994683" z="1.5"/>
+     <vertex x="-0.82544446" y="1.61312723" z="2.5"/>
+     <vertex x="-0.618839979" y="1.48065138" z="2.5"/>
+     <vertex x="-2.95767999" y="-2.06792617" z="1.5"/>
+     <vertex x="-0.416032076" y="1.34243298" z="2.5"/>
+     <vertex x="-2.853935" y="-2.13882971" z="1.5"/>
+     <vertex x="-0.21718049" y="1.19858122" z="2.5"/>
+     <vertex x="-3.35206342" y="-2.93424058" z="1.27955532"/>
+     <vertex x="-2.75221014" y="-2.21260262" z="1.5"/>
+     <vertex x="-3.16067743" y="-2.73350859" z="1.34423256"/>
+     <vertex x="-2.96418047" y="-2.5373075" z="1.40885448"/>
+     <vertex x="-4.87725258" y="-4.90070486" z="0.695014715"/>
+     <vertex x="-4.72355175" y="-4.67086649" z="0.760039568"/>
+     <vertex x="-4.5663166" y="-4.44354343" z="0.825023651"/>
+     <vertex x="-4.40528774" y="-4.21870089" z="0.890016556"/>
+     <vertex x="-4.24013042" y="-3.99625611" z="0.955092192"/>
+     <vertex x="-4.07085323" y="-3.77663732" z="1.02018261"/>
+     <vertex x="-3.89746833" y="-3.56027412" z="1.08521938"/>
+     <vertex x="-3.71998787" y="-3.34759617" z="1.15013456"/>
+     <vertex x="-3.53839612" y="-3.13900304" z="1.21486783"/>
+     <vertex x="-2.86399722" y="-2.44106245" z="1.44113088"/>
+     <vertex x="-2.76251459" y="-2.34613776" z="1.47337651"/>
+     <vertex x="-2.65972543" y="-2.2525959" z="1.50558567"/>
+     <vertex x="-2.55562258" y="-2.16049957" z="1.53775358"/>
+     <vertex x="-0.0224416256" y="1.04920864" z="2.5"/>
+     <vertex x="-2.45019841" y="-2.06991124" z="1.56987333"/>
+     <vertex x="-2.34344625" y="-1.98089361" z="1.60194016"/>
+     <vertex x="-2.23535824" y="-1.89350891" z="1.63394833"/>
+     <vertex x="0.168031454" y="0.894433498" z="2.5"/>
+     <vertex x="-2.12592769" y="-1.80781984" z="1.66589212"/>
+     <vertex x="-2.01514721" y="-1.72388935" z="1.6977663"/>
+     <vertex x="-1.90300965" y="-1.64177942" z="1.72956467"/>
+     <vertex x="-1.78950763" y="-1.56155252" z="1.76128149"/>
+     <vertex x="0.354088545" y="0.734376907" z="2.5"/>
+     <vertex x="-1.67463422" y="-1.4832716" z="1.79291201"/>
+     <vertex x="-1.5583818" y="-1.40699959" z="1.82444954"/>
+     <vertex x="-1.44074321" y="-1.332798" z="1.8558898"/>
+     <vertex x="-1.32172751" y="-1.26073933" z="1.88722181"/>
+     <vertex x="0.535583735" y="0.56916523" z="2.5"/>
+     <vertex x="-1.20180106" y="-1.19114637" z="1.9183259"/>
+     <vertex x="-1.0811708" y="-1.12414742" z="1.94915581"/>
+     <vertex x="-0.959817648" y="-1.05973101" z="1.97972536"/>
+     <vertex x="-0.837722063" y="-0.997886658" z="2.01004648"/>
+     <vertex x="-0.7148664" y="-0.938603401" z="2.040133"/>
+     <vertex x="0.712373495" y="0.398928642" z="2.5"/>
+     <vertex x="-0.591230631" y="-0.881870747" z="2.06999683"/>
+     <vertex x="-0.46679616" y="-0.82767725" z="2.09965086"/>
+     <vertex x="-0.341543913" y="-0.776011944" z="2.12910891"/>
+     <vertex x="0.884319544" y="0.223800182" z="2.5"/>
+     <vertex x="-0.215455294" y="-0.726864815" z="2.15838242"/>
+     <vertex x="-0.0885112286" y="-0.680224895" z="2.18748522"/>
+     <vertex x="0.0393078327" y="-0.636080742" z="2.21643019"/>
+     <vertex x="0.16802001" y="-0.594421387" z="2.24522924"/>
+     <vertex x="1.05128646" y="0.0439181328" z="2.5"/>
+     <vertex x="0.297644377" y="-0.555236816" z="2.27389622"/>
+     <vertex x="0.428200483" y="-0.518516064" z="2.30244303"/>
+     <vertex x="0.55970645" y="-0.484247684" z="2.3308835"/>
+     <vertex x="0.692181826" y="-0.452420712" z="2.35922956"/>
+     <vertex x="1.21314216" y="-0.140575409" z="2.5"/>
+     <vertex x="0.825645685" y="-0.423025608" z="2.38749456"/>
+     <vertex x="0.960116148" y="-0.396049976" z="2.41569138"/>
+     <vertex x="1.09561276" y="-0.371483803" z="2.44383287"/>
+     <vertex x="1.23215461" y="-0.34931612" z="2.47193146"/>
+     <vertex x="1.36976027" y="-0.329536438" z="2.5"/>
+     <vertex x="-1.03568339" y="1.73975611" z="2.5"/>
+     <vertex x="-1.6865375" y="2.08359194" z="2.5"/>
+     <vertex x="-3.85035825" y="-1.61012983" z="1.5"/>
+     <vertex x="-2.36398792" y="2.37150574" z="2.5"/>
+     <vertex x="-3.96847701" y="-1.56725407" z="1.5"/>
+     <vertex x="-2.59489107" y="2.45468616" z="2.5"/>
+     <vertex x="-2.82803655" y="2.53135872" z="2.5"/>
+     <vertex x="-4.45152855" y="-1.42919445" z="1.5"/>
+     <vertex x="-3.53908277" y="2.72174454" z="2.5"/>
+     <vertex x="-4.57446575" y="-1.40317488" z="1.5"/>
+     <vertex x="-3.7793467" y="2.77183056" z="2.5"/>
+     <vertex x="-4.69808006" y="-1.38059807" z="1.5"/>
+     <vertex x="-4.02092075" y="2.81515789" z="2.5"/>
+     <vertex x="-5.38218021" y="-5.71154261" z="0.5"/>
+     <vertex x="-5.4446907" y="-5.81822968" z="0.5"/>
+     <vertex x="-5.4446907" y="-5.81822968" z="-2.5"/>
+     <vertex x="-5.48454666" y="-5.66505384" z="-2.5"/>
+     <vertex x="-5.52442265" y="-5.50696182" z="-2.5"/>
+     <vertex x="-5.56411362" y="-5.34416199" z="-2.5"/>
+     <vertex x="-5.60341358" y="-5.17686367" z="-2.5"/>
+     <vertex x="-5.64211559" y="-5.00527573" z="-2.5"/>
+     <vertex x="-5.6800127" y="-4.82960606" z="-2.5"/>
+     <vertex x="-5.71690083" y="-4.65006399" z="-2.5"/>
+     <vertex x="-5.75257206" y="-4.46685791" z="-2.5"/>
+     <vertex x="-5.78682041" y="-4.28019714" z="-2.5"/>
+     <vertex x="-5.81943893" y="-4.09029007" z="-2.5"/>
+     <vertex x="-5.85022354" y="-3.89734507" z="-2.5"/>
+     <vertex x="-5.87896633" y="-3.70157123" z="-2.5"/>
+     <vertex x="-5.90546036" y="-3.50317717" z="-2.5"/>
+     <vertex x="-5.92950153" y="-3.30237174" z="-2.5"/>
+     <vertex x="-5.95088196" y="-3.09936357" z="-2.5"/>
+     <vertex x="-5.96939564" y="-2.89436126" z="-2.5"/>
+     <vertex x="-5.98483658" y="-2.68757391" z="-2.5"/>
+     <vertex x="-5.99699879" y="-2.4792099" z="-2.5"/>
+     <vertex x="-6.00567532" y="-2.26947784" z="-2.5"/>
+     <vertex x="-6.01066017" y="-2.05858707" z="-2.5"/>
+     <vertex x="-6.01174831" y="-1.84674573" z="-2.5"/>
+     <vertex x="-6.00873089" y="-1.63416243" z="-2.5"/>
+     <vertex x="-6.00140476" y="-1.42104673" z="-2.5"/>
+     <vertex x="-5.98956108" y="-1.20760679" z="-2.5"/>
+     <vertex x="-5.97317696" y="-0.996216297" z="-2.5"/>
+     <vertex x="-5.95249939" y="-0.789918423" z="-2.5"/>
+     <vertex x="-5.92765141" y="-0.58862257" z="-2.5"/>
+     <vertex x="-5.89875507" y="-0.392216206" z="-2.5"/>
+     <vertex x="-5.86593056" y="-0.20058918" z="-2.5"/>
+     <vertex x="-5.82929897" y="-0.0136294365" z="-2.5"/>
+     <vertex x="-5.78898239" y="0.168774605" z="-2.5"/>
+     <vertex x="-5.74510098" y="0.346734047" z="-2.5"/>
+     <vertex x="-5.69777679" y="0.52036047" z="-2.5"/>
+     <vertex x="-5.64713097" y="0.689765453" z="-2.5"/>
+     <vertex x="-5.59328556" y="0.855059624" z="-2.5"/>
+     <vertex x="-5.53635979" y="1.01635551" z="-2.5"/>
+     <vertex x="-5.47647667" y="1.17376375" z="-2.5"/>
+     <vertex x="-5.41375732" y="1.32739639" z="-2.5"/>
+     <vertex x="-5.34832191" y="1.47736454" z="-2.5"/>
+     <vertex x="-5.28029251" y="1.6237793" z="-2.5"/>
+     <vertex x="-5.20954609" y="1.76725245" z="-2.5"/>
+     <vertex x="-5.1340313" y="1.91194773" z="-2.5"/>
+     <vertex x="-5.05300236" y="2.05871058" z="-2.5"/>
+     <vertex x="-4.96613789" y="2.2074585" z="-2.5"/>
+     <vertex x="-4.87311554" y="2.35810947" z="-2.5"/>
+     <vertex x="-4.77361202" y="2.51058292" z="-2.5"/>
+     <vertex x="-4.72132874" y="2.58747673" z="-2.5"/>
+     <vertex x="-4.66730499" y="2.66479588" z="-2.5"/>
+     <vertex x="-4.61149979" y="2.74252987" z="-2.5"/>
+     <vertex x="-4.55387402" y="2.82066822" z="-2.5"/>
+     <vertex x="-4.49438477" y="2.89920044" z="-2.5"/>
+     <vertex x="-4.4509449" y="2.95431519" z="2.5"/>
+     <vertex x="-4.43299484" y="2.97811604" z="-2.5"/>
+     <vertex x="-4.39292336" y="3.02766228" z="2.5"/>
+     <vertex x="-4.36966228" y="3.05740643" z="-2.5"/>
+     <vertex x="-4.33313656" y="3.10143375" z="2.5"/>
+     <vertex x="-4.30434608" y="3.13705921" z="-2.5"/>
+     <vertex x="-4.27154827" y="3.17561817" z="2.5"/>
+     <vertex x="-4.23700809" y="3.21706676" z="-2.5"/>
+     <vertex x="-4.20812035" y="3.25020123" z="2.5"/>
+     <vertex x="-4.16760635" y="3.29741669" z="-2.5"/>
+     <vertex x="-4.14281464" y="3.32517052" z="2.5"/>
+     <vertex x="-4.09610081" y="3.37809849" z="-2.5"/>
+     <vertex x="-4.07559586" y="3.4005127" z="2.5"/>
+     <vertex x="-4.02245235" y="3.45910454" z="-2.5"/>
+     <vertex x="-4.00642586" y="3.47621441" z="2.5"/>
+     <vertex x="-3.94661927" y="3.54042244" z="-2.5"/>
+     <vertex x="-3.93526626" y="3.55226231" z="2.5"/>
+     <vertex x="-3.86856198" y="3.62204266" z="-2.5"/>
+     <vertex x="-3.86208081" y="3.62864494" z="2.5"/>
+     <vertex x="-3.78824019" y="3.7039547" z="-2.5"/>
+     <vertex x="-3.78683233" y="3.70534801" z="2.5"/>
+     <vertex x="-3.70948315" y="3.78235817" z="2.5"/>
+     <vertex x="-3.70561337" y="3.78614807" z="-2.5"/>
+     <vertex x="-3.62999606" y="3.85966206" z="2.5"/>
+     <vertex x="-3.53404617" y="3.9507122" z="-2.5"/>
+     <vertex x="-3.54833341" y="3.93724728" z="2.5"/>
+     <vertex x="-3.4644587" y="4.01510143" z="2.5"/>
+     <vertex x="-3.44833589" y="4.0303669" z="-2.5"/>
+     <vertex x="-3.37833381" y="4.09320927" z="2.5"/>
+     <vertex x="-3.36355925" y="4.10756969" z="-2.5"/>
+     <vertex x="-3.29006743" y="4.17144585" z="2.5"/>
+     <vertex x="-3.27954602" y="4.18249702" z="-2.5"/>
+     <vertex x="-3.20225239" y="4.2477541" z="2.5"/>
+     <vertex x="-3.19612503" y="4.2553215" z="-2.5"/>
+     <vertex x="-3.11567569" y="4.32154465" z="2.5"/>
+     <vertex x="-3.1131258" y="4.32621861" z="-2.5"/>
+     <vertex x="-3.03010011" y="4.3930378" z="2.5"/>
+     <vertex x="-3.03037691" y="4.39536381" z="-2.5"/>
+     <vertex x="-2.94528794" y="4.4624548" z="2.5"/>
+     <vertex x="-2.86494827" y="4.52909756" z="-2.5"/>
+     <vertex x="-2.86100125" y="4.53001595" z="2.5"/>
+     <vertex x="-2.6984725" y="4.65792179" z="-2.5"/>
+     <vertex x="-2.6930542" y="4.66045284" z="2.5"/>
+     <vertex x="-2.52958298" y="4.7832346" z="-2.5"/>
+     <vertex x="-2.52435851" y="4.78611374" z="2.5"/>
+     <vertex x="-2.35691309" y="4.90643501" z="-2.5"/>
+     <vertex x="-2.35301256" y="4.90876484" z="2.5"/>
+     <vertex x="-2.1790967" y="5.02892208" z="-2.5"/>
+     <vertex x="-2.17711568" y="5.03016949" z="2.5"/>
+     <vertex x="-2.08783126" y="5.09033489" z="-2.5"/>
+     <vertex x="-2.08686638" y="5.09095669" z="2.5"/>
+     <vertex x="-1.99476647" y="5.15209484" z="-2.5"/>
+     <vertex x="-1.99476647" y="5.15209484" z="2.5"/>
+     <vertex x="-1.85906029" y="5.24043179" z="2.37456131"/>
+     <vertex x="-1.85906029" y="5.24043179" z="-2.37456155"/>
+     <vertex x="-1.72215247" y="5.32731438" z="2.24922514"/>
+     <vertex x="-1.72215247" y="5.32731438" z="-2.24922514"/>
+     <vertex x="-1.58411145" y="5.41274643" z="2.12400293"/>
+     <vertex x="-1.58411145" y="5.41274643" z="-2.1240027"/>
+     <vertex x="-1.44500518" y="5.49672985" z="1.99890566"/>
+     <vertex x="-1.44500518" y="5.49672985" z="-1.99890554"/>
+     <vertex x="-1.16387153" y="5.66036129" z="1.74913311"/>
+     <vertex x="-1.16387153" y="5.66036129" z="-1.74913311"/>
+     <vertex x="-0.879298925" y="5.81822968" z="1.5"/>
+     <vertex x="-0.879298925" y="5.81822968" z="-1.5"/>
+     <vertex x="-0.422425985" y="4.52714825" z="2.5"/>
+     <vertex x="-0.677826643" y="4.64728546" z="2.5"/>
+     <vertex x="-0.936098814" y="4.76111794" z="2.5"/>
+     <vertex x="-1.19708705" y="4.86857796" z="2.5"/>
+     <vertex x="-1.46063375" y="4.96960068" z="2.5"/>
+     <vertex x="-1.72658038" y="5.06412506" z="2.5"/>
+     <vertex x="-0.170050383" y="4.40078068" z="2.5"/>
+     <vertex x="0.0791480541" y="4.26825619" z="2.5"/>
+     <vertex x="0.325019121" y="4.12965679" z="2.5"/>
+     <vertex x="0.567414999" y="3.98506451" z="2.5"/>
+     <vertex x="0.806189299" y="3.83456802" z="2.5"/>
+     <vertex x="1.04119802" y="3.67825603" z="2.5"/>
+     <vertex x="1.2723" y="3.51622486" z="2.5"/>
+     <vertex x="1.49935603" y="3.34856987" z="2.5"/>
+     <vertex x="1.72222924" y="3.1753931" z="2.5"/>
+     <vertex x="1.94078517" y="2.99679947" z="2.5"/>
+     <vertex x="2.15489221" y="2.81289577" z="2.5"/>
+     <vertex x="2.36442208" y="2.6237936" z="2.5"/>
+     <vertex x="2.56924796" y="2.42960548" z="2.5"/>
+     <vertex x="2.76924586" y="2.23044968" z="2.5"/>
+     <vertex x="2.9642961" y="2.02644539" z="2.5"/>
+     <vertex x="3.15428233" y="1.81771612" z="2.5"/>
+     <vertex x="3.33908725" y="1.60438681" z="2.5"/>
+     <vertex x="3.51860213" y="1.38658667" z="2.5"/>
+     <vertex x="3.69271731" y="1.16444635" z="2.5"/>
+     <vertex x="2.3342011" y="-0.257732868" z="2.5"/>
+     <vertex x="2.22133899" y="-0.260446548" z="2.5"/>
+     <vertex x="2.10993695" y="-0.264538765" z="2.5"/>
+     <vertex x="1.99997926" y="-0.269982338" z="2.5"/>
+     <vertex x="1.89145207" y="-0.276751041" z="2.5"/>
+     <vertex x="1.78434062" y="-0.284818172" z="2.5"/>
+     <vertex x="1.67863059" y="-0.294156551" z="2.5"/>
+     <vertex x="1.57430673" y="-0.304740429" z="2.5"/>
+     <vertex x="1.47135472" y="-0.316542625" z="2.5"/>
+     <vertex x="2.44853663" y="-0.256424427" z="2.5"/>
+     <vertex x="3.86132884" y="0.938100338" z="2.5"/>
+     <vertex x="4.02433491" y="0.70768404" z="2.5"/>
+     <vertex x="4.18163681" y="0.473337173" z="2.5"/>
+     <vertex x="4.33314037" y="0.235200405" z="2.5"/>
+     <vertex x="4.47875404" y="-0.00658273697" z="2.5"/>
+     <vertex x="2.56339717" y="-0.256479263" z="2.5"/>
+     <vertex x="2.67671275" y="-0.257748127" z="2.5"/>
+     <vertex x="2.7885015" y="-0.260201454" z="2.5"/>
+     <vertex x="2.89886165" y="-0.263816357" z="2.5"/>
+     <vertex x="3.11568522" y="-0.27443552" z="2.5"/>
+     <vertex x="3.32796168" y="-0.289416313" z="2.5"/>
+     <vertex x="3.53646922" y="-0.308568954" z="2.5"/>
+     <vertex x="3.74198604" y="-0.33170414" z="2.5"/>
+     <vertex x="3.94529128" y="-0.358633518" z="2.5"/>
+     <vertex x="4.14716339" y="-0.389167309" z="2.5"/>
+     <vertex x="4.61839104" y="-0.251866817" z="2.5"/>
+     <vertex x="4.34838104" y="-0.423116684" z="2.5"/>
+     <vertex x="4.54972172" y="-0.460291862" z="2.5"/>
+     <vertex x="4.75196552" y="-0.50050354" z="2.5"/>
+     <vertex x="-1.72658038" y="5.06412506" z="-2.5"/>
+     <vertex x="-1.46063375" y="4.96960068" z="-2.5"/>
+     <vertex x="-1.19708705" y="4.86857796" z="-2.5"/>
+     <vertex x="-0.611739397" y="5.70967484" z="-1.5"/>
+     <vertex x="-0.936098814" y="4.76111794" z="-2.5"/>
+     <vertex x="-0.346758604" y="5.59496784" z="-1.5"/>
+     <vertex x="-0.677826643" y="4.64728546" z="-2.5"/>
+     <vertex x="-0.0844976902" y="5.47417164" z="-1.5"/>
+     <vertex x="-0.422425985" y="4.52714825" z="-2.5"/>
+     <vertex x="0.174902678" y="5.34735012" z="-1.5"/>
+     <vertex x="-0.170050383" y="4.40078068" z="-2.5"/>
+     <vertex x="0.43130517" y="5.21457005" z="-1.5"/>
+     <vertex x="0.0791480541" y="4.26825619" z="-2.5"/>
+     <vertex x="0.684571505" y="5.07590389" z="-1.5"/>
+     <vertex x="0.325019121" y="4.12965679" z="-2.5"/>
+     <vertex x="0.934568167" y="4.93142414" z="-1.5"/>
+     <vertex x="0.567414999" y="3.98506451" z="-2.5"/>
+     <vertex x="1.18116021" y="4.78120899" z="-1.5"/>
+     <vertex x="0.806189299" y="3.83456802" z="-2.5"/>
+     <vertex x="1.42421746" y="4.6253376" z="-1.5"/>
+     <vertex x="1.04119802" y="3.67825603" z="-2.5"/>
+     <vertex x="1.66360927" y="4.46389389" z="-1.5"/>
+     <vertex x="1.2723" y="3.51622486" z="-2.5"/>
+     <vertex x="1.89920831" y="4.29696465" z="-1.5"/>
+     <vertex x="1.49935603" y="3.34856987" z="-2.5"/>
+     <vertex x="2.13088822" y="4.12463665" z="-1.5"/>
+     <vertex x="1.72222924" y="3.1753931" z="-2.5"/>
+     <vertex x="2.35852647" y="3.94700432" z="-1.5"/>
+     <vertex x="1.94078517" y="2.99679947" z="-2.5"/>
+     <vertex x="2.58200145" y="3.76416111" z="-1.5"/>
+     <vertex x="2.801193" y="3.57620525" z="-1.5"/>
+     <vertex x="2.15489221" y="2.81289577" z="-2.5"/>
+     <vertex x="3.0159843" y="3.38323593" z="-1.5"/>
+     <vertex x="2.36442208" y="2.6237936" z="-2.5"/>
+     <vertex x="3.22626185" y="3.18535709" z="-1.5"/>
+     <vertex x="2.56924796" y="2.42960548" z="-2.5"/>
+     <vertex x="3.43191218" y="2.9826746" z="-1.5"/>
+     <vertex x="2.76924586" y="2.23044968" z="-2.5"/>
+     <vertex x="3.63282657" y="2.77529621" z="-1.5"/>
+     <vertex x="2.9642961" y="2.02644539" z="-2.5"/>
+     <vertex x="3.82889628" y="2.5633316" z="-1.5"/>
+     <vertex x="3.15428233" y="1.81771612" z="-2.5"/>
+     <vertex x="4.02001953" y="2.34689522" z="-1.5"/>
+     <vertex x="3.33908725" y="1.60438681" z="-2.5"/>
+     <vertex x="4.20609093" y="2.12610197" z="-1.5"/>
+     <vertex x="3.51860213" y="1.38658667" z="-2.5"/>
+     <vertex x="4.38701344" y="1.90106964" z="-1.5"/>
+     <vertex x="3.69271731" y="1.16444635" z="-2.5"/>
+     <vertex x="4.56269073" y="1.67191887" z="-1.5"/>
+     <vertex x="3.86132884" y="0.938100338" z="-2.5"/>
+     <vertex x="4.73302746" y="1.43877125" z="-1.5"/>
+     <vertex x="4.02433491" y="0.70768404" z="-2.5"/>
+     <vertex x="4.89793301" y="1.20175123" z="-1.5"/>
+     <vertex x="4.18163681" y="0.473337173" z="-2.5"/>
+     <vertex x="5.05732059" y="0.960985184" z="-1.5"/>
+     <vertex x="4.33314037" y="0.235200405" z="-2.5"/>
+     <vertex x="5.21110439" y="0.716602325" z="-1.5"/>
+     <vertex x="4.47875404" y="-0.00658273697" z="-2.5"/>
+     <vertex x="5.35920238" y="0.468732357" z="-1.5"/>
+     <vertex x="4.61839104" y="-0.251866817" z="-2.5"/>
+     <vertex x="5.50153542" y="0.217508316" z="-1.5"/>
+     <vertex x="4.75196552" y="-0.50050354" z="-2.5"/>
+     <vertex x="5.63802814" y="-0.0369367599" z="-1.5"/>
+     <vertex x="4.91038704" y="-0.533998966" z="-2.37456155"/>
+     <vertex x="5.76860714" y="-0.294466972" z="-1.5"/>
+     <vertex x="5.06863117" y="-0.569372177" z="-2.24922514"/>
+     <vertex x="5.22665024" y="-0.606572628" z="-2.1240027"/>
+     <vertex x="5.38439846" y="-0.645550251" z="-1.99890554"/>
+     <vertex x="5.89320278" y="-0.554944038" z="-1.5"/>
+     <vertex x="5.69889545" y="-0.728636265" z="-1.74913311"/>
+     <vertex x="6.01174831" y="-0.818229675" z="-1.5"/>
+     <vertex x="1.58897901" y="-0.302632809" z="-2.5"/>
+     <vertex x="1.48819518" y="-0.313941002" z="-2.5"/>
+     <vertex x="1.38904786" y="-0.326357365" z="-2.5"/>
+     <vertex x="1.69142032" y="-0.292468071" z="-2.5"/>
+     <vertex x="1.79554105" y="-0.283482552" z="-2.5"/>
+     <vertex x="1.90136123" y="-0.275711536" z="-2.5"/>
+     <vertex x="2.00890326" y="-0.269191265" z="-2.5"/>
+     <vertex x="2.11818767" y="-0.263957024" z="-2.5"/>
+     <vertex x="2.22923589" y="-0.260044575" z="-2.5"/>
+     <vertex x="2.34206939" y="-0.257489681" z="-2.5"/>
+     <vertex x="2.45670915" y="-0.256328106" z="-2.5"/>
+     <vertex x="4.54351711" y="-0.459115982" z="-2.5"/>
+     <vertex x="4.33588505" y="-0.420991898" z="-2.5"/>
+     <vertex x="4.12794685" y="-0.386322021" z="-2.5"/>
+     <vertex x="3.91857696" y="-0.355297089" z="-2.5"/>
+     <vertex x="3.7066505" y="-0.328106403" z="-2.5"/>
+     <vertex x="3.49104476" y="-0.304940701" z="-2.5"/>
+     <vertex x="3.27063346" y="-0.285990715" z="-2.5"/>
+     <vertex x="3.15827537" y="-0.278155804" z="-2.5"/>
+     <vertex x="3.04429412" y="-0.271446228" z="-2.5"/>
+     <vertex x="2.92854953" y="-0.265885353" z="-2.5"/>
+     <vertex x="2.8109014" y="-0.261497498" z="-2.5"/>
+     <vertex x="2.6914928" y="-0.258327007" z="-2.5"/>
+     <vertex x="2.57317615" y="-0.256595135" z="-2.5"/>
+     <vertex x="1.29151559" y="-0.339845181" z="-2.5"/>
+     <vertex x="1.19557738" y="-0.35436964" z="-2.5"/>
+     <vertex x="1.10121179" y="-0.369894981" z="-2.5"/>
+     <vertex x="1.00839734" y="-0.386385441" z="-2.5"/>
+     <vertex x="0.917113543" y="-0.403804779" z="-2.5"/>
+     <vertex x="0.739051104" y="-0.441289902" z="-2.5"/>
+     <vertex x="0.566854239" y="-0.482064247" z="-2.5"/>
+     <vertex x="0.40035367" y="-0.52584219" z="-2.5"/>
+     <vertex x="0.239379168" y="-0.572339058" z="-2.5"/>
+     <vertex x="0.0837609768" y="-0.621269226" z="-2.5"/>
+     <vertex x="-0.0676596165" y="-0.672714233" z="-2.5"/>
+     <vertex x="-0.219263792" y="-0.728169441" z="-2.5"/>
+     <vertex x="-0.371545076" y="-0.78797102" z="-2.5"/>
+     <vertex x="-0.524497271" y="-0.852283001" z="-2.5"/>
+     <vertex x="-0.678113222" y="-0.921269894" z="-2.5"/>
+     <vertex x="-0.832386255" y="-0.995096207" z="-2.5"/>
+     <vertex x="-0.987308741" y="-1.07392597" z="-2.5"/>
+     <vertex x="-1.14287448" y="-1.15792465" z="-2.5"/>
+     <vertex x="-1.29907584" y="-1.24725533" z="-2.5"/>
+     <vertex x="-1.45590663" y="-1.34208345" z="-2.5"/>
+     <vertex x="-1.61335945" y="-1.44257307" z="-2.5"/>
+     <vertex x="-1.77142739" y="-1.54888821" z="-2.5"/>
+     <vertex x="-1.93010354" y="-1.66119337" z="-2.5"/>
+     <vertex x="-2.08938098" y="-1.77965355" z="-2.5"/>
+     <vertex x="-2.2492528" y="-1.90443301" z="-2.5"/>
+     <vertex x="-2.40971208" y="-2.03569555" z="-2.5"/>
+     <vertex x="-2.57073402" y="-2.17359042" z="-2.5"/>
+     <vertex x="-2.72997379" y="-2.31612349" z="-2.5"/>
+     <vertex x="-2.88579226" y="-2.46161771" z="-2.5"/>
+     <vertex x="-3.03818774" y="-2.60978007" z="-2.5"/>
+     <vertex x="-3.18715858" y="-2.76031709" z="-2.5"/>
+     <vertex x="-3.33270288" y="-2.91293597" z="-2.5"/>
+     <vertex x="-3.47481894" y="-3.06734324" z="-2.5"/>
+     <vertex x="-3.61350513" y="-3.22324562" z="-2.5"/>
+     <vertex x="-3.74875951" y="-3.38035011" z="-2.5"/>
+     <vertex x="-3.88058066" y="-3.53836346" z="-2.5"/>
+     <vertex x="-4.00896645" y="-3.69699216" z="-2.5"/>
+     <vertex x="-4.13391495" y="-3.8559432" z="-2.5"/>
+     <vertex x="-4.25542545" y="-4.01492357" z="-2.5"/>
+     <vertex x="-4.3734951" y="-4.17363977" z="-2.5"/>
+     <vertex x="-4.48812199" y="-4.33179855" z="-2.5"/>
+     <vertex x="-4.59930611" y="-4.48910713" z="-2.5"/>
+     <vertex x="-4.70704365" y="-4.64527178" z="-2.5"/>
+     <vertex x="-4.81133366" y="-4.79999924" z="-2.5"/>
+     <vertex x="-4.91217518" y="-4.95299721" z="-2.5"/>
+     <vertex x="-5.00956535" y="-5.10397148" z="-2.5"/>
+     <vertex x="-5.10350227" y="-5.25262928" z="-2.5"/>
+     <vertex x="-5.19398594" y="-5.39867687" z="-2.5"/>
+     <vertex x="-5.28101254" y="-5.54182196" z="-2.5"/>
+     <vertex x="-5.36458206" y="-5.68177032" z="-2.5"/>
+     <vertex x="4.91038704" y="-0.533998966" z="2.37456131"/>
+     <vertex x="5.06863117" y="-0.569372177" z="2.24922514"/>
+     <vertex x="5.22665024" y="-0.606572628" z="2.12400293"/>
+     <vertex x="5.38439846" y="-0.645550251" z="1.99890566"/>
+     <vertex x="5.69889545" y="-0.728636265" z="1.74913311"/>
+     <vertex x="6.01174831" y="-0.818229675" z="1.5"/>
+     <vertex x="-0.611739397" y="5.70967484" z="1.5"/>
+     <vertex x="-0.346758604" y="5.59496784" z="1.5"/>
+     <vertex x="-0.0844976902" y="5.47417164" z="1.5"/>
+     <vertex x="0.174902678" y="5.34735012" z="1.5"/>
+     <vertex x="0.43130517" y="5.21457005" z="1.5"/>
+     <vertex x="0.684571505" y="5.07590389" z="1.5"/>
+     <vertex x="0.934568167" y="4.93142414" z="1.5"/>
+     <vertex x="1.18116021" y="4.78120899" z="1.5"/>
+     <vertex x="1.42421746" y="4.6253376" z="1.5"/>
+     <vertex x="1.66360927" y="4.46389389" z="1.5"/>
+     <vertex x="1.89920831" y="4.29696465" z="1.5"/>
+     <vertex x="2.13088822" y="4.12463665" z="1.5"/>
+     <vertex x="2.35852647" y="3.94700432" z="1.5"/>
+     <vertex x="2.58200145" y="3.76416111" z="1.5"/>
+     <vertex x="2.801193" y="3.57620525" z="1.5"/>
+     <vertex x="3.0159843" y="3.38323593" z="1.5"/>
+     <vertex x="3.22626185" y="3.18535709" z="1.5"/>
+     <vertex x="3.43191218" y="2.9826746" z="1.5"/>
+     <vertex x="3.63282657" y="2.77529621" z="1.5"/>
+     <vertex x="3.82889628" y="2.5633316" z="1.5"/>
+     <vertex x="4.02001953" y="2.34689522" z="1.5"/>
+     <vertex x="4.20609093" y="2.12610197" z="1.5"/>
+     <vertex x="4.38701344" y="1.90106964" z="1.5"/>
+     <vertex x="4.56269073" y="1.67191887" z="1.5"/>
+     <vertex x="4.73302746" y="1.43877125" z="1.5"/>
+     <vertex x="4.89793301" y="1.20175123" z="1.5"/>
+     <vertex x="5.05732059" y="0.960985184" z="1.5"/>
+     <vertex x="5.21110439" y="0.716602325" z="1.5"/>
+     <vertex x="5.35920238" y="0.468732357" z="1.5"/>
+     <vertex x="5.50153542" y="0.217508316" z="1.5"/>
+     <vertex x="5.63802814" y="-0.0369367599" z="1.5"/>
+     <vertex x="5.76860714" y="-0.294466972" z="1.5"/>
+     <vertex x="5.89320278" y="-0.554944038" z="1.5"/>
+    </vertices>
+    <triangles>
+     <triangle v1="0" v2="1" v3="2"/>
+     <triangle v1="2" v2="1" v3="3"/>
+     <triangle v1="2" v2="3" v3="4"/>
+     <triangle v1="4" v2="3" v3="5"/>
+     <triangle v1="4" v2="5" v3="6"/>
+     <triangle v1="6" v2="7" v3="4"/>
+     <triangle v1="4" v2="7" v3="8"/>
+     <triangle v1="4" v2="8" v3="9"/>
+     <triangle v1="9" v2="8" v3="10"/>
+     <triangle v1="9" v2="10" v3="11"/>
+     <triangle v1="11" v2="12" v3="9"/>
+     <triangle v1="9" v2="12" v3="13"/>
+     <triangle v1="9" v2="13" v3="14"/>
+     <triangle v1="14" v2="13" v3="15"/>
+     <triangle v1="14" v2="15" v3="16"/>
+     <triangle v1="16" v2="17" v3="14"/>
+     <triangle v1="14" v2="17" v3="18"/>
+     <triangle v1="14" v2="18" v3="19"/>
+     <triangle v1="19" v2="18" v3="20"/>
+     <triangle v1="19" v2="20" v3="21"/>
+     <triangle v1="21" v2="20" v3="22"/>
+     <triangle v1="21" v2="22" v3="23"/>
+     <triangle v1="23" v2="22" v3="24"/>
+     <triangle v1="23" v2="24" v3="25"/>
+     <triangle v1="17" v2="26" v3="18"/>
+     <triangle v1="18" v2="26" v3="27"/>
+     <triangle v1="18" v2="27" v3="28"/>
+     <triangle v1="28" v2="29" v3="18"/>
+     <triangle v1="18" v2="29" v3="20"/>
+     <triangle v1="29" v2="30" v3="20"/>
+     <triangle v1="20" v2="30" v3="31"/>
+     <triangle v1="20" v2="31" v3="32"/>
+     <triangle v1="32" v2="33" v3="20"/>
+     <triangle v1="20" v2="33" v3="22"/>
+     <triangle v1="33" v2="34" v3="22"/>
+     <triangle v1="22" v2="34" v3="35"/>
+     <triangle v1="22" v2="35" v3="36"/>
+     <triangle v1="36" v2="37" v3="22"/>
+     <triangle v1="22" v2="37" v3="24"/>
+     <triangle v1="25" v2="38" v3="23"/>
+     <triangle v1="23" v2="38" v3="39"/>
+     <triangle v1="23" v2="39" v3="40"/>
+     <triangle v1="23" v2="40" v3="21"/>
+     <triangle v1="21" v2="40" v3="41"/>
+     <triangle v1="21" v2="41" v3="42"/>
+     <triangle v1="42" v2="41" v3="43"/>
+     <triangle v1="42" v2="43" v3="44"/>
+     <triangle v1="44" v2="45" v3="42"/>
+     <triangle v1="42" v2="45" v3="21"/>
+     <triangle v1="45" v2="46" v3="21"/>
+     <triangle v1="21" v2="46" v3="47"/>
+     <triangle v1="21" v2="47" v3="48"/>
+     <triangle v1="48" v2="49" v3="21"/>
+     <triangle v1="21" v2="49" v3="50"/>
+     <triangle v1="21" v2="50" v3="51"/>
+     <triangle v1="51" v2="52" v3="21"/>
+     <triangle v1="21" v2="52" v3="53"/>
+     <triangle v1="21" v2="53" v3="54"/>
+     <triangle v1="54" v2="55" v3="21"/>
+     <triangle v1="21" v2="55" v3="56"/>
+     <triangle v1="21" v2="56" v3="57"/>
+     <triangle v1="57" v2="58" v3="21"/>
+     <triangle v1="21" v2="58" v3="59"/>
+     <triangle v1="21" v2="59" v3="60"/>
+     <triangle v1="60" v2="61" v3="21"/>
+     <triangle v1="21" v2="61" v3="62"/>
+     <triangle v1="63" v2="64" v3="19"/>
+     <triangle v1="19" v2="64" v3="2"/>
+     <triangle v1="19" v2="2" v3="4"/>
+     <triangle v1="65" v2="66" v3="63"/>
+     <triangle v1="63" v2="66" v3="67"/>
+     <triangle v1="63" v2="67" v3="68"/>
+     <triangle v1="68" v2="67" v3="69"/>
+     <triangle v1="68" v2="69" v3="70"/>
+     <triangle v1="71" v2="72" v3="65"/>
+     <triangle v1="65" v2="72" v3="73"/>
+     <triangle v1="65" v2="73" v3="74"/>
+     <triangle v1="74" v2="73" v3="75"/>
+     <triangle v1="74" v2="75" v3="76"/>
+     <triangle v1="77" v2="78" v3="71"/>
+     <triangle v1="71" v2="78" v3="79"/>
+     <triangle v1="71" v2="79" v3="80"/>
+     <triangle v1="80" v2="79" v3="81"/>
+     <triangle v1="80" v2="81" v3="82"/>
+     <triangle v1="77" v2="83" v3="78"/>
+     <triangle v1="78" v2="83" v3="84"/>
+     <triangle v1="78" v2="84" v3="85"/>
+     <triangle v1="85" v2="84" v3="86"/>
+     <triangle v1="86" v2="84" v3="87"/>
+     <triangle v1="86" v2="87" v3="88"/>
+     <triangle v1="88" v2="87" v3="89"/>
+     <triangle v1="88" v2="89" v3="90"/>
+     <triangle v1="90" v2="89" v3="91"/>
+     <triangle v1="90" v2="91" v3="92"/>
+     <triangle v1="92" v2="91" v3="93"/>
+     <triangle v1="92" v2="93" v3="94"/>
+     <triangle v1="83" v2="95" v3="84"/>
+     <triangle v1="84" v2="95" v3="96"/>
+     <triangle v1="84" v2="96" v3="97"/>
+     <triangle v1="84" v2="97" v3="87"/>
+     <triangle v1="87" v2="97" v3="98"/>
+     <triangle v1="87" v2="98" v3="99"/>
+     <triangle v1="99" v2="100" v3="87"/>
+     <triangle v1="87" v2="100" v3="101"/>
+     <triangle v1="87" v2="101" v3="89"/>
+     <triangle v1="89" v2="101" v3="102"/>
+     <triangle v1="89" v2="102" v3="103"/>
+     <triangle v1="103" v2="91" v3="89"/>
+     <triangle v1="94" v2="104" v3="92"/>
+     <triangle v1="92" v2="104" v3="105"/>
+     <triangle v1="92" v2="105" v3="106"/>
+     <triangle v1="107" v2="108" v3="106"/>
+     <triangle v1="106" v2="108" v3="90"/>
+     <triangle v1="106" v2="90" v3="92"/>
+     <triangle v1="107" v2="109" v3="108"/>
+     <triangle v1="108" v2="109" v3="110"/>
+     <triangle v1="108" v2="110" v3="111"/>
+     <triangle v1="108" v2="111" v3="112"/>
+     <triangle v1="112" v2="111" v3="113"/>
+     <triangle v1="112" v2="113" v3="114"/>
+     <triangle v1="114" v2="115" v3="112"/>
+     <triangle v1="112" v2="115" v3="116"/>
+     <triangle v1="112" v2="116" v3="117"/>
+     <triangle v1="117" v2="116" v3="118"/>
+     <triangle v1="117" v2="118" v3="119"/>
+     <triangle v1="119" v2="120" v3="117"/>
+     <triangle v1="117" v2="120" v3="121"/>
+     <triangle v1="117" v2="121" v3="122"/>
+     <triangle v1="122" v2="121" v3="123"/>
+     <triangle v1="122" v2="123" v3="124"/>
+     <triangle v1="124" v2="125" v3="122"/>
+     <triangle v1="122" v2="125" v3="126"/>
+     <triangle v1="122" v2="126" v3="127"/>
+     <triangle v1="122" v2="127" v3="128"/>
+     <triangle v1="128" v2="127" v3="129"/>
+     <triangle v1="128" v2="129" v3="130"/>
+     <triangle v1="130" v2="131" v3="128"/>
+     <triangle v1="128" v2="131" v3="132"/>
+     <triangle v1="132" v2="131" v3="133"/>
+     <triangle v1="132" v2="133" v3="134"/>
+     <triangle v1="134" v2="135" v3="132"/>
+     <triangle v1="132" v2="135" v3="136"/>
+     <triangle v1="132" v2="136" v3="137"/>
+     <triangle v1="137" v2="136" v3="138"/>
+     <triangle v1="137" v2="138" v3="139"/>
+     <triangle v1="139" v2="140" v3="137"/>
+     <triangle v1="137" v2="140" v3="141"/>
+     <triangle v1="137" v2="141" v3="142"/>
+     <triangle v1="142" v2="141" v3="143"/>
+     <triangle v1="142" v2="143" v3="144"/>
+     <triangle v1="144" v2="145" v3="142"/>
+     <triangle v1="142" v2="145" v3="146"/>
+     <triangle v1="142" v2="146" v3="147"/>
+     <triangle v1="85" v2="148" v3="78"/>
+     <triangle v1="78" v2="148" v3="79"/>
+     <triangle v1="148" v2="81" v3="79"/>
+     <triangle v1="80" v2="82" v3="72"/>
+     <triangle v1="72" v2="82" v3="149"/>
+     <triangle v1="72" v2="149" v3="73"/>
+     <triangle v1="73" v2="149" v3="75"/>
+     <triangle v1="74" v2="76" v3="150"/>
+     <triangle v1="150" v2="76" v3="151"/>
+     <triangle v1="150" v2="151" v3="152"/>
+     <triangle v1="152" v2="151" v3="153"/>
+     <triangle v1="152" v2="153" v3="66"/>
+     <triangle v1="66" v2="153" v3="154"/>
+     <triangle v1="66" v2="154" v3="67"/>
+     <triangle v1="67" v2="154" v3="69"/>
+     <triangle v1="68" v2="70" v3="155"/>
+     <triangle v1="155" v2="70" v3="156"/>
+     <triangle v1="155" v2="156" v3="157"/>
+     <triangle v1="157" v2="156" v3="158"/>
+     <triangle v1="157" v2="158" v3="159"/>
+     <triangle v1="159" v2="158" v3="160"/>
+     <triangle v1="159" v2="160" v3="64"/>
+     <triangle v1="64" v2="160" v3="0"/>
+     <triangle v1="64" v2="0" v3="2"/>
+     <triangle v1="74" v2="150" v3="65"/>
+     <triangle v1="65" v2="150" v3="152"/>
+     <triangle v1="65" v2="152" v3="66"/>
+     <triangle v1="155" v2="157" v3="63"/>
+     <triangle v1="63" v2="157" v3="159"/>
+     <triangle v1="63" v2="159" v3="64"/>
+     <triangle v1="4" v2="9" v3="19"/>
+     <triangle v1="19" v2="9" v3="14"/>
+     <triangle v1="68" v2="155" v3="63"/>
+     <triangle v1="72" v2="71" v3="80"/>
+     <triangle v1="71" v2="65" v3="161"/>
+     <triangle v1="161" v2="65" v3="63"/>
+     <triangle v1="161" v2="63" v3="19"/>
+     <triangle v1="19" v2="21" v3="161"/>
+     <triangle v1="161" v2="21" v3="62"/>
+     <triangle v1="161" v2="62" v3="162"/>
+     <triangle v1="163" v2="162" v3="164"/>
+     <triangle v1="164" v2="162" v3="62"/>
+     <triangle v1="164" v2="62" v3="165"/>
+     <triangle v1="165" v2="62" v3="61"/>
+     <triangle v1="165" v2="61" v3="166"/>
+     <triangle v1="166" v2="61" v3="167"/>
+     <triangle v1="167" v2="61" v3="60"/>
+     <triangle v1="167" v2="60" v3="168"/>
+     <triangle v1="168" v2="60" v3="169"/>
+     <triangle v1="169" v2="60" v3="59"/>
+     <triangle v1="169" v2="59" v3="170"/>
+     <triangle v1="170" v2="59" v3="58"/>
+     <triangle v1="170" v2="58" v3="171"/>
+     <triangle v1="171" v2="58" v3="172"/>
+     <triangle v1="172" v2="58" v3="57"/>
+     <triangle v1="172" v2="57" v3="173"/>
+     <triangle v1="173" v2="57" v3="56"/>
+     <triangle v1="173" v2="56" v3="174"/>
+     <triangle v1="174" v2="56" v3="55"/>
+     <triangle v1="174" v2="55" v3="175"/>
+     <triangle v1="175" v2="55" v3="176"/>
+     <triangle v1="176" v2="55" v3="54"/>
+     <triangle v1="176" v2="54" v3="177"/>
+     <triangle v1="177" v2="54" v3="53"/>
+     <triangle v1="177" v2="53" v3="178"/>
+     <triangle v1="178" v2="53" v3="179"/>
+     <triangle v1="179" v2="53" v3="52"/>
+     <triangle v1="179" v2="52" v3="180"/>
+     <triangle v1="180" v2="52" v3="51"/>
+     <triangle v1="180" v2="51" v3="181"/>
+     <triangle v1="181" v2="51" v3="50"/>
+     <triangle v1="181" v2="50" v3="182"/>
+     <triangle v1="182" v2="50" v3="183"/>
+     <triangle v1="183" v2="50" v3="49"/>
+     <triangle v1="183" v2="49" v3="184"/>
+     <triangle v1="184" v2="49" v3="48"/>
+     <triangle v1="184" v2="48" v3="185"/>
+     <triangle v1="185" v2="48" v3="47"/>
+     <triangle v1="185" v2="47" v3="186"/>
+     <triangle v1="186" v2="47" v3="46"/>
+     <triangle v1="186" v2="46" v3="45"/>
+     <triangle v1="186" v2="45" v3="187"/>
+     <triangle v1="187" v2="45" v3="44"/>
+     <triangle v1="187" v2="44" v3="43"/>
+     <triangle v1="187" v2="43" v3="188"/>
+     <triangle v1="188" v2="43" v3="41"/>
+     <triangle v1="188" v2="41" v3="189"/>
+     <triangle v1="189" v2="41" v3="40"/>
+     <triangle v1="189" v2="40" v3="39"/>
+     <triangle v1="189" v2="39" v3="190"/>
+     <triangle v1="190" v2="39" v3="38"/>
+     <triangle v1="190" v2="38" v3="191"/>
+     <triangle v1="191" v2="38" v3="25"/>
+     <triangle v1="191" v2="25" v3="192"/>
+     <triangle v1="192" v2="25" v3="24"/>
+     <triangle v1="192" v2="24" v3="37"/>
+     <triangle v1="192" v2="37" v3="193"/>
+     <triangle v1="193" v2="37" v3="36"/>
+     <triangle v1="193" v2="36" v3="194"/>
+     <triangle v1="194" v2="36" v3="35"/>
+     <triangle v1="194" v2="35" v3="195"/>
+     <triangle v1="195" v2="35" v3="34"/>
+     <triangle v1="195" v2="34" v3="33"/>
+     <triangle v1="195" v2="33" v3="196"/>
+     <triangle v1="196" v2="33" v3="32"/>
+     <triangle v1="196" v2="32" v3="197"/>
+     <triangle v1="197" v2="32" v3="31"/>
+     <triangle v1="197" v2="31" v3="198"/>
+     <triangle v1="198" v2="31" v3="30"/>
+     <triangle v1="198" v2="30" v3="29"/>
+     <triangle v1="198" v2="29" v3="199"/>
+     <triangle v1="199" v2="29" v3="28"/>
+     <triangle v1="199" v2="28" v3="200"/>
+     <triangle v1="200" v2="28" v3="27"/>
+     <triangle v1="200" v2="27" v3="201"/>
+     <triangle v1="201" v2="27" v3="26"/>
+     <triangle v1="201" v2="26" v3="202"/>
+     <triangle v1="202" v2="26" v3="17"/>
+     <triangle v1="202" v2="17" v3="16"/>
+     <triangle v1="202" v2="16" v3="203"/>
+     <triangle v1="203" v2="16" v3="15"/>
+     <triangle v1="203" v2="15" v3="204"/>
+     <triangle v1="204" v2="15" v3="13"/>
+     <triangle v1="204" v2="13" v3="205"/>
+     <triangle v1="205" v2="13" v3="12"/>
+     <triangle v1="205" v2="12" v3="206"/>
+     <triangle v1="206" v2="12" v3="11"/>
+     <triangle v1="206" v2="11" v3="207"/>
+     <triangle v1="207" v2="11" v3="10"/>
+     <triangle v1="207" v2="10" v3="8"/>
+     <triangle v1="207" v2="8" v3="208"/>
+     <triangle v1="208" v2="8" v3="7"/>
+     <triangle v1="208" v2="7" v3="209"/>
+     <triangle v1="209" v2="7" v3="6"/>
+     <triangle v1="209" v2="6" v3="210"/>
+     <triangle v1="210" v2="6" v3="5"/>
+     <triangle v1="210" v2="5" v3="211"/>
+     <triangle v1="211" v2="5" v3="212"/>
+     <triangle v1="212" v2="5" v3="3"/>
+     <triangle v1="212" v2="3" v3="213"/>
+     <triangle v1="213" v2="3" v3="1"/>
+     <triangle v1="213" v2="1" v3="214"/>
+     <triangle v1="214" v2="1" v3="215"/>
+     <triangle v1="214" v2="215" v3="216"/>
+     <triangle v1="216" v2="215" v3="217"/>
+     <triangle v1="216" v2="217" v3="218"/>
+     <triangle v1="218" v2="217" v3="219"/>
+     <triangle v1="218" v2="219" v3="220"/>
+     <triangle v1="220" v2="219" v3="221"/>
+     <triangle v1="220" v2="221" v3="222"/>
+     <triangle v1="222" v2="221" v3="223"/>
+     <triangle v1="222" v2="223" v3="224"/>
+     <triangle v1="224" v2="223" v3="225"/>
+     <triangle v1="224" v2="225" v3="226"/>
+     <triangle v1="226" v2="225" v3="227"/>
+     <triangle v1="226" v2="227" v3="228"/>
+     <triangle v1="228" v2="227" v3="229"/>
+     <triangle v1="228" v2="229" v3="230"/>
+     <triangle v1="230" v2="229" v3="231"/>
+     <triangle v1="230" v2="231" v3="232"/>
+     <triangle v1="232" v2="231" v3="233"/>
+     <triangle v1="232" v2="233" v3="234"/>
+     <triangle v1="234" v2="233" v3="235"/>
+     <triangle v1="234" v2="235" v3="236"/>
+     <triangle v1="234" v2="236" v3="237"/>
+     <triangle v1="237" v2="236" v3="238"/>
+     <triangle v1="237" v2="238" v3="239"/>
+     <triangle v1="239" v2="238" v3="240"/>
+     <triangle v1="239" v2="240" v3="241"/>
+     <triangle v1="239" v2="241" v3="242"/>
+     <triangle v1="242" v2="241" v3="243"/>
+     <triangle v1="242" v2="243" v3="244"/>
+     <triangle v1="244" v2="243" v3="245"/>
+     <triangle v1="244" v2="245" v3="246"/>
+     <triangle v1="246" v2="245" v3="247"/>
+     <triangle v1="246" v2="247" v3="248"/>
+     <triangle v1="248" v2="247" v3="249"/>
+     <triangle v1="248" v2="249" v3="250"/>
+     <triangle v1="250" v2="249" v3="251"/>
+     <triangle v1="250" v2="251" v3="252"/>
+     <triangle v1="252" v2="251" v3="253"/>
+     <triangle v1="252" v2="253" v3="254"/>
+     <triangle v1="254" v2="253" v3="255"/>
+     <triangle v1="254" v2="255" v3="256"/>
+     <triangle v1="256" v2="255" v3="257"/>
+     <triangle v1="256" v2="257" v3="258"/>
+     <triangle v1="258" v2="257" v3="259"/>
+     <triangle v1="258" v2="259" v3="260"/>
+     <triangle v1="260" v2="259" v3="261"/>
+     <triangle v1="260" v2="261" v3="262"/>
+     <triangle v1="262" v2="261" v3="263"/>
+     <triangle v1="262" v2="263" v3="264"/>
+     <triangle v1="264" v2="263" v3="265"/>
+     <triangle v1="264" v2="265" v3="266"/>
+     <triangle v1="266" v2="265" v3="267"/>
+     <triangle v1="266" v2="267" v3="268"/>
+     <triangle v1="266" v2="268" v3="269"/>
+     <triangle v1="269" v2="268" v3="270"/>
+     <triangle v1="269" v2="270" v3="271"/>
+     <triangle v1="271" v2="270" v3="272"/>
+     <triangle v1="271" v2="272" v3="273"/>
+     <triangle v1="273" v2="272" v3="274"/>
+     <triangle v1="273" v2="274" v3="275"/>
+     <triangle v1="275" v2="274" v3="276"/>
+     <triangle v1="275" v2="276" v3="277"/>
+     <triangle v1="277" v2="276" v3="278"/>
+     <triangle v1="277" v2="278" v3="279"/>
+     <triangle v1="1" v2="0" v3="215"/>
+     <triangle v1="215" v2="0" v3="217"/>
+     <triangle v1="217" v2="0" v3="219"/>
+     <triangle v1="219" v2="0" v3="160"/>
+     <triangle v1="219" v2="160" v3="221"/>
+     <triangle v1="221" v2="160" v3="223"/>
+     <triangle v1="223" v2="160" v3="158"/>
+     <triangle v1="223" v2="158" v3="225"/>
+     <triangle v1="225" v2="158" v3="227"/>
+     <triangle v1="227" v2="158" v3="156"/>
+     <triangle v1="227" v2="156" v3="229"/>
+     <triangle v1="229" v2="156" v3="231"/>
+     <triangle v1="231" v2="156" v3="70"/>
+     <triangle v1="231" v2="70" v3="233"/>
+     <triangle v1="233" v2="70" v3="235"/>
+     <triangle v1="235" v2="70" v3="69"/>
+     <triangle v1="235" v2="69" v3="236"/>
+     <triangle v1="236" v2="69" v3="238"/>
+     <triangle v1="238" v2="69" v3="240"/>
+     <triangle v1="240" v2="69" v3="154"/>
+     <triangle v1="240" v2="154" v3="241"/>
+     <triangle v1="241" v2="154" v3="243"/>
+     <triangle v1="243" v2="154" v3="153"/>
+     <triangle v1="243" v2="153" v3="245"/>
+     <triangle v1="245" v2="153" v3="247"/>
+     <triangle v1="247" v2="153" v3="280"/>
+     <triangle v1="247" v2="280" v3="249"/>
+     <triangle v1="249" v2="280" v3="251"/>
+     <triangle v1="251" v2="280" v3="281"/>
+     <triangle v1="251" v2="281" v3="253"/>
+     <triangle v1="253" v2="281" v3="255"/>
+     <triangle v1="255" v2="281" v3="282"/>
+     <triangle v1="255" v2="282" v3="257"/>
+     <triangle v1="257" v2="282" v3="283"/>
+     <triangle v1="257" v2="283" v3="259"/>
+     <triangle v1="259" v2="283" v3="284"/>
+     <triangle v1="259" v2="284" v3="261"/>
+     <triangle v1="261" v2="284" v3="285"/>
+     <triangle v1="261" v2="285" v3="263"/>
+     <triangle v1="263" v2="285" v3="265"/>
+     <triangle v1="265" v2="285" v3="267"/>
+     <triangle v1="280" v2="153" v3="286"/>
+     <triangle v1="286" v2="153" v3="151"/>
+     <triangle v1="286" v2="151" v3="287"/>
+     <triangle v1="287" v2="151" v3="76"/>
+     <triangle v1="287" v2="76" v3="288"/>
+     <triangle v1="288" v2="76" v3="75"/>
+     <triangle v1="288" v2="75" v3="289"/>
+     <triangle v1="289" v2="75" v3="290"/>
+     <triangle v1="290" v2="75" v3="149"/>
+     <triangle v1="290" v2="149" v3="291"/>
+     <triangle v1="291" v2="149" v3="82"/>
+     <triangle v1="291" v2="82" v3="292"/>
+     <triangle v1="292" v2="82" v3="81"/>
+     <triangle v1="292" v2="81" v3="293"/>
+     <triangle v1="293" v2="81" v3="148"/>
+     <triangle v1="293" v2="148" v3="294"/>
+     <triangle v1="294" v2="148" v3="85"/>
+     <triangle v1="294" v2="85" v3="295"/>
+     <triangle v1="295" v2="85" v3="86"/>
+     <triangle v1="295" v2="86" v3="296"/>
+     <triangle v1="296" v2="86" v3="88"/>
+     <triangle v1="296" v2="88" v3="297"/>
+     <triangle v1="297" v2="88" v3="90"/>
+     <triangle v1="297" v2="90" v3="298"/>
+     <triangle v1="298" v2="90" v3="299"/>
+     <triangle v1="299" v2="90" v3="108"/>
+     <triangle v1="299" v2="108" v3="300"/>
+     <triangle v1="300" v2="108" v3="112"/>
+     <triangle v1="300" v2="112" v3="301"/>
+     <triangle v1="301" v2="112" v3="117"/>
+     <triangle v1="301" v2="117" v3="302"/>
+     <triangle v1="302" v2="117" v3="122"/>
+     <triangle v1="302" v2="122" v3="303"/>
+     <triangle v1="303" v2="122" v3="128"/>
+     <triangle v1="303" v2="128" v3="304"/>
+     <triangle v1="304" v2="128" v3="132"/>
+     <triangle v1="304" v2="132" v3="305"/>
+     <triangle v1="305" v2="132" v3="306"/>
+     <triangle v1="306" v2="132" v3="307"/>
+     <triangle v1="307" v2="132" v3="137"/>
+     <triangle v1="307" v2="137" v3="308"/>
+     <triangle v1="308" v2="137" v3="309"/>
+     <triangle v1="309" v2="137" v3="310"/>
+     <triangle v1="310" v2="137" v3="142"/>
+     <triangle v1="310" v2="142" v3="311"/>
+     <triangle v1="311" v2="142" v3="312"/>
+     <triangle v1="312" v2="142" v3="313"/>
+     <triangle v1="313" v2="142" v3="147"/>
+     <triangle v1="305" v2="314" v3="304"/>
+     <triangle v1="304" v2="314" v3="315"/>
+     <triangle v1="315" v2="314" v3="316"/>
+     <triangle v1="316" v2="314" v3="317"/>
+     <triangle v1="317" v2="314" v3="318"/>
+     <triangle v1="318" v2="314" v3="319"/>
+     <triangle v1="319" v2="314" v3="320"/>
+     <triangle v1="319" v2="320" v3="321"/>
+     <triangle v1="321" v2="322" v3="319"/>
+     <triangle v1="319" v2="322" v3="323"/>
+     <triangle v1="319" v2="323" v3="324"/>
+     <triangle v1="324" v2="325" v3="319"/>
+     <triangle v1="319" v2="325" v3="326"/>
+     <triangle v1="319" v2="326" v3="327"/>
+     <triangle v1="327" v2="328" v3="319"/>
+     <triangle v1="319" v2="328" v3="329"/>
+     <triangle v1="319" v2="329" v3="330"/>
+     <triangle v1="330" v2="329" v3="331"/>
+     <triangle v1="330" v2="331" v3="332"/>
+     <triangle v1="332" v2="333" v3="330"/>
+     <triangle v1="266" v2="269" v3="334"/>
+     <triangle v1="334" v2="269" v3="271"/>
+     <triangle v1="334" v2="271" v3="273"/>
+     <triangle v1="273" v2="275" v3="334"/>
+     <triangle v1="334" v2="275" v3="335"/>
+     <triangle v1="335" v2="275" v3="277"/>
+     <triangle v1="335" v2="277" v3="279"/>
+     <triangle v1="335" v2="279" v3="336"/>
+     <triangle v1="336" v2="279" v3="337"/>
+     <triangle v1="336" v2="337" v3="338"/>
+     <triangle v1="338" v2="337" v3="339"/>
+     <triangle v1="338" v2="339" v3="340"/>
+     <triangle v1="340" v2="339" v3="341"/>
+     <triangle v1="340" v2="341" v3="342"/>
+     <triangle v1="342" v2="341" v3="343"/>
+     <triangle v1="342" v2="343" v3="344"/>
+     <triangle v1="344" v2="343" v3="345"/>
+     <triangle v1="344" v2="345" v3="346"/>
+     <triangle v1="346" v2="345" v3="347"/>
+     <triangle v1="346" v2="347" v3="348"/>
+     <triangle v1="348" v2="347" v3="349"/>
+     <triangle v1="348" v2="349" v3="350"/>
+     <triangle v1="350" v2="349" v3="351"/>
+     <triangle v1="350" v2="351" v3="352"/>
+     <triangle v1="352" v2="351" v3="353"/>
+     <triangle v1="352" v2="353" v3="354"/>
+     <triangle v1="354" v2="353" v3="355"/>
+     <triangle v1="354" v2="355" v3="356"/>
+     <triangle v1="356" v2="355" v3="357"/>
+     <triangle v1="356" v2="357" v3="358"/>
+     <triangle v1="358" v2="357" v3="359"/>
+     <triangle v1="358" v2="359" v3="360"/>
+     <triangle v1="360" v2="359" v3="361"/>
+     <triangle v1="360" v2="361" v3="362"/>
+     <triangle v1="362" v2="361" v3="363"/>
+     <triangle v1="362" v2="363" v3="364"/>
+     <triangle v1="362" v2="364" v3="365"/>
+     <triangle v1="365" v2="364" v3="366"/>
+     <triangle v1="365" v2="366" v3="367"/>
+     <triangle v1="367" v2="366" v3="368"/>
+     <triangle v1="367" v2="368" v3="369"/>
+     <triangle v1="369" v2="368" v3="370"/>
+     <triangle v1="369" v2="370" v3="371"/>
+     <triangle v1="371" v2="370" v3="372"/>
+     <triangle v1="371" v2="372" v3="373"/>
+     <triangle v1="373" v2="372" v3="374"/>
+     <triangle v1="373" v2="374" v3="375"/>
+     <triangle v1="375" v2="374" v3="376"/>
+     <triangle v1="375" v2="376" v3="377"/>
+     <triangle v1="377" v2="376" v3="378"/>
+     <triangle v1="377" v2="378" v3="379"/>
+     <triangle v1="379" v2="378" v3="380"/>
+     <triangle v1="379" v2="380" v3="381"/>
+     <triangle v1="381" v2="380" v3="382"/>
+     <triangle v1="381" v2="382" v3="383"/>
+     <triangle v1="383" v2="382" v3="384"/>
+     <triangle v1="383" v2="384" v3="385"/>
+     <triangle v1="385" v2="384" v3="386"/>
+     <triangle v1="385" v2="386" v3="387"/>
+     <triangle v1="387" v2="386" v3="388"/>
+     <triangle v1="387" v2="388" v3="389"/>
+     <triangle v1="389" v2="388" v3="390"/>
+     <triangle v1="389" v2="390" v3="391"/>
+     <triangle v1="391" v2="390" v3="392"/>
+     <triangle v1="391" v2="392" v3="393"/>
+     <triangle v1="393" v2="392" v3="394"/>
+     <triangle v1="393" v2="394" v3="395"/>
+     <triangle v1="395" v2="394" v3="396"/>
+     <triangle v1="395" v2="396" v3="397"/>
+     <triangle v1="397" v2="396" v3="398"/>
+     <triangle v1="397" v2="398" v3="399"/>
+     <triangle v1="399" v2="398" v3="400"/>
+     <triangle v1="400" v2="398" v3="401"/>
+     <triangle v1="401" v2="398" v3="402"/>
+     <triangle v1="401" v2="402" v3="403"/>
+     <triangle v1="403" v2="402" v3="404"/>
+     <triangle v1="266" v2="334" v3="264"/>
+     <triangle v1="264" v2="334" v3="262"/>
+     <triangle v1="262" v2="334" v3="260"/>
+     <triangle v1="260" v2="334" v3="335"/>
+     <triangle v1="260" v2="335" v3="258"/>
+     <triangle v1="258" v2="335" v3="336"/>
+     <triangle v1="258" v2="336" v3="256"/>
+     <triangle v1="256" v2="336" v3="338"/>
+     <triangle v1="256" v2="338" v3="254"/>
+     <triangle v1="254" v2="338" v3="252"/>
+     <triangle v1="252" v2="338" v3="340"/>
+     <triangle v1="252" v2="340" v3="250"/>
+     <triangle v1="250" v2="340" v3="248"/>
+     <triangle v1="248" v2="340" v3="246"/>
+     <triangle v1="246" v2="340" v3="342"/>
+     <triangle v1="246" v2="342" v3="244"/>
+     <triangle v1="244" v2="342" v3="242"/>
+     <triangle v1="242" v2="342" v3="344"/>
+     <triangle v1="242" v2="344" v3="239"/>
+     <triangle v1="239" v2="344" v3="237"/>
+     <triangle v1="237" v2="344" v3="346"/>
+     <triangle v1="237" v2="346" v3="234"/>
+     <triangle v1="234" v2="346" v3="232"/>
+     <triangle v1="232" v2="346" v3="405"/>
+     <triangle v1="232" v2="405" v3="230"/>
+     <triangle v1="230" v2="405" v3="228"/>
+     <triangle v1="228" v2="405" v3="226"/>
+     <triangle v1="226" v2="405" v3="224"/>
+     <triangle v1="224" v2="405" v3="222"/>
+     <triangle v1="222" v2="405" v3="220"/>
+     <triangle v1="220" v2="405" v3="218"/>
+     <triangle v1="218" v2="405" v3="216"/>
+     <triangle v1="216" v2="405" v3="214"/>
+     <triangle v1="214" v2="405" v3="213"/>
+     <triangle v1="213" v2="405" v3="212"/>
+     <triangle v1="212" v2="405" v3="211"/>
+     <triangle v1="211" v2="405" v3="210"/>
+     <triangle v1="210" v2="405" v3="209"/>
+     <triangle v1="209" v2="405" v3="208"/>
+     <triangle v1="208" v2="405" v3="207"/>
+     <triangle v1="207" v2="405" v3="206"/>
+     <triangle v1="206" v2="405" v3="205"/>
+     <triangle v1="205" v2="405" v3="204"/>
+     <triangle v1="204" v2="405" v3="203"/>
+     <triangle v1="203" v2="405" v3="202"/>
+     <triangle v1="202" v2="405" v3="201"/>
+     <triangle v1="201" v2="405" v3="200"/>
+     <triangle v1="200" v2="405" v3="199"/>
+     <triangle v1="199" v2="405" v3="198"/>
+     <triangle v1="198" v2="405" v3="197"/>
+     <triangle v1="197" v2="405" v3="196"/>
+     <triangle v1="196" v2="405" v3="195"/>
+     <triangle v1="195" v2="405" v3="194"/>
+     <triangle v1="194" v2="405" v3="193"/>
+     <triangle v1="193" v2="405" v3="192"/>
+     <triangle v1="192" v2="405" v3="191"/>
+     <triangle v1="191" v2="405" v3="406"/>
+     <triangle v1="191" v2="406" v3="407"/>
+     <triangle v1="346" v2="348" v3="405"/>
+     <triangle v1="405" v2="348" v3="350"/>
+     <triangle v1="405" v2="350" v3="352"/>
+     <triangle v1="352" v2="354" v3="405"/>
+     <triangle v1="405" v2="354" v3="356"/>
+     <triangle v1="405" v2="356" v3="358"/>
+     <triangle v1="358" v2="360" v3="405"/>
+     <triangle v1="405" v2="360" v3="362"/>
+     <triangle v1="405" v2="362" v3="365"/>
+     <triangle v1="365" v2="367" v3="405"/>
+     <triangle v1="405" v2="367" v3="369"/>
+     <triangle v1="405" v2="369" v3="408"/>
+     <triangle v1="408" v2="369" v3="409"/>
+     <triangle v1="409" v2="369" v3="371"/>
+     <triangle v1="409" v2="371" v3="410"/>
+     <triangle v1="410" v2="371" v3="411"/>
+     <triangle v1="411" v2="371" v3="373"/>
+     <triangle v1="411" v2="373" v3="412"/>
+     <triangle v1="412" v2="373" v3="375"/>
+     <triangle v1="412" v2="375" v3="413"/>
+     <triangle v1="413" v2="375" v3="414"/>
+     <triangle v1="414" v2="375" v3="377"/>
+     <triangle v1="414" v2="377" v3="415"/>
+     <triangle v1="415" v2="377" v3="379"/>
+     <triangle v1="415" v2="379" v3="381"/>
+     <triangle v1="381" v2="383" v3="415"/>
+     <triangle v1="415" v2="383" v3="385"/>
+     <triangle v1="415" v2="385" v3="387"/>
+     <triangle v1="387" v2="389" v3="415"/>
+     <triangle v1="415" v2="389" v3="391"/>
+     <triangle v1="415" v2="391" v3="393"/>
+     <triangle v1="395" v2="416" v3="393"/>
+     <triangle v1="393" v2="416" v3="417"/>
+     <triangle v1="393" v2="417" v3="418"/>
+     <triangle v1="418" v2="419" v3="393"/>
+     <triangle v1="393" v2="419" v3="420"/>
+     <triangle v1="393" v2="420" v3="421"/>
+     <triangle v1="421" v2="422" v3="393"/>
+     <triangle v1="393" v2="422" v3="423"/>
+     <triangle v1="393" v2="423" v3="424"/>
+     <triangle v1="424" v2="425" v3="393"/>
+     <triangle v1="393" v2="425" v3="426"/>
+     <triangle v1="393" v2="426" v3="427"/>
+     <triangle v1="427" v2="428" v3="393"/>
+     <triangle v1="393" v2="428" v3="415"/>
+     <triangle v1="407" v2="429" v3="191"/>
+     <triangle v1="191" v2="429" v3="430"/>
+     <triangle v1="191" v2="430" v3="431"/>
+     <triangle v1="431" v2="432" v3="191"/>
+     <triangle v1="191" v2="432" v3="433"/>
+     <triangle v1="191" v2="433" v3="190"/>
+     <triangle v1="190" v2="433" v3="434"/>
+     <triangle v1="190" v2="434" v3="435"/>
+     <triangle v1="435" v2="436" v3="190"/>
+     <triangle v1="190" v2="436" v3="437"/>
+     <triangle v1="190" v2="437" v3="438"/>
+     <triangle v1="190" v2="438" v3="189"/>
+     <triangle v1="189" v2="438" v3="439"/>
+     <triangle v1="189" v2="439" v3="440"/>
+     <triangle v1="440" v2="441" v3="189"/>
+     <triangle v1="189" v2="441" v3="442"/>
+     <triangle v1="189" v2="442" v3="188"/>
+     <triangle v1="188" v2="442" v3="443"/>
+     <triangle v1="188" v2="443" v3="444"/>
+     <triangle v1="444" v2="445" v3="188"/>
+     <triangle v1="188" v2="445" v3="187"/>
+     <triangle v1="187" v2="445" v3="446"/>
+     <triangle v1="187" v2="446" v3="447"/>
+     <triangle v1="187" v2="447" v3="186"/>
+     <triangle v1="186" v2="447" v3="448"/>
+     <triangle v1="186" v2="448" v3="449"/>
+     <triangle v1="186" v2="449" v3="185"/>
+     <triangle v1="185" v2="449" v3="450"/>
+     <triangle v1="185" v2="450" v3="451"/>
+     <triangle v1="185" v2="451" v3="184"/>
+     <triangle v1="184" v2="451" v3="452"/>
+     <triangle v1="184" v2="452" v3="453"/>
+     <triangle v1="184" v2="453" v3="183"/>
+     <triangle v1="183" v2="453" v3="454"/>
+     <triangle v1="183" v2="454" v3="455"/>
+     <triangle v1="183" v2="455" v3="182"/>
+     <triangle v1="182" v2="455" v3="456"/>
+     <triangle v1="182" v2="456" v3="181"/>
+     <triangle v1="181" v2="456" v3="457"/>
+     <triangle v1="181" v2="457" v3="458"/>
+     <triangle v1="181" v2="458" v3="180"/>
+     <triangle v1="180" v2="458" v3="459"/>
+     <triangle v1="180" v2="459" v3="179"/>
+     <triangle v1="179" v2="459" v3="460"/>
+     <triangle v1="179" v2="460" v3="178"/>
+     <triangle v1="178" v2="460" v3="461"/>
+     <triangle v1="178" v2="461" v3="462"/>
+     <triangle v1="178" v2="462" v3="177"/>
+     <triangle v1="177" v2="462" v3="463"/>
+     <triangle v1="177" v2="463" v3="176"/>
+     <triangle v1="176" v2="463" v3="464"/>
+     <triangle v1="176" v2="464" v3="175"/>
+     <triangle v1="175" v2="464" v3="465"/>
+     <triangle v1="175" v2="465" v3="466"/>
+     <triangle v1="175" v2="466" v3="174"/>
+     <triangle v1="174" v2="466" v3="467"/>
+     <triangle v1="174" v2="467" v3="173"/>
+     <triangle v1="173" v2="467" v3="468"/>
+     <triangle v1="173" v2="468" v3="172"/>
+     <triangle v1="172" v2="468" v3="469"/>
+     <triangle v1="172" v2="469" v3="171"/>
+     <triangle v1="171" v2="469" v3="470"/>
+     <triangle v1="171" v2="470" v3="170"/>
+     <triangle v1="170" v2="470" v3="471"/>
+     <triangle v1="170" v2="471" v3="472"/>
+     <triangle v1="170" v2="472" v3="169"/>
+     <triangle v1="169" v2="472" v3="473"/>
+     <triangle v1="169" v2="473" v3="168"/>
+     <triangle v1="168" v2="473" v3="474"/>
+     <triangle v1="168" v2="474" v3="167"/>
+     <triangle v1="167" v2="474" v3="475"/>
+     <triangle v1="167" v2="475" v3="166"/>
+     <triangle v1="166" v2="475" v3="476"/>
+     <triangle v1="166" v2="476" v3="165"/>
+     <triangle v1="165" v2="476" v3="477"/>
+     <triangle v1="165" v2="477" v3="164"/>
+     <triangle v1="164" v2="477" v3="478"/>
+     <triangle v1="164" v2="478" v3="163"/>
+     <triangle v1="161" v2="478" v3="71"/>
+     <triangle v1="71" v2="478" v3="477"/>
+     <triangle v1="71" v2="477" v3="77"/>
+     <triangle v1="77" v2="477" v3="476"/>
+     <triangle v1="77" v2="476" v3="475"/>
+     <triangle v1="162" v2="163" v3="161"/>
+     <triangle v1="161" v2="163" v3="478"/>
+     <triangle v1="77" v2="475" v3="83"/>
+     <triangle v1="83" v2="475" v3="474"/>
+     <triangle v1="83" v2="474" v3="473"/>
+     <triangle v1="83" v2="473" v3="95"/>
+     <triangle v1="95" v2="473" v3="472"/>
+     <triangle v1="95" v2="472" v3="96"/>
+     <triangle v1="96" v2="472" v3="471"/>
+     <triangle v1="96" v2="471" v3="470"/>
+     <triangle v1="96" v2="470" v3="97"/>
+     <triangle v1="97" v2="470" v3="469"/>
+     <triangle v1="97" v2="469" v3="98"/>
+     <triangle v1="98" v2="469" v3="468"/>
+     <triangle v1="98" v2="468" v3="99"/>
+     <triangle v1="99" v2="468" v3="467"/>
+     <triangle v1="99" v2="467" v3="466"/>
+     <triangle v1="99" v2="466" v3="100"/>
+     <triangle v1="100" v2="466" v3="465"/>
+     <triangle v1="100" v2="465" v3="101"/>
+     <triangle v1="101" v2="465" v3="464"/>
+     <triangle v1="101" v2="464" v3="463"/>
+     <triangle v1="101" v2="463" v3="102"/>
+     <triangle v1="102" v2="463" v3="462"/>
+     <triangle v1="102" v2="462" v3="103"/>
+     <triangle v1="103" v2="462" v3="461"/>
+     <triangle v1="103" v2="461" v3="91"/>
+     <triangle v1="91" v2="461" v3="460"/>
+     <triangle v1="91" v2="460" v3="459"/>
+     <triangle v1="91" v2="459" v3="93"/>
+     <triangle v1="93" v2="459" v3="458"/>
+     <triangle v1="93" v2="458" v3="94"/>
+     <triangle v1="94" v2="458" v3="457"/>
+     <triangle v1="94" v2="457" v3="104"/>
+     <triangle v1="104" v2="457" v3="105"/>
+     <triangle v1="105" v2="457" v3="456"/>
+     <triangle v1="105" v2="456" v3="106"/>
+     <triangle v1="106" v2="456" v3="455"/>
+     <triangle v1="106" v2="455" v3="107"/>
+     <triangle v1="107" v2="455" v3="109"/>
+     <triangle v1="109" v2="455" v3="454"/>
+     <triangle v1="109" v2="454" v3="110"/>
+     <triangle v1="110" v2="454" v3="453"/>
+     <triangle v1="110" v2="453" v3="111"/>
+     <triangle v1="111" v2="453" v3="113"/>
+     <triangle v1="113" v2="453" v3="452"/>
+     <triangle v1="113" v2="452" v3="114"/>
+     <triangle v1="114" v2="452" v3="451"/>
+     <triangle v1="114" v2="451" v3="115"/>
+     <triangle v1="115" v2="451" v3="450"/>
+     <triangle v1="115" v2="450" v3="116"/>
+     <triangle v1="116" v2="450" v3="118"/>
+     <triangle v1="118" v2="450" v3="449"/>
+     <triangle v1="118" v2="449" v3="119"/>
+     <triangle v1="119" v2="449" v3="448"/>
+     <triangle v1="119" v2="448" v3="120"/>
+     <triangle v1="120" v2="448" v3="121"/>
+     <triangle v1="121" v2="448" v3="447"/>
+     <triangle v1="121" v2="447" v3="123"/>
+     <triangle v1="123" v2="447" v3="446"/>
+     <triangle v1="123" v2="446" v3="124"/>
+     <triangle v1="124" v2="446" v3="445"/>
+     <triangle v1="124" v2="445" v3="125"/>
+     <triangle v1="125" v2="445" v3="444"/>
+     <triangle v1="125" v2="444" v3="126"/>
+     <triangle v1="126" v2="444" v3="127"/>
+     <triangle v1="127" v2="444" v3="443"/>
+     <triangle v1="127" v2="443" v3="129"/>
+     <triangle v1="129" v2="443" v3="442"/>
+     <triangle v1="129" v2="442" v3="130"/>
+     <triangle v1="130" v2="442" v3="441"/>
+     <triangle v1="130" v2="441" v3="131"/>
+     <triangle v1="131" v2="441" v3="440"/>
+     <triangle v1="131" v2="440" v3="133"/>
+     <triangle v1="133" v2="440" v3="134"/>
+     <triangle v1="134" v2="440" v3="439"/>
+     <triangle v1="134" v2="439" v3="135"/>
+     <triangle v1="135" v2="439" v3="438"/>
+     <triangle v1="135" v2="438" v3="136"/>
+     <triangle v1="136" v2="438" v3="437"/>
+     <triangle v1="136" v2="437" v3="138"/>
+     <triangle v1="138" v2="437" v3="436"/>
+     <triangle v1="138" v2="436" v3="139"/>
+     <triangle v1="139" v2="436" v3="435"/>
+     <triangle v1="139" v2="435" v3="140"/>
+     <triangle v1="140" v2="435" v3="141"/>
+     <triangle v1="141" v2="435" v3="434"/>
+     <triangle v1="141" v2="434" v3="143"/>
+     <triangle v1="143" v2="434" v3="433"/>
+     <triangle v1="143" v2="433" v3="144"/>
+     <triangle v1="144" v2="433" v3="432"/>
+     <triangle v1="144" v2="432" v3="145"/>
+     <triangle v1="145" v2="432" v3="431"/>
+     <triangle v1="145" v2="431" v3="430"/>
+     <triangle v1="145" v2="430" v3="146"/>
+     <triangle v1="146" v2="430" v3="429"/>
+     <triangle v1="146" v2="429" v3="147"/>
+     <triangle v1="147" v2="429" v3="407"/>
+     <triangle v1="147" v2="407" v3="313"/>
+     <triangle v1="313" v2="407" v3="406"/>
+     <triangle v1="313" v2="406" v3="312"/>
+     <triangle v1="312" v2="406" v3="405"/>
+     <triangle v1="312" v2="405" v3="311"/>
+     <triangle v1="311" v2="405" v3="408"/>
+     <triangle v1="311" v2="408" v3="310"/>
+     <triangle v1="310" v2="408" v3="409"/>
+     <triangle v1="310" v2="409" v3="309"/>
+     <triangle v1="309" v2="409" v3="410"/>
+     <triangle v1="309" v2="410" v3="308"/>
+     <triangle v1="308" v2="410" v3="411"/>
+     <triangle v1="308" v2="411" v3="307"/>
+     <triangle v1="307" v2="411" v3="412"/>
+     <triangle v1="307" v2="412" v3="306"/>
+     <triangle v1="306" v2="412" v3="413"/>
+     <triangle v1="306" v2="413" v3="305"/>
+     <triangle v1="305" v2="413" v3="414"/>
+     <triangle v1="305" v2="414" v3="314"/>
+     <triangle v1="314" v2="414" v3="415"/>
+     <triangle v1="314" v2="415" v3="320"/>
+     <triangle v1="320" v2="415" v3="428"/>
+     <triangle v1="320" v2="428" v3="321"/>
+     <triangle v1="321" v2="428" v3="427"/>
+     <triangle v1="321" v2="427" v3="322"/>
+     <triangle v1="322" v2="427" v3="426"/>
+     <triangle v1="322" v2="426" v3="323"/>
+     <triangle v1="323" v2="426" v3="425"/>
+     <triangle v1="323" v2="425" v3="424"/>
+     <triangle v1="323" v2="424" v3="324"/>
+     <triangle v1="324" v2="424" v3="423"/>
+     <triangle v1="324" v2="423" v3="422"/>
+     <triangle v1="324" v2="422" v3="325"/>
+     <triangle v1="325" v2="422" v3="421"/>
+     <triangle v1="325" v2="421" v3="326"/>
+     <triangle v1="326" v2="421" v3="420"/>
+     <triangle v1="326" v2="420" v3="327"/>
+     <triangle v1="327" v2="420" v3="419"/>
+     <triangle v1="327" v2="419" v3="328"/>
+     <triangle v1="328" v2="419" v3="418"/>
+     <triangle v1="328" v2="418" v3="329"/>
+     <triangle v1="329" v2="418" v3="417"/>
+     <triangle v1="329" v2="417" v3="331"/>
+     <triangle v1="331" v2="417" v3="416"/>
+     <triangle v1="331" v2="416" v3="332"/>
+     <triangle v1="332" v2="416" v3="395"/>
+     <triangle v1="332" v2="395" v3="333"/>
+     <triangle v1="333" v2="395" v3="397"/>
+     <triangle v1="333" v2="397" v3="479"/>
+     <triangle v1="479" v2="397" v3="480"/>
+     <triangle v1="480" v2="397" v3="399"/>
+     <triangle v1="480" v2="399" v3="400"/>
+     <triangle v1="480" v2="400" v3="481"/>
+     <triangle v1="481" v2="400" v3="401"/>
+     <triangle v1="481" v2="401" v3="482"/>
+     <triangle v1="482" v2="401" v3="403"/>
+     <triangle v1="482" v2="403" v3="483"/>
+     <triangle v1="483" v2="403" v3="404"/>
+     <triangle v1="483" v2="404" v3="484"/>
+     <triangle v1="485" v2="278" v3="283"/>
+     <triangle v1="283" v2="278" v3="276"/>
+     <triangle v1="283" v2="276" v3="284"/>
+     <triangle v1="284" v2="276" v3="274"/>
+     <triangle v1="284" v2="274" v3="285"/>
+     <triangle v1="285" v2="274" v3="272"/>
+     <triangle v1="285" v2="272" v3="270"/>
+     <triangle v1="270" v2="268" v3="285"/>
+     <triangle v1="285" v2="268" v3="267"/>
+     <triangle v1="283" v2="282" v3="485"/>
+     <triangle v1="485" v2="282" v3="486"/>
+     <triangle v1="486" v2="282" v3="281"/>
+     <triangle v1="486" v2="281" v3="487"/>
+     <triangle v1="487" v2="281" v3="280"/>
+     <triangle v1="487" v2="280" v3="488"/>
+     <triangle v1="488" v2="280" v3="286"/>
+     <triangle v1="488" v2="286" v3="489"/>
+     <triangle v1="489" v2="286" v3="287"/>
+     <triangle v1="489" v2="287" v3="490"/>
+     <triangle v1="490" v2="287" v3="288"/>
+     <triangle v1="490" v2="288" v3="491"/>
+     <triangle v1="491" v2="288" v3="289"/>
+     <triangle v1="491" v2="289" v3="492"/>
+     <triangle v1="492" v2="289" v3="290"/>
+     <triangle v1="492" v2="290" v3="493"/>
+     <triangle v1="493" v2="290" v3="291"/>
+     <triangle v1="493" v2="291" v3="494"/>
+     <triangle v1="494" v2="291" v3="292"/>
+     <triangle v1="494" v2="292" v3="495"/>
+     <triangle v1="495" v2="292" v3="293"/>
+     <triangle v1="495" v2="293" v3="496"/>
+     <triangle v1="496" v2="293" v3="294"/>
+     <triangle v1="496" v2="294" v3="497"/>
+     <triangle v1="497" v2="294" v3="295"/>
+     <triangle v1="497" v2="295" v3="498"/>
+     <triangle v1="498" v2="295" v3="499"/>
+     <triangle v1="499" v2="295" v3="296"/>
+     <triangle v1="499" v2="296" v3="500"/>
+     <triangle v1="500" v2="296" v3="297"/>
+     <triangle v1="500" v2="297" v3="501"/>
+     <triangle v1="501" v2="297" v3="298"/>
+     <triangle v1="501" v2="298" v3="502"/>
+     <triangle v1="502" v2="298" v3="299"/>
+     <triangle v1="502" v2="299" v3="503"/>
+     <triangle v1="503" v2="299" v3="300"/>
+     <triangle v1="503" v2="300" v3="504"/>
+     <triangle v1="504" v2="300" v3="301"/>
+     <triangle v1="504" v2="301" v3="505"/>
+     <triangle v1="505" v2="301" v3="302"/>
+     <triangle v1="505" v2="302" v3="506"/>
+     <triangle v1="506" v2="302" v3="303"/>
+     <triangle v1="506" v2="303" v3="507"/>
+     <triangle v1="507" v2="303" v3="304"/>
+     <triangle v1="507" v2="304" v3="508"/>
+     <triangle v1="508" v2="304" v3="315"/>
+     <triangle v1="508" v2="315" v3="509"/>
+     <triangle v1="509" v2="315" v3="316"/>
+     <triangle v1="509" v2="316" v3="510"/>
+     <triangle v1="510" v2="316" v3="317"/>
+     <triangle v1="510" v2="317" v3="511"/>
+     <triangle v1="511" v2="317" v3="318"/>
+     <triangle v1="511" v2="318" v3="512"/>
+     <triangle v1="512" v2="318" v3="319"/>
+     <triangle v1="512" v2="319" v3="513"/>
+     <triangle v1="513" v2="319" v3="330"/>
+     <triangle v1="513" v2="330" v3="514"/>
+     <triangle v1="514" v2="330" v3="333"/>
+     <triangle v1="514" v2="333" v3="515"/>
+     <triangle v1="515" v2="333" v3="479"/>
+     <triangle v1="515" v2="479" v3="480"/>
+     <triangle v1="515" v2="480" v3="516"/>
+     <triangle v1="516" v2="480" v3="481"/>
+     <triangle v1="516" v2="481" v3="482"/>
+     <triangle v1="516" v2="482" v3="517"/>
+     <triangle v1="517" v2="482" v3="483"/>
+     <triangle v1="517" v2="483" v3="484"/>
+     <triangle v1="484" v2="404" v3="517"/>
+     <triangle v1="517" v2="404" v3="402"/>
+     <triangle v1="517" v2="402" v3="516"/>
+     <triangle v1="516" v2="402" v3="398"/>
+     <triangle v1="516" v2="398" v3="515"/>
+     <triangle v1="515" v2="398" v3="396"/>
+     <triangle v1="515" v2="396" v3="514"/>
+     <triangle v1="514" v2="396" v3="394"/>
+     <triangle v1="514" v2="394" v3="513"/>
+     <triangle v1="513" v2="394" v3="392"/>
+     <triangle v1="513" v2="392" v3="512"/>
+     <triangle v1="512" v2="392" v3="390"/>
+     <triangle v1="512" v2="390" v3="511"/>
+     <triangle v1="511" v2="390" v3="388"/>
+     <triangle v1="511" v2="388" v3="510"/>
+     <triangle v1="510" v2="388" v3="386"/>
+     <triangle v1="510" v2="386" v3="509"/>
+     <triangle v1="509" v2="386" v3="384"/>
+     <triangle v1="509" v2="384" v3="508"/>
+     <triangle v1="508" v2="384" v3="382"/>
+     <triangle v1="508" v2="382" v3="507"/>
+     <triangle v1="507" v2="382" v3="380"/>
+     <triangle v1="507" v2="380" v3="506"/>
+     <triangle v1="506" v2="380" v3="378"/>
+     <triangle v1="506" v2="378" v3="505"/>
+     <triangle v1="505" v2="378" v3="376"/>
+     <triangle v1="505" v2="376" v3="504"/>
+     <triangle v1="504" v2="376" v3="374"/>
+     <triangle v1="504" v2="374" v3="503"/>
+     <triangle v1="503" v2="374" v3="372"/>
+     <triangle v1="503" v2="372" v3="502"/>
+     <triangle v1="502" v2="372" v3="370"/>
+     <triangle v1="502" v2="370" v3="501"/>
+     <triangle v1="501" v2="370" v3="368"/>
+     <triangle v1="501" v2="368" v3="500"/>
+     <triangle v1="500" v2="368" v3="366"/>
+     <triangle v1="500" v2="366" v3="499"/>
+     <triangle v1="499" v2="366" v3="364"/>
+     <triangle v1="499" v2="364" v3="498"/>
+     <triangle v1="498" v2="364" v3="363"/>
+     <triangle v1="498" v2="363" v3="497"/>
+     <triangle v1="497" v2="363" v3="361"/>
+     <triangle v1="497" v2="361" v3="496"/>
+     <triangle v1="496" v2="361" v3="359"/>
+     <triangle v1="496" v2="359" v3="495"/>
+     <triangle v1="495" v2="359" v3="357"/>
+     <triangle v1="495" v2="357" v3="494"/>
+     <triangle v1="494" v2="357" v3="355"/>
+     <triangle v1="494" v2="355" v3="493"/>
+     <triangle v1="493" v2="355" v3="353"/>
+     <triangle v1="493" v2="353" v3="492"/>
+     <triangle v1="492" v2="353" v3="351"/>
+     <triangle v1="492" v2="351" v3="491"/>
+     <triangle v1="491" v2="351" v3="349"/>
+     <triangle v1="491" v2="349" v3="490"/>
+     <triangle v1="490" v2="349" v3="347"/>
+     <triangle v1="490" v2="347" v3="489"/>
+     <triangle v1="489" v2="347" v3="345"/>
+     <triangle v1="489" v2="345" v3="488"/>
+     <triangle v1="488" v2="345" v3="343"/>
+     <triangle v1="488" v2="343" v3="487"/>
+     <triangle v1="487" v2="343" v3="341"/>
+     <triangle v1="487" v2="341" v3="486"/>
+     <triangle v1="486" v2="341" v3="339"/>
+     <triangle v1="486" v2="339" v3="485"/>
+     <triangle v1="485" v2="339" v3="337"/>
+     <triangle v1="485" v2="337" v3="278"/>
+     <triangle v1="278" v2="337" v3="279"/>
+    </triangles>
+   </mesh>
+  </object>
+  <object id="6" p:UUID="00030005-81cb-4c03-9d28-80fed5dfa1dc" type="model">
+   <mesh>
+    <vertices>
+     <vertex x="4.97071838" y="-0.427292824" z="2.47201109"/>
+     <vertex x="2.34252429" y="2.75996065" z="1.5"/>
+     <vertex x="4.99043846" y="-0.564508438" z="2.5"/>
+     <vertex x="2.24634218" y="2.68382621" z="1.5"/>
+     <vertex x="4.80389452" y="-0.710639954" z="2.5"/>
+     <vertex x="2.14812088" y="2.61034179" z="1.5"/>
+     <vertex x="4.61346197" y="-0.851666451" z="2.5"/>
+     <vertex x="2.04793286" y="2.53956175" z="1.5"/>
+     <vertex x="4.41928053" y="-0.987483978" z="2.5"/>
+     <vertex x="1.94585299" y="2.47153878" z="1.5"/>
+     <vertex x="4.22149181" y="-1.11799383" z="2.5"/>
+     <vertex x="1.84195685" y="2.40632343" z="1.5"/>
+     <vertex x="4.02024174" y="-1.24309969" z="2.5"/>
+     <vertex x="1.73632169" y="2.34396434" z="1.5"/>
+     <vertex x="3.81567812" y="-1.36271" z="2.5"/>
+     <vertex x="1.62902617" y="2.28450775" z="1.5"/>
+     <vertex x="3.60795021" y="-1.47673702" z="2.5"/>
+     <vertex x="1.52014995" y="2.22799778" z="1.5"/>
+     <vertex x="3.39721036" y="-1.58509731" z="2.5"/>
+     <vertex x="1.40977371" y="2.17447615" z="1.5"/>
+     <vertex x="3.18361378" y="-1.68771076" z="2.5"/>
+     <vertex x="1.29797983" y="2.12398338" z="1.5"/>
+     <vertex x="2.96731687" y="-1.78450298" z="2.5"/>
+     <vertex x="1.18485105" y="2.07655621" z="1.5"/>
+     <vertex x="2.74847817" y="-1.8754015" z="2.5"/>
+     <vertex x="1.07047164" y="2.03223038" z="1.5"/>
+     <vertex x="2.52725816" y="-1.96034145" z="2.5"/>
+     <vertex x="0.95492661" y="1.9910388" z="1.5"/>
+     <vertex x="2.30381918" y="-2.03925991" z="2.5"/>
+     <vertex x="0.838301659" y="1.95301151" z="1.5"/>
+     <vertex x="2.07832527" y="-2.11209869" z="2.5"/>
+     <vertex x="0.720683455" y="1.9181776" z="1.5"/>
+     <vertex x="1.85094142" y="-2.1788044" z="2.5"/>
+     <vertex x="0.602159619" y="1.88656235" z="1.5"/>
+     <vertex x="1.62183475" y="-2.23932838" z="2.5"/>
+     <vertex x="0.482818007" y="1.85818958" z="1.5"/>
+     <vertex x="1.39117301" y="-2.29362583" z="2.5"/>
+     <vertex x="0.362747431" y="1.83308029" z="1.5"/>
+     <vertex x="1.15912545" y="-2.34165764" z="2.5"/>
+     <vertex x="0.242036998" y="1.81125307" z="1.5"/>
+     <vertex x="0.925862432" y="-2.38338757" z="2.5"/>
+     <vertex x="0.0679309368" y="2.45367408" z="1.34423256"/>
+     <vertex x="0.120948613" y="1.79274797" z="1.5"/>
+     <vertex x="0.0687031746" y="2.31486607" z="1.3765533"/>
+     <vertex x="0.0677216649" y="2.1759944" z="1.40885448"/>
+     <vertex x="4.94862366" y="-0.291134834" z="2.44399261"/>
+     <vertex x="4.92414474" y="-0.15601635" z="2.4159317"/>
+     <vertex x="2.43652415" y="2.83862734" z="1.5"/>
+     <vertex x="4.8972702" y="-0.02191782" z="2.38781595"/>
+     <vertex x="4.86798906" y="0.111178875" z="2.35963249"/>
+     <vertex x="4.83629084" y="0.243292332" z="2.33136797"/>
+     <vertex x="2.52848554" y="2.9199512" z="1.5"/>
+     <vertex x="-0.332764208" y="6.06255865" z="0.5"/>
+     <vertex x="2.61812663" y="3.00368834" z="1.5"/>
+     <vertex x="2.70545197" y="3.08983779" z="1.5"/>
+     <vertex x="4.545825" y="1.14214802" z="2.13019466"/>
+     <vertex x="4.49440384" y="1.26707554" z="2.10082769"/>
+     <vertex x="4.80216551" y="0.374442101" z="2.30301046"/>
+     <vertex x="4.76560116" y="0.504646778" z="2.2745471"/>
+     <vertex x="4.7265873" y="0.633924961" z="2.245965"/>
+     <vertex x="4.68511391" y="0.762295246" z="2.2172513"/>
+     <vertex x="4.64116907" y="0.889776707" z="2.18839359"/>
+     <vertex x="4.59474325" y="1.01638842" z="2.15937853"/>
+     <vertex x="4.44046831" y="1.39118958" z="2.07126617"/>
+     <vertex x="4.38400888" y="1.51450825" z="2.04149675"/>
+     <vertex x="4.32501364" y="1.63705063" z="2.01150703"/>
+     <vertex x="2.79039669" y="3.17833543" z="1.5"/>
+     <vertex x="4.26347303" y="1.75883579" z="1.98128366"/>
+     <vertex x="4.19937515" y="1.87988234" z="1.95081472"/>
+     <vertex x="4.1327095" y="2.00020933" z="1.92008686"/>
+     <vertex x="4.06346607" y="2.1198349" z="1.88908768"/>
+     <vertex x="2.87289762" y="3.26911545" z="1.5"/>
+     <vertex x="3.99175072" y="2.23858643" z="1.85785389"/>
+     <vertex x="3.91789627" y="2.3559773" z="1.82651091"/>
+     <vertex x="3.84197998" y="2.47198772" z="1.79507017"/>
+     <vertex x="3.76406336" y="2.58662558" z="1.76353788"/>
+     <vertex x="2.9528935" y="3.36211038" z="1.5"/>
+     <vertex x="3.68420887" y="2.69989777" z="1.73191977"/>
+     <vertex x="3.60247803" y="2.81181169" z="1.70022058"/>
+     <vertex x="3.5189333" y="2.92237473" z="1.66844606"/>
+     <vertex x="3.43363643" y="3.03159404" z="1.63660192"/>
+     <vertex x="-0.305488288" y="6.09075403" z="0.5"/>
+     <vertex x="3.34664917" y="3.13947678" z="1.60469389"/>
+     <vertex x="3.25803375" y="3.24603057" z="1.57272673"/>
+     <vertex x="3.03032494" y="3.45725155" z="1.5"/>
+     <vertex x="3.16785192" y="3.35126233" z="1.54070711"/>
+     <vertex x="3.07616544" y="3.45517945" z="1.50863934"/>
+     <vertex x="2.98303676" y="3.55778909" z="1.4765296"/>
+     <vertex x="2.88852763" y="3.65909886" z="1.44438314"/>
+     <vertex x="2.79270005" y="3.7591157" z="1.4122057"/>
+     <vertex x="2.69561577" y="3.85784674" z="1.38000274"/>
+     <vertex x="2.59733677" y="3.95529985" z="1.34777951"/>
+     <vertex x="2.39744282" y="4.14639997" z="1.28329539"/>
+     <vertex x="2.19351411" y="4.33247375" z="1.21879721"/>
+     <vertex x="1.98558378" y="4.51397324" z="1.15419626"/>
+     <vertex x="1.77311373" y="4.69174194" z="1.08926749"/>
+     <vertex x="1.55644846" y="4.86579418" z="1.0240643"/>
+     <vertex x="1.33596265" y="5.03611708" z="0.958648682"/>
+     <vertex x="1.11203074" y="5.2026968" z="0.89308238"/>
+     <vertex x="0.885027289" y="5.36552191" z="0.827427626"/>
+     <vertex x="0.655326605" y="5.52457905" z="0.761746407"/>
+     <vertex x="0.423303187" y="5.67985487" z="0.696100712"/>
+     <vertex x="0.189331591" y="5.83133698" z="0.63055253"/>
+     <vertex x="-0.0462137461" y="5.97901249" z="0.565164089"/>
+     <vertex x="-0.282958955" y="6.12286901" z="0.5"/>
+     <vertex x="-0.364115" y="6.03897715" z="0.5"/>
+     <vertex x="-0.398768783" y="6.02059031" z="0.5"/>
+     <vertex x="-0.435872257" y="6.00785112" z="0.5"/>
+     <vertex x="-0.370364428" y="5.73945856" z="0.565002441"/>
+     <vertex x="-0.308591634" y="5.47014952" z="0.630006313"/>
+     <vertex x="-0.250706434" y="5.19991541" z="0.695014715"/>
+     <vertex x="-0.196869105" y="4.92871189" z="0.760039568"/>
+     <vertex x="-0.147309422" y="4.65678835" z="0.825023651"/>
+     <vertex x="-0.102185875" y="4.38393641" z="0.890016556"/>
+     <vertex x="-0.0616779923" y="4.10985994" z="0.955092192"/>
+     <vertex x="-0.0260810256" y="3.83486891" z="1.02018261"/>
+     <vertex x="0.00430941582" y="3.55927563" z="1.08521938"/>
+     <vertex x="0.0291976929" y="3.28339195" z="1.15013456"/>
+     <vertex x="0.0482905507" y="3.00748944" z="1.21486783"/>
+     <vertex x="0.0613223314" y="2.73094344" z="1.27955532"/>
+     <vertex x="0.0649370551" y="2.03709888" z="1.44113088"/>
+     <vertex x="0.0602999926" y="1.89821815" z="1.47337651"/>
+     <vertex x="0.0537611246" y="1.75939083" z="1.50558567"/>
+     <vertex x="0.0452710986" y="1.62065697" z="1.53775358"/>
+     <vertex x="0.456374824" y="-2.44782639" z="2.5"/>
+     <vertex x="0.691555023" y="-2.41878605" z="2.5"/>
+     <vertex x="0.0347806215" y="1.48205566" z="1.56987333"/>
+     <vertex x="0.0222404003" y="1.34362507" z="1.60194016"/>
+     <vertex x="0.00760102272" y="1.20540524" z="1.63394833"/>
+     <vertex x="-0.00918680429" y="1.06743479" z="1.66589212"/>
+     <vertex x="0.220494509" y="-2.47048759" z="2.5"/>
+     <vertex x="-0.0281724334" y="0.929753304" z="1.6977663"/>
+     <vertex x="-0.0494051874" y="0.792399406" z="1.72956467"/>
+     <vertex x="-0.0729343891" y="0.655412674" z="1.76128149"/>
+     <vertex x="-0.0988093913" y="0.51883173" z="1.79291201"/>
+     <vertex x="-0.01591295" y="-2.48675251" z="2.5"/>
+     <vertex x="-0.127079517" y="0.382696152" z="1.82444954"/>
+     <vertex x="-0.157794088" y="0.24704504" z="1.8558898"/>
+     <vertex x="-0.190997839" y="0.111934662" z="1.88722181"/>
+     <vertex x="-0.226589054" y="-0.0220756531" z="1.9183259"/>
+     <vertex x="-0.264512062" y="-0.154749393" z="1.94915581"/>
+     <vertex x="-0.252674162" y="-2.49661064" z="2.5"/>
+     <vertex x="-0.304772556" y="-0.286108494" z="1.97972536"/>
+     <vertex x="-0.347376287" y="-0.416173458" z="2.01004648"/>
+     <vertex x="-0.392329037" y="-0.544965267" z="2.040133"/>
+     <vertex x="-0.4896155" y="-2.50005341" z="2.5"/>
+     <vertex x="-0.439636439" y="-0.672504902" z="2.06999683"/>
+     <vertex x="-0.489304304" y="-0.79881382" z="2.09965086"/>
+     <vertex x="-0.541338325" y="-0.923913002" z="2.12910891"/>
+     <vertex x="-0.595744193" y="-1.04782391" z="2.15838242"/>
+     <vertex x="-0.726563156" y="-2.49707794" z="2.5"/>
+     <vertex x="-0.65252769" y="-1.17056656" z="2.18748522"/>
+     <vertex x="-0.711694539" y="-1.29216242" z="2.21643019"/>
+     <vertex x="-0.773250461" y="-1.41263342" z="2.24522924"/>
+     <vertex x="-0.837201238" y="-1.53199911" z="2.27389622"/>
+     <vertex x="-0.963343382" y="-2.48768806" z="2.5"/>
+     <vertex x="-0.903552413" y="-1.65028191" z="2.30244303"/>
+     <vertex x="-0.972309947" y="-1.76750278" z="2.3308835"/>
+     <vertex x="-1.04347944" y="-1.8836813" z="2.35922956"/>
+     <vertex x="-1.19978249" y="-2.4718895" z="2.5"/>
+     <vertex x="-1.11706662" y="-1.99884033" z="2.38749456"/>
+     <vertex x="-1.19307733" y="-2.11299992" z="2.41569138"/>
+     <vertex x="-1.27151704" y="-2.22618103" z="2.44383287"/>
+     <vertex x="-1.35239172" y="-2.33840561" z="2.47193146"/>
+     <vertex x="-1.43570709" y="-2.44969463" z="2.5"/>
+     <vertex x="-0.466940969" y="6.12999964" z="0.5"/>
+     <vertex x="-0.498254776" y="6.24994278" z="0.5"/>
+     <vertex x="-0.498254776" y="6.24994278" z="-2.5"/>
+     <vertex x="-0.361795545" y="6.16983366" z="-2.5"/>
+     <vertex x="-0.221846879" y="6.08626461" z="-2.5"/>
+     <vertex x="-0.0787020028" y="5.99923754" z="-2.5"/>
+     <vertex x="0.0673458576" y="5.90875435" z="-2.5"/>
+     <vertex x="0.216003537" y="5.81481695" z="-2.5"/>
+     <vertex x="0.366977811" y="5.71742678" z="-2.5"/>
+     <vertex x="0.519975424" y="5.61658573" z="-2.5"/>
+     <vertex x="0.674703121" y="5.51229525" z="-2.5"/>
+     <vertex x="0.830867887" y="5.40455723" z="-2.5"/>
+     <vertex x="0.988176227" y="5.29337406" z="-2.5"/>
+     <vertex x="1.14633512" y="5.1787467" z="-2.5"/>
+     <vertex x="1.30505133" y="5.06067705" z="-2.5"/>
+     <vertex x="1.46403158" y="4.93916702" z="-2.5"/>
+     <vertex x="1.62298274" y="4.81421804" z="-2.5"/>
+     <vertex x="1.78161144" y="4.6858325" z="-2.5"/>
+     <vertex x="1.93962479" y="4.55401134" z="-2.5"/>
+     <vertex x="2.09672928" y="4.41875696" z="-2.5"/>
+     <vertex x="2.25263166" y="4.28007078" z="-2.5"/>
+     <vertex x="2.40703893" y="4.13795471" z="-2.5"/>
+     <vertex x="2.55965781" y="3.99241042" z="-2.5"/>
+     <vertex x="2.71019483" y="3.84343958" z="-2.5"/>
+     <vertex x="2.85835719" y="3.69104409" z="-2.5"/>
+     <vertex x="3.00385141" y="3.53522563" z="-2.5"/>
+     <vertex x="3.14638448" y="3.37598586" z="-2.5"/>
+     <vertex x="3.28427935" y="3.21496391" z="-2.5"/>
+     <vertex x="3.41554189" y="3.05450463" z="-2.5"/>
+     <vertex x="3.54032135" y="2.89463282" z="-2.5"/>
+     <vertex x="3.65878153" y="2.73535538" z="-2.5"/>
+     <vertex x="3.77108669" y="2.57667923" z="-2.5"/>
+     <vertex x="3.87740183" y="2.41861129" z="-2.5"/>
+     <vertex x="3.97789145" y="2.26115847" z="-2.5"/>
+     <vertex x="4.07271957" y="2.10432768" z="-2.5"/>
+     <vertex x="4.16205025" y="1.94812632" z="-2.5"/>
+     <vertex x="4.24604893" y="1.79256058" z="-2.5"/>
+     <vertex x="4.32487869" y="1.63763809" z="-2.5"/>
+     <vertex x="4.39870501" y="1.48336506" z="-2.5"/>
+     <vertex x="4.4676919" y="1.32974911" z="-2.5"/>
+     <vertex x="4.53200388" y="1.17679691" z="-2.5"/>
+     <vertex x="4.59180546" y="1.02451563" z="-2.5"/>
+     <vertex x="4.64726067" y="0.872911453" z="-2.5"/>
+     <vertex x="4.69870567" y="0.72149086" z="-2.5"/>
+     <vertex x="4.74763584" y="0.565872669" z="-2.5"/>
+     <vertex x="4.79413271" y="0.404898167" z="-2.5"/>
+     <vertex x="4.83791065" y="0.238397598" z="-2.5"/>
+     <vertex x="4.878685" y="0.0662007332" z="-2.5"/>
+     <vertex x="4.89785671" y="-0.0220866203" z="-2.5"/>
+     <vertex x="4.91617012" y="-0.111861706" z="-2.5"/>
+     <vertex x="4.93358946" y="-0.203145504" z="-2.5"/>
+     <vertex x="4.95007992" y="-0.295959949" z="-2.5"/>
+     <vertex x="4.96560526" y="-0.390325546" z="-2.5"/>
+     <vertex x="4.98012972" y="-0.486263752" z="-2.5"/>
+     <vertex x="4.99361753" y="-0.583796024" z="-2.5"/>
+     <vertex x="5.00343227" y="-0.666102886" z="2.5"/>
+     <vertex x="5.0060339" y="-0.682943344" z="-2.5"/>
+     <vertex x="5.01523447" y="-0.76905489" z="2.5"/>
+     <vertex x="5.01734209" y="-0.783727169" z="-2.5"/>
+     <vertex x="5.02581835" y="-0.873378754" z="2.5"/>
+     <vertex x="5.02750683" y="-0.88616848" z="-2.5"/>
+     <vertex x="5.03515673" y="-0.979088783" z="2.5"/>
+     <vertex x="5.03649235" y="-0.990289211" z="-2.5"/>
+     <vertex x="5.04322386" y="-1.08620024" z="2.5"/>
+     <vertex x="5.04426336" y="-1.09610939" z="-2.5"/>
+     <vertex x="5.04999256" y="-1.19472742" z="2.5"/>
+     <vertex x="5.05078363" y="-1.20365143" z="-2.5"/>
+     <vertex x="5.05543613" y="-1.30468512" z="2.5"/>
+     <vertex x="5.05601788" y="-1.31293583" z="-2.5"/>
+     <vertex x="5.05952835" y="-1.41608715" z="2.5"/>
+     <vertex x="5.05993032" y="-1.42398405" z="-2.5"/>
+     <vertex x="5.06224203" y="-1.52894926" z="2.5"/>
+     <vertex x="5.06248522" y="-1.53681755" z="-2.5"/>
+     <vertex x="5.06355047" y="-1.6432848" z="2.5"/>
+     <vertex x="5.06364679" y="-1.65145731" z="-2.5"/>
+     <vertex x="5.06349564" y="-1.75814533" z="2.5"/>
+     <vertex x="5.06337976" y="-1.76792431" z="-2.5"/>
+     <vertex x="5.06222677" y="-1.87146091" z="2.5"/>
+     <vertex x="5.06164789" y="-1.88624096" z="-2.5"/>
+     <vertex x="5.05977345" y="-1.98324966" z="2.5"/>
+     <vertex x="5.0584774" y="-2.00564957" z="-2.5"/>
+     <vertex x="5.05615854" y="-2.09360981" z="2.5"/>
+     <vertex x="5.05408955" y="-2.12329769" z="-2.5"/>
+     <vertex x="5.04852867" y="-2.23904228" z="-2.5"/>
+     <vertex x="5.04553938" y="-2.31043339" z="2.5"/>
+     <vertex x="5.0418191" y="-2.35302353" z="-2.5"/>
+     <vertex x="5.03398418" y="-2.46538162" z="-2.5"/>
+     <vertex x="5.03055859" y="-2.52270985" z="2.5"/>
+     <vertex x="5.02504778" y="-2.57625771" z="-2.5"/>
+     <vertex x="5.01140594" y="-2.73121738" z="2.5"/>
+     <vertex x="5.0150342" y="-2.68579292" z="-2.5"/>
+     <vertex x="4.9918685" y="-2.90139866" z="-2.5"/>
+     <vertex x="4.98827076" y="-2.9367342" z="2.5"/>
+     <vertex x="4.96467781" y="-3.11332512" z="-2.5"/>
+     <vertex x="4.96134138" y="-3.14003944" z="2.5"/>
+     <vertex x="4.93365288" y="-3.32269478" z="-2.5"/>
+     <vertex x="4.93080759" y="-3.34191132" z="2.5"/>
+     <vertex x="4.898983" y="-3.53063297" z="-2.5"/>
+     <vertex x="4.89685822" y="-3.54312897" z="2.5"/>
+     <vertex x="4.86085892" y="-3.73826504" z="-2.5"/>
+     <vertex x="4.85968304" y="-3.74446964" z="2.5"/>
+     <vertex x="4.81947136" y="-3.94671345" z="-2.5"/>
+     <vertex x="4.81947136" y="-3.94671345" z="2.5"/>
+     <vertex x="4.78597593" y="-4.10513496" z="2.37456131"/>
+     <vertex x="4.78597593" y="-4.10513496" z="-2.37456155"/>
+     <vertex x="4.75060272" y="-4.2633791" z="2.24922514"/>
+     <vertex x="4.75060272" y="-4.2633791" z="-2.24922514"/>
+     <vertex x="4.71340227" y="-4.42139816" z="2.12400293"/>
+     <vertex x="4.71340227" y="-4.42139816" z="-2.1240027"/>
+     <vertex x="4.67442465" y="-4.57914639" z="1.99890566"/>
+     <vertex x="4.67442465" y="-4.57914639" z="-1.99890554"/>
+     <vertex x="4.6337204" y="-4.73657703" z="1.87394524"/>
+     <vertex x="4.6337204" y="-4.73657703" z="-1.87394524"/>
+     <vertex x="4.59133863" y="-4.89364338" z="1.74913311"/>
+     <vertex x="4.59133863" y="-4.89364338" z="-1.74913311"/>
+     <vertex x="4.50174522" y="-5.20649624" z="1.5"/>
+     <vertex x="4.50174522" y="-5.20649624" z="-1.5"/>
+     <vertex x="-2.03982115" y="-3.15427589" z="2.5"/>
+     <vertex x="-2.11714554" y="-3.23409653" z="2.5"/>
+     <vertex x="0.648837328" y="-5.1927042" z="2.5"/>
+     <vertex x="-2.19665527" y="-3.31418324" z="2.5"/>
+     <vertex x="0.376203835" y="-5.21676254" z="2.5"/>
+     <vertex x="-2.27838945" y="-3.39452457" z="2.5"/>
+     <vertex x="0.103075027" y="-5.23432446" z="2.5"/>
+     <vertex x="-0.170394421" y="-5.24538231" z="2.5"/>
+     <vertex x="-2.44656086" y="-3.5541954" z="2.5"/>
+     <vertex x="-0.444049567" y="-5.24992943" z="2.5"/>
+     <vertex x="-0.71773541" y="-5.24796295" z="2.5"/>
+     <vertex x="-2.52977729" y="-3.63087273" z="2.5"/>
+     <vertex x="-0.991296887" y="-5.23948288" z="2.5"/>
+     <vertex x="-2.61217189" y="-3.70528507" z="2.5"/>
+     <vertex x="-1.26457918" y="-5.22449589" z="2.5"/>
+     <vertex x="-2.69390345" y="-3.77759457" z="2.5"/>
+     <vertex x="-1.53742731" y="-5.20300961" z="2.5"/>
+     <vertex x="-2.77513027" y="-3.84796429" z="2.5"/>
+     <vertex x="-1.8096869" y="-5.17503643" z="2.5"/>
+     <vertex x="-2.93670511" y="-3.98353291" z="2.5"/>
+     <vertex x="-2.0812037" y="-5.14059162" z="2.5"/>
+     <vertex x="-2.35182381" y="-5.09969521" z="2.5"/>
+     <vertex x="-3.09816575" y="-4.11329079" z="2.5"/>
+     <vertex x="-2.62139416" y="-5.05237007" z="2.5"/>
+     <vertex x="-3.26078129" y="-4.23853588" z="2.5"/>
+     <vertex x="-2.88976192" y="-4.99864388" z="2.5"/>
+     <vertex x="-3.4258213" y="-4.36056805" z="2.5"/>
+     <vertex x="-3.15677524" y="-4.93854523" z="2.5"/>
+     <vertex x="-3.59455466" y="-4.48068714" z="2.5"/>
+     <vertex x="-3.42228246" y="-4.87211037" z="2.5"/>
+     <vertex x="-3.76825094" y="-4.60019207" z="2.5"/>
+     <vertex x="-3.68613362" y="-4.79937553" z="2.5"/>
+     <vertex x="-3.85735679" y="-4.66012001" z="2.5"/>
+     <vertex x="-3.94817924" y="-4.72038174" z="2.5"/>
+     <vertex x="-1.89156914" y="-2.99547672" z="2.5"/>
+     <vertex x="-1.96464217" y="-3.07473183" z="2.5"/>
+     <vertex x="-1.75158322" y="-2.83787537" z="2.5"/>
+     <vertex x="-1.82056272" y="-2.91652107" z="2.5"/>
+     <vertex x="-1.68459117" y="-2.759552" z="2.5"/>
+     <vertex x="-1.61954713" y="-2.68156052" z="2.5"/>
+     <vertex x="-1.55641139" y="-2.60391331" z="2.5"/>
+     <vertex x="-1.49514461" y="-2.52662086" z="2.5"/>
+     <vertex x="0.92082119" y="-5.16216564" z="2.5"/>
+     <vertex x="1.19200122" y="-5.12516308" z="2.5"/>
+     <vertex x="1.46222377" y="-5.08171749" z="2.5"/>
+     <vertex x="1.73133612" y="-5.03185368" z="2.5"/>
+     <vertex x="1.99918532" y="-4.97559929" z="2.5"/>
+     <vertex x="2.26562023" y="-4.91298676" z="2.5"/>
+     <vertex x="2.53048944" y="-4.84405136" z="2.5"/>
+     <vertex x="2.79364324" y="-4.76883221" z="2.5"/>
+     <vertex x="3.05493236" y="-4.68737221" z="2.5"/>
+     <vertex x="3.31420898" y="-4.59971714" z="2.5"/>
+     <vertex x="3.57132626" y="-4.5059166" z="2.5"/>
+     <vertex x="3.8261385" y="-4.40602398" z="2.5"/>
+     <vertex x="4.07850122" y="-4.30009556" z="2.5"/>
+     <vertex x="4.32827139" y="-4.18819141" z="2.5"/>
+     <vertex x="4.57530832" y="-4.07037449" z="2.5"/>
+     <vertex x="4.57530832" y="-4.07037449" z="-2.5"/>
+     <vertex x="4.32827139" y="-4.18819141" z="-2.5"/>
+     <vertex x="4.07850122" y="-4.30009556" z="-2.5"/>
+     <vertex x="4.23579168" y="-5.31892967" z="-1.5"/>
+     <vertex x="3.8261385" y="-4.40602398" z="-2.5"/>
+     <vertex x="3.96731234" y="-5.42518902" z="-1.5"/>
+     <vertex x="3.57132626" y="-4.5059166" z="-2.5"/>
+     <vertex x="3.69644976" y="-5.52521992" z="-1.5"/>
+     <vertex x="3.31420898" y="-4.59971714" z="-2.5"/>
+     <vertex x="3.42334938" y="-5.61896706" z="-1.5"/>
+     <vertex x="3.05493236" y="-4.68737221" z="-2.5"/>
+     <vertex x="3.14815617" y="-5.7063818" z="-1.5"/>
+     <vertex x="2.79364324" y="-4.76883221" z="-2.5"/>
+     <vertex x="2.87101746" y="-5.7874155" z="-1.5"/>
+     <vertex x="2.53048944" y="-4.84405136" z="-2.5"/>
+     <vertex x="2.59208107" y="-5.86202717" z="-1.5"/>
+     <vertex x="2.26562023" y="-4.91298676" z="-2.5"/>
+     <vertex x="2.31149554" y="-5.93017673" z="-1.5"/>
+     <vertex x="1.99918532" y="-4.97559929" z="-2.5"/>
+     <vertex x="2.02941084" y="-5.99182606" z="-1.5"/>
+     <vertex x="1.73133612" y="-5.03185368" z="-2.5"/>
+     <vertex x="1.7459774" y="-6.04694366" z="-1.5"/>
+     <vertex x="1.46222377" y="-5.08171749" z="-2.5"/>
+     <vertex x="1.46134663" y="-6.09549999" z="-1.5"/>
+     <vertex x="1.19200122" y="-5.12516308" z="-2.5"/>
+     <vertex x="1.17567015" y="-6.13746929" z="-1.5"/>
+     <vertex x="0.92082119" y="-5.16216564" z="-2.5"/>
+     <vertex x="0.889100432" y="-6.17282867" z="-1.5"/>
+     <vertex x="0.648837328" y="-5.1927042" z="-2.5"/>
+     <vertex x="0.601790428" y="-6.20155907" z="-1.5"/>
+     <vertex x="0.376203835" y="-5.21676254" z="-2.5"/>
+     <vertex x="0.313893557" y="-6.22364616" z="-1.5"/>
+     <vertex x="0.103075027" y="-5.23432446" z="-2.5"/>
+     <vertex x="0.0255632401" y="-6.23907661" z="-1.5"/>
+     <vertex x="-0.170394421" y="-5.24538231" z="-2.5"/>
+     <vertex x="-0.263046503" y="-6.24784374" z="-1.5"/>
+     <vertex x="-0.444049567" y="-5.24992943" z="-2.5"/>
+     <vertex x="-0.551781774" y="-6.24994278" z="-1.5"/>
+     <vertex x="-0.71773541" y="-5.24796295" z="-2.5"/>
+     <vertex x="-0.840488553" y="-6.24537182" z="-1.5"/>
+     <vertex x="-0.991296887" y="-5.23948288" z="-2.5"/>
+     <vertex x="-1.12901258" y="-6.23413277" z="-1.5"/>
+     <vertex x="-1.26457918" y="-5.22449589" z="-2.5"/>
+     <vertex x="-1.41720009" y="-6.21623325" z="-1.5"/>
+     <vertex x="-1.53742731" y="-5.20300961" z="-2.5"/>
+     <vertex x="-1.7048974" y="-6.19168186" z="-1.5"/>
+     <vertex x="-1.8096869" y="-5.17503643" z="-2.5"/>
+     <vertex x="-1.99195075" y="-6.16049099" z="-1.5"/>
+     <vertex x="-2.0812037" y="-5.14059162" z="-2.5"/>
+     <vertex x="-2.27820706" y="-6.12267876" z="-1.5"/>
+     <vertex x="-2.35182381" y="-5.09969521" z="-2.5"/>
+     <vertex x="-2.56351376" y="-6.07826519" z="-1.5"/>
+     <vertex x="-2.62139416" y="-5.05237007" z="-2.5"/>
+     <vertex x="-2.84771824" y="-6.02727318" z="-1.5"/>
+     <vertex x="-2.88976192" y="-4.99864388" z="-2.5"/>
+     <vertex x="-3.13066936" y="-5.96972942" z="-1.5"/>
+     <vertex x="-3.15677524" y="-4.93854523" z="-2.5"/>
+     <vertex x="-3.41221571" y="-5.90566635" z="-1.5"/>
+     <vertex x="-3.42228246" y="-4.87211037" z="-2.5"/>
+     <vertex x="-3.6922071" y="-5.83511734" z="-1.5"/>
+     <vertex x="-3.68613362" y="-4.79937553" z="-2.5"/>
+     <vertex x="-3.97049451" y="-5.75811958" z="-1.5"/>
+     <vertex x="-3.94817924" y="-4.72038174" z="-2.5"/>
+     <vertex x="-4.24692917" y="-5.67471409" z="-1.5"/>
+     <vertex x="-4.08388519" y="-4.80871868" z="-2.37456155"/>
+     <vertex x="-4.52136326" y="-5.58494663" z="-1.5"/>
+     <vertex x="-4.22079325" y="-4.89560127" z="-2.24922514"/>
+     <vertex x="-4.35883427" y="-4.98103333" z="-2.1240027"/>
+     <vertex x="-4.49794054" y="-5.06501675" z="-1.99890554"/>
+     <vertex x="-4.7936511" y="-5.48886299" z="-1.5"/>
+     <vertex x="-4.63804293" y="-5.1475544" z="-1.87394524"/>
+     <vertex x="-4.77907419" y="-5.22864819" z="-1.74913311"/>
+     <vertex x="-5.06364679" y="-5.38651657" z="-1.5"/>
+     <vertex x="-0.460086703" y="6.10338449" z="-2.5"/>
+     <vertex x="-0.421914458" y="5.95247746" z="-2.5"/>
+     <vertex x="-0.383915484" y="5.79739237" z="-2.5"/>
+     <vertex x="-0.346267223" y="5.63830233" z="-2.5"/>
+     <vertex x="-0.30914712" y="5.47537899" z="-2.5"/>
+     <vertex x="-0.272732556" y="5.3087945" z="-2.5"/>
+     <vertex x="-0.237201005" y="5.13872099" z="-2.5"/>
+     <vertex x="-0.202729881" y="4.96533012" z="-2.5"/>
+     <vertex x="-0.169496626" y="4.78879356" z="-2.5"/>
+     <vertex x="-0.137678653" y="4.6092844" z="-2.5"/>
+     <vertex x="-0.107453406" y="4.42697334" z="-2.5"/>
+     <vertex x="-0.0789983273" y="4.24203348" z="-2.5"/>
+     <vertex x="-0.0524908304" y="4.05463648" z="-2.5"/>
+     <vertex x="-0.0281083882" y="3.86495423" z="-2.5"/>
+     <vertex x="-0.00602835417" y="3.67315888" z="-2.5"/>
+     <vertex x="0.0135717392" y="3.47942233" z="-2.5"/>
+     <vertex x="0.0305145383" y="3.28391671" z="-2.5"/>
+     <vertex x="0.0446226001" y="3.08681417" z="-2.5"/>
+     <vertex x="0.0557184815" y="2.88828611" z="-2.5"/>
+     <vertex x="0.0636247396" y="2.68850517" z="-2.5"/>
+     <vertex x="0.068163991" y="2.48764324" z="-2.5"/>
+     <vertex x="0.0691586733" y="2.28587198" z="-2.5"/>
+     <vertex x="0.0664315224" y="2.08336401" z="-2.5"/>
+     <vertex x="0.059804976" y="1.88029051" z="-2.5"/>
+     <vertex x="0.0491017103" y="1.67682457" z="-2.5"/>
+     <vertex x="0.0341442227" y="1.47313738" z="-2.5"/>
+     <vertex x="0.0147879124" y="1.26973772" z="-2.5"/>
+     <vertex x="-0.00871565938" y="1.07019138" z="-2.5"/>
+     <vertex x="-0.0361886621" y="0.875326633" z="-2.5"/>
+     <vertex x="-0.0675244331" y="0.685035706" z="-2.5"/>
+     <vertex x="-0.102616251" y="0.499210358" z="-2.5"/>
+     <vertex x="-0.141357422" y="0.317743301" z="-2.5"/>
+     <vertex x="-0.183641285" y="0.140526772" z="-2.5"/>
+     <vertex x="-0.229361087" y="-0.0325479507" z="-2.5"/>
+     <vertex x="-0.278410196" y="-0.201588154" z="-2.5"/>
+     <vertex x="-0.33068186" y="-0.36670208" z="-2.5"/>
+     <vertex x="-0.386069447" y="-0.527997017" z="-2.5"/>
+     <vertex x="-0.444466233" y="-0.685581207" z="-2.5"/>
+     <vertex x="-0.505765498" y="-0.839562893" z="-2.5"/>
+     <vertex x="-0.569860578" y="-0.990049362" z="-2.5"/>
+     <vertex x="-0.636644781" y="-1.13714886" z="-2.5"/>
+     <vertex x="-0.706011355" y="-1.28096867" z="-2.5"/>
+     <vertex x="-0.779173017" y="-1.42421055" z="-2.5"/>
+     <vertex x="-0.858182788" y="-1.57048655" z="-2.5"/>
+     <vertex x="-0.900007427" y="-1.64473009" z="-2.5"/>
+     <vertex x="-0.943443656" y="-1.71968889" z="-2.5"/>
+     <vertex x="-0.988540411" y="-1.79534626" z="-2.5"/>
+     <vertex x="-1.03534627" y="-1.87168407" z="-2.5"/>
+     <vertex x="-1.08391047" y="-1.94868755" z="-2.5"/>
+     <vertex x="-1.1342814" y="-2.02633953" z="-2.5"/>
+     <vertex x="-1.18650818" y="-2.10462284" z="-2.5"/>
+     <vertex x="-1.24063945" y="-2.18352127" z="-2.5"/>
+     <vertex x="-1.29672408" y="-2.26301861" z="-2.5"/>
+     <vertex x="-1.35481107" y="-2.34309673" z="-2.5"/>
+     <vertex x="-1.41494918" y="-2.42373943" z="-2.5"/>
+     <vertex x="-1.47718692" y="-2.5049305" z="-2.5"/>
+     <vertex x="-1.54157364" y="-2.58665371" z="-2.5"/>
+     <vertex x="-1.60815775" y="-2.66889095" z="-2.5"/>
+     <vertex x="-1.67698836" y="-2.75162697" z="-2.5"/>
+     <vertex x="-1.74811411" y="-2.83484459" z="-2.5"/>
+     <vertex x="-1.82158387" y="-2.91852665" z="-2.5"/>
+     <vertex x="-1.89744651" y="-3.00265694" z="-2.5"/>
+     <vertex x="-1.9757508" y="-3.08721924" z="-2.5"/>
+     <vertex x="-2.05654573" y="-3.17219543" z="-2.5"/>
+     <vertex x="-2.1398797" y="-3.25757027" z="-2.5"/>
+     <vertex x="-2.22580218" y="-3.34332657" z="-2.5"/>
+     <vertex x="-2.31436157" y="-3.42944813" z="-2.5"/>
+     <vertex x="-2.40560675" y="-3.51591778" z="-2.5"/>
+     <vertex x="-2.49958658" y="-3.60271835" z="-2.5"/>
+     <vertex x="-2.59634995" y="-3.68983364" z="-2.5"/>
+     <vertex x="-2.69511747" y="-3.77659607" z="-2.5"/>
+     <vertex x="-2.79255414" y="-3.86037159" z="-2.5"/>
+     <vertex x="-2.88859248" y="-3.94115162" z="-2.5"/>
+     <vertex x="-2.98356628" y="-4.01924419" z="-2.5"/>
+     <vertex x="-3.0778091" y="-4.09495926" z="-2.5"/>
+     <vertex x="-3.17165518" y="-4.1686058" z="-2.5"/>
+     <vertex x="-3.35949087" y="-4.31092739" z="-2.5"/>
+     <vertex x="-3.54974341" y="-4.44868279" z="-2.5"/>
+     <vertex x="-3.74508286" y="-4.58434296" z="-2.5"/>
+     <vertex x="-3.84549451" y="-4.65216064" z="-2.5"/>
+     <vertex x="-4.08388519" y="-4.80871868" z="2.37456131"/>
+     <vertex x="-4.22079325" y="-4.89560127" z="2.24922514"/>
+     <vertex x="-4.35883427" y="-4.98103333" z="2.12400293"/>
+     <vertex x="-4.49794054" y="-5.06501675" z="1.99890566"/>
+     <vertex x="-4.63804293" y="-5.1475544" z="1.87394524"/>
+     <vertex x="-4.77907419" y="-5.22864819" z="1.74913311"/>
+     <vertex x="-5.06364679" y="-5.38651657" z="1.5"/>
+     <vertex x="-4.7936511" y="-5.48886299" z="1.5"/>
+     <vertex x="-4.52136326" y="-5.58494663" z="1.5"/>
+     <vertex x="-4.24692917" y="-5.67471409" z="1.5"/>
+     <vertex x="-3.97049451" y="-5.75811958" z="1.5"/>
+     <vertex x="-3.6922071" y="-5.83511734" z="1.5"/>
+     <vertex x="-3.41221571" y="-5.90566635" z="1.5"/>
+     <vertex x="-3.13066936" y="-5.96972942" z="1.5"/>
+     <vertex x="-2.84771824" y="-6.02727318" z="1.5"/>
+     <vertex x="-2.56351376" y="-6.07826519" z="1.5"/>
+     <vertex x="-2.27820706" y="-6.12267876" z="1.5"/>
+     <vertex x="-1.99195075" y="-6.16049099" z="1.5"/>
+     <vertex x="-1.7048974" y="-6.19168186" z="1.5"/>
+     <vertex x="-1.41720009" y="-6.21623325" z="1.5"/>
+     <vertex x="-1.12901258" y="-6.23413277" z="1.5"/>
+     <vertex x="-0.840488553" y="-6.24537182" z="1.5"/>
+     <vertex x="-0.551781774" y="-6.24994278" z="1.5"/>
+     <vertex x="-0.263046503" y="-6.24784374" z="1.5"/>
+     <vertex x="0.0255632401" y="-6.23907661" z="1.5"/>
+     <vertex x="0.313893557" y="-6.22364616" z="1.5"/>
+     <vertex x="0.601790428" y="-6.20155907" z="1.5"/>
+     <vertex x="0.889100432" y="-6.17282867" z="1.5"/>
+     <vertex x="1.17567015" y="-6.13746929" z="1.5"/>
+     <vertex x="1.46134663" y="-6.09549999" z="1.5"/>
+     <vertex x="1.7459774" y="-6.04694366" z="1.5"/>
+     <vertex x="2.02941084" y="-5.99182606" z="1.5"/>
+     <vertex x="2.31149554" y="-5.93017673" z="1.5"/>
+     <vertex x="2.59208107" y="-5.86202717" z="1.5"/>
+     <vertex x="2.87101746" y="-5.7874155" z="1.5"/>
+     <vertex x="3.14815617" y="-5.7063818" z="1.5"/>
+     <vertex x="3.42334938" y="-5.61896706" z="1.5"/>
+     <vertex x="3.69644976" y="-5.52521992" z="1.5"/>
+     <vertex x="3.96731234" y="-5.42518902" z="1.5"/>
+     <vertex x="4.23579168" y="-5.31892967" z="1.5"/>
+    </vertices>
+    <triangles>
+     <triangle v1="0" v2="1" v3="2"/>
+     <triangle v1="2" v2="1" v3="3"/>
+     <triangle v1="2" v2="3" v3="4"/>
+     <triangle v1="4" v2="3" v3="5"/>
+     <triangle v1="4" v2="5" v3="6"/>
+     <triangle v1="6" v2="5" v3="7"/>
+     <triangle v1="6" v2="7" v3="8"/>
+     <triangle v1="8" v2="7" v3="9"/>
+     <triangle v1="8" v2="9" v3="10"/>
+     <triangle v1="10" v2="9" v3="11"/>
+     <triangle v1="10" v2="11" v3="12"/>
+     <triangle v1="12" v2="11" v3="13"/>
+     <triangle v1="12" v2="13" v3="14"/>
+     <triangle v1="14" v2="13" v3="15"/>
+     <triangle v1="14" v2="15" v3="16"/>
+     <triangle v1="16" v2="15" v3="17"/>
+     <triangle v1="16" v2="17" v3="18"/>
+     <triangle v1="18" v2="17" v3="19"/>
+     <triangle v1="18" v2="19" v3="20"/>
+     <triangle v1="20" v2="19" v3="21"/>
+     <triangle v1="20" v2="21" v3="22"/>
+     <triangle v1="22" v2="21" v3="23"/>
+     <triangle v1="22" v2="23" v3="24"/>
+     <triangle v1="24" v2="23" v3="25"/>
+     <triangle v1="24" v2="25" v3="26"/>
+     <triangle v1="26" v2="25" v3="27"/>
+     <triangle v1="26" v2="27" v3="28"/>
+     <triangle v1="28" v2="27" v3="29"/>
+     <triangle v1="28" v2="29" v3="30"/>
+     <triangle v1="30" v2="29" v3="31"/>
+     <triangle v1="30" v2="31" v3="32"/>
+     <triangle v1="32" v2="31" v3="33"/>
+     <triangle v1="32" v2="33" v3="34"/>
+     <triangle v1="34" v2="33" v3="35"/>
+     <triangle v1="34" v2="35" v3="36"/>
+     <triangle v1="36" v2="35" v3="37"/>
+     <triangle v1="36" v2="37" v3="38"/>
+     <triangle v1="38" v2="37" v3="39"/>
+     <triangle v1="38" v2="39" v3="40"/>
+     <triangle v1="40" v2="39" v3="41"/>
+     <triangle v1="40" v2="41" v3="42"/>
+     <triangle v1="42" v2="41" v3="43"/>
+     <triangle v1="42" v2="43" v3="44"/>
+     <triangle v1="0" v2="45" v3="1"/>
+     <triangle v1="1" v2="45" v3="46"/>
+     <triangle v1="1" v2="46" v3="47"/>
+     <triangle v1="47" v2="46" v3="48"/>
+     <triangle v1="47" v2="48" v3="49"/>
+     <triangle v1="49" v2="50" v3="47"/>
+     <triangle v1="47" v2="50" v3="51"/>
+     <triangle v1="47" v2="51" v3="52"/>
+     <triangle v1="52" v2="51" v3="53"/>
+     <triangle v1="52" v2="53" v3="54"/>
+     <triangle v1="54" v2="53" v3="55"/>
+     <triangle v1="54" v2="55" v3="56"/>
+     <triangle v1="50" v2="57" v3="51"/>
+     <triangle v1="51" v2="57" v3="58"/>
+     <triangle v1="51" v2="58" v3="59"/>
+     <triangle v1="51" v2="59" v3="53"/>
+     <triangle v1="53" v2="59" v3="60"/>
+     <triangle v1="53" v2="60" v3="61"/>
+     <triangle v1="61" v2="62" v3="53"/>
+     <triangle v1="53" v2="62" v3="55"/>
+     <triangle v1="56" v2="63" v3="54"/>
+     <triangle v1="54" v2="63" v3="64"/>
+     <triangle v1="54" v2="64" v3="65"/>
+     <triangle v1="54" v2="65" v3="66"/>
+     <triangle v1="66" v2="65" v3="67"/>
+     <triangle v1="66" v2="67" v3="68"/>
+     <triangle v1="68" v2="69" v3="66"/>
+     <triangle v1="66" v2="69" v3="70"/>
+     <triangle v1="66" v2="70" v3="71"/>
+     <triangle v1="71" v2="70" v3="72"/>
+     <triangle v1="71" v2="72" v3="73"/>
+     <triangle v1="73" v2="74" v3="71"/>
+     <triangle v1="71" v2="74" v3="75"/>
+     <triangle v1="71" v2="75" v3="76"/>
+     <triangle v1="76" v2="75" v3="77"/>
+     <triangle v1="76" v2="77" v3="78"/>
+     <triangle v1="78" v2="79" v3="76"/>
+     <triangle v1="76" v2="79" v3="80"/>
+     <triangle v1="76" v2="80" v3="81"/>
+     <triangle v1="81" v2="80" v3="82"/>
+     <triangle v1="81" v2="82" v3="83"/>
+     <triangle v1="81" v2="83" v3="84"/>
+     <triangle v1="84" v2="83" v3="85"/>
+     <triangle v1="84" v2="85" v3="86"/>
+     <triangle v1="84" v2="86" v3="81"/>
+     <triangle v1="81" v2="86" v3="87"/>
+     <triangle v1="81" v2="87" v3="88"/>
+     <triangle v1="88" v2="89" v3="81"/>
+     <triangle v1="81" v2="89" v3="90"/>
+     <triangle v1="81" v2="90" v3="91"/>
+     <triangle v1="91" v2="92" v3="81"/>
+     <triangle v1="81" v2="92" v3="93"/>
+     <triangle v1="81" v2="93" v3="94"/>
+     <triangle v1="94" v2="95" v3="81"/>
+     <triangle v1="81" v2="95" v3="96"/>
+     <triangle v1="81" v2="96" v3="97"/>
+     <triangle v1="97" v2="98" v3="81"/>
+     <triangle v1="81" v2="98" v3="99"/>
+     <triangle v1="81" v2="99" v3="100"/>
+     <triangle v1="100" v2="101" v3="81"/>
+     <triangle v1="81" v2="101" v3="102"/>
+     <triangle v1="81" v2="102" v3="103"/>
+     <triangle v1="103" v2="104" v3="81"/>
+     <triangle v1="52" v2="54" v3="81"/>
+     <triangle v1="81" v2="54" v3="66"/>
+     <triangle v1="81" v2="66" v3="71"/>
+     <triangle v1="105" v2="3" v3="52"/>
+     <triangle v1="52" v2="3" v3="1"/>
+     <triangle v1="52" v2="1" v3="47"/>
+     <triangle v1="106" v2="15" v3="105"/>
+     <triangle v1="105" v2="15" v3="13"/>
+     <triangle v1="105" v2="13" v3="11"/>
+     <triangle v1="107" v2="27" v3="106"/>
+     <triangle v1="106" v2="27" v3="25"/>
+     <triangle v1="106" v2="25" v3="23"/>
+     <triangle v1="108" v2="33" v3="107"/>
+     <triangle v1="107" v2="33" v3="31"/>
+     <triangle v1="107" v2="31" v3="29"/>
+     <triangle v1="108" v2="109" v3="33"/>
+     <triangle v1="33" v2="109" v3="110"/>
+     <triangle v1="33" v2="110" v3="35"/>
+     <triangle v1="35" v2="110" v3="111"/>
+     <triangle v1="35" v2="111" v3="112"/>
+     <triangle v1="112" v2="113" v3="35"/>
+     <triangle v1="35" v2="113" v3="37"/>
+     <triangle v1="113" v2="114" v3="37"/>
+     <triangle v1="37" v2="114" v3="115"/>
+     <triangle v1="37" v2="115" v3="116"/>
+     <triangle v1="116" v2="117" v3="37"/>
+     <triangle v1="37" v2="117" v3="39"/>
+     <triangle v1="117" v2="118" v3="39"/>
+     <triangle v1="39" v2="118" v3="119"/>
+     <triangle v1="39" v2="119" v3="41"/>
+     <triangle v1="44" v2="120" v3="42"/>
+     <triangle v1="42" v2="120" v3="121"/>
+     <triangle v1="42" v2="121" v3="122"/>
+     <triangle v1="123" v2="124" v3="122"/>
+     <triangle v1="122" v2="124" v3="125"/>
+     <triangle v1="122" v2="125" v3="42"/>
+     <triangle v1="42" v2="125" v3="40"/>
+     <triangle v1="123" v2="126" v3="124"/>
+     <triangle v1="124" v2="126" v3="127"/>
+     <triangle v1="124" v2="127" v3="128"/>
+     <triangle v1="128" v2="129" v3="124"/>
+     <triangle v1="124" v2="129" v3="130"/>
+     <triangle v1="130" v2="129" v3="131"/>
+     <triangle v1="130" v2="131" v3="132"/>
+     <triangle v1="132" v2="133" v3="130"/>
+     <triangle v1="130" v2="133" v3="134"/>
+     <triangle v1="130" v2="134" v3="135"/>
+     <triangle v1="135" v2="134" v3="136"/>
+     <triangle v1="135" v2="136" v3="137"/>
+     <triangle v1="137" v2="138" v3="135"/>
+     <triangle v1="135" v2="138" v3="139"/>
+     <triangle v1="135" v2="139" v3="140"/>
+     <triangle v1="135" v2="140" v3="141"/>
+     <triangle v1="141" v2="140" v3="142"/>
+     <triangle v1="141" v2="142" v3="143"/>
+     <triangle v1="143" v2="144" v3="141"/>
+     <triangle v1="141" v2="144" v3="145"/>
+     <triangle v1="145" v2="144" v3="146"/>
+     <triangle v1="145" v2="146" v3="147"/>
+     <triangle v1="147" v2="148" v3="145"/>
+     <triangle v1="145" v2="148" v3="149"/>
+     <triangle v1="145" v2="149" v3="150"/>
+     <triangle v1="150" v2="149" v3="151"/>
+     <triangle v1="150" v2="151" v3="152"/>
+     <triangle v1="152" v2="153" v3="150"/>
+     <triangle v1="150" v2="153" v3="154"/>
+     <triangle v1="150" v2="154" v3="155"/>
+     <triangle v1="155" v2="154" v3="156"/>
+     <triangle v1="155" v2="156" v3="157"/>
+     <triangle v1="157" v2="158" v3="155"/>
+     <triangle v1="155" v2="158" v3="159"/>
+     <triangle v1="159" v2="158" v3="160"/>
+     <triangle v1="159" v2="160" v3="161"/>
+     <triangle v1="161" v2="162" v3="159"/>
+     <triangle v1="159" v2="162" v3="163"/>
+     <triangle v1="159" v2="163" v3="164"/>
+     <triangle v1="27" v2="107" v3="29"/>
+     <triangle v1="23" v2="21" v3="106"/>
+     <triangle v1="106" v2="21" v3="19"/>
+     <triangle v1="106" v2="19" v3="17"/>
+     <triangle v1="11" v2="9" v3="105"/>
+     <triangle v1="105" v2="9" v3="7"/>
+     <triangle v1="105" v2="7" v3="5"/>
+     <triangle v1="76" v2="81" v3="71"/>
+     <triangle v1="3" v2="105" v3="5"/>
+     <triangle v1="15" v2="106" v3="17"/>
+     <triangle v1="107" v2="106" v3="165"/>
+     <triangle v1="165" v2="106" v3="105"/>
+     <triangle v1="165" v2="105" v3="52"/>
+     <triangle v1="52" v2="81" v3="165"/>
+     <triangle v1="165" v2="81" v3="104"/>
+     <triangle v1="165" v2="104" v3="166"/>
+     <triangle v1="167" v2="166" v3="168"/>
+     <triangle v1="168" v2="166" v3="104"/>
+     <triangle v1="168" v2="104" v3="169"/>
+     <triangle v1="169" v2="104" v3="103"/>
+     <triangle v1="169" v2="103" v3="170"/>
+     <triangle v1="170" v2="103" v3="171"/>
+     <triangle v1="171" v2="103" v3="102"/>
+     <triangle v1="171" v2="102" v3="172"/>
+     <triangle v1="172" v2="102" v3="173"/>
+     <triangle v1="173" v2="102" v3="101"/>
+     <triangle v1="173" v2="101" v3="174"/>
+     <triangle v1="174" v2="101" v3="100"/>
+     <triangle v1="174" v2="100" v3="175"/>
+     <triangle v1="175" v2="100" v3="176"/>
+     <triangle v1="176" v2="100" v3="99"/>
+     <triangle v1="176" v2="99" v3="177"/>
+     <triangle v1="177" v2="99" v3="98"/>
+     <triangle v1="177" v2="98" v3="178"/>
+     <triangle v1="178" v2="98" v3="97"/>
+     <triangle v1="178" v2="97" v3="179"/>
+     <triangle v1="179" v2="97" v3="180"/>
+     <triangle v1="180" v2="97" v3="96"/>
+     <triangle v1="180" v2="96" v3="181"/>
+     <triangle v1="181" v2="96" v3="95"/>
+     <triangle v1="181" v2="95" v3="182"/>
+     <triangle v1="182" v2="95" v3="183"/>
+     <triangle v1="183" v2="95" v3="94"/>
+     <triangle v1="183" v2="94" v3="184"/>
+     <triangle v1="184" v2="94" v3="93"/>
+     <triangle v1="184" v2="93" v3="185"/>
+     <triangle v1="185" v2="93" v3="92"/>
+     <triangle v1="185" v2="92" v3="186"/>
+     <triangle v1="186" v2="92" v3="187"/>
+     <triangle v1="187" v2="92" v3="91"/>
+     <triangle v1="187" v2="91" v3="188"/>
+     <triangle v1="188" v2="91" v3="90"/>
+     <triangle v1="188" v2="90" v3="89"/>
+     <triangle v1="188" v2="89" v3="189"/>
+     <triangle v1="189" v2="89" v3="88"/>
+     <triangle v1="189" v2="88" v3="190"/>
+     <triangle v1="190" v2="88" v3="87"/>
+     <triangle v1="190" v2="87" v3="86"/>
+     <triangle v1="190" v2="86" v3="191"/>
+     <triangle v1="191" v2="86" v3="85"/>
+     <triangle v1="191" v2="85" v3="83"/>
+     <triangle v1="191" v2="83" v3="192"/>
+     <triangle v1="192" v2="83" v3="82"/>
+     <triangle v1="192" v2="82" v3="193"/>
+     <triangle v1="193" v2="82" v3="80"/>
+     <triangle v1="193" v2="80" v3="79"/>
+     <triangle v1="193" v2="79" v3="194"/>
+     <triangle v1="194" v2="79" v3="78"/>
+     <triangle v1="194" v2="78" v3="195"/>
+     <triangle v1="195" v2="78" v3="77"/>
+     <triangle v1="195" v2="77" v3="196"/>
+     <triangle v1="196" v2="77" v3="75"/>
+     <triangle v1="196" v2="75" v3="74"/>
+     <triangle v1="196" v2="74" v3="197"/>
+     <triangle v1="197" v2="74" v3="73"/>
+     <triangle v1="197" v2="73" v3="198"/>
+     <triangle v1="198" v2="73" v3="72"/>
+     <triangle v1="198" v2="72" v3="199"/>
+     <triangle v1="199" v2="72" v3="70"/>
+     <triangle v1="199" v2="70" v3="69"/>
+     <triangle v1="199" v2="69" v3="200"/>
+     <triangle v1="200" v2="69" v3="68"/>
+     <triangle v1="200" v2="68" v3="201"/>
+     <triangle v1="201" v2="68" v3="67"/>
+     <triangle v1="201" v2="67" v3="202"/>
+     <triangle v1="202" v2="67" v3="65"/>
+     <triangle v1="202" v2="65" v3="64"/>
+     <triangle v1="202" v2="64" v3="203"/>
+     <triangle v1="203" v2="64" v3="63"/>
+     <triangle v1="203" v2="63" v3="204"/>
+     <triangle v1="204" v2="63" v3="56"/>
+     <triangle v1="204" v2="56" v3="205"/>
+     <triangle v1="205" v2="56" v3="55"/>
+     <triangle v1="205" v2="55" v3="206"/>
+     <triangle v1="206" v2="55" v3="62"/>
+     <triangle v1="206" v2="62" v3="61"/>
+     <triangle v1="206" v2="61" v3="207"/>
+     <triangle v1="207" v2="61" v3="60"/>
+     <triangle v1="207" v2="60" v3="208"/>
+     <triangle v1="208" v2="60" v3="59"/>
+     <triangle v1="208" v2="59" v3="209"/>
+     <triangle v1="209" v2="59" v3="58"/>
+     <triangle v1="209" v2="58" v3="210"/>
+     <triangle v1="210" v2="58" v3="57"/>
+     <triangle v1="210" v2="57" v3="211"/>
+     <triangle v1="211" v2="57" v3="50"/>
+     <triangle v1="211" v2="50" v3="49"/>
+     <triangle v1="211" v2="49" v3="212"/>
+     <triangle v1="212" v2="49" v3="48"/>
+     <triangle v1="212" v2="48" v3="213"/>
+     <triangle v1="213" v2="48" v3="214"/>
+     <triangle v1="214" v2="48" v3="46"/>
+     <triangle v1="214" v2="46" v3="215"/>
+     <triangle v1="215" v2="46" v3="45"/>
+     <triangle v1="215" v2="45" v3="216"/>
+     <triangle v1="216" v2="45" v3="217"/>
+     <triangle v1="217" v2="45" v3="0"/>
+     <triangle v1="217" v2="0" v3="218"/>
+     <triangle v1="218" v2="0" v3="2"/>
+     <triangle v1="218" v2="2" v3="219"/>
+     <triangle v1="219" v2="2" v3="220"/>
+     <triangle v1="219" v2="220" v3="221"/>
+     <triangle v1="221" v2="220" v3="222"/>
+     <triangle v1="221" v2="222" v3="223"/>
+     <triangle v1="223" v2="222" v3="224"/>
+     <triangle v1="223" v2="224" v3="225"/>
+     <triangle v1="225" v2="224" v3="226"/>
+     <triangle v1="225" v2="226" v3="227"/>
+     <triangle v1="227" v2="226" v3="228"/>
+     <triangle v1="227" v2="228" v3="229"/>
+     <triangle v1="229" v2="228" v3="230"/>
+     <triangle v1="229" v2="230" v3="231"/>
+     <triangle v1="231" v2="230" v3="232"/>
+     <triangle v1="231" v2="232" v3="233"/>
+     <triangle v1="233" v2="232" v3="234"/>
+     <triangle v1="233" v2="234" v3="235"/>
+     <triangle v1="235" v2="234" v3="236"/>
+     <triangle v1="235" v2="236" v3="237"/>
+     <triangle v1="237" v2="236" v3="238"/>
+     <triangle v1="237" v2="238" v3="239"/>
+     <triangle v1="239" v2="238" v3="240"/>
+     <triangle v1="239" v2="240" v3="241"/>
+     <triangle v1="241" v2="240" v3="242"/>
+     <triangle v1="241" v2="242" v3="243"/>
+     <triangle v1="243" v2="242" v3="244"/>
+     <triangle v1="243" v2="244" v3="245"/>
+     <triangle v1="245" v2="244" v3="246"/>
+     <triangle v1="245" v2="246" v3="247"/>
+     <triangle v1="247" v2="246" v3="248"/>
+     <triangle v1="248" v2="246" v3="249"/>
+     <triangle v1="248" v2="249" v3="250"/>
+     <triangle v1="250" v2="249" v3="251"/>
+     <triangle v1="251" v2="249" v3="252"/>
+     <triangle v1="251" v2="252" v3="253"/>
+     <triangle v1="253" v2="252" v3="254"/>
+     <triangle v1="253" v2="254" v3="255"/>
+     <triangle v1="255" v2="254" v3="256"/>
+     <triangle v1="256" v2="254" v3="257"/>
+     <triangle v1="256" v2="257" v3="258"/>
+     <triangle v1="258" v2="257" v3="259"/>
+     <triangle v1="258" v2="259" v3="260"/>
+     <triangle v1="260" v2="259" v3="261"/>
+     <triangle v1="260" v2="261" v3="262"/>
+     <triangle v1="262" v2="261" v3="263"/>
+     <triangle v1="262" v2="263" v3="264"/>
+     <triangle v1="264" v2="263" v3="265"/>
+     <triangle v1="264" v2="265" v3="266"/>
+     <triangle v1="266" v2="265" v3="267"/>
+     <triangle v1="266" v2="267" v3="268"/>
+     <triangle v1="266" v2="268" v3="269"/>
+     <triangle v1="269" v2="268" v3="270"/>
+     <triangle v1="269" v2="270" v3="271"/>
+     <triangle v1="271" v2="270" v3="272"/>
+     <triangle v1="271" v2="272" v3="273"/>
+     <triangle v1="273" v2="272" v3="274"/>
+     <triangle v1="273" v2="274" v3="275"/>
+     <triangle v1="275" v2="274" v3="276"/>
+     <triangle v1="275" v2="276" v3="277"/>
+     <triangle v1="277" v2="276" v3="278"/>
+     <triangle v1="277" v2="278" v3="279"/>
+     <triangle v1="279" v2="278" v3="280"/>
+     <triangle v1="279" v2="280" v3="281"/>
+     <triangle v1="2" v2="4" v3="220"/>
+     <triangle v1="220" v2="4" v3="222"/>
+     <triangle v1="222" v2="4" v3="6"/>
+     <triangle v1="222" v2="6" v3="224"/>
+     <triangle v1="224" v2="6" v3="226"/>
+     <triangle v1="226" v2="6" v3="8"/>
+     <triangle v1="226" v2="8" v3="228"/>
+     <triangle v1="228" v2="8" v3="230"/>
+     <triangle v1="230" v2="8" v3="10"/>
+     <triangle v1="230" v2="10" v3="232"/>
+     <triangle v1="232" v2="10" v3="12"/>
+     <triangle v1="232" v2="12" v3="234"/>
+     <triangle v1="234" v2="12" v3="236"/>
+     <triangle v1="236" v2="12" v3="14"/>
+     <triangle v1="236" v2="14" v3="238"/>
+     <triangle v1="238" v2="14" v3="16"/>
+     <triangle v1="238" v2="16" v3="240"/>
+     <triangle v1="240" v2="16" v3="242"/>
+     <triangle v1="242" v2="16" v3="18"/>
+     <triangle v1="242" v2="18" v3="244"/>
+     <triangle v1="244" v2="18" v3="246"/>
+     <triangle v1="246" v2="18" v3="20"/>
+     <triangle v1="246" v2="20" v3="249"/>
+     <triangle v1="249" v2="20" v3="22"/>
+     <triangle v1="249" v2="22" v3="24"/>
+     <triangle v1="249" v2="24" v3="252"/>
+     <triangle v1="252" v2="24" v3="26"/>
+     <triangle v1="252" v2="26" v3="254"/>
+     <triangle v1="254" v2="26" v3="28"/>
+     <triangle v1="254" v2="28" v3="30"/>
+     <triangle v1="30" v2="32" v3="254"/>
+     <triangle v1="254" v2="32" v3="34"/>
+     <triangle v1="254" v2="34" v3="36"/>
+     <triangle v1="36" v2="38" v3="254"/>
+     <triangle v1="254" v2="38" v3="40"/>
+     <triangle v1="254" v2="40" v3="125"/>
+     <triangle v1="125" v2="124" v3="254"/>
+     <triangle v1="254" v2="124" v3="130"/>
+     <triangle v1="254" v2="130" v3="135"/>
+     <triangle v1="141" v2="282" v3="135"/>
+     <triangle v1="135" v2="282" v3="283"/>
+     <triangle v1="135" v2="283" v3="284"/>
+     <triangle v1="284" v2="283" v3="285"/>
+     <triangle v1="284" v2="285" v3="286"/>
+     <triangle v1="286" v2="285" v3="287"/>
+     <triangle v1="286" v2="287" v3="288"/>
+     <triangle v1="288" v2="287" v3="289"/>
+     <triangle v1="289" v2="287" v3="290"/>
+     <triangle v1="289" v2="290" v3="291"/>
+     <triangle v1="291" v2="290" v3="292"/>
+     <triangle v1="292" v2="290" v3="293"/>
+     <triangle v1="292" v2="293" v3="294"/>
+     <triangle v1="294" v2="293" v3="295"/>
+     <triangle v1="294" v2="295" v3="296"/>
+     <triangle v1="296" v2="295" v3="297"/>
+     <triangle v1="296" v2="297" v3="298"/>
+     <triangle v1="298" v2="297" v3="299"/>
+     <triangle v1="298" v2="299" v3="300"/>
+     <triangle v1="300" v2="299" v3="301"/>
+     <triangle v1="300" v2="301" v3="302"/>
+     <triangle v1="302" v2="301" v3="303"/>
+     <triangle v1="303" v2="301" v3="304"/>
+     <triangle v1="303" v2="304" v3="305"/>
+     <triangle v1="305" v2="304" v3="306"/>
+     <triangle v1="305" v2="306" v3="307"/>
+     <triangle v1="307" v2="306" v3="308"/>
+     <triangle v1="307" v2="308" v3="309"/>
+     <triangle v1="309" v2="308" v3="310"/>
+     <triangle v1="309" v2="310" v3="311"/>
+     <triangle v1="311" v2="310" v3="312"/>
+     <triangle v1="311" v2="312" v3="313"/>
+     <triangle v1="313" v2="312" v3="314"/>
+     <triangle v1="313" v2="314" v3="315"/>
+     <triangle v1="145" v2="316" v3="141"/>
+     <triangle v1="141" v2="316" v3="317"/>
+     <triangle v1="141" v2="317" v3="282"/>
+     <triangle v1="150" v2="318" v3="145"/>
+     <triangle v1="145" v2="318" v3="319"/>
+     <triangle v1="145" v2="319" v3="316"/>
+     <triangle v1="318" v2="150" v3="320"/>
+     <triangle v1="320" v2="150" v3="155"/>
+     <triangle v1="320" v2="155" v3="321"/>
+     <triangle v1="321" v2="155" v3="322"/>
+     <triangle v1="322" v2="155" v3="159"/>
+     <triangle v1="322" v2="159" v3="323"/>
+     <triangle v1="323" v2="159" v3="164"/>
+     <triangle v1="284" v2="324" v3="135"/>
+     <triangle v1="135" v2="324" v3="325"/>
+     <triangle v1="135" v2="325" v3="326"/>
+     <triangle v1="326" v2="327" v3="135"/>
+     <triangle v1="135" v2="327" v3="328"/>
+     <triangle v1="135" v2="328" v3="329"/>
+     <triangle v1="329" v2="330" v3="135"/>
+     <triangle v1="135" v2="330" v3="331"/>
+     <triangle v1="135" v2="331" v3="332"/>
+     <triangle v1="332" v2="333" v3="135"/>
+     <triangle v1="135" v2="333" v3="334"/>
+     <triangle v1="135" v2="334" v3="335"/>
+     <triangle v1="135" v2="335" v3="261"/>
+     <triangle v1="261" v2="335" v3="336"/>
+     <triangle v1="261" v2="336" v3="263"/>
+     <triangle v1="263" v2="336" v3="337"/>
+     <triangle v1="263" v2="337" v3="265"/>
+     <triangle v1="265" v2="337" v3="338"/>
+     <triangle v1="265" v2="338" v3="267"/>
+     <triangle v1="261" v2="259" v3="135"/>
+     <triangle v1="135" v2="259" v3="257"/>
+     <triangle v1="135" v2="257" v3="254"/>
+     <triangle v1="266" v2="269" v3="339"/>
+     <triangle v1="339" v2="269" v3="271"/>
+     <triangle v1="339" v2="271" v3="273"/>
+     <triangle v1="273" v2="275" v3="339"/>
+     <triangle v1="339" v2="275" v3="340"/>
+     <triangle v1="340" v2="275" v3="277"/>
+     <triangle v1="340" v2="277" v3="279"/>
+     <triangle v1="340" v2="279" v3="341"/>
+     <triangle v1="341" v2="279" v3="281"/>
+     <triangle v1="341" v2="281" v3="342"/>
+     <triangle v1="341" v2="342" v3="343"/>
+     <triangle v1="343" v2="342" v3="344"/>
+     <triangle v1="343" v2="344" v3="345"/>
+     <triangle v1="345" v2="344" v3="346"/>
+     <triangle v1="345" v2="346" v3="347"/>
+     <triangle v1="347" v2="346" v3="348"/>
+     <triangle v1="347" v2="348" v3="349"/>
+     <triangle v1="349" v2="348" v3="350"/>
+     <triangle v1="349" v2="350" v3="351"/>
+     <triangle v1="351" v2="350" v3="352"/>
+     <triangle v1="351" v2="352" v3="353"/>
+     <triangle v1="353" v2="352" v3="354"/>
+     <triangle v1="353" v2="354" v3="355"/>
+     <triangle v1="355" v2="354" v3="356"/>
+     <triangle v1="355" v2="356" v3="357"/>
+     <triangle v1="357" v2="356" v3="358"/>
+     <triangle v1="357" v2="358" v3="359"/>
+     <triangle v1="359" v2="358" v3="360"/>
+     <triangle v1="359" v2="360" v3="361"/>
+     <triangle v1="361" v2="360" v3="362"/>
+     <triangle v1="361" v2="362" v3="363"/>
+     <triangle v1="363" v2="362" v3="364"/>
+     <triangle v1="363" v2="364" v3="365"/>
+     <triangle v1="365" v2="364" v3="366"/>
+     <triangle v1="365" v2="366" v3="367"/>
+     <triangle v1="367" v2="366" v3="368"/>
+     <triangle v1="367" v2="368" v3="369"/>
+     <triangle v1="369" v2="368" v3="370"/>
+     <triangle v1="369" v2="370" v3="371"/>
+     <triangle v1="371" v2="370" v3="372"/>
+     <triangle v1="371" v2="372" v3="373"/>
+     <triangle v1="373" v2="372" v3="374"/>
+     <triangle v1="373" v2="374" v3="375"/>
+     <triangle v1="375" v2="374" v3="376"/>
+     <triangle v1="375" v2="376" v3="377"/>
+     <triangle v1="377" v2="376" v3="378"/>
+     <triangle v1="377" v2="378" v3="379"/>
+     <triangle v1="379" v2="378" v3="380"/>
+     <triangle v1="379" v2="380" v3="381"/>
+     <triangle v1="381" v2="380" v3="382"/>
+     <triangle v1="381" v2="382" v3="383"/>
+     <triangle v1="383" v2="382" v3="384"/>
+     <triangle v1="383" v2="384" v3="385"/>
+     <triangle v1="385" v2="384" v3="386"/>
+     <triangle v1="385" v2="386" v3="387"/>
+     <triangle v1="387" v2="386" v3="388"/>
+     <triangle v1="387" v2="388" v3="389"/>
+     <triangle v1="389" v2="388" v3="390"/>
+     <triangle v1="389" v2="390" v3="391"/>
+     <triangle v1="391" v2="390" v3="392"/>
+     <triangle v1="391" v2="392" v3="393"/>
+     <triangle v1="393" v2="392" v3="394"/>
+     <triangle v1="393" v2="394" v3="395"/>
+     <triangle v1="395" v2="394" v3="396"/>
+     <triangle v1="395" v2="396" v3="397"/>
+     <triangle v1="397" v2="396" v3="398"/>
+     <triangle v1="397" v2="398" v3="399"/>
+     <triangle v1="399" v2="398" v3="400"/>
+     <triangle v1="399" v2="400" v3="401"/>
+     <triangle v1="401" v2="400" v3="402"/>
+     <triangle v1="401" v2="402" v3="403"/>
+     <triangle v1="403" v2="402" v3="404"/>
+     <triangle v1="403" v2="404" v3="405"/>
+     <triangle v1="405" v2="404" v3="406"/>
+     <triangle v1="406" v2="404" v3="407"/>
+     <triangle v1="407" v2="404" v3="408"/>
+     <triangle v1="407" v2="408" v3="409"/>
+     <triangle v1="409" v2="408" v3="410"/>
+     <triangle v1="410" v2="408" v3="411"/>
+     <triangle v1="165" v2="412" v3="107"/>
+     <triangle v1="107" v2="412" v3="413"/>
+     <triangle v1="107" v2="413" v3="414"/>
+     <triangle v1="166" v2="167" v3="165"/>
+     <triangle v1="165" v2="167" v3="412"/>
+     <triangle v1="107" v2="414" v3="108"/>
+     <triangle v1="108" v2="414" v3="415"/>
+     <triangle v1="108" v2="415" v3="109"/>
+     <triangle v1="109" v2="415" v3="416"/>
+     <triangle v1="109" v2="416" v3="417"/>
+     <triangle v1="109" v2="417" v3="110"/>
+     <triangle v1="110" v2="417" v3="418"/>
+     <triangle v1="110" v2="418" v3="111"/>
+     <triangle v1="111" v2="418" v3="419"/>
+     <triangle v1="111" v2="419" v3="420"/>
+     <triangle v1="111" v2="420" v3="112"/>
+     <triangle v1="112" v2="420" v3="421"/>
+     <triangle v1="112" v2="421" v3="113"/>
+     <triangle v1="113" v2="421" v3="422"/>
+     <triangle v1="113" v2="422" v3="423"/>
+     <triangle v1="113" v2="423" v3="114"/>
+     <triangle v1="114" v2="423" v3="424"/>
+     <triangle v1="114" v2="424" v3="115"/>
+     <triangle v1="115" v2="424" v3="425"/>
+     <triangle v1="115" v2="425" v3="426"/>
+     <triangle v1="115" v2="426" v3="116"/>
+     <triangle v1="116" v2="426" v3="427"/>
+     <triangle v1="116" v2="427" v3="117"/>
+     <triangle v1="117" v2="427" v3="428"/>
+     <triangle v1="117" v2="428" v3="429"/>
+     <triangle v1="117" v2="429" v3="118"/>
+     <triangle v1="118" v2="429" v3="430"/>
+     <triangle v1="118" v2="430" v3="119"/>
+     <triangle v1="119" v2="430" v3="431"/>
+     <triangle v1="119" v2="431" v3="41"/>
+     <triangle v1="41" v2="431" v3="432"/>
+     <triangle v1="41" v2="432" v3="433"/>
+     <triangle v1="434" v2="44" v3="433"/>
+     <triangle v1="433" v2="44" v3="43"/>
+     <triangle v1="433" v2="43" v3="41"/>
+     <triangle v1="44" v2="434" v3="120"/>
+     <triangle v1="120" v2="434" v3="435"/>
+     <triangle v1="120" v2="435" v3="121"/>
+     <triangle v1="121" v2="435" v3="122"/>
+     <triangle v1="122" v2="435" v3="436"/>
+     <triangle v1="122" v2="436" v3="123"/>
+     <triangle v1="123" v2="436" v3="437"/>
+     <triangle v1="123" v2="437" v3="126"/>
+     <triangle v1="126" v2="437" v3="127"/>
+     <triangle v1="127" v2="437" v3="438"/>
+     <triangle v1="127" v2="438" v3="128"/>
+     <triangle v1="128" v2="438" v3="439"/>
+     <triangle v1="128" v2="439" v3="129"/>
+     <triangle v1="129" v2="439" v3="131"/>
+     <triangle v1="131" v2="439" v3="440"/>
+     <triangle v1="131" v2="440" v3="132"/>
+     <triangle v1="132" v2="440" v3="441"/>
+     <triangle v1="132" v2="441" v3="133"/>
+     <triangle v1="133" v2="441" v3="442"/>
+     <triangle v1="133" v2="442" v3="134"/>
+     <triangle v1="134" v2="442" v3="136"/>
+     <triangle v1="136" v2="442" v3="443"/>
+     <triangle v1="136" v2="443" v3="137"/>
+     <triangle v1="137" v2="443" v3="444"/>
+     <triangle v1="137" v2="444" v3="138"/>
+     <triangle v1="138" v2="444" v3="445"/>
+     <triangle v1="138" v2="445" v3="139"/>
+     <triangle v1="139" v2="445" v3="140"/>
+     <triangle v1="140" v2="445" v3="446"/>
+     <triangle v1="140" v2="446" v3="142"/>
+     <triangle v1="142" v2="446" v3="447"/>
+     <triangle v1="142" v2="447" v3="143"/>
+     <triangle v1="143" v2="447" v3="448"/>
+     <triangle v1="143" v2="448" v3="144"/>
+     <triangle v1="144" v2="448" v3="449"/>
+     <triangle v1="144" v2="449" v3="146"/>
+     <triangle v1="146" v2="449" v3="147"/>
+     <triangle v1="147" v2="449" v3="450"/>
+     <triangle v1="147" v2="450" v3="148"/>
+     <triangle v1="148" v2="450" v3="451"/>
+     <triangle v1="148" v2="451" v3="149"/>
+     <triangle v1="149" v2="451" v3="452"/>
+     <triangle v1="149" v2="452" v3="151"/>
+     <triangle v1="151" v2="452" v3="453"/>
+     <triangle v1="151" v2="453" v3="152"/>
+     <triangle v1="152" v2="453" v3="454"/>
+     <triangle v1="152" v2="454" v3="153"/>
+     <triangle v1="153" v2="454" v3="154"/>
+     <triangle v1="154" v2="454" v3="455"/>
+     <triangle v1="154" v2="455" v3="156"/>
+     <triangle v1="156" v2="455" v3="456"/>
+     <triangle v1="156" v2="456" v3="457"/>
+     <triangle v1="156" v2="457" v3="157"/>
+     <triangle v1="157" v2="457" v3="458"/>
+     <triangle v1="157" v2="458" v3="158"/>
+     <triangle v1="158" v2="458" v3="459"/>
+     <triangle v1="158" v2="459" v3="460"/>
+     <triangle v1="158" v2="460" v3="160"/>
+     <triangle v1="160" v2="460" v3="461"/>
+     <triangle v1="160" v2="461" v3="161"/>
+     <triangle v1="161" v2="461" v3="462"/>
+     <triangle v1="161" v2="462" v3="463"/>
+     <triangle v1="161" v2="463" v3="162"/>
+     <triangle v1="162" v2="463" v3="464"/>
+     <triangle v1="162" v2="464" v3="163"/>
+     <triangle v1="163" v2="464" v3="465"/>
+     <triangle v1="163" v2="465" v3="466"/>
+     <triangle v1="163" v2="466" v3="164"/>
+     <triangle v1="164" v2="466" v3="467"/>
+     <triangle v1="164" v2="467" v3="323"/>
+     <triangle v1="323" v2="467" v3="468"/>
+     <triangle v1="323" v2="468" v3="322"/>
+     <triangle v1="322" v2="468" v3="469"/>
+     <triangle v1="322" v2="469" v3="321"/>
+     <triangle v1="321" v2="469" v3="470"/>
+     <triangle v1="321" v2="470" v3="320"/>
+     <triangle v1="320" v2="470" v3="471"/>
+     <triangle v1="320" v2="471" v3="318"/>
+     <triangle v1="318" v2="471" v3="472"/>
+     <triangle v1="318" v2="472" v3="319"/>
+     <triangle v1="319" v2="472" v3="316"/>
+     <triangle v1="316" v2="472" v3="473"/>
+     <triangle v1="316" v2="473" v3="317"/>
+     <triangle v1="317" v2="473" v3="474"/>
+     <triangle v1="317" v2="474" v3="282"/>
+     <triangle v1="282" v2="474" v3="475"/>
+     <triangle v1="282" v2="475" v3="283"/>
+     <triangle v1="283" v2="475" v3="476"/>
+     <triangle v1="283" v2="476" v3="285"/>
+     <triangle v1="285" v2="476" v3="477"/>
+     <triangle v1="285" v2="477" v3="287"/>
+     <triangle v1="287" v2="477" v3="478"/>
+     <triangle v1="287" v2="478" v3="479"/>
+     <triangle v1="287" v2="479" v3="290"/>
+     <triangle v1="290" v2="479" v3="480"/>
+     <triangle v1="290" v2="480" v3="293"/>
+     <triangle v1="293" v2="480" v3="481"/>
+     <triangle v1="293" v2="481" v3="295"/>
+     <triangle v1="295" v2="481" v3="482"/>
+     <triangle v1="295" v2="482" v3="297"/>
+     <triangle v1="297" v2="482" v3="483"/>
+     <triangle v1="297" v2="483" v3="299"/>
+     <triangle v1="299" v2="483" v3="484"/>
+     <triangle v1="299" v2="484" v3="301"/>
+     <triangle v1="301" v2="484" v3="485"/>
+     <triangle v1="301" v2="485" v3="486"/>
+     <triangle v1="301" v2="486" v3="304"/>
+     <triangle v1="304" v2="486" v3="487"/>
+     <triangle v1="304" v2="487" v3="306"/>
+     <triangle v1="306" v2="487" v3="488"/>
+     <triangle v1="306" v2="488" v3="308"/>
+     <triangle v1="308" v2="488" v3="489"/>
+     <triangle v1="308" v2="489" v3="310"/>
+     <triangle v1="310" v2="489" v3="490"/>
+     <triangle v1="310" v2="490" v3="312"/>
+     <triangle v1="312" v2="490" v3="491"/>
+     <triangle v1="312" v2="491" v3="314"/>
+     <triangle v1="314" v2="491" v3="401"/>
+     <triangle v1="314" v2="401" v3="315"/>
+     <triangle v1="315" v2="401" v3="403"/>
+     <triangle v1="315" v2="403" v3="492"/>
+     <triangle v1="492" v2="403" v3="493"/>
+     <triangle v1="493" v2="403" v3="405"/>
+     <triangle v1="493" v2="405" v3="406"/>
+     <triangle v1="493" v2="406" v3="494"/>
+     <triangle v1="494" v2="406" v3="407"/>
+     <triangle v1="494" v2="407" v3="495"/>
+     <triangle v1="495" v2="407" v3="496"/>
+     <triangle v1="496" v2="407" v3="409"/>
+     <triangle v1="496" v2="409" v3="410"/>
+     <triangle v1="496" v2="410" v3="497"/>
+     <triangle v1="497" v2="410" v3="411"/>
+     <triangle v1="497" v2="411" v3="498"/>
+     <triangle v1="498" v2="411" v3="499"/>
+     <triangle v1="499" v2="411" v3="408"/>
+     <triangle v1="499" v2="408" v3="500"/>
+     <triangle v1="500" v2="408" v3="404"/>
+     <triangle v1="500" v2="404" v3="501"/>
+     <triangle v1="501" v2="404" v3="402"/>
+     <triangle v1="501" v2="402" v3="502"/>
+     <triangle v1="502" v2="402" v3="400"/>
+     <triangle v1="502" v2="400" v3="503"/>
+     <triangle v1="503" v2="400" v3="398"/>
+     <triangle v1="503" v2="398" v3="504"/>
+     <triangle v1="504" v2="398" v3="396"/>
+     <triangle v1="504" v2="396" v3="505"/>
+     <triangle v1="505" v2="396" v3="394"/>
+     <triangle v1="505" v2="394" v3="506"/>
+     <triangle v1="506" v2="394" v3="392"/>
+     <triangle v1="506" v2="392" v3="507"/>
+     <triangle v1="507" v2="392" v3="390"/>
+     <triangle v1="507" v2="390" v3="508"/>
+     <triangle v1="508" v2="390" v3="388"/>
+     <triangle v1="508" v2="388" v3="509"/>
+     <triangle v1="509" v2="388" v3="386"/>
+     <triangle v1="509" v2="386" v3="510"/>
+     <triangle v1="510" v2="386" v3="384"/>
+     <triangle v1="510" v2="384" v3="511"/>
+     <triangle v1="511" v2="384" v3="382"/>
+     <triangle v1="511" v2="382" v3="512"/>
+     <triangle v1="512" v2="382" v3="380"/>
+     <triangle v1="512" v2="380" v3="513"/>
+     <triangle v1="513" v2="380" v3="378"/>
+     <triangle v1="513" v2="378" v3="514"/>
+     <triangle v1="514" v2="378" v3="376"/>
+     <triangle v1="514" v2="376" v3="515"/>
+     <triangle v1="515" v2="376" v3="374"/>
+     <triangle v1="515" v2="374" v3="516"/>
+     <triangle v1="516" v2="374" v3="372"/>
+     <triangle v1="516" v2="372" v3="517"/>
+     <triangle v1="517" v2="372" v3="370"/>
+     <triangle v1="517" v2="370" v3="518"/>
+     <triangle v1="518" v2="370" v3="368"/>
+     <triangle v1="518" v2="368" v3="519"/>
+     <triangle v1="519" v2="368" v3="366"/>
+     <triangle v1="519" v2="366" v3="520"/>
+     <triangle v1="520" v2="366" v3="364"/>
+     <triangle v1="520" v2="364" v3="521"/>
+     <triangle v1="521" v2="364" v3="362"/>
+     <triangle v1="521" v2="362" v3="522"/>
+     <triangle v1="522" v2="362" v3="360"/>
+     <triangle v1="522" v2="360" v3="523"/>
+     <triangle v1="523" v2="360" v3="358"/>
+     <triangle v1="523" v2="358" v3="524"/>
+     <triangle v1="524" v2="358" v3="356"/>
+     <triangle v1="524" v2="356" v3="525"/>
+     <triangle v1="525" v2="356" v3="354"/>
+     <triangle v1="525" v2="354" v3="526"/>
+     <triangle v1="526" v2="354" v3="352"/>
+     <triangle v1="526" v2="352" v3="527"/>
+     <triangle v1="527" v2="352" v3="350"/>
+     <triangle v1="527" v2="350" v3="528"/>
+     <triangle v1="528" v2="350" v3="348"/>
+     <triangle v1="528" v2="348" v3="529"/>
+     <triangle v1="529" v2="348" v3="346"/>
+     <triangle v1="529" v2="346" v3="530"/>
+     <triangle v1="530" v2="346" v3="344"/>
+     <triangle v1="530" v2="344" v3="531"/>
+     <triangle v1="531" v2="344" v3="342"/>
+     <triangle v1="531" v2="342" v3="280"/>
+     <triangle v1="280" v2="342" v3="281"/>
+     <triangle v1="531" v2="280" v3="336"/>
+     <triangle v1="336" v2="280" v3="278"/>
+     <triangle v1="336" v2="278" v3="337"/>
+     <triangle v1="337" v2="278" v3="276"/>
+     <triangle v1="337" v2="276" v3="274"/>
+     <triangle v1="337" v2="274" v3="338"/>
+     <triangle v1="338" v2="274" v3="272"/>
+     <triangle v1="338" v2="272" v3="270"/>
+     <triangle v1="270" v2="268" v3="338"/>
+     <triangle v1="338" v2="268" v3="267"/>
+     <triangle v1="336" v2="335" v3="531"/>
+     <triangle v1="531" v2="335" v3="530"/>
+     <triangle v1="530" v2="335" v3="334"/>
+     <triangle v1="530" v2="334" v3="529"/>
+     <triangle v1="529" v2="334" v3="333"/>
+     <triangle v1="529" v2="333" v3="528"/>
+     <triangle v1="528" v2="333" v3="332"/>
+     <triangle v1="528" v2="332" v3="527"/>
+     <triangle v1="527" v2="332" v3="331"/>
+     <triangle v1="527" v2="331" v3="526"/>
+     <triangle v1="526" v2="331" v3="330"/>
+     <triangle v1="526" v2="330" v3="525"/>
+     <triangle v1="525" v2="330" v3="329"/>
+     <triangle v1="525" v2="329" v3="524"/>
+     <triangle v1="524" v2="329" v3="328"/>
+     <triangle v1="524" v2="328" v3="523"/>
+     <triangle v1="523" v2="328" v3="327"/>
+     <triangle v1="523" v2="327" v3="522"/>
+     <triangle v1="522" v2="327" v3="326"/>
+     <triangle v1="522" v2="326" v3="521"/>
+     <triangle v1="521" v2="326" v3="325"/>
+     <triangle v1="521" v2="325" v3="520"/>
+     <triangle v1="520" v2="325" v3="324"/>
+     <triangle v1="520" v2="324" v3="519"/>
+     <triangle v1="519" v2="324" v3="284"/>
+     <triangle v1="519" v2="284" v3="518"/>
+     <triangle v1="518" v2="284" v3="286"/>
+     <triangle v1="518" v2="286" v3="517"/>
+     <triangle v1="517" v2="286" v3="288"/>
+     <triangle v1="517" v2="288" v3="516"/>
+     <triangle v1="516" v2="288" v3="289"/>
+     <triangle v1="516" v2="289" v3="515"/>
+     <triangle v1="515" v2="289" v3="291"/>
+     <triangle v1="515" v2="291" v3="514"/>
+     <triangle v1="514" v2="291" v3="292"/>
+     <triangle v1="514" v2="292" v3="513"/>
+     <triangle v1="513" v2="292" v3="294"/>
+     <triangle v1="513" v2="294" v3="512"/>
+     <triangle v1="512" v2="294" v3="296"/>
+     <triangle v1="512" v2="296" v3="511"/>
+     <triangle v1="511" v2="296" v3="298"/>
+     <triangle v1="511" v2="298" v3="510"/>
+     <triangle v1="510" v2="298" v3="300"/>
+     <triangle v1="510" v2="300" v3="509"/>
+     <triangle v1="509" v2="300" v3="302"/>
+     <triangle v1="509" v2="302" v3="508"/>
+     <triangle v1="508" v2="302" v3="303"/>
+     <triangle v1="508" v2="303" v3="507"/>
+     <triangle v1="507" v2="303" v3="305"/>
+     <triangle v1="507" v2="305" v3="506"/>
+     <triangle v1="506" v2="305" v3="307"/>
+     <triangle v1="506" v2="307" v3="505"/>
+     <triangle v1="505" v2="307" v3="309"/>
+     <triangle v1="505" v2="309" v3="504"/>
+     <triangle v1="504" v2="309" v3="311"/>
+     <triangle v1="504" v2="311" v3="503"/>
+     <triangle v1="503" v2="311" v3="313"/>
+     <triangle v1="503" v2="313" v3="502"/>
+     <triangle v1="502" v2="313" v3="315"/>
+     <triangle v1="502" v2="315" v3="501"/>
+     <triangle v1="501" v2="315" v3="492"/>
+     <triangle v1="501" v2="492" v3="500"/>
+     <triangle v1="500" v2="492" v3="493"/>
+     <triangle v1="500" v2="493" v3="494"/>
+     <triangle v1="494" v2="495" v3="500"/>
+     <triangle v1="500" v2="495" v3="499"/>
+     <triangle v1="499" v2="495" v3="496"/>
+     <triangle v1="499" v2="496" v3="497"/>
+     <triangle v1="497" v2="498" v3="499"/>
+     <triangle v1="266" v2="339" v3="264"/>
+     <triangle v1="264" v2="339" v3="262"/>
+     <triangle v1="262" v2="339" v3="260"/>
+     <triangle v1="260" v2="339" v3="258"/>
+     <triangle v1="258" v2="339" v3="256"/>
+     <triangle v1="256" v2="339" v3="255"/>
+     <triangle v1="255" v2="339" v3="253"/>
+     <triangle v1="253" v2="339" v3="251"/>
+     <triangle v1="251" v2="339" v3="250"/>
+     <triangle v1="250" v2="339" v3="448"/>
+     <triangle v1="250" v2="448" v3="248"/>
+     <triangle v1="248" v2="448" v3="247"/>
+     <triangle v1="247" v2="448" v3="447"/>
+     <triangle v1="247" v2="447" v3="245"/>
+     <triangle v1="245" v2="447" v3="243"/>
+     <triangle v1="243" v2="447" v3="241"/>
+     <triangle v1="241" v2="447" v3="239"/>
+     <triangle v1="239" v2="447" v3="237"/>
+     <triangle v1="237" v2="447" v3="446"/>
+     <triangle v1="237" v2="446" v3="235"/>
+     <triangle v1="235" v2="446" v3="233"/>
+     <triangle v1="233" v2="446" v3="231"/>
+     <triangle v1="231" v2="446" v3="229"/>
+     <triangle v1="229" v2="446" v3="227"/>
+     <triangle v1="227" v2="446" v3="445"/>
+     <triangle v1="227" v2="445" v3="225"/>
+     <triangle v1="225" v2="445" v3="223"/>
+     <triangle v1="223" v2="445" v3="221"/>
+     <triangle v1="221" v2="445" v3="219"/>
+     <triangle v1="219" v2="445" v3="218"/>
+     <triangle v1="218" v2="445" v3="217"/>
+     <triangle v1="217" v2="445" v3="216"/>
+     <triangle v1="216" v2="445" v3="444"/>
+     <triangle v1="216" v2="444" v3="215"/>
+     <triangle v1="215" v2="444" v3="214"/>
+     <triangle v1="214" v2="444" v3="213"/>
+     <triangle v1="213" v2="444" v3="212"/>
+     <triangle v1="212" v2="444" v3="211"/>
+     <triangle v1="211" v2="444" v3="443"/>
+     <triangle v1="211" v2="443" v3="210"/>
+     <triangle v1="210" v2="443" v3="209"/>
+     <triangle v1="209" v2="443" v3="208"/>
+     <triangle v1="208" v2="443" v3="207"/>
+     <triangle v1="207" v2="443" v3="442"/>
+     <triangle v1="207" v2="442" v3="206"/>
+     <triangle v1="206" v2="442" v3="205"/>
+     <triangle v1="205" v2="442" v3="204"/>
+     <triangle v1="204" v2="442" v3="203"/>
+     <triangle v1="203" v2="442" v3="441"/>
+     <triangle v1="203" v2="441" v3="202"/>
+     <triangle v1="202" v2="441" v3="201"/>
+     <triangle v1="201" v2="441" v3="200"/>
+     <triangle v1="200" v2="441" v3="440"/>
+     <triangle v1="200" v2="440" v3="199"/>
+     <triangle v1="199" v2="440" v3="198"/>
+     <triangle v1="198" v2="440" v3="439"/>
+     <triangle v1="198" v2="439" v3="197"/>
+     <triangle v1="197" v2="439" v3="196"/>
+     <triangle v1="196" v2="439" v3="438"/>
+     <triangle v1="196" v2="438" v3="195"/>
+     <triangle v1="195" v2="438" v3="194"/>
+     <triangle v1="194" v2="438" v3="437"/>
+     <triangle v1="194" v2="437" v3="193"/>
+     <triangle v1="193" v2="437" v3="192"/>
+     <triangle v1="192" v2="437" v3="436"/>
+     <triangle v1="192" v2="436" v3="191"/>
+     <triangle v1="191" v2="436" v3="435"/>
+     <triangle v1="191" v2="435" v3="190"/>
+     <triangle v1="190" v2="435" v3="434"/>
+     <triangle v1="190" v2="434" v3="189"/>
+     <triangle v1="189" v2="434" v3="188"/>
+     <triangle v1="188" v2="434" v3="433"/>
+     <triangle v1="188" v2="433" v3="187"/>
+     <triangle v1="187" v2="433" v3="432"/>
+     <triangle v1="187" v2="432" v3="186"/>
+     <triangle v1="186" v2="432" v3="431"/>
+     <triangle v1="186" v2="431" v3="185"/>
+     <triangle v1="185" v2="431" v3="430"/>
+     <triangle v1="185" v2="430" v3="184"/>
+     <triangle v1="184" v2="430" v3="429"/>
+     <triangle v1="184" v2="429" v3="183"/>
+     <triangle v1="183" v2="429" v3="428"/>
+     <triangle v1="183" v2="428" v3="182"/>
+     <triangle v1="182" v2="428" v3="427"/>
+     <triangle v1="182" v2="427" v3="181"/>
+     <triangle v1="181" v2="427" v3="426"/>
+     <triangle v1="181" v2="426" v3="180"/>
+     <triangle v1="180" v2="426" v3="425"/>
+     <triangle v1="180" v2="425" v3="179"/>
+     <triangle v1="179" v2="425" v3="424"/>
+     <triangle v1="179" v2="424" v3="178"/>
+     <triangle v1="178" v2="424" v3="423"/>
+     <triangle v1="178" v2="423" v3="177"/>
+     <triangle v1="177" v2="423" v3="422"/>
+     <triangle v1="177" v2="422" v3="176"/>
+     <triangle v1="176" v2="422" v3="421"/>
+     <triangle v1="176" v2="421" v3="175"/>
+     <triangle v1="175" v2="421" v3="420"/>
+     <triangle v1="175" v2="420" v3="174"/>
+     <triangle v1="174" v2="420" v3="419"/>
+     <triangle v1="174" v2="419" v3="173"/>
+     <triangle v1="173" v2="419" v3="418"/>
+     <triangle v1="173" v2="418" v3="172"/>
+     <triangle v1="172" v2="418" v3="417"/>
+     <triangle v1="172" v2="417" v3="416"/>
+     <triangle v1="340" v2="459" v3="339"/>
+     <triangle v1="339" v2="459" v3="458"/>
+     <triangle v1="339" v2="458" v3="457"/>
+     <triangle v1="341" v2="488" v3="340"/>
+     <triangle v1="340" v2="488" v3="487"/>
+     <triangle v1="340" v2="487" v3="486"/>
+     <triangle v1="341" v2="343" v3="488"/>
+     <triangle v1="488" v2="343" v3="489"/>
+     <triangle v1="489" v2="343" v3="345"/>
+     <triangle v1="489" v2="345" v3="490"/>
+     <triangle v1="490" v2="345" v3="347"/>
+     <triangle v1="490" v2="347" v3="491"/>
+     <triangle v1="491" v2="347" v3="349"/>
+     <triangle v1="491" v2="349" v3="401"/>
+     <triangle v1="401" v2="349" v3="351"/>
+     <triangle v1="401" v2="351" v3="399"/>
+     <triangle v1="399" v2="351" v3="353"/>
+     <triangle v1="399" v2="353" v3="397"/>
+     <triangle v1="397" v2="353" v3="355"/>
+     <triangle v1="397" v2="355" v3="395"/>
+     <triangle v1="395" v2="355" v3="357"/>
+     <triangle v1="395" v2="357" v3="393"/>
+     <triangle v1="393" v2="357" v3="359"/>
+     <triangle v1="393" v2="359" v3="391"/>
+     <triangle v1="391" v2="359" v3="361"/>
+     <triangle v1="391" v2="361" v3="389"/>
+     <triangle v1="389" v2="361" v3="363"/>
+     <triangle v1="389" v2="363" v3="387"/>
+     <triangle v1="387" v2="363" v3="365"/>
+     <triangle v1="387" v2="365" v3="385"/>
+     <triangle v1="385" v2="365" v3="367"/>
+     <triangle v1="385" v2="367" v3="383"/>
+     <triangle v1="383" v2="367" v3="369"/>
+     <triangle v1="383" v2="369" v3="381"/>
+     <triangle v1="381" v2="369" v3="371"/>
+     <triangle v1="381" v2="371" v3="379"/>
+     <triangle v1="379" v2="371" v3="373"/>
+     <triangle v1="379" v2="373" v3="377"/>
+     <triangle v1="377" v2="373" v3="375"/>
+     <triangle v1="486" v2="485" v3="340"/>
+     <triangle v1="340" v2="485" v3="484"/>
+     <triangle v1="340" v2="484" v3="483"/>
+     <triangle v1="483" v2="482" v3="340"/>
+     <triangle v1="340" v2="482" v3="481"/>
+     <triangle v1="340" v2="481" v3="480"/>
+     <triangle v1="480" v2="479" v3="340"/>
+     <triangle v1="340" v2="479" v3="478"/>
+     <triangle v1="340" v2="478" v3="477"/>
+     <triangle v1="477" v2="476" v3="340"/>
+     <triangle v1="340" v2="476" v3="475"/>
+     <triangle v1="340" v2="475" v3="474"/>
+     <triangle v1="474" v2="473" v3="340"/>
+     <triangle v1="340" v2="473" v3="472"/>
+     <triangle v1="340" v2="472" v3="471"/>
+     <triangle v1="471" v2="470" v3="340"/>
+     <triangle v1="340" v2="470" v3="469"/>
+     <triangle v1="340" v2="469" v3="468"/>
+     <triangle v1="468" v2="467" v3="340"/>
+     <triangle v1="340" v2="467" v3="466"/>
+     <triangle v1="340" v2="466" v3="465"/>
+     <triangle v1="465" v2="464" v3="340"/>
+     <triangle v1="340" v2="464" v3="463"/>
+     <triangle v1="340" v2="463" v3="462"/>
+     <triangle v1="462" v2="461" v3="340"/>
+     <triangle v1="340" v2="461" v3="460"/>
+     <triangle v1="340" v2="460" v3="459"/>
+     <triangle v1="457" v2="456" v3="339"/>
+     <triangle v1="339" v2="456" v3="455"/>
+     <triangle v1="339" v2="455" v3="454"/>
+     <triangle v1="454" v2="453" v3="339"/>
+     <triangle v1="339" v2="453" v3="452"/>
+     <triangle v1="339" v2="452" v3="451"/>
+     <triangle v1="451" v2="450" v3="339"/>
+     <triangle v1="339" v2="450" v3="449"/>
+     <triangle v1="339" v2="449" v3="448"/>
+     <triangle v1="172" v2="416" v3="171"/>
+     <triangle v1="171" v2="416" v3="415"/>
+     <triangle v1="171" v2="415" v3="170"/>
+     <triangle v1="170" v2="415" v3="414"/>
+     <triangle v1="170" v2="414" v3="169"/>
+     <triangle v1="169" v2="414" v3="413"/>
+     <triangle v1="169" v2="413" v3="168"/>
+     <triangle v1="168" v2="413" v3="412"/>
+     <triangle v1="168" v2="412" v3="167"/>
+    </triangles>
+   </mesh>
+  </object>
+  <object id="7" p:UUID="00030006-81cb-4c03-9d28-80fed5dfa1dc" type="model">
+   <mesh>
+    <vertices>
+     <vertex x="4.26343727" y="-2.85169315" z="2.5"/>
+     <vertex x="4.50706053" y="-2.88140774" z="2.5"/>
+     <vertex x="4.94678164" y="1.34584045" z="1.5"/>
+     <vertex x="4.59014225" y="-2.77043629" z="2.47201109"/>
+     <vertex x="5.07172728" y="1.33369732" z="1.5"/>
+     <vertex x="4.67079735" y="-2.65853596" z="2.44399261"/>
+     <vertex x="4.74903107" y="-2.54568291" z="2.4159317"/>
+     <vertex x="4.82484961" y="-2.43185806" z="2.38781595"/>
+     <vertex x="4.89825869" y="-2.31703949" z="2.35963249"/>
+     <vertex x="5.19721317" y="1.32502985" z="1.5"/>
+     <vertex x="4.96926308" y="-2.20120716" z="2.33136797"/>
+     <vertex x="5.03786945" y="-2.08433962" z="2.30301046"/>
+     <vertex x="5.10408306" y="-1.96641588" z="2.2745471"/>
+     <vertex x="5.16790962" y="-1.84741592" z="2.245965"/>
+     <vertex x="5.32276726" y="1.31987667" z="1.5"/>
+     <vertex x="5.22935534" y="-1.72731781" z="2.2172513"/>
+     <vertex x="5.28842449" y="-1.60610151" z="2.18839359"/>
+     <vertex x="5.34512424" y="-1.48374557" z="2.15937853"/>
+     <vertex x="5.44873714" y="1.31823158" z="1.5"/>
+     <vertex x="5.42903185" y="5.56870937" z="0.5"/>
+     <vertex x="5.57406187" y="1.32009506" z="1.5"/>
+     <vertex x="5.468256" y="5.56935978" z="0.5"/>
+     <vertex x="5.6996069" y="1.32546568" z="1.5"/>
+     <vertex x="5.8249526" y="1.3343401" z="1.5"/>
+     <vertex x="5.8680706" y="0.213959217" z="1.76353788"/>
+     <vertex x="5.89170027" y="0.350520134" z="1.73191977"/>
+     <vertex x="5.39945984" y="-1.36022949" z="2.13019466"/>
+     <vertex x="5.45143652" y="-1.23553181" z="2.10082769"/>
+     <vertex x="5.50106001" y="-1.10963249" z="2.07126617"/>
+     <vertex x="5.54833651" y="-0.98251009" z="2.04149675"/>
+     <vertex x="5.59327173" y="-0.85414362" z="2.01150703"/>
+     <vertex x="5.63587046" y="-0.7245121" z="1.98128366"/>
+     <vertex x="5.67613935" y="-0.593595505" z="1.95081472"/>
+     <vertex x="5.71408367" y="-0.461372375" z="1.92008686"/>
+     <vertex x="5.74970913" y="-0.327821255" z="1.88908768"/>
+     <vertex x="5.782969" y="-0.193140984" z="1.85785389"/>
+     <vertex x="5.8137536" y="-0.0579099655" z="1.82651091"/>
+     <vertex x="5.84210443" y="0.0778026581" z="1.79507017"/>
+     <vertex x="5.91304302" y="0.487447739" z="1.70022058"/>
+     <vertex x="5.93214798" y="0.62470293" z="1.66844606"/>
+     <vertex x="5.9490633" y="0.762246609" z="1.63660192"/>
+     <vertex x="5.96383905" y="0.900040627" z="1.60469389"/>
+     <vertex x="5.95000219" y="1.34671068" z="1.5"/>
+     <vertex x="5.9765234" y="1.03804588" z="1.57272673"/>
+     <vertex x="5.98716497" y="1.17622423" z="1.54070711"/>
+     <vertex x="5.99581337" y="1.31453657" z="1.50863934"/>
+     <vertex x="6.0025177" y="1.45294476" z="1.4765296"/>
+     <vertex x="6.00732613" y="1.59140968" z="1.44438314"/>
+     <vertex x="6.01028824" y="1.72989225" z="1.4122057"/>
+     <vertex x="6.01086903" y="2.00675821" z="1.34777951"/>
+     <vertex x="6.00465107" y="2.28323269" z="1.28329539"/>
+     <vertex x="5.99202538" y="2.55900645" z="1.21879721"/>
+     <vertex x="5.97333622" y="2.8343749" z="1.15419626"/>
+     <vertex x="5.94879866" y="3.11031556" z="1.08926749"/>
+     <vertex x="5.91866684" y="3.3865943" z="1.0240643"/>
+     <vertex x="5.88319588" y="3.66293764" z="0.958648682"/>
+     <vertex x="5.84264231" y="3.93907118" z="0.89308238"/>
+     <vertex x="5.79726124" y="4.21472168" z="0.827427626"/>
+     <vertex x="5.74730825" y="4.48961449" z="0.761746407"/>
+     <vertex x="5.69303942" y="4.76347685" z="0.696100712"/>
+     <vertex x="5.63471079" y="5.03603363" z="0.63055253"/>
+     <vertex x="5.57257748" y="5.3070116" z="0.565164089"/>
+     <vertex x="5.50689554" y="5.57613802" z="0.5"/>
+     <vertex x="5.39018869" y="5.57420349" z="0.5"/>
+     <vertex x="4.82209921" y="1.36148167" z="1.5"/>
+     <vertex x="5.35268354" y="5.58570576" z="0.5"/>
+     <vertex x="4.08756876" y="1.52769327" z="1.5"/>
+     <vertex x="4.20789671" y="1.49147797" z="1.5"/>
+     <vertex x="4.32918882" y="1.45863628" z="1.5"/>
+     <vertex x="3.06306243" y="-2.60146141" z="2.5"/>
+     <vertex x="3.30014014" y="-2.66493988" z="2.5"/>
+     <vertex x="5.31743908" y="5.60293388" z="0.5"/>
+     <vertex x="3.50364685" y="1.75829887" z="1.5"/>
+     <vertex x="3.61776352" y="1.70568943" z="1.5"/>
+     <vertex x="3.73330498" y="1.65628719" z="1.5"/>
+     <vertex x="1.90945411" y="-2.18588543" z="2.5"/>
+     <vertex x="2.1353302" y="-2.28188229" z="2.5"/>
+     <vertex x="5.17397833" y="5.36683083" z="0.565002441"/>
+     <vertex x="3.17072749" y="1.93494487" z="1.5"/>
+     <vertex x="3.28004169" y="1.8729713" z="1.5"/>
+     <vertex x="3.39104366" y="1.81407356" z="1.5"/>
+     <vertex x="1.24921274" y="-1.8604393" z="2.5"/>
+     <vertex x="1.46622109" y="-1.97508144" z="2.5"/>
+     <vertex x="5.02722788" y="5.13272047" z="0.630006313"/>
+     <vertex x="3.06318617" y="1.99994683" z="1.5"/>
+     <vertex x="0.825266361" y="-1.61312723" z="2.5"/>
+     <vertex x="0.61866188" y="-1.48065138" z="2.5"/>
+     <vertex x="2.95750189" y="2.06792617" z="1.5"/>
+     <vertex x="0.415853977" y="-1.34243298" z="2.5"/>
+     <vertex x="2.8537569" y="2.13882971" z="1.5"/>
+     <vertex x="0.217002392" y="-1.19858122" z="2.5"/>
+     <vertex x="3.35188532" y="2.93424058" z="1.27955532"/>
+     <vertex x="2.75203204" y="2.21260262" z="1.5"/>
+     <vertex x="3.16049933" y="2.73350859" z="1.34423256"/>
+     <vertex x="2.96400237" y="2.5373075" z="1.40885448"/>
+     <vertex x="4.87707424" y="4.90070486" z="0.695014715"/>
+     <vertex x="4.72337341" y="4.67086649" z="0.760039568"/>
+     <vertex x="4.56613827" y="4.44354343" z="0.825023651"/>
+     <vertex x="4.40510988" y="4.21870089" z="0.890016556"/>
+     <vertex x="4.23995209" y="3.99625611" z="0.955092192"/>
+     <vertex x="4.0706749" y="3.77663732" z="1.02018261"/>
+     <vertex x="3.89729023" y="3.56027412" z="1.08521938"/>
+     <vertex x="3.71980977" y="3.34759617" z="1.15013456"/>
+     <vertex x="3.53821802" y="3.13900304" z="1.21486783"/>
+     <vertex x="2.86381912" y="2.44106245" z="1.44113088"/>
+     <vertex x="2.76233649" y="2.34613776" z="1.47337651"/>
+     <vertex x="2.65954733" y="2.2525959" z="1.50558567"/>
+     <vertex x="2.55544448" y="2.16049957" z="1.53775358"/>
+     <vertex x="0.0222635269" y="-1.04920864" z="2.5"/>
+     <vertex x="2.45002031" y="2.06991124" z="1.56987333"/>
+     <vertex x="2.34326816" y="1.98089361" z="1.60194016"/>
+     <vertex x="2.23518014" y="1.89350891" z="1.63394833"/>
+     <vertex x="-0.168209553" y="-0.894433498" z="2.5"/>
+     <vertex x="2.12574959" y="1.80781984" z="1.66589212"/>
+     <vertex x="2.01496911" y="1.72388935" z="1.6977663"/>
+     <vertex x="1.90283155" y="1.64177942" z="1.72956467"/>
+     <vertex x="1.78932953" y="1.56155252" z="1.76128149"/>
+     <vertex x="-0.354266644" y="-0.734376907" z="2.5"/>
+     <vertex x="1.67445612" y="1.4832716" z="1.79291201"/>
+     <vertex x="1.5582037" y="1.40699959" z="1.82444954"/>
+     <vertex x="1.44056511" y="1.332798" z="1.8558898"/>
+     <vertex x="1.32154942" y="1.26073933" z="1.88722181"/>
+     <vertex x="-0.535761833" y="-0.56916523" z="2.5"/>
+     <vertex x="1.20162296" y="1.19114637" z="1.9183259"/>
+     <vertex x="1.0809927" y="1.12414742" z="1.94915581"/>
+     <vertex x="0.959639549" y="1.05973101" z="1.97972536"/>
+     <vertex x="0.837543964" y="0.997886658" z="2.01004648"/>
+     <vertex x="0.714688301" y="0.938603401" z="2.040133"/>
+     <vertex x="-0.712551594" y="-0.398928642" z="2.5"/>
+     <vertex x="0.591052532" y="0.881870747" z="2.06999683"/>
+     <vertex x="0.466618061" y="0.82767725" z="2.09965086"/>
+     <vertex x="0.341365814" y="0.776011944" z="2.12910891"/>
+     <vertex x="-0.884497643" y="-0.223800182" z="2.5"/>
+     <vertex x="0.215277195" y="0.726864815" z="2.15838242"/>
+     <vertex x="0.0883331299" y="0.680224895" z="2.18748522"/>
+     <vertex x="-0.0394859314" y="0.636080742" z="2.21643019"/>
+     <vertex x="-0.168198109" y="0.594421387" z="2.24522924"/>
+     <vertex x="-1.05146456" y="-0.0439181328" z="2.5"/>
+     <vertex x="-0.297822475" y="0.555236816" z="2.27389622"/>
+     <vertex x="-0.428378582" y="0.518516064" z="2.30244303"/>
+     <vertex x="-0.559884548" y="0.484247684" z="2.3308835"/>
+     <vertex x="-0.692359924" y="0.452420712" z="2.35922956"/>
+     <vertex x="-1.21332026" y="0.140575409" z="2.5"/>
+     <vertex x="-0.825823784" y="0.423025608" z="2.38749456"/>
+     <vertex x="-0.960294247" y="0.396049976" z="2.41569138"/>
+     <vertex x="-1.09579086" y="0.371483803" z="2.44383287"/>
+     <vertex x="-1.23233271" y="0.34931612" z="2.47193146"/>
+     <vertex x="-1.36993837" y="0.329536438" z="2.5"/>
+     <vertex x="1.03550529" y="-1.73975611" z="2.5"/>
+     <vertex x="1.68635941" y="-2.08359194" z="2.5"/>
+     <vertex x="3.85018015" y="1.61012983" z="1.5"/>
+     <vertex x="2.36380982" y="-2.37150574" z="2.5"/>
+     <vertex x="3.96829891" y="1.56725407" z="1.5"/>
+     <vertex x="2.59471297" y="-2.45468616" z="2.5"/>
+     <vertex x="2.82785845" y="-2.53135872" z="2.5"/>
+     <vertex x="4.45135069" y="1.42919445" z="1.5"/>
+     <vertex x="3.53890467" y="-2.72174454" z="2.5"/>
+     <vertex x="4.57428741" y="1.40317488" z="1.5"/>
+     <vertex x="3.77916861" y="-2.77183056" z="2.5"/>
+     <vertex x="4.6979022" y="1.38059807" z="1.5"/>
+     <vertex x="4.02074289" y="-2.81515789" z="2.5"/>
+     <vertex x="5.38200235" y="5.71154261" z="0.5"/>
+     <vertex x="5.44451284" y="5.81822968" z="0.5"/>
+     <vertex x="5.44451284" y="5.81822968" z="-2.5"/>
+     <vertex x="5.4826808" y="5.67167139" z="-2.5"/>
+     <vertex x="5.52085304" y="5.52076435" z="-2.5"/>
+     <vertex x="5.5588522" y="5.36567926" z="-2.5"/>
+     <vertex x="5.5965004" y="5.20658922" z="-2.5"/>
+     <vertex x="5.63362026" y="5.04366589" z="-2.5"/>
+     <vertex x="5.67003489" y="4.87708139" z="-2.5"/>
+     <vertex x="5.70556641" y="4.70700788" z="-2.5"/>
+     <vertex x="5.74003792" y="4.53361702" z="-2.5"/>
+     <vertex x="5.77327108" y="4.35708046" z="-2.5"/>
+     <vertex x="5.805089" y="4.1775713" z="-2.5"/>
+     <vertex x="5.83531427" y="3.99526024" z="-2.5"/>
+     <vertex x="5.86376953" y="3.81032038" z="-2.5"/>
+     <vertex x="5.89027691" y="3.62292337" z="-2.5"/>
+     <vertex x="5.91465902" y="3.43324113" z="-2.5"/>
+     <vertex x="5.93673944" y="3.24144578" z="-2.5"/>
+     <vertex x="5.95633936" y="3.04770923" z="-2.5"/>
+     <vertex x="5.97328234" y="2.85220361" z="-2.5"/>
+     <vertex x="5.98739004" y="2.65510106" z="-2.5"/>
+     <vertex x="5.99848604" y="2.45657301" z="-2.5"/>
+     <vertex x="6.00639248" y="2.25679207" z="-2.5"/>
+     <vertex x="6.01093149" y="2.05593014" z="-2.5"/>
+     <vertex x="6.01192617" y="1.85415888" z="-2.5"/>
+     <vertex x="6.00919914" y="1.65165091" z="-2.5"/>
+     <vertex x="6.00257254" y="1.4485774" z="-2.5"/>
+     <vertex x="5.99186945" y="1.24511147" z="-2.5"/>
+     <vertex x="5.97691202" y="1.04142427" z="-2.5"/>
+     <vertex x="5.95755577" y="0.838024616" z="-2.5"/>
+     <vertex x="5.93405199" y="0.638478279" z="-2.5"/>
+     <vertex x="5.90657902" y="0.443613529" z="-2.5"/>
+     <vertex x="5.87524319" y="0.253322601" z="-2.5"/>
+     <vertex x="5.84015131" y="0.0674972534" z="-2.5"/>
+     <vertex x="5.8014102" y="-0.113969803" z="-2.5"/>
+     <vertex x="5.75912619" y="-0.291186333" z="-2.5"/>
+     <vertex x="5.71340656" y="-0.464261055" z="-2.5"/>
+     <vertex x="5.66435719" y="-0.633301258" z="-2.5"/>
+     <vertex x="5.61208582" y="-0.798415184" z="-2.5"/>
+     <vertex x="5.55669832" y="-0.959710121" z="-2.5"/>
+     <vertex x="5.49830151" y="-1.11729431" z="-2.5"/>
+     <vertex x="5.43700218" y="-1.271276" z="-2.5"/>
+     <vertex x="5.37290716" y="-1.42176247" z="-2.5"/>
+     <vertex x="5.30612278" y="-1.56886196" z="-2.5"/>
+     <vertex x="5.23675632" y="-1.71268177" z="-2.5"/>
+     <vertex x="5.16359472" y="-1.85592365" z="-2.5"/>
+     <vertex x="5.08458471" y="-2.00219965" z="-2.5"/>
+     <vertex x="5.04276037" y="-2.0764432" z="-2.5"/>
+     <vertex x="4.99932384" y="-2.151402" z="-2.5"/>
+     <vertex x="4.95422745" y="-2.22705936" z="-2.5"/>
+     <vertex x="4.90742111" y="-2.30339718" z="-2.5"/>
+     <vertex x="4.85885715" y="-2.38040066" z="-2.5"/>
+     <vertex x="4.80848598" y="-2.45805264" z="-2.5"/>
+     <vertex x="4.75625944" y="-2.53633595" z="-2.5"/>
+     <vertex x="4.70212841" y="-2.61523438" z="-2.5"/>
+     <vertex x="4.6460433" y="-2.69473171" z="-2.5"/>
+     <vertex x="4.58795643" y="-2.77480984" z="-2.5"/>
+     <vertex x="4.52781868" y="-2.85545254" z="-2.5"/>
+     <vertex x="4.46558046" y="-2.9366436" z="-2.5"/>
+     <vertex x="4.44762325" y="-2.95833397" z="2.5"/>
+     <vertex x="4.4011941" y="-3.01836681" z="-2.5"/>
+     <vertex x="4.38635635" y="-3.03562641" z="2.5"/>
+     <vertex x="4.33460999" y="-3.10060406" z="-2.5"/>
+     <vertex x="4.32322025" y="-3.11327362" z="2.5"/>
+     <vertex x="4.2657795" y="-3.18334007" z="-2.5"/>
+     <vertex x="4.25817633" y="-3.19126511" z="2.5"/>
+     <vertex x="4.19465351" y="-3.26655769" z="-2.5"/>
+     <vertex x="4.19118452" y="-3.26958847" z="2.5"/>
+     <vertex x="4.12118387" y="-3.35023975" z="-2.5"/>
+     <vertex x="4.12220478" y="-3.34823418" z="2.5"/>
+     <vertex x="4.05119848" y="-3.42718983" z="2.5"/>
+     <vertex x="4.04532099" y="-3.43437004" z="-2.5"/>
+     <vertex x="3.97812557" y="-3.50644493" z="2.5"/>
+     <vertex x="3.9670167" y="-3.51893234" z="-2.5"/>
+     <vertex x="3.90294647" y="-3.585989" z="2.5"/>
+     <vertex x="3.88622189" y="-3.60390854" z="-2.5"/>
+     <vertex x="3.82562208" y="-3.66580963" z="2.5"/>
+     <vertex x="3.80288792" y="-3.68928337" z="-2.5"/>
+     <vertex x="3.74611235" y="-3.74589634" z="2.5"/>
+     <vertex x="3.71696544" y="-3.77503967" z="-2.5"/>
+     <vertex x="3.66437817" y="-3.82623768" z="2.5"/>
+     <vertex x="3.62840605" y="-3.86116123" z="-2.5"/>
+     <vertex x="3.53716087" y="-3.94763088" z="-2.5"/>
+     <vertex x="3.49620676" y="-3.98590851" z="2.5"/>
+     <vertex x="3.44318104" y="-4.03443146" z="-2.5"/>
+     <vertex x="3.41299033" y="-4.06258583" z="2.5"/>
+     <vertex x="3.34641767" y="-4.12154675" z="-2.5"/>
+     <vertex x="3.33059573" y="-4.13699818" z="2.5"/>
+     <vertex x="3.24765015" y="-4.20830917" z="-2.5"/>
+     <vertex x="3.24886417" y="-4.20930767" z="2.5"/>
+     <vertex x="3.16763735" y="-4.27967739" z="2.5"/>
+     <vertex x="3.00606251" y="-4.41524601" z="2.5"/>
+     <vertex x="3.05417514" y="-4.37286472" z="-2.5"/>
+     <vertex x="3.15021348" y="-4.29208469" z="-2.5"/>
+     <vertex x="2.95920134" y="-4.4509573" z="-2.5"/>
+     <vertex x="2.84460187" y="-4.54500389" z="2.5"/>
+     <vertex x="2.86495852" y="-4.52667236" z="-2.5"/>
+     <vertex x="2.77111244" y="-4.60031891" z="-2.5"/>
+     <vertex x="2.68198633" y="-4.67024899" z="2.5"/>
+     <vertex x="2.58327675" y="-4.7426405" z="-2.5"/>
+     <vertex x="2.51694632" y="-4.79228115" z="2.5"/>
+     <vertex x="2.39302421" y="-4.88039589" z="-2.5"/>
+     <vertex x="2.34821296" y="-4.91240025" z="2.5"/>
+     <vertex x="2.19768476" y="-5.01605606" z="-2.5"/>
+     <vertex x="2.17451668" y="-5.03190517" z="2.5"/>
+     <vertex x="2.09727311" y="-5.08387375" z="-2.5"/>
+     <vertex x="1.99458838" y="-5.15209484" z="2.5"/>
+     <vertex x="1.99458838" y="-5.15209484" z="-2.5"/>
+     <vertex x="1.85888219" y="-5.24043179" z="2.37456131"/>
+     <vertex x="1.85888219" y="-5.24043179" z="-2.37456155"/>
+     <vertex x="1.72197437" y="-5.32731438" z="2.24922514"/>
+     <vertex x="1.72197437" y="-5.32731438" z="-2.24922514"/>
+     <vertex x="1.58393335" y="-5.41274643" z="2.12400293"/>
+     <vertex x="1.58393335" y="-5.41274643" z="-2.1240027"/>
+     <vertex x="1.44482708" y="-5.49672985" z="1.99890566"/>
+     <vertex x="1.44482708" y="-5.49672985" z="-1.99890554"/>
+     <vertex x="1.16369343" y="-5.66036129" z="1.74913311"/>
+     <vertex x="1.16369343" y="-5.66036129" z="-1.74913311"/>
+     <vertex x="0.879120827" y="-5.81822968" z="1.5"/>
+     <vertex x="0.879120827" y="-5.81822968" z="-1.5"/>
+     <vertex x="0.422247887" y="-4.52714825" z="2.5"/>
+     <vertex x="0.677648544" y="-4.64728546" z="2.5"/>
+     <vertex x="0.935920715" y="-4.76111794" z="2.5"/>
+     <vertex x="1.19690895" y="-4.86857796" z="2.5"/>
+     <vertex x="1.46045566" y="-4.96960068" z="2.5"/>
+     <vertex x="1.72640228" y="-5.06412506" z="2.5"/>
+     <vertex x="0.169872284" y="-4.40078068" z="2.5"/>
+     <vertex x="-0.0793261528" y="-4.26825619" z="2.5"/>
+     <vertex x="-0.32519722" y="-4.12965679" z="2.5"/>
+     <vertex x="-0.567593098" y="-3.98506451" z="2.5"/>
+     <vertex x="-0.806367397" y="-3.83456802" z="2.5"/>
+     <vertex x="-1.04137611" y="-3.67825603" z="2.5"/>
+     <vertex x="-1.2724781" y="-3.51622486" z="2.5"/>
+     <vertex x="-1.49953413" y="-3.34856987" z="2.5"/>
+     <vertex x="-1.72240734" y="-3.1753931" z="2.5"/>
+     <vertex x="-1.94096327" y="-2.99679947" z="2.5"/>
+     <vertex x="-2.1550703" y="-2.81289577" z="2.5"/>
+     <vertex x="-2.36460018" y="-2.6237936" z="2.5"/>
+     <vertex x="-2.56942606" y="-2.42960548" z="2.5"/>
+     <vertex x="-2.76942396" y="-2.23044968" z="2.5"/>
+     <vertex x="-2.9644742" y="-2.02644539" z="2.5"/>
+     <vertex x="-3.15446043" y="-1.81771612" z="2.5"/>
+     <vertex x="-3.33926535" y="-1.60438681" z="2.5"/>
+     <vertex x="-3.51878023" y="-1.38658667" z="2.5"/>
+     <vertex x="-3.69289541" y="-1.16444635" z="2.5"/>
+     <vertex x="-2.29431009" y="0.258517265" z="2.5"/>
+     <vertex x="-2.18503141" y="0.261611938" z="2.5"/>
+     <vertex x="-2.07744265" y="0.265988827" z="2.5"/>
+     <vertex x="-1.97152281" y="0.271612167" z="2.5"/>
+     <vertex x="-1.86725235" y="0.278446674" z="2.5"/>
+     <vertex x="-1.76461077" y="0.286456585" z="2.5"/>
+     <vertex x="-1.66357899" y="0.295606136" z="2.5"/>
+     <vertex x="-1.56413651" y="0.305860043" z="2.5"/>
+     <vertex x="-1.46626282" y="0.317181587" z="2.5"/>
+     <vertex x="-2.40529823" y="0.256741047" z="2.5"/>
+     <vertex x="-3.86150694" y="-0.938100338" z="2.5"/>
+     <vertex x="-2.51801538" y="0.256319046" z="2.5"/>
+     <vertex x="-2.63248205" y="0.257286072" z="2.5"/>
+     <vertex x="-4.02451277" y="-0.70768404" z="2.5"/>
+     <vertex x="-2.86444616" y="0.26333189" z="2.5"/>
+     <vertex x="-2.97831106" y="0.268114567" z="2.5"/>
+     <vertex x="-3.09042406" y="0.274002552" z="2.5"/>
+     <vertex x="-4.18181467" y="-0.473337173" z="2.5"/>
+     <vertex x="-3.20091391" y="0.280972958" z="2.5"/>
+     <vertex x="-3.3099122" y="0.289004803" z="2.5"/>
+     <vertex x="-3.52395296" y="0.308162689" z="2.5"/>
+     <vertex x="-4.33331823" y="-0.235200405" z="2.5"/>
+     <vertex x="-3.73358774" y="0.331299782" z="2.5"/>
+     <vertex x="-4.4789319" y="0.00658273697" z="2.5"/>
+     <vertex x="-3.93985987" y="0.358240128" z="2.5"/>
+     <vertex x="-4.14380884" y="0.38880682" z="2.5"/>
+     <vertex x="-4.6185689" y="0.251866817" z="2.5"/>
+     <vertex x="-4.34647799" y="0.422823906" z="2.5"/>
+     <vertex x="-4.54890871" y="0.460114956" z="2.5"/>
+     <vertex x="-4.75214338" y="0.50050354" z="2.5"/>
+     <vertex x="1.72640228" y="-5.06412506" z="-2.5"/>
+     <vertex x="1.46045566" y="-4.96960068" z="-2.5"/>
+     <vertex x="1.19690895" y="-4.86857796" z="-2.5"/>
+     <vertex x="0.611561298" y="-5.70967484" z="-1.5"/>
+     <vertex x="0.935920715" y="-4.76111794" z="-2.5"/>
+     <vertex x="0.346580505" y="-5.59496784" z="-1.5"/>
+     <vertex x="0.677648544" y="-4.64728546" z="-2.5"/>
+     <vertex x="0.0843195915" y="-5.47417164" z="-1.5"/>
+     <vertex x="0.422247887" y="-4.52714825" z="-2.5"/>
+     <vertex x="-0.175080776" y="-5.34735012" z="-1.5"/>
+     <vertex x="0.169872284" y="-4.40078068" z="-2.5"/>
+     <vertex x="-0.431483269" y="-5.21457005" z="-1.5"/>
+     <vertex x="-0.0793261528" y="-4.26825619" z="-2.5"/>
+     <vertex x="-0.684749603" y="-5.07590389" z="-1.5"/>
+     <vertex x="-0.32519722" y="-4.12965679" z="-2.5"/>
+     <vertex x="-0.934746265" y="-4.93142414" z="-1.5"/>
+     <vertex x="-0.567593098" y="-3.98506451" z="-2.5"/>
+     <vertex x="-1.18133831" y="-4.78120899" z="-1.5"/>
+     <vertex x="-0.806367397" y="-3.83456802" z="-2.5"/>
+     <vertex x="-1.42439556" y="-4.6253376" z="-1.5"/>
+     <vertex x="-1.04137611" y="-3.67825603" z="-2.5"/>
+     <vertex x="-1.66378736" y="-4.46389389" z="-1.5"/>
+     <vertex x="-1.2724781" y="-3.51622486" z="-2.5"/>
+     <vertex x="-1.89938641" y="-4.29696465" z="-1.5"/>
+     <vertex x="-1.49953413" y="-3.34856987" z="-2.5"/>
+     <vertex x="-2.13106632" y="-4.12463665" z="-1.5"/>
+     <vertex x="-1.72240734" y="-3.1753931" z="-2.5"/>
+     <vertex x="-2.35870457" y="-3.94700432" z="-1.5"/>
+     <vertex x="-1.94096327" y="-2.99679947" z="-2.5"/>
+     <vertex x="-2.58217955" y="-3.76416111" z="-1.5"/>
+     <vertex x="-2.8013711" y="-3.57620525" z="-1.5"/>
+     <vertex x="-2.1550703" y="-2.81289577" z="-2.5"/>
+     <vertex x="-3.0161624" y="-3.38323593" z="-1.5"/>
+     <vertex x="-2.36460018" y="-2.6237936" z="-2.5"/>
+     <vertex x="-3.22643995" y="-3.18535709" z="-1.5"/>
+     <vertex x="-2.56942606" y="-2.42960548" z="-2.5"/>
+     <vertex x="-3.43209028" y="-2.9826746" z="-1.5"/>
+     <vertex x="-2.76942396" y="-2.23044968" z="-2.5"/>
+     <vertex x="-3.63300467" y="-2.77529621" z="-1.5"/>
+     <vertex x="-2.9644742" y="-2.02644539" z="-2.5"/>
+     <vertex x="-3.82907438" y="-2.5633316" z="-1.5"/>
+     <vertex x="-3.15446043" y="-1.81771612" z="-2.5"/>
+     <vertex x="-4.02019739" y="-2.34689522" z="-1.5"/>
+     <vertex x="-3.33926535" y="-1.60438681" z="-2.5"/>
+     <vertex x="-4.20626879" y="-2.12610197" z="-1.5"/>
+     <vertex x="-3.51878023" y="-1.38658667" z="-2.5"/>
+     <vertex x="-4.3871913" y="-1.90106964" z="-1.5"/>
+     <vertex x="-3.69289541" y="-1.16444635" z="-2.5"/>
+     <vertex x="-4.5628686" y="-1.67191887" z="-1.5"/>
+     <vertex x="-3.86150694" y="-0.938100338" z="-2.5"/>
+     <vertex x="-4.73320532" y="-1.43877125" z="-1.5"/>
+     <vertex x="-4.02451277" y="-0.70768404" z="-2.5"/>
+     <vertex x="-4.89811087" y="-1.20175123" z="-1.5"/>
+     <vertex x="-4.18181467" y="-0.473337173" z="-2.5"/>
+     <vertex x="-5.05749846" y="-0.960985184" z="-1.5"/>
+     <vertex x="-4.33331823" y="-0.235200405" z="-2.5"/>
+     <vertex x="-5.21128225" y="-0.716602325" z="-1.5"/>
+     <vertex x="-4.4789319" y="0.00658273697" z="-2.5"/>
+     <vertex x="-5.35938025" y="-0.468732357" z="-1.5"/>
+     <vertex x="-4.6185689" y="0.251866817" z="-2.5"/>
+     <vertex x="-5.50171328" y="-0.217508316" z="-1.5"/>
+     <vertex x="-4.75214338" y="0.50050354" z="-2.5"/>
+     <vertex x="-5.63820601" y="0.0369367599" z="-1.5"/>
+     <vertex x="-4.9105649" y="0.533998966" z="-2.37456155"/>
+     <vertex x="-5.768785" y="0.294466972" z="-1.5"/>
+     <vertex x="-5.06880903" y="0.569372177" z="-2.24922514"/>
+     <vertex x="-5.2268281" y="0.606572628" z="-2.1240027"/>
+     <vertex x="-5.38457632" y="0.645550251" z="-1.99890554"/>
+     <vertex x="-5.89338064" y="0.554944038" z="-1.5"/>
+     <vertex x="-5.69907331" y="0.728636265" z="-1.74913311"/>
+     <vertex x="-6.01192617" y="0.818229675" z="-1.5"/>
+     <vertex x="5.33565807" y="5.63344145" z="-2.5"/>
+     <vertex x="5.22428083" y="5.44879055" z="-2.5"/>
+     <vertex x="5.11038637" y="5.26447582" z="-2.5"/>
+     <vertex x="4.9939785" y="5.08069563" z="-2.5"/>
+     <vertex x="4.87506247" y="4.89764833" z="-2.5"/>
+     <vertex x="4.75364208" y="4.71553278" z="-2.5"/>
+     <vertex x="4.62972307" y="4.53454685" z="-2.5"/>
+     <vertex x="4.50330925" y="4.35488987" z="-2.5"/>
+     <vertex x="4.37440491" y="4.17675924" z="-2.5"/>
+     <vertex x="4.24301529" y="4.00035477" z="-2.5"/>
+     <vertex x="4.10914516" y="3.82587337" z="-2.5"/>
+     <vertex x="3.97279835" y="3.65351486" z="-2.5"/>
+     <vertex x="3.83397961" y="3.48347712" z="-2.5"/>
+     <vertex x="3.69269419" y="3.31595874" z="-2.5"/>
+     <vertex x="3.5489459" y="3.15115809" z="-2.5"/>
+     <vertex x="3.40274" y="2.98927402" z="-2.5"/>
+     <vertex x="3.25408053" y="2.83050442" z="-2.5"/>
+     <vertex x="3.10297227" y="2.67504811" z="-2.5"/>
+     <vertex x="2.94941998" y="2.52310371" z="-2.5"/>
+     <vertex x="2.79342794" y="2.37486935" z="-2.5"/>
+     <vertex x="2.63582015" y="2.23126364" z="-2.5"/>
+     <vertex x="2.47895575" y="2.09436345" z="-2.5"/>
+     <vertex x="2.32300186" y="1.9641223" z="-2.5"/>
+     <vertex x="2.16797996" y="1.84035969" z="-2.5"/>
+     <vertex x="2.01391125" y="1.72289515" z="-2.5"/>
+     <vertex x="1.86081743" y="1.61154842" z="-2.5"/>
+     <vertex x="1.70871949" y="1.50613928" z="-2.5"/>
+     <vertex x="1.55763912" y="1.40648699" z="-2.5"/>
+     <vertex x="1.40759754" y="1.31241083" z="-2.5"/>
+     <vertex x="1.25861645" y="1.22373152" z="-2.5"/>
+     <vertex x="1.11071682" y="1.14026737" z="-2.5"/>
+     <vertex x="0.963920593" y="1.06183863" z="-2.5"/>
+     <vertex x="0.818248749" y="0.988265038" z="-2.5"/>
+     <vertex x="0.673722267" y="0.919365406" z="-2.5"/>
+     <vertex x="0.53036356" y="0.854960442" z="-2.5"/>
+     <vertex x="0.38803196" y="0.794802666" z="-2.5"/>
+     <vertex x="0.243391991" y="0.737440586" z="-2.5"/>
+     <vertex x="0.0950417519" y="0.682466984" z="-2.5"/>
+     <vertex x="-0.0571107864" y="0.630048275" z="-2.5"/>
+     <vertex x="-0.213158131" y="0.580349922" z="-2.5"/>
+     <vertex x="-0.37319231" y="0.533538342" z="-2.5"/>
+     <vertex x="-0.537305355" y="0.489779472" z="-2.5"/>
+     <vertex x="-0.705589771" y="0.449239254" z="-2.5"/>
+     <vertex x="-0.878137112" y="0.412083149" z="-2.5"/>
+     <vertex x="-1.05504036" y="0.37847805" z="-2.5"/>
+     <vertex x="-1.23639059" y="0.348588943" z="-2.5"/>
+     <vertex x="-1.42228127" y="0.322582245" z="-2.5"/>
+     <vertex x="-1.61280346" y="0.300623894" z="-2.5"/>
+     <vertex x="-1.80804968" y="0.282879829" z="-2.5"/>
+     <vertex x="-2.00811243" y="0.269515991" z="-2.5"/>
+     <vertex x="-2.21308327" y="0.260698318" z="-2.5"/>
+     <vertex x="-2.4230547" y="0.256592751" z="-2.5"/>
+     <vertex x="-2.63499308" y="0.257137299" z="-2.5"/>
+     <vertex x="-2.8418889" y="0.261795521" z="-2.5"/>
+     <vertex x="-3.04404497" y="0.270397663" z="-2.5"/>
+     <vertex x="-3.24207926" y="0.282793045" z="-2.5"/>
+     <vertex x="-3.43660975" y="0.298832417" z="-2.5"/>
+     <vertex x="-3.62825537" y="0.31836462" z="-2.5"/>
+     <vertex x="-3.81763315" y="0.341239929" z="-2.5"/>
+     <vertex x="-4.00536108" y="0.36730814" z="-2.5"/>
+     <vertex x="-4.19205809" y="0.396418571" z="-2.5"/>
+     <vertex x="-4.37834215" y="0.428421497" z="-2.5"/>
+     <vertex x="-4.56483126" y="0.463166714" z="-2.5"/>
+     <vertex x="-5.06880903" y="0.569372177" z="2.24922514"/>
+     <vertex x="-4.9105649" y="0.533998966" z="2.37456131"/>
+     <vertex x="-5.2268281" y="0.606572628" z="2.12400293"/>
+     <vertex x="-5.38457632" y="0.645550251" z="1.99890566"/>
+     <vertex x="-5.69907331" y="0.728636265" z="1.74913311"/>
+     <vertex x="-6.01192617" y="0.818229675" z="1.5"/>
+     <vertex x="-5.89338064" y="0.554944038" z="1.5"/>
+     <vertex x="-5.768785" y="0.294466972" z="1.5"/>
+     <vertex x="-5.63820601" y="0.0369367599" z="1.5"/>
+     <vertex x="-5.50171328" y="-0.217508316" z="1.5"/>
+     <vertex x="-5.35938025" y="-0.468732357" z="1.5"/>
+     <vertex x="-5.21128225" y="-0.716602325" z="1.5"/>
+     <vertex x="-5.05749846" y="-0.960985184" z="1.5"/>
+     <vertex x="-4.89811087" y="-1.20175123" z="1.5"/>
+     <vertex x="-4.73320532" y="-1.43877125" z="1.5"/>
+     <vertex x="-4.5628686" y="-1.67191887" z="1.5"/>
+     <vertex x="-4.3871913" y="-1.90106964" z="1.5"/>
+     <vertex x="-4.20626879" y="-2.12610197" z="1.5"/>
+     <vertex x="-4.02019739" y="-2.34689522" z="1.5"/>
+     <vertex x="-3.82907438" y="-2.5633316" z="1.5"/>
+     <vertex x="-3.63300467" y="-2.77529621" z="1.5"/>
+     <vertex x="-3.43209028" y="-2.9826746" z="1.5"/>
+     <vertex x="-3.22643995" y="-3.18535709" z="1.5"/>
+     <vertex x="-3.0161624" y="-3.38323593" z="1.5"/>
+     <vertex x="-2.8013711" y="-3.57620525" z="1.5"/>
+     <vertex x="-2.58217955" y="-3.76416111" z="1.5"/>
+     <vertex x="-2.35870457" y="-3.94700432" z="1.5"/>
+     <vertex x="-2.13106632" y="-4.12463665" z="1.5"/>
+     <vertex x="-1.89938641" y="-4.29696465" z="1.5"/>
+     <vertex x="-1.66378736" y="-4.46389389" z="1.5"/>
+     <vertex x="-1.42439556" y="-4.6253376" z="1.5"/>
+     <vertex x="-1.18133831" y="-4.78120899" z="1.5"/>
+     <vertex x="-0.934746265" y="-4.93142414" z="1.5"/>
+     <vertex x="-0.684749603" y="-5.07590389" z="1.5"/>
+     <vertex x="-0.431483269" y="-5.21457005" z="1.5"/>
+     <vertex x="-0.175080776" y="-5.34735012" z="1.5"/>
+     <vertex x="0.0843195915" y="-5.47417164" z="1.5"/>
+     <vertex x="0.346580505" y="-5.59496784" z="1.5"/>
+     <vertex x="0.611561298" y="-5.70967484" z="1.5"/>
+    </vertices>
+    <triangles>
+     <triangle v1="0" v2="1" v3="2"/>
+     <triangle v1="2" v2="1" v3="3"/>
+     <triangle v1="2" v2="3" v3="4"/>
+     <triangle v1="4" v2="3" v3="5"/>
+     <triangle v1="4" v2="5" v3="6"/>
+     <triangle v1="6" v2="7" v3="4"/>
+     <triangle v1="4" v2="7" v3="8"/>
+     <triangle v1="4" v2="8" v3="9"/>
+     <triangle v1="9" v2="8" v3="10"/>
+     <triangle v1="9" v2="10" v3="11"/>
+     <triangle v1="11" v2="12" v3="9"/>
+     <triangle v1="9" v2="12" v3="13"/>
+     <triangle v1="9" v2="13" v3="14"/>
+     <triangle v1="14" v2="13" v3="15"/>
+     <triangle v1="14" v2="15" v3="16"/>
+     <triangle v1="16" v2="17" v3="14"/>
+     <triangle v1="14" v2="17" v3="18"/>
+     <triangle v1="14" v2="18" v3="19"/>
+     <triangle v1="19" v2="18" v3="20"/>
+     <triangle v1="19" v2="20" v3="21"/>
+     <triangle v1="21" v2="20" v3="22"/>
+     <triangle v1="21" v2="22" v3="23"/>
+     <triangle v1="23" v2="22" v3="24"/>
+     <triangle v1="23" v2="24" v3="25"/>
+     <triangle v1="17" v2="26" v3="18"/>
+     <triangle v1="18" v2="26" v3="27"/>
+     <triangle v1="18" v2="27" v3="28"/>
+     <triangle v1="28" v2="29" v3="18"/>
+     <triangle v1="18" v2="29" v3="20"/>
+     <triangle v1="29" v2="30" v3="20"/>
+     <triangle v1="20" v2="30" v3="31"/>
+     <triangle v1="20" v2="31" v3="32"/>
+     <triangle v1="32" v2="33" v3="20"/>
+     <triangle v1="20" v2="33" v3="22"/>
+     <triangle v1="33" v2="34" v3="22"/>
+     <triangle v1="22" v2="34" v3="35"/>
+     <triangle v1="22" v2="35" v3="36"/>
+     <triangle v1="36" v2="37" v3="22"/>
+     <triangle v1="22" v2="37" v3="24"/>
+     <triangle v1="25" v2="38" v3="23"/>
+     <triangle v1="23" v2="38" v3="39"/>
+     <triangle v1="23" v2="39" v3="40"/>
+     <triangle v1="23" v2="40" v3="21"/>
+     <triangle v1="21" v2="40" v3="41"/>
+     <triangle v1="21" v2="41" v3="42"/>
+     <triangle v1="42" v2="41" v3="43"/>
+     <triangle v1="42" v2="43" v3="44"/>
+     <triangle v1="44" v2="45" v3="42"/>
+     <triangle v1="42" v2="45" v3="21"/>
+     <triangle v1="45" v2="46" v3="21"/>
+     <triangle v1="21" v2="46" v3="47"/>
+     <triangle v1="21" v2="47" v3="48"/>
+     <triangle v1="48" v2="49" v3="21"/>
+     <triangle v1="21" v2="49" v3="50"/>
+     <triangle v1="21" v2="50" v3="51"/>
+     <triangle v1="51" v2="52" v3="21"/>
+     <triangle v1="21" v2="52" v3="53"/>
+     <triangle v1="21" v2="53" v3="54"/>
+     <triangle v1="54" v2="55" v3="21"/>
+     <triangle v1="21" v2="55" v3="56"/>
+     <triangle v1="21" v2="56" v3="57"/>
+     <triangle v1="57" v2="58" v3="21"/>
+     <triangle v1="21" v2="58" v3="59"/>
+     <triangle v1="21" v2="59" v3="60"/>
+     <triangle v1="60" v2="61" v3="21"/>
+     <triangle v1="21" v2="61" v3="62"/>
+     <triangle v1="63" v2="64" v3="19"/>
+     <triangle v1="19" v2="64" v3="2"/>
+     <triangle v1="19" v2="2" v3="4"/>
+     <triangle v1="65" v2="66" v3="63"/>
+     <triangle v1="63" v2="66" v3="67"/>
+     <triangle v1="63" v2="67" v3="68"/>
+     <triangle v1="68" v2="67" v3="69"/>
+     <triangle v1="68" v2="69" v3="70"/>
+     <triangle v1="71" v2="72" v3="65"/>
+     <triangle v1="65" v2="72" v3="73"/>
+     <triangle v1="65" v2="73" v3="74"/>
+     <triangle v1="74" v2="73" v3="75"/>
+     <triangle v1="74" v2="75" v3="76"/>
+     <triangle v1="77" v2="78" v3="71"/>
+     <triangle v1="71" v2="78" v3="79"/>
+     <triangle v1="71" v2="79" v3="80"/>
+     <triangle v1="80" v2="79" v3="81"/>
+     <triangle v1="80" v2="81" v3="82"/>
+     <triangle v1="77" v2="83" v3="78"/>
+     <triangle v1="78" v2="83" v3="84"/>
+     <triangle v1="78" v2="84" v3="85"/>
+     <triangle v1="85" v2="84" v3="86"/>
+     <triangle v1="86" v2="84" v3="87"/>
+     <triangle v1="86" v2="87" v3="88"/>
+     <triangle v1="88" v2="87" v3="89"/>
+     <triangle v1="88" v2="89" v3="90"/>
+     <triangle v1="90" v2="89" v3="91"/>
+     <triangle v1="90" v2="91" v3="92"/>
+     <triangle v1="92" v2="91" v3="93"/>
+     <triangle v1="92" v2="93" v3="94"/>
+     <triangle v1="83" v2="95" v3="84"/>
+     <triangle v1="84" v2="95" v3="96"/>
+     <triangle v1="84" v2="96" v3="97"/>
+     <triangle v1="84" v2="97" v3="87"/>
+     <triangle v1="87" v2="97" v3="98"/>
+     <triangle v1="87" v2="98" v3="99"/>
+     <triangle v1="99" v2="100" v3="87"/>
+     <triangle v1="87" v2="100" v3="101"/>
+     <triangle v1="87" v2="101" v3="89"/>
+     <triangle v1="89" v2="101" v3="102"/>
+     <triangle v1="89" v2="102" v3="103"/>
+     <triangle v1="103" v2="91" v3="89"/>
+     <triangle v1="94" v2="104" v3="92"/>
+     <triangle v1="92" v2="104" v3="105"/>
+     <triangle v1="92" v2="105" v3="106"/>
+     <triangle v1="107" v2="108" v3="106"/>
+     <triangle v1="106" v2="108" v3="90"/>
+     <triangle v1="106" v2="90" v3="92"/>
+     <triangle v1="107" v2="109" v3="108"/>
+     <triangle v1="108" v2="109" v3="110"/>
+     <triangle v1="108" v2="110" v3="111"/>
+     <triangle v1="108" v2="111" v3="112"/>
+     <triangle v1="112" v2="111" v3="113"/>
+     <triangle v1="112" v2="113" v3="114"/>
+     <triangle v1="114" v2="115" v3="112"/>
+     <triangle v1="112" v2="115" v3="116"/>
+     <triangle v1="112" v2="116" v3="117"/>
+     <triangle v1="117" v2="116" v3="118"/>
+     <triangle v1="117" v2="118" v3="119"/>
+     <triangle v1="119" v2="120" v3="117"/>
+     <triangle v1="117" v2="120" v3="121"/>
+     <triangle v1="117" v2="121" v3="122"/>
+     <triangle v1="122" v2="121" v3="123"/>
+     <triangle v1="122" v2="123" v3="124"/>
+     <triangle v1="124" v2="125" v3="122"/>
+     <triangle v1="122" v2="125" v3="126"/>
+     <triangle v1="122" v2="126" v3="127"/>
+     <triangle v1="122" v2="127" v3="128"/>
+     <triangle v1="128" v2="127" v3="129"/>
+     <triangle v1="128" v2="129" v3="130"/>
+     <triangle v1="130" v2="131" v3="128"/>
+     <triangle v1="128" v2="131" v3="132"/>
+     <triangle v1="132" v2="131" v3="133"/>
+     <triangle v1="132" v2="133" v3="134"/>
+     <triangle v1="134" v2="135" v3="132"/>
+     <triangle v1="132" v2="135" v3="136"/>
+     <triangle v1="132" v2="136" v3="137"/>
+     <triangle v1="137" v2="136" v3="138"/>
+     <triangle v1="137" v2="138" v3="139"/>
+     <triangle v1="139" v2="140" v3="137"/>
+     <triangle v1="137" v2="140" v3="141"/>
+     <triangle v1="137" v2="141" v3="142"/>
+     <triangle v1="142" v2="141" v3="143"/>
+     <triangle v1="142" v2="143" v3="144"/>
+     <triangle v1="144" v2="145" v3="142"/>
+     <triangle v1="142" v2="145" v3="146"/>
+     <triangle v1="142" v2="146" v3="147"/>
+     <triangle v1="85" v2="148" v3="78"/>
+     <triangle v1="78" v2="148" v3="79"/>
+     <triangle v1="148" v2="81" v3="79"/>
+     <triangle v1="80" v2="82" v3="72"/>
+     <triangle v1="72" v2="82" v3="149"/>
+     <triangle v1="72" v2="149" v3="73"/>
+     <triangle v1="73" v2="149" v3="75"/>
+     <triangle v1="74" v2="76" v3="150"/>
+     <triangle v1="150" v2="76" v3="151"/>
+     <triangle v1="150" v2="151" v3="152"/>
+     <triangle v1="152" v2="151" v3="153"/>
+     <triangle v1="152" v2="153" v3="66"/>
+     <triangle v1="66" v2="153" v3="154"/>
+     <triangle v1="66" v2="154" v3="67"/>
+     <triangle v1="67" v2="154" v3="69"/>
+     <triangle v1="68" v2="70" v3="155"/>
+     <triangle v1="155" v2="70" v3="156"/>
+     <triangle v1="155" v2="156" v3="157"/>
+     <triangle v1="157" v2="156" v3="158"/>
+     <triangle v1="157" v2="158" v3="159"/>
+     <triangle v1="159" v2="158" v3="160"/>
+     <triangle v1="159" v2="160" v3="64"/>
+     <triangle v1="64" v2="160" v3="0"/>
+     <triangle v1="64" v2="0" v3="2"/>
+     <triangle v1="74" v2="150" v3="65"/>
+     <triangle v1="65" v2="150" v3="152"/>
+     <triangle v1="65" v2="152" v3="66"/>
+     <triangle v1="155" v2="157" v3="63"/>
+     <triangle v1="63" v2="157" v3="159"/>
+     <triangle v1="63" v2="159" v3="64"/>
+     <triangle v1="4" v2="9" v3="19"/>
+     <triangle v1="19" v2="9" v3="14"/>
+     <triangle v1="68" v2="155" v3="63"/>
+     <triangle v1="72" v2="71" v3="80"/>
+     <triangle v1="71" v2="65" v3="161"/>
+     <triangle v1="161" v2="65" v3="63"/>
+     <triangle v1="161" v2="63" v3="19"/>
+     <triangle v1="19" v2="21" v3="161"/>
+     <triangle v1="161" v2="21" v3="62"/>
+     <triangle v1="161" v2="62" v3="162"/>
+     <triangle v1="163" v2="162" v3="164"/>
+     <triangle v1="164" v2="162" v3="62"/>
+     <triangle v1="164" v2="62" v3="165"/>
+     <triangle v1="165" v2="62" v3="61"/>
+     <triangle v1="165" v2="61" v3="166"/>
+     <triangle v1="166" v2="61" v3="167"/>
+     <triangle v1="167" v2="61" v3="60"/>
+     <triangle v1="167" v2="60" v3="168"/>
+     <triangle v1="168" v2="60" v3="169"/>
+     <triangle v1="169" v2="60" v3="59"/>
+     <triangle v1="169" v2="59" v3="170"/>
+     <triangle v1="170" v2="59" v3="58"/>
+     <triangle v1="170" v2="58" v3="171"/>
+     <triangle v1="171" v2="58" v3="172"/>
+     <triangle v1="172" v2="58" v3="57"/>
+     <triangle v1="172" v2="57" v3="173"/>
+     <triangle v1="173" v2="57" v3="174"/>
+     <triangle v1="174" v2="57" v3="56"/>
+     <triangle v1="174" v2="56" v3="175"/>
+     <triangle v1="175" v2="56" v3="55"/>
+     <triangle v1="175" v2="55" v3="176"/>
+     <triangle v1="176" v2="55" v3="177"/>
+     <triangle v1="177" v2="55" v3="54"/>
+     <triangle v1="177" v2="54" v3="178"/>
+     <triangle v1="178" v2="54" v3="53"/>
+     <triangle v1="178" v2="53" v3="179"/>
+     <triangle v1="179" v2="53" v3="52"/>
+     <triangle v1="179" v2="52" v3="180"/>
+     <triangle v1="180" v2="52" v3="181"/>
+     <triangle v1="181" v2="52" v3="51"/>
+     <triangle v1="181" v2="51" v3="182"/>
+     <triangle v1="182" v2="51" v3="50"/>
+     <triangle v1="182" v2="50" v3="183"/>
+     <triangle v1="183" v2="50" v3="184"/>
+     <triangle v1="184" v2="50" v3="49"/>
+     <triangle v1="184" v2="49" v3="185"/>
+     <triangle v1="185" v2="49" v3="48"/>
+     <triangle v1="185" v2="48" v3="186"/>
+     <triangle v1="186" v2="48" v3="47"/>
+     <triangle v1="186" v2="47" v3="187"/>
+     <triangle v1="187" v2="47" v3="46"/>
+     <triangle v1="187" v2="46" v3="45"/>
+     <triangle v1="187" v2="45" v3="188"/>
+     <triangle v1="188" v2="45" v3="44"/>
+     <triangle v1="188" v2="44" v3="189"/>
+     <triangle v1="189" v2="44" v3="43"/>
+     <triangle v1="189" v2="43" v3="41"/>
+     <triangle v1="189" v2="41" v3="190"/>
+     <triangle v1="190" v2="41" v3="40"/>
+     <triangle v1="190" v2="40" v3="191"/>
+     <triangle v1="191" v2="40" v3="39"/>
+     <triangle v1="191" v2="39" v3="38"/>
+     <triangle v1="191" v2="38" v3="192"/>
+     <triangle v1="192" v2="38" v3="25"/>
+     <triangle v1="192" v2="25" v3="193"/>
+     <triangle v1="193" v2="25" v3="24"/>
+     <triangle v1="193" v2="24" v3="194"/>
+     <triangle v1="194" v2="24" v3="37"/>
+     <triangle v1="194" v2="37" v3="36"/>
+     <triangle v1="194" v2="36" v3="195"/>
+     <triangle v1="195" v2="36" v3="35"/>
+     <triangle v1="195" v2="35" v3="196"/>
+     <triangle v1="196" v2="35" v3="34"/>
+     <triangle v1="196" v2="34" v3="197"/>
+     <triangle v1="197" v2="34" v3="33"/>
+     <triangle v1="197" v2="33" v3="32"/>
+     <triangle v1="197" v2="32" v3="198"/>
+     <triangle v1="198" v2="32" v3="31"/>
+     <triangle v1="198" v2="31" v3="199"/>
+     <triangle v1="199" v2="31" v3="30"/>
+     <triangle v1="199" v2="30" v3="200"/>
+     <triangle v1="200" v2="30" v3="29"/>
+     <triangle v1="200" v2="29" v3="201"/>
+     <triangle v1="201" v2="29" v3="28"/>
+     <triangle v1="201" v2="28" v3="27"/>
+     <triangle v1="201" v2="27" v3="202"/>
+     <triangle v1="202" v2="27" v3="26"/>
+     <triangle v1="202" v2="26" v3="203"/>
+     <triangle v1="203" v2="26" v3="17"/>
+     <triangle v1="203" v2="17" v3="204"/>
+     <triangle v1="204" v2="17" v3="16"/>
+     <triangle v1="204" v2="16" v3="205"/>
+     <triangle v1="205" v2="16" v3="15"/>
+     <triangle v1="205" v2="15" v3="206"/>
+     <triangle v1="206" v2="15" v3="13"/>
+     <triangle v1="206" v2="13" v3="12"/>
+     <triangle v1="206" v2="12" v3="207"/>
+     <triangle v1="207" v2="12" v3="11"/>
+     <triangle v1="207" v2="11" v3="208"/>
+     <triangle v1="208" v2="11" v3="209"/>
+     <triangle v1="209" v2="11" v3="10"/>
+     <triangle v1="209" v2="10" v3="210"/>
+     <triangle v1="210" v2="10" v3="8"/>
+     <triangle v1="210" v2="8" v3="211"/>
+     <triangle v1="211" v2="8" v3="212"/>
+     <triangle v1="212" v2="8" v3="7"/>
+     <triangle v1="212" v2="7" v3="213"/>
+     <triangle v1="213" v2="7" v3="6"/>
+     <triangle v1="213" v2="6" v3="214"/>
+     <triangle v1="214" v2="6" v3="215"/>
+     <triangle v1="215" v2="6" v3="5"/>
+     <triangle v1="215" v2="5" v3="216"/>
+     <triangle v1="216" v2="5" v3="3"/>
+     <triangle v1="216" v2="3" v3="217"/>
+     <triangle v1="217" v2="3" v3="218"/>
+     <triangle v1="218" v2="3" v3="1"/>
+     <triangle v1="218" v2="1" v3="219"/>
+     <triangle v1="219" v2="1" v3="220"/>
+     <triangle v1="219" v2="220" v3="221"/>
+     <triangle v1="221" v2="220" v3="222"/>
+     <triangle v1="221" v2="222" v3="223"/>
+     <triangle v1="223" v2="222" v3="224"/>
+     <triangle v1="223" v2="224" v3="225"/>
+     <triangle v1="225" v2="224" v3="226"/>
+     <triangle v1="225" v2="226" v3="227"/>
+     <triangle v1="227" v2="226" v3="228"/>
+     <triangle v1="227" v2="228" v3="229"/>
+     <triangle v1="229" v2="228" v3="230"/>
+     <triangle v1="229" v2="230" v3="231"/>
+     <triangle v1="229" v2="231" v3="232"/>
+     <triangle v1="232" v2="231" v3="233"/>
+     <triangle v1="232" v2="233" v3="234"/>
+     <triangle v1="234" v2="233" v3="235"/>
+     <triangle v1="234" v2="235" v3="236"/>
+     <triangle v1="236" v2="235" v3="237"/>
+     <triangle v1="236" v2="237" v3="238"/>
+     <triangle v1="238" v2="237" v3="239"/>
+     <triangle v1="238" v2="239" v3="240"/>
+     <triangle v1="240" v2="239" v3="241"/>
+     <triangle v1="240" v2="241" v3="242"/>
+     <triangle v1="242" v2="241" v3="243"/>
+     <triangle v1="243" v2="241" v3="244"/>
+     <triangle v1="243" v2="244" v3="245"/>
+     <triangle v1="245" v2="244" v3="246"/>
+     <triangle v1="245" v2="246" v3="247"/>
+     <triangle v1="247" v2="246" v3="248"/>
+     <triangle v1="247" v2="248" v3="249"/>
+     <triangle v1="249" v2="248" v3="250"/>
+     <triangle v1="249" v2="250" v3="251"/>
+     <triangle v1="252" v2="253" v3="251"/>
+     <triangle v1="251" v2="253" v3="254"/>
+     <triangle v1="251" v2="254" v3="249"/>
+     <triangle v1="253" v2="252" v3="255"/>
+     <triangle v1="255" v2="252" v3="256"/>
+     <triangle v1="255" v2="256" v3="257"/>
+     <triangle v1="257" v2="256" v3="258"/>
+     <triangle v1="258" v2="256" v3="259"/>
+     <triangle v1="258" v2="259" v3="260"/>
+     <triangle v1="260" v2="259" v3="261"/>
+     <triangle v1="260" v2="261" v3="262"/>
+     <triangle v1="262" v2="261" v3="263"/>
+     <triangle v1="262" v2="263" v3="264"/>
+     <triangle v1="264" v2="263" v3="265"/>
+     <triangle v1="264" v2="265" v3="266"/>
+     <triangle v1="266" v2="265" v3="267"/>
+     <triangle v1="266" v2="267" v3="268"/>
+     <triangle v1="268" v2="267" v3="269"/>
+     <triangle v1="268" v2="269" v3="270"/>
+     <triangle v1="270" v2="269" v3="271"/>
+     <triangle v1="270" v2="271" v3="272"/>
+     <triangle v1="272" v2="271" v3="273"/>
+     <triangle v1="272" v2="273" v3="274"/>
+     <triangle v1="274" v2="273" v3="275"/>
+     <triangle v1="274" v2="275" v3="276"/>
+     <triangle v1="276" v2="275" v3="277"/>
+     <triangle v1="276" v2="277" v3="278"/>
+     <triangle v1="278" v2="277" v3="279"/>
+     <triangle v1="278" v2="279" v3="280"/>
+     <triangle v1="1" v2="0" v3="220"/>
+     <triangle v1="220" v2="0" v3="222"/>
+     <triangle v1="222" v2="0" v3="160"/>
+     <triangle v1="222" v2="160" v3="224"/>
+     <triangle v1="224" v2="160" v3="226"/>
+     <triangle v1="226" v2="160" v3="158"/>
+     <triangle v1="226" v2="158" v3="228"/>
+     <triangle v1="228" v2="158" v3="230"/>
+     <triangle v1="230" v2="158" v3="231"/>
+     <triangle v1="231" v2="158" v3="156"/>
+     <triangle v1="231" v2="156" v3="233"/>
+     <triangle v1="233" v2="156" v3="235"/>
+     <triangle v1="235" v2="156" v3="70"/>
+     <triangle v1="235" v2="70" v3="237"/>
+     <triangle v1="237" v2="70" v3="239"/>
+     <triangle v1="239" v2="70" v3="69"/>
+     <triangle v1="239" v2="69" v3="241"/>
+     <triangle v1="241" v2="69" v3="244"/>
+     <triangle v1="244" v2="69" v3="154"/>
+     <triangle v1="244" v2="154" v3="246"/>
+     <triangle v1="246" v2="154" v3="248"/>
+     <triangle v1="248" v2="154" v3="153"/>
+     <triangle v1="248" v2="153" v3="250"/>
+     <triangle v1="250" v2="153" v3="281"/>
+     <triangle v1="250" v2="281" v3="251"/>
+     <triangle v1="251" v2="281" v3="252"/>
+     <triangle v1="252" v2="281" v3="282"/>
+     <triangle v1="252" v2="282" v3="256"/>
+     <triangle v1="256" v2="282" v3="283"/>
+     <triangle v1="256" v2="283" v3="259"/>
+     <triangle v1="259" v2="283" v3="284"/>
+     <triangle v1="259" v2="284" v3="261"/>
+     <triangle v1="261" v2="284" v3="285"/>
+     <triangle v1="261" v2="285" v3="263"/>
+     <triangle v1="263" v2="285" v3="286"/>
+     <triangle v1="263" v2="286" v3="265"/>
+     <triangle v1="265" v2="286" v3="267"/>
+     <triangle v1="281" v2="153" v3="287"/>
+     <triangle v1="287" v2="153" v3="151"/>
+     <triangle v1="287" v2="151" v3="288"/>
+     <triangle v1="288" v2="151" v3="76"/>
+     <triangle v1="288" v2="76" v3="289"/>
+     <triangle v1="289" v2="76" v3="75"/>
+     <triangle v1="289" v2="75" v3="290"/>
+     <triangle v1="290" v2="75" v3="291"/>
+     <triangle v1="291" v2="75" v3="149"/>
+     <triangle v1="291" v2="149" v3="292"/>
+     <triangle v1="292" v2="149" v3="82"/>
+     <triangle v1="292" v2="82" v3="293"/>
+     <triangle v1="293" v2="82" v3="81"/>
+     <triangle v1="293" v2="81" v3="294"/>
+     <triangle v1="294" v2="81" v3="148"/>
+     <triangle v1="294" v2="148" v3="295"/>
+     <triangle v1="295" v2="148" v3="85"/>
+     <triangle v1="295" v2="85" v3="296"/>
+     <triangle v1="296" v2="85" v3="86"/>
+     <triangle v1="296" v2="86" v3="297"/>
+     <triangle v1="297" v2="86" v3="88"/>
+     <triangle v1="297" v2="88" v3="298"/>
+     <triangle v1="298" v2="88" v3="90"/>
+     <triangle v1="298" v2="90" v3="299"/>
+     <triangle v1="299" v2="90" v3="300"/>
+     <triangle v1="300" v2="90" v3="108"/>
+     <triangle v1="300" v2="108" v3="301"/>
+     <triangle v1="301" v2="108" v3="112"/>
+     <triangle v1="301" v2="112" v3="302"/>
+     <triangle v1="302" v2="112" v3="117"/>
+     <triangle v1="302" v2="117" v3="303"/>
+     <triangle v1="303" v2="117" v3="122"/>
+     <triangle v1="303" v2="122" v3="304"/>
+     <triangle v1="304" v2="122" v3="128"/>
+     <triangle v1="304" v2="128" v3="305"/>
+     <triangle v1="305" v2="128" v3="132"/>
+     <triangle v1="305" v2="132" v3="306"/>
+     <triangle v1="306" v2="132" v3="307"/>
+     <triangle v1="307" v2="132" v3="137"/>
+     <triangle v1="307" v2="137" v3="308"/>
+     <triangle v1="308" v2="137" v3="309"/>
+     <triangle v1="309" v2="137" v3="310"/>
+     <triangle v1="310" v2="137" v3="142"/>
+     <triangle v1="310" v2="142" v3="311"/>
+     <triangle v1="311" v2="142" v3="312"/>
+     <triangle v1="312" v2="142" v3="313"/>
+     <triangle v1="313" v2="142" v3="314"/>
+     <triangle v1="314" v2="142" v3="147"/>
+     <triangle v1="306" v2="315" v3="305"/>
+     <triangle v1="305" v2="315" v3="316"/>
+     <triangle v1="316" v2="315" v3="317"/>
+     <triangle v1="316" v2="317" v3="318"/>
+     <triangle v1="316" v2="318" v3="319"/>
+     <triangle v1="319" v2="318" v3="320"/>
+     <triangle v1="319" v2="320" v3="321"/>
+     <triangle v1="321" v2="322" v3="319"/>
+     <triangle v1="319" v2="322" v3="323"/>
+     <triangle v1="323" v2="322" v3="324"/>
+     <triangle v1="323" v2="324" v3="325"/>
+     <triangle v1="325" v2="326" v3="323"/>
+     <triangle v1="323" v2="326" v3="327"/>
+     <triangle v1="327" v2="326" v3="328"/>
+     <triangle v1="327" v2="328" v3="329"/>
+     <triangle v1="329" v2="328" v3="330"/>
+     <triangle v1="329" v2="330" v3="331"/>
+     <triangle v1="329" v2="331" v3="332"/>
+     <triangle v1="332" v2="331" v3="333"/>
+     <triangle v1="332" v2="333" v3="334"/>
+     <triangle v1="334" v2="335" v3="332"/>
+     <triangle v1="268" v2="270" v3="336"/>
+     <triangle v1="336" v2="270" v3="272"/>
+     <triangle v1="336" v2="272" v3="274"/>
+     <triangle v1="274" v2="276" v3="336"/>
+     <triangle v1="336" v2="276" v3="337"/>
+     <triangle v1="337" v2="276" v3="278"/>
+     <triangle v1="337" v2="278" v3="280"/>
+     <triangle v1="337" v2="280" v3="338"/>
+     <triangle v1="338" v2="280" v3="339"/>
+     <triangle v1="338" v2="339" v3="340"/>
+     <triangle v1="340" v2="339" v3="341"/>
+     <triangle v1="340" v2="341" v3="342"/>
+     <triangle v1="342" v2="341" v3="343"/>
+     <triangle v1="342" v2="343" v3="344"/>
+     <triangle v1="344" v2="343" v3="345"/>
+     <triangle v1="344" v2="345" v3="346"/>
+     <triangle v1="346" v2="345" v3="347"/>
+     <triangle v1="346" v2="347" v3="348"/>
+     <triangle v1="348" v2="347" v3="349"/>
+     <triangle v1="348" v2="349" v3="350"/>
+     <triangle v1="350" v2="349" v3="351"/>
+     <triangle v1="350" v2="351" v3="352"/>
+     <triangle v1="352" v2="351" v3="353"/>
+     <triangle v1="352" v2="353" v3="354"/>
+     <triangle v1="354" v2="353" v3="355"/>
+     <triangle v1="354" v2="355" v3="356"/>
+     <triangle v1="356" v2="355" v3="357"/>
+     <triangle v1="356" v2="357" v3="358"/>
+     <triangle v1="358" v2="357" v3="359"/>
+     <triangle v1="358" v2="359" v3="360"/>
+     <triangle v1="360" v2="359" v3="361"/>
+     <triangle v1="360" v2="361" v3="362"/>
+     <triangle v1="362" v2="361" v3="363"/>
+     <triangle v1="362" v2="363" v3="364"/>
+     <triangle v1="364" v2="363" v3="365"/>
+     <triangle v1="364" v2="365" v3="366"/>
+     <triangle v1="364" v2="366" v3="367"/>
+     <triangle v1="367" v2="366" v3="368"/>
+     <triangle v1="367" v2="368" v3="369"/>
+     <triangle v1="369" v2="368" v3="370"/>
+     <triangle v1="369" v2="370" v3="371"/>
+     <triangle v1="371" v2="370" v3="372"/>
+     <triangle v1="371" v2="372" v3="373"/>
+     <triangle v1="373" v2="372" v3="374"/>
+     <triangle v1="373" v2="374" v3="375"/>
+     <triangle v1="375" v2="374" v3="376"/>
+     <triangle v1="375" v2="376" v3="377"/>
+     <triangle v1="377" v2="376" v3="378"/>
+     <triangle v1="377" v2="378" v3="379"/>
+     <triangle v1="379" v2="378" v3="380"/>
+     <triangle v1="379" v2="380" v3="381"/>
+     <triangle v1="381" v2="380" v3="382"/>
+     <triangle v1="381" v2="382" v3="383"/>
+     <triangle v1="383" v2="382" v3="384"/>
+     <triangle v1="383" v2="384" v3="385"/>
+     <triangle v1="385" v2="384" v3="386"/>
+     <triangle v1="385" v2="386" v3="387"/>
+     <triangle v1="387" v2="386" v3="388"/>
+     <triangle v1="387" v2="388" v3="389"/>
+     <triangle v1="389" v2="388" v3="390"/>
+     <triangle v1="389" v2="390" v3="391"/>
+     <triangle v1="391" v2="390" v3="392"/>
+     <triangle v1="391" v2="392" v3="393"/>
+     <triangle v1="393" v2="392" v3="394"/>
+     <triangle v1="393" v2="394" v3="395"/>
+     <triangle v1="395" v2="394" v3="396"/>
+     <triangle v1="395" v2="396" v3="397"/>
+     <triangle v1="397" v2="396" v3="398"/>
+     <triangle v1="397" v2="398" v3="399"/>
+     <triangle v1="399" v2="398" v3="400"/>
+     <triangle v1="399" v2="400" v3="401"/>
+     <triangle v1="401" v2="400" v3="402"/>
+     <triangle v1="402" v2="400" v3="403"/>
+     <triangle v1="403" v2="400" v3="404"/>
+     <triangle v1="403" v2="404" v3="405"/>
+     <triangle v1="405" v2="404" v3="406"/>
+     <triangle v1="161" v2="407" v3="71"/>
+     <triangle v1="71" v2="407" v3="408"/>
+     <triangle v1="71" v2="408" v3="77"/>
+     <triangle v1="77" v2="408" v3="409"/>
+     <triangle v1="77" v2="409" v3="83"/>
+     <triangle v1="83" v2="409" v3="410"/>
+     <triangle v1="83" v2="410" v3="95"/>
+     <triangle v1="95" v2="410" v3="411"/>
+     <triangle v1="95" v2="411" v3="412"/>
+     <triangle v1="162" v2="163" v3="161"/>
+     <triangle v1="161" v2="163" v3="407"/>
+     <triangle v1="95" v2="412" v3="96"/>
+     <triangle v1="96" v2="412" v3="413"/>
+     <triangle v1="96" v2="413" v3="97"/>
+     <triangle v1="97" v2="413" v3="414"/>
+     <triangle v1="97" v2="414" v3="98"/>
+     <triangle v1="98" v2="414" v3="415"/>
+     <triangle v1="98" v2="415" v3="99"/>
+     <triangle v1="99" v2="415" v3="416"/>
+     <triangle v1="99" v2="416" v3="417"/>
+     <triangle v1="99" v2="417" v3="100"/>
+     <triangle v1="100" v2="417" v3="418"/>
+     <triangle v1="100" v2="418" v3="101"/>
+     <triangle v1="101" v2="418" v3="419"/>
+     <triangle v1="101" v2="419" v3="102"/>
+     <triangle v1="102" v2="419" v3="420"/>
+     <triangle v1="102" v2="420" v3="103"/>
+     <triangle v1="103" v2="420" v3="421"/>
+     <triangle v1="103" v2="421" v3="422"/>
+     <triangle v1="103" v2="422" v3="91"/>
+     <triangle v1="91" v2="422" v3="423"/>
+     <triangle v1="91" v2="423" v3="93"/>
+     <triangle v1="93" v2="423" v3="424"/>
+     <triangle v1="93" v2="424" v3="94"/>
+     <triangle v1="94" v2="424" v3="425"/>
+     <triangle v1="94" v2="425" v3="104"/>
+     <triangle v1="104" v2="425" v3="426"/>
+     <triangle v1="104" v2="426" v3="105"/>
+     <triangle v1="105" v2="426" v3="427"/>
+     <triangle v1="105" v2="427" v3="106"/>
+     <triangle v1="106" v2="427" v3="107"/>
+     <triangle v1="107" v2="427" v3="428"/>
+     <triangle v1="107" v2="428" v3="109"/>
+     <triangle v1="109" v2="428" v3="429"/>
+     <triangle v1="109" v2="429" v3="110"/>
+     <triangle v1="110" v2="429" v3="111"/>
+     <triangle v1="111" v2="429" v3="430"/>
+     <triangle v1="111" v2="430" v3="113"/>
+     <triangle v1="113" v2="430" v3="431"/>
+     <triangle v1="113" v2="431" v3="114"/>
+     <triangle v1="114" v2="431" v3="115"/>
+     <triangle v1="115" v2="431" v3="432"/>
+     <triangle v1="115" v2="432" v3="116"/>
+     <triangle v1="116" v2="432" v3="433"/>
+     <triangle v1="116" v2="433" v3="118"/>
+     <triangle v1="118" v2="433" v3="434"/>
+     <triangle v1="118" v2="434" v3="119"/>
+     <triangle v1="119" v2="434" v3="120"/>
+     <triangle v1="120" v2="434" v3="435"/>
+     <triangle v1="120" v2="435" v3="121"/>
+     <triangle v1="121" v2="435" v3="436"/>
+     <triangle v1="121" v2="436" v3="123"/>
+     <triangle v1="123" v2="436" v3="437"/>
+     <triangle v1="123" v2="437" v3="124"/>
+     <triangle v1="124" v2="437" v3="438"/>
+     <triangle v1="124" v2="438" v3="125"/>
+     <triangle v1="125" v2="438" v3="126"/>
+     <triangle v1="126" v2="438" v3="439"/>
+     <triangle v1="126" v2="439" v3="127"/>
+     <triangle v1="127" v2="439" v3="440"/>
+     <triangle v1="127" v2="440" v3="129"/>
+     <triangle v1="129" v2="440" v3="441"/>
+     <triangle v1="129" v2="441" v3="130"/>
+     <triangle v1="130" v2="441" v3="442"/>
+     <triangle v1="130" v2="442" v3="131"/>
+     <triangle v1="131" v2="442" v3="443"/>
+     <triangle v1="131" v2="443" v3="133"/>
+     <triangle v1="133" v2="443" v3="444"/>
+     <triangle v1="133" v2="444" v3="134"/>
+     <triangle v1="134" v2="444" v3="135"/>
+     <triangle v1="135" v2="444" v3="445"/>
+     <triangle v1="135" v2="445" v3="136"/>
+     <triangle v1="136" v2="445" v3="446"/>
+     <triangle v1="136" v2="446" v3="138"/>
+     <triangle v1="138" v2="446" v3="447"/>
+     <triangle v1="138" v2="447" v3="139"/>
+     <triangle v1="139" v2="447" v3="448"/>
+     <triangle v1="139" v2="448" v3="140"/>
+     <triangle v1="140" v2="448" v3="449"/>
+     <triangle v1="140" v2="449" v3="141"/>
+     <triangle v1="141" v2="449" v3="143"/>
+     <triangle v1="143" v2="449" v3="450"/>
+     <triangle v1="143" v2="450" v3="144"/>
+     <triangle v1="144" v2="450" v3="451"/>
+     <triangle v1="144" v2="451" v3="145"/>
+     <triangle v1="145" v2="451" v3="452"/>
+     <triangle v1="145" v2="452" v3="146"/>
+     <triangle v1="146" v2="452" v3="147"/>
+     <triangle v1="147" v2="452" v3="453"/>
+     <triangle v1="147" v2="453" v3="314"/>
+     <triangle v1="314" v2="453" v3="313"/>
+     <triangle v1="313" v2="453" v3="454"/>
+     <triangle v1="313" v2="454" v3="312"/>
+     <triangle v1="312" v2="454" v3="455"/>
+     <triangle v1="312" v2="455" v3="311"/>
+     <triangle v1="311" v2="455" v3="310"/>
+     <triangle v1="310" v2="455" v3="456"/>
+     <triangle v1="310" v2="456" v3="309"/>
+     <triangle v1="309" v2="456" v3="308"/>
+     <triangle v1="308" v2="456" v3="457"/>
+     <triangle v1="308" v2="457" v3="307"/>
+     <triangle v1="307" v2="457" v3="306"/>
+     <triangle v1="306" v2="457" v3="458"/>
+     <triangle v1="306" v2="458" v3="315"/>
+     <triangle v1="315" v2="458" v3="317"/>
+     <triangle v1="317" v2="458" v3="459"/>
+     <triangle v1="317" v2="459" v3="318"/>
+     <triangle v1="318" v2="459" v3="460"/>
+     <triangle v1="318" v2="460" v3="320"/>
+     <triangle v1="320" v2="460" v3="321"/>
+     <triangle v1="321" v2="460" v3="461"/>
+     <triangle v1="321" v2="461" v3="322"/>
+     <triangle v1="322" v2="461" v3="462"/>
+     <triangle v1="322" v2="462" v3="324"/>
+     <triangle v1="324" v2="462" v3="325"/>
+     <triangle v1="325" v2="462" v3="463"/>
+     <triangle v1="325" v2="463" v3="326"/>
+     <triangle v1="326" v2="463" v3="464"/>
+     <triangle v1="326" v2="464" v3="328"/>
+     <triangle v1="328" v2="464" v3="465"/>
+     <triangle v1="328" v2="465" v3="330"/>
+     <triangle v1="330" v2="465" v3="466"/>
+     <triangle v1="330" v2="466" v3="331"/>
+     <triangle v1="331" v2="466" v3="467"/>
+     <triangle v1="331" v2="467" v3="333"/>
+     <triangle v1="333" v2="467" v3="468"/>
+     <triangle v1="333" v2="468" v3="334"/>
+     <triangle v1="334" v2="468" v3="469"/>
+     <triangle v1="334" v2="469" v3="335"/>
+     <triangle v1="335" v2="469" v3="397"/>
+     <triangle v1="335" v2="397" v3="399"/>
+     <triangle v1="401" v2="470" v3="399"/>
+     <triangle v1="399" v2="470" v3="471"/>
+     <triangle v1="399" v2="471" v3="335"/>
+     <triangle v1="401" v2="402" v3="470"/>
+     <triangle v1="470" v2="402" v3="472"/>
+     <triangle v1="472" v2="402" v3="403"/>
+     <triangle v1="472" v2="403" v3="473"/>
+     <triangle v1="473" v2="403" v3="405"/>
+     <triangle v1="473" v2="405" v3="474"/>
+     <triangle v1="474" v2="405" v3="406"/>
+     <triangle v1="474" v2="406" v3="475"/>
+     <triangle v1="475" v2="406" v3="476"/>
+     <triangle v1="476" v2="406" v3="404"/>
+     <triangle v1="476" v2="404" v3="400"/>
+     <triangle v1="476" v2="400" v3="477"/>
+     <triangle v1="477" v2="400" v3="398"/>
+     <triangle v1="477" v2="398" v3="478"/>
+     <triangle v1="478" v2="398" v3="396"/>
+     <triangle v1="478" v2="396" v3="479"/>
+     <triangle v1="479" v2="396" v3="394"/>
+     <triangle v1="479" v2="394" v3="480"/>
+     <triangle v1="480" v2="394" v3="392"/>
+     <triangle v1="480" v2="392" v3="481"/>
+     <triangle v1="481" v2="392" v3="390"/>
+     <triangle v1="481" v2="390" v3="482"/>
+     <triangle v1="482" v2="390" v3="388"/>
+     <triangle v1="482" v2="388" v3="483"/>
+     <triangle v1="483" v2="388" v3="386"/>
+     <triangle v1="483" v2="386" v3="484"/>
+     <triangle v1="484" v2="386" v3="384"/>
+     <triangle v1="484" v2="384" v3="485"/>
+     <triangle v1="485" v2="384" v3="382"/>
+     <triangle v1="485" v2="382" v3="486"/>
+     <triangle v1="486" v2="382" v3="380"/>
+     <triangle v1="486" v2="380" v3="487"/>
+     <triangle v1="487" v2="380" v3="378"/>
+     <triangle v1="487" v2="378" v3="488"/>
+     <triangle v1="488" v2="378" v3="376"/>
+     <triangle v1="488" v2="376" v3="489"/>
+     <triangle v1="489" v2="376" v3="374"/>
+     <triangle v1="489" v2="374" v3="490"/>
+     <triangle v1="490" v2="374" v3="372"/>
+     <triangle v1="490" v2="372" v3="491"/>
+     <triangle v1="491" v2="372" v3="370"/>
+     <triangle v1="491" v2="370" v3="492"/>
+     <triangle v1="492" v2="370" v3="368"/>
+     <triangle v1="492" v2="368" v3="493"/>
+     <triangle v1="493" v2="368" v3="366"/>
+     <triangle v1="493" v2="366" v3="494"/>
+     <triangle v1="494" v2="366" v3="365"/>
+     <triangle v1="494" v2="365" v3="495"/>
+     <triangle v1="495" v2="365" v3="363"/>
+     <triangle v1="495" v2="363" v3="496"/>
+     <triangle v1="496" v2="363" v3="361"/>
+     <triangle v1="496" v2="361" v3="497"/>
+     <triangle v1="497" v2="361" v3="359"/>
+     <triangle v1="497" v2="359" v3="498"/>
+     <triangle v1="498" v2="359" v3="357"/>
+     <triangle v1="498" v2="357" v3="499"/>
+     <triangle v1="499" v2="357" v3="355"/>
+     <triangle v1="499" v2="355" v3="500"/>
+     <triangle v1="500" v2="355" v3="353"/>
+     <triangle v1="500" v2="353" v3="501"/>
+     <triangle v1="501" v2="353" v3="351"/>
+     <triangle v1="501" v2="351" v3="502"/>
+     <triangle v1="502" v2="351" v3="349"/>
+     <triangle v1="502" v2="349" v3="503"/>
+     <triangle v1="503" v2="349" v3="347"/>
+     <triangle v1="503" v2="347" v3="504"/>
+     <triangle v1="504" v2="347" v3="345"/>
+     <triangle v1="504" v2="345" v3="505"/>
+     <triangle v1="505" v2="345" v3="343"/>
+     <triangle v1="505" v2="343" v3="506"/>
+     <triangle v1="506" v2="343" v3="341"/>
+     <triangle v1="506" v2="341" v3="507"/>
+     <triangle v1="507" v2="341" v3="339"/>
+     <triangle v1="507" v2="339" v3="508"/>
+     <triangle v1="508" v2="339" v3="279"/>
+     <triangle v1="279" v2="339" v3="280"/>
+     <triangle v1="508" v2="279" v3="284"/>
+     <triangle v1="284" v2="279" v3="277"/>
+     <triangle v1="284" v2="277" v3="285"/>
+     <triangle v1="285" v2="277" v3="275"/>
+     <triangle v1="285" v2="275" v3="286"/>
+     <triangle v1="286" v2="275" v3="273"/>
+     <triangle v1="286" v2="273" v3="271"/>
+     <triangle v1="271" v2="269" v3="286"/>
+     <triangle v1="286" v2="269" v3="267"/>
+     <triangle v1="284" v2="283" v3="508"/>
+     <triangle v1="508" v2="283" v3="507"/>
+     <triangle v1="507" v2="283" v3="282"/>
+     <triangle v1="507" v2="282" v3="506"/>
+     <triangle v1="506" v2="282" v3="281"/>
+     <triangle v1="506" v2="281" v3="505"/>
+     <triangle v1="505" v2="281" v3="287"/>
+     <triangle v1="505" v2="287" v3="504"/>
+     <triangle v1="504" v2="287" v3="288"/>
+     <triangle v1="504" v2="288" v3="503"/>
+     <triangle v1="503" v2="288" v3="289"/>
+     <triangle v1="503" v2="289" v3="502"/>
+     <triangle v1="502" v2="289" v3="290"/>
+     <triangle v1="502" v2="290" v3="501"/>
+     <triangle v1="501" v2="290" v3="291"/>
+     <triangle v1="501" v2="291" v3="500"/>
+     <triangle v1="500" v2="291" v3="292"/>
+     <triangle v1="500" v2="292" v3="499"/>
+     <triangle v1="499" v2="292" v3="293"/>
+     <triangle v1="499" v2="293" v3="498"/>
+     <triangle v1="498" v2="293" v3="294"/>
+     <triangle v1="498" v2="294" v3="497"/>
+     <triangle v1="497" v2="294" v3="295"/>
+     <triangle v1="497" v2="295" v3="496"/>
+     <triangle v1="496" v2="295" v3="296"/>
+     <triangle v1="496" v2="296" v3="495"/>
+     <triangle v1="495" v2="296" v3="494"/>
+     <triangle v1="494" v2="296" v3="297"/>
+     <triangle v1="494" v2="297" v3="493"/>
+     <triangle v1="493" v2="297" v3="298"/>
+     <triangle v1="493" v2="298" v3="492"/>
+     <triangle v1="492" v2="298" v3="299"/>
+     <triangle v1="492" v2="299" v3="491"/>
+     <triangle v1="491" v2="299" v3="300"/>
+     <triangle v1="491" v2="300" v3="490"/>
+     <triangle v1="490" v2="300" v3="301"/>
+     <triangle v1="490" v2="301" v3="489"/>
+     <triangle v1="489" v2="301" v3="302"/>
+     <triangle v1="489" v2="302" v3="488"/>
+     <triangle v1="488" v2="302" v3="303"/>
+     <triangle v1="488" v2="303" v3="487"/>
+     <triangle v1="487" v2="303" v3="304"/>
+     <triangle v1="487" v2="304" v3="486"/>
+     <triangle v1="486" v2="304" v3="305"/>
+     <triangle v1="486" v2="305" v3="485"/>
+     <triangle v1="485" v2="305" v3="316"/>
+     <triangle v1="485" v2="316" v3="484"/>
+     <triangle v1="484" v2="316" v3="319"/>
+     <triangle v1="484" v2="319" v3="483"/>
+     <triangle v1="483" v2="319" v3="323"/>
+     <triangle v1="483" v2="323" v3="482"/>
+     <triangle v1="482" v2="323" v3="327"/>
+     <triangle v1="482" v2="327" v3="481"/>
+     <triangle v1="481" v2="327" v3="329"/>
+     <triangle v1="481" v2="329" v3="480"/>
+     <triangle v1="480" v2="329" v3="332"/>
+     <triangle v1="480" v2="332" v3="479"/>
+     <triangle v1="479" v2="332" v3="335"/>
+     <triangle v1="479" v2="335" v3="478"/>
+     <triangle v1="478" v2="335" v3="471"/>
+     <triangle v1="478" v2="471" v3="470"/>
+     <triangle v1="478" v2="470" v3="477"/>
+     <triangle v1="477" v2="470" v3="472"/>
+     <triangle v1="477" v2="472" v3="473"/>
+     <triangle v1="477" v2="473" v3="476"/>
+     <triangle v1="476" v2="473" v3="474"/>
+     <triangle v1="476" v2="474" v3="475"/>
+     <triangle v1="268" v2="336" v3="266"/>
+     <triangle v1="266" v2="336" v3="264"/>
+     <triangle v1="264" v2="336" v3="262"/>
+     <triangle v1="262" v2="336" v3="337"/>
+     <triangle v1="262" v2="337" v3="260"/>
+     <triangle v1="260" v2="337" v3="338"/>
+     <triangle v1="260" v2="338" v3="258"/>
+     <triangle v1="258" v2="338" v3="340"/>
+     <triangle v1="258" v2="340" v3="257"/>
+     <triangle v1="257" v2="340" v3="255"/>
+     <triangle v1="255" v2="340" v3="253"/>
+     <triangle v1="253" v2="340" v3="342"/>
+     <triangle v1="253" v2="342" v3="254"/>
+     <triangle v1="254" v2="342" v3="249"/>
+     <triangle v1="249" v2="342" v3="344"/>
+     <triangle v1="249" v2="344" v3="247"/>
+     <triangle v1="247" v2="344" v3="245"/>
+     <triangle v1="245" v2="344" v3="346"/>
+     <triangle v1="245" v2="346" v3="243"/>
+     <triangle v1="243" v2="346" v3="242"/>
+     <triangle v1="242" v2="346" v3="240"/>
+     <triangle v1="240" v2="346" v3="348"/>
+     <triangle v1="240" v2="348" v3="238"/>
+     <triangle v1="238" v2="348" v3="236"/>
+     <triangle v1="236" v2="348" v3="350"/>
+     <triangle v1="236" v2="350" v3="234"/>
+     <triangle v1="234" v2="350" v3="455"/>
+     <triangle v1="234" v2="455" v3="232"/>
+     <triangle v1="232" v2="455" v3="229"/>
+     <triangle v1="229" v2="455" v3="227"/>
+     <triangle v1="227" v2="455" v3="225"/>
+     <triangle v1="225" v2="455" v3="223"/>
+     <triangle v1="223" v2="455" v3="221"/>
+     <triangle v1="221" v2="455" v3="219"/>
+     <triangle v1="219" v2="455" v3="218"/>
+     <triangle v1="218" v2="455" v3="217"/>
+     <triangle v1="217" v2="455" v3="216"/>
+     <triangle v1="216" v2="455" v3="215"/>
+     <triangle v1="215" v2="455" v3="214"/>
+     <triangle v1="214" v2="455" v3="213"/>
+     <triangle v1="213" v2="455" v3="212"/>
+     <triangle v1="212" v2="455" v3="211"/>
+     <triangle v1="211" v2="455" v3="210"/>
+     <triangle v1="210" v2="455" v3="209"/>
+     <triangle v1="209" v2="455" v3="208"/>
+     <triangle v1="208" v2="455" v3="207"/>
+     <triangle v1="207" v2="455" v3="206"/>
+     <triangle v1="206" v2="455" v3="205"/>
+     <triangle v1="205" v2="455" v3="204"/>
+     <triangle v1="204" v2="455" v3="203"/>
+     <triangle v1="203" v2="455" v3="202"/>
+     <triangle v1="202" v2="455" v3="201"/>
+     <triangle v1="201" v2="455" v3="200"/>
+     <triangle v1="200" v2="455" v3="199"/>
+     <triangle v1="199" v2="455" v3="198"/>
+     <triangle v1="198" v2="455" v3="197"/>
+     <triangle v1="197" v2="455" v3="454"/>
+     <triangle v1="197" v2="454" v3="453"/>
+     <triangle v1="350" v2="352" v3="455"/>
+     <triangle v1="455" v2="352" v3="354"/>
+     <triangle v1="455" v2="354" v3="356"/>
+     <triangle v1="356" v2="358" v3="455"/>
+     <triangle v1="455" v2="358" v3="360"/>
+     <triangle v1="455" v2="360" v3="362"/>
+     <triangle v1="362" v2="364" v3="455"/>
+     <triangle v1="455" v2="364" v3="367"/>
+     <triangle v1="455" v2="367" v3="369"/>
+     <triangle v1="369" v2="371" v3="455"/>
+     <triangle v1="455" v2="371" v3="373"/>
+     <triangle v1="455" v2="373" v3="456"/>
+     <triangle v1="456" v2="373" v3="375"/>
+     <triangle v1="456" v2="375" v3="457"/>
+     <triangle v1="457" v2="375" v3="377"/>
+     <triangle v1="457" v2="377" v3="458"/>
+     <triangle v1="458" v2="377" v3="379"/>
+     <triangle v1="458" v2="379" v3="459"/>
+     <triangle v1="459" v2="379" v3="381"/>
+     <triangle v1="459" v2="381" v3="460"/>
+     <triangle v1="460" v2="381" v3="383"/>
+     <triangle v1="460" v2="383" v3="461"/>
+     <triangle v1="461" v2="383" v3="385"/>
+     <triangle v1="461" v2="385" v3="462"/>
+     <triangle v1="462" v2="385" v3="463"/>
+     <triangle v1="463" v2="385" v3="387"/>
+     <triangle v1="463" v2="387" v3="464"/>
+     <triangle v1="464" v2="387" v3="389"/>
+     <triangle v1="464" v2="389" v3="465"/>
+     <triangle v1="465" v2="389" v3="391"/>
+     <triangle v1="465" v2="391" v3="466"/>
+     <triangle v1="466" v2="391" v3="467"/>
+     <triangle v1="467" v2="391" v3="393"/>
+     <triangle v1="467" v2="393" v3="468"/>
+     <triangle v1="468" v2="393" v3="395"/>
+     <triangle v1="468" v2="395" v3="469"/>
+     <triangle v1="469" v2="395" v3="397"/>
+     <triangle v1="453" v2="452" v3="197"/>
+     <triangle v1="197" v2="452" v3="451"/>
+     <triangle v1="197" v2="451" v3="450"/>
+     <triangle v1="450" v2="449" v3="197"/>
+     <triangle v1="197" v2="449" v3="448"/>
+     <triangle v1="197" v2="448" v3="447"/>
+     <triangle v1="447" v2="446" v3="197"/>
+     <triangle v1="197" v2="446" v3="445"/>
+     <triangle v1="197" v2="445" v3="444"/>
+     <triangle v1="444" v2="443" v3="197"/>
+     <triangle v1="197" v2="443" v3="442"/>
+     <triangle v1="197" v2="442" v3="441"/>
+     <triangle v1="441" v2="440" v3="197"/>
+     <triangle v1="197" v2="440" v3="439"/>
+     <triangle v1="197" v2="439" v3="438"/>
+     <triangle v1="438" v2="437" v3="197"/>
+     <triangle v1="197" v2="437" v3="436"/>
+     <triangle v1="197" v2="436" v3="435"/>
+     <triangle v1="435" v2="434" v3="197"/>
+     <triangle v1="197" v2="434" v3="433"/>
+     <triangle v1="197" v2="433" v3="432"/>
+     <triangle v1="432" v2="431" v3="197"/>
+     <triangle v1="197" v2="431" v3="430"/>
+     <triangle v1="197" v2="430" v3="429"/>
+     <triangle v1="428" v2="195" v3="429"/>
+     <triangle v1="429" v2="195" v3="196"/>
+     <triangle v1="429" v2="196" v3="197"/>
+     <triangle v1="427" v2="193" v3="428"/>
+     <triangle v1="428" v2="193" v3="194"/>
+     <triangle v1="428" v2="194" v3="195"/>
+     <triangle v1="426" v2="191" v3="427"/>
+     <triangle v1="427" v2="191" v3="192"/>
+     <triangle v1="427" v2="192" v3="193"/>
+     <triangle v1="191" v2="426" v3="190"/>
+     <triangle v1="190" v2="426" v3="425"/>
+     <triangle v1="190" v2="425" v3="189"/>
+     <triangle v1="189" v2="425" v3="188"/>
+     <triangle v1="188" v2="425" v3="424"/>
+     <triangle v1="188" v2="424" v3="187"/>
+     <triangle v1="187" v2="424" v3="423"/>
+     <triangle v1="187" v2="423" v3="186"/>
+     <triangle v1="186" v2="423" v3="185"/>
+     <triangle v1="185" v2="423" v3="422"/>
+     <triangle v1="185" v2="422" v3="184"/>
+     <triangle v1="184" v2="422" v3="421"/>
+     <triangle v1="184" v2="421" v3="183"/>
+     <triangle v1="183" v2="421" v3="182"/>
+     <triangle v1="182" v2="421" v3="420"/>
+     <triangle v1="182" v2="420" v3="181"/>
+     <triangle v1="181" v2="420" v3="419"/>
+     <triangle v1="181" v2="419" v3="180"/>
+     <triangle v1="180" v2="419" v3="418"/>
+     <triangle v1="180" v2="418" v3="179"/>
+     <triangle v1="179" v2="418" v3="178"/>
+     <triangle v1="178" v2="418" v3="417"/>
+     <triangle v1="178" v2="417" v3="177"/>
+     <triangle v1="177" v2="417" v3="416"/>
+     <triangle v1="177" v2="416" v3="176"/>
+     <triangle v1="176" v2="416" v3="415"/>
+     <triangle v1="176" v2="415" v3="175"/>
+     <triangle v1="175" v2="415" v3="174"/>
+     <triangle v1="174" v2="415" v3="414"/>
+     <triangle v1="174" v2="414" v3="173"/>
+     <triangle v1="173" v2="414" v3="413"/>
+     <triangle v1="173" v2="413" v3="172"/>
+     <triangle v1="172" v2="413" v3="412"/>
+     <triangle v1="172" v2="412" v3="171"/>
+     <triangle v1="171" v2="412" v3="170"/>
+     <triangle v1="170" v2="412" v3="411"/>
+     <triangle v1="170" v2="411" v3="169"/>
+     <triangle v1="169" v2="411" v3="410"/>
+     <triangle v1="169" v2="410" v3="168"/>
+     <triangle v1="168" v2="410" v3="409"/>
+     <triangle v1="168" v2="409" v3="167"/>
+     <triangle v1="167" v2="409" v3="166"/>
+     <triangle v1="166" v2="409" v3="408"/>
+     <triangle v1="166" v2="408" v3="165"/>
+     <triangle v1="165" v2="408" v3="407"/>
+     <triangle v1="165" v2="407" v3="164"/>
+     <triangle v1="164" v2="407" v3="163"/>
+    </triangles>
+   </mesh>
+  </object>
+  <object id="8" p:UUID="00030007-81cb-4c03-9d28-80fed5dfa1dc" type="model">
+   <mesh>
+    <vertices>
+     <vertex x="0.427292824" y="4.97071838" z="2.47201109"/>
+     <vertex x="-2.75996065" y="2.34252429" z="1.5"/>
+     <vertex x="0.564508438" y="4.99043846" z="2.5"/>
+     <vertex x="-2.68382621" y="2.24634218" z="1.5"/>
+     <vertex x="0.710639954" y="4.80389452" z="2.5"/>
+     <vertex x="-2.61034179" y="2.14812088" z="1.5"/>
+     <vertex x="0.851666451" y="4.61346197" z="2.5"/>
+     <vertex x="-2.53956175" y="2.04793286" z="1.5"/>
+     <vertex x="0.987483978" y="4.41928053" z="2.5"/>
+     <vertex x="-2.47153878" y="1.94585299" z="1.5"/>
+     <vertex x="1.11799383" y="4.22149181" z="2.5"/>
+     <vertex x="-2.40632343" y="1.84195685" z="1.5"/>
+     <vertex x="1.24309969" y="4.02024174" z="2.5"/>
+     <vertex x="-2.34396434" y="1.73632169" z="1.5"/>
+     <vertex x="1.36271" y="3.81567812" z="2.5"/>
+     <vertex x="-2.28450775" y="1.62902617" z="1.5"/>
+     <vertex x="1.47673702" y="3.60795021" z="2.5"/>
+     <vertex x="-2.22799778" y="1.52014995" z="1.5"/>
+     <vertex x="1.58509731" y="3.39721036" z="2.5"/>
+     <vertex x="-2.17447615" y="1.40977371" z="1.5"/>
+     <vertex x="1.68771076" y="3.18361378" z="2.5"/>
+     <vertex x="-2.12398338" y="1.29797983" z="1.5"/>
+     <vertex x="1.78450298" y="2.96731687" z="2.5"/>
+     <vertex x="-2.07655621" y="1.18485105" z="1.5"/>
+     <vertex x="1.8754015" y="2.74847817" z="2.5"/>
+     <vertex x="-2.03223038" y="1.07047164" z="1.5"/>
+     <vertex x="1.96034145" y="2.52725816" z="2.5"/>
+     <vertex x="-1.9910388" y="0.954926491" z="1.5"/>
+     <vertex x="2.03925991" y="2.30381918" z="2.5"/>
+     <vertex x="-1.95301151" y="0.838301659" z="1.5"/>
+     <vertex x="2.11209869" y="2.07832527" z="2.5"/>
+     <vertex x="-1.9181776" y="0.720683455" z="1.5"/>
+     <vertex x="2.1788044" y="1.85094142" z="2.5"/>
+     <vertex x="-1.88656235" y="0.602159619" z="1.5"/>
+     <vertex x="2.23932838" y="1.62183475" z="2.5"/>
+     <vertex x="-1.85818958" y="0.482818007" z="1.5"/>
+     <vertex x="2.29362583" y="1.39117301" z="2.5"/>
+     <vertex x="-1.83308029" y="0.362747431" z="1.5"/>
+     <vertex x="2.34165764" y="1.15912545" z="2.5"/>
+     <vertex x="-1.81125307" y="0.242036998" z="1.5"/>
+     <vertex x="2.38338757" y="0.925862432" z="2.5"/>
+     <vertex x="-2.45367408" y="0.0679309368" z="1.34423256"/>
+     <vertex x="-1.79274797" y="0.120948613" z="1.5"/>
+     <vertex x="-2.31486607" y="0.0687031746" z="1.3765533"/>
+     <vertex x="-2.1759944" y="0.0677216649" z="1.40885448"/>
+     <vertex x="0.291134834" y="4.94862366" z="2.44399261"/>
+     <vertex x="0.15601635" y="4.92414474" z="2.4159317"/>
+     <vertex x="-2.83862734" y="2.43652415" z="1.5"/>
+     <vertex x="0.02191782" y="4.8972702" z="2.38781595"/>
+     <vertex x="-0.111178875" y="4.86798906" z="2.35963249"/>
+     <vertex x="-0.243292332" y="4.83629084" z="2.33136797"/>
+     <vertex x="-2.9199512" y="2.52848554" z="1.5"/>
+     <vertex x="-6.06255865" y="-0.332764208" z="0.5"/>
+     <vertex x="-3.00368834" y="2.61812663" z="1.5"/>
+     <vertex x="-3.08983779" y="2.70545197" z="1.5"/>
+     <vertex x="-1.14214802" y="4.545825" z="2.13019466"/>
+     <vertex x="-1.26707554" y="4.49440384" z="2.10082769"/>
+     <vertex x="-0.374442101" y="4.80216551" z="2.30301046"/>
+     <vertex x="-0.504646778" y="4.76560116" z="2.2745471"/>
+     <vertex x="-0.633924961" y="4.7265873" z="2.245965"/>
+     <vertex x="-0.762295246" y="4.68511391" z="2.2172513"/>
+     <vertex x="-0.889776707" y="4.64116907" z="2.18839359"/>
+     <vertex x="-1.01638842" y="4.59474325" z="2.15937853"/>
+     <vertex x="-1.39118958" y="4.44046831" z="2.07126617"/>
+     <vertex x="-1.51450825" y="4.38400888" z="2.04149675"/>
+     <vertex x="-1.63705063" y="4.32501364" z="2.01150703"/>
+     <vertex x="-3.17833543" y="2.79039669" z="1.5"/>
+     <vertex x="-1.75883579" y="4.26347303" z="1.98128366"/>
+     <vertex x="-1.87988234" y="4.19937515" z="1.95081472"/>
+     <vertex x="-2.00020933" y="4.1327095" z="1.92008686"/>
+     <vertex x="-2.1198349" y="4.06346607" z="1.88908768"/>
+     <vertex x="-3.26911545" y="2.87289762" z="1.5"/>
+     <vertex x="-2.23858643" y="3.99175072" z="1.85785389"/>
+     <vertex x="-2.3559773" y="3.91789627" z="1.82651091"/>
+     <vertex x="-2.47198772" y="3.84197998" z="1.79507017"/>
+     <vertex x="-2.58662558" y="3.76406336" z="1.76353788"/>
+     <vertex x="-3.36211038" y="2.9528935" z="1.5"/>
+     <vertex x="-2.69989777" y="3.68420887" z="1.73191977"/>
+     <vertex x="-2.81181169" y="3.60247803" z="1.70022058"/>
+     <vertex x="-2.92237473" y="3.5189333" z="1.66844606"/>
+     <vertex x="-3.03159404" y="3.43363643" z="1.63660192"/>
+     <vertex x="-6.09075403" y="-0.305488288" z="0.5"/>
+     <vertex x="-3.13947678" y="3.34664917" z="1.60469389"/>
+     <vertex x="-3.24603057" y="3.25803375" z="1.57272673"/>
+     <vertex x="-3.45725155" y="3.03032494" z="1.5"/>
+     <vertex x="-3.35126233" y="3.16785192" z="1.54070711"/>
+     <vertex x="-3.45517945" y="3.07616544" z="1.50863934"/>
+     <vertex x="-3.55778909" y="2.98303676" z="1.4765296"/>
+     <vertex x="-3.65909886" y="2.88852763" z="1.44438314"/>
+     <vertex x="-3.7591157" y="2.79270005" z="1.4122057"/>
+     <vertex x="-3.85784674" y="2.69561577" z="1.38000274"/>
+     <vertex x="-3.95529985" y="2.59733677" z="1.34777951"/>
+     <vertex x="-4.14639997" y="2.39744282" z="1.28329539"/>
+     <vertex x="-4.33247375" y="2.19351411" z="1.21879721"/>
+     <vertex x="-4.51397324" y="1.98558378" z="1.15419626"/>
+     <vertex x="-4.69174194" y="1.77311373" z="1.08926749"/>
+     <vertex x="-4.86579418" y="1.55644846" z="1.0240643"/>
+     <vertex x="-5.03611708" y="1.33596265" z="0.958648682"/>
+     <vertex x="-5.2026968" y="1.11203074" z="0.89308238"/>
+     <vertex x="-5.36552191" y="0.885027289" z="0.827427626"/>
+     <vertex x="-5.52457905" y="0.655326605" z="0.761746407"/>
+     <vertex x="-5.67985487" y="0.423303187" z="0.696100712"/>
+     <vertex x="-5.83133698" y="0.189331591" z="0.63055253"/>
+     <vertex x="-5.97901249" y="-0.0462137461" z="0.565164089"/>
+     <vertex x="-6.12286901" y="-0.282958955" z="0.5"/>
+     <vertex x="-6.03897715" y="-0.364115" z="0.5"/>
+     <vertex x="-6.02059031" y="-0.398768783" z="0.5"/>
+     <vertex x="-6.00785112" y="-0.435872257" z="0.5"/>
+     <vertex x="-5.73945856" y="-0.370364428" z="0.565002441"/>
+     <vertex x="-5.47014952" y="-0.308591634" z="0.630006313"/>
+     <vertex x="-5.19991541" y="-0.250706434" z="0.695014715"/>
+     <vertex x="-4.92871189" y="-0.196869105" z="0.760039568"/>
+     <vertex x="-4.65678835" y="-0.147309422" z="0.825023651"/>
+     <vertex x="-4.38393641" y="-0.102185875" z="0.890016556"/>
+     <vertex x="-4.10985994" y="-0.0616779923" z="0.955092192"/>
+     <vertex x="-3.83486891" y="-0.0260810256" z="1.02018261"/>
+     <vertex x="-3.55927563" y="0.00430941582" z="1.08521938"/>
+     <vertex x="-3.28339195" y="0.0291976929" z="1.15013456"/>
+     <vertex x="-3.00748944" y="0.0482905507" z="1.21486783"/>
+     <vertex x="-2.73094344" y="0.0613223314" z="1.27955532"/>
+     <vertex x="-2.03709888" y="0.0649370551" z="1.44113088"/>
+     <vertex x="-1.89821815" y="0.0602999926" z="1.47337651"/>
+     <vertex x="-1.75939083" y="0.0537611246" z="1.50558567"/>
+     <vertex x="-1.62065697" y="0.0452710986" z="1.53775358"/>
+     <vertex x="2.44782639" y="0.456374824" z="2.5"/>
+     <vertex x="2.41878605" y="0.691554904" z="2.5"/>
+     <vertex x="-1.48205566" y="0.0347806215" z="1.56987333"/>
+     <vertex x="-1.34362507" y="0.0222404003" z="1.60194016"/>
+     <vertex x="-1.20540524" y="0.00760102272" z="1.63394833"/>
+     <vertex x="-1.06743479" y="-0.00918680429" z="1.66589212"/>
+     <vertex x="2.47048759" y="0.220494509" z="2.5"/>
+     <vertex x="-0.929753304" y="-0.0281724334" z="1.6977663"/>
+     <vertex x="-0.792399406" y="-0.0494051874" z="1.72956467"/>
+     <vertex x="-0.655412674" y="-0.0729343891" z="1.76128149"/>
+     <vertex x="-0.51883173" y="-0.0988093913" z="1.79291201"/>
+     <vertex x="2.48675251" y="-0.01591295" z="2.5"/>
+     <vertex x="-0.382696152" y="-0.127079517" z="1.82444954"/>
+     <vertex x="-0.24704504" y="-0.157794088" z="1.8558898"/>
+     <vertex x="-0.111934662" y="-0.190997839" z="1.88722181"/>
+     <vertex x="0.0220756531" y="-0.226589054" z="1.9183259"/>
+     <vertex x="0.154749393" y="-0.264512062" z="1.94915581"/>
+     <vertex x="2.49661064" y="-0.252674162" z="2.5"/>
+     <vertex x="0.286108494" y="-0.304772556" z="1.97972536"/>
+     <vertex x="0.416173458" y="-0.347376287" z="2.01004648"/>
+     <vertex x="0.544965267" y="-0.392329037" z="2.040133"/>
+     <vertex x="2.50005341" y="-0.4896155" z="2.5"/>
+     <vertex x="0.672504902" y="-0.439636439" z="2.06999683"/>
+     <vertex x="0.79881382" y="-0.489304304" z="2.09965086"/>
+     <vertex x="0.923913002" y="-0.541338325" z="2.12910891"/>
+     <vertex x="1.04782391" y="-0.595744193" z="2.15838242"/>
+     <vertex x="2.49707794" y="-0.726563156" z="2.5"/>
+     <vertex x="1.17056656" y="-0.65252769" z="2.18748522"/>
+     <vertex x="1.29216242" y="-0.711694539" z="2.21643019"/>
+     <vertex x="1.41263342" y="-0.773250461" z="2.24522924"/>
+     <vertex x="1.53199911" y="-0.837201238" z="2.27389622"/>
+     <vertex x="2.48768806" y="-0.963343382" z="2.5"/>
+     <vertex x="1.65028191" y="-0.903552413" z="2.30244303"/>
+     <vertex x="1.76750278" y="-0.972309947" z="2.3308835"/>
+     <vertex x="1.8836813" y="-1.04347944" z="2.35922956"/>
+     <vertex x="2.4718895" y="-1.19978249" z="2.5"/>
+     <vertex x="1.99884033" y="-1.11706662" z="2.38749456"/>
+     <vertex x="2.11299992" y="-1.19307733" z="2.41569138"/>
+     <vertex x="2.22618103" y="-1.27151704" z="2.44383287"/>
+     <vertex x="2.33840561" y="-1.35239172" z="2.47193146"/>
+     <vertex x="2.44969463" y="-1.43570709" z="2.5"/>
+     <vertex x="-6.12999964" y="-0.466940969" z="0.5"/>
+     <vertex x="-6.24994278" y="-0.498254776" z="0.5"/>
+     <vertex x="2.38895512" y="-1.38907218" z="-2.5"/>
+     <vertex x="2.46748734" y="-1.44856048" z="-2.5"/>
+     <vertex x="2.52277279" y="-1.49213481" z="2.5"/>
+     <vertex x="2.54640293" y="-1.509951" z="-2.5"/>
+     <vertex x="2.59628296" y="-1.55029058" z="2.5"/>
+     <vertex x="2.62569332" y="-1.57328379" z="-2.5"/>
+     <vertex x="2.67020988" y="-1.61021173" z="2.5"/>
+     <vertex x="2.70534611" y="-1.6385994" z="-2.5"/>
+     <vertex x="2.74454212" y="-1.67193508" z="2.5"/>
+     <vertex x="2.78535366" y="-1.70593786" z="-2.5"/>
+     <vertex x="2.81926632" y="-1.73549795" z="2.5"/>
+     <vertex x="2.86570358" y="-1.77533948" z="-2.5"/>
+     <vertex x="2.89436913" y="-1.80093718" z="2.5"/>
+     <vertex x="2.94638538" y="-1.84684455" z="-2.5"/>
+     <vertex x="2.96983719" y="-1.86828995" z="2.5"/>
+     <vertex x="3.02739143" y="-1.92049348" z="-2.5"/>
+     <vertex x="3.04565811" y="-1.93759346" z="2.5"/>
+     <vertex x="3.10870934" y="-1.99632645" z="-2.5"/>
+     <vertex x="3.12181854" y="-2.00888443" z="2.5"/>
+     <vertex x="3.19032955" y="-2.07438374" z="-2.5"/>
+     <vertex x="3.19830608" y="-2.08220053" z="2.5"/>
+     <vertex x="3.27224159" y="-2.15470552" z="-2.5"/>
+     <vertex x="3.27510643" y="-2.15757823" z="2.5"/>
+     <vertex x="3.35443497" y="-2.23733234" z="-2.5"/>
+     <vertex x="3.35220814" y="-2.23505497" z="2.5"/>
+     <vertex x="3.42959785" y="-2.3146677" z="2.5"/>
+     <vertex x="3.5189991" y="-2.40889955" z="-2.5"/>
+     <vertex x="3.50726128" y="-2.39645338" z="2.5"/>
+     <vertex x="3.58518696" y="-2.4804492" z="2.5"/>
+     <vertex x="3.59865379" y="-2.49460983" z="-2.5"/>
+     <vertex x="3.6633606" y="-2.56669259" z="2.5"/>
+     <vertex x="3.67585659" y="-2.57938647" z="-2.5"/>
+     <vertex x="3.74154091" y="-2.65492773" z="2.5"/>
+     <vertex x="3.75078392" y="-2.6633997" z="-2.5"/>
+     <vertex x="3.81758404" y="-2.74244428" z="2.5"/>
+     <vertex x="3.8236084" y="-2.74682069" z="-2.5"/>
+     <vertex x="3.89114094" y="-2.82876015" z="2.5"/>
+     <vertex x="3.8945055" y="-2.82981992" z="-2.5"/>
+     <vertex x="3.96242905" y="-2.91410923" z="2.5"/>
+     <vertex x="3.9636507" y="-2.91256881" z="-2.5"/>
+     <vertex x="4.03166771" y="-2.99872637" z="2.5"/>
+     <vertex x="4.09738445" y="-3.07799745" z="-2.5"/>
+     <vertex x="4.09907532" y="-3.08284521" z="2.5"/>
+     <vertex x="4.22620869" y="-3.24447322" z="-2.5"/>
+     <vertex x="4.22926617" y="-3.25052619" z="2.5"/>
+     <vertex x="4.35152149" y="-3.41336274" z="-2.5"/>
+     <vertex x="4.35474682" y="-3.4190259" z="2.5"/>
+     <vertex x="4.47472191" y="-3.58603263" z="-2.5"/>
+     <vertex x="4.47726345" y="-3.59021854" z="2.5"/>
+     <vertex x="4.59720898" y="-3.76384902" z="-2.5"/>
+     <vertex x="4.59856033" y="-3.76597834" z="2.5"/>
+     <vertex x="4.65862179" y="-3.85511446" z="-2.5"/>
+     <vertex x="4.65929604" y="-3.85615659" z="2.5"/>
+     <vertex x="4.72038174" y="-3.94817924" z="-2.5"/>
+     <vertex x="4.72038174" y="-3.94817924" z="2.5"/>
+     <vertex x="4.80871868" y="-4.08388519" z="-2.37456155"/>
+     <vertex x="4.80871868" y="-4.08388519" z="2.37456131"/>
+     <vertex x="4.89560127" y="-4.22079325" z="2.24922514"/>
+     <vertex x="4.89560127" y="-4.22079325" z="-2.24922514"/>
+     <vertex x="4.98103333" y="-4.35883427" z="-2.1240027"/>
+     <vertex x="2.31081676" y="-1.33144557" z="-2.5"/>
+     <vertex x="2.23308277" y="-1.27564061" z="-2.5"/>
+     <vertex x="2.15576363" y="-1.22161686" z="-2.5"/>
+     <vertex x="2.07886982" y="-1.16933417" z="-2.5"/>
+     <vertex x="2.00241089" y="-1.11875212" z="-2.5"/>
+     <vertex x="1.92639637" y="-1.06983054" z="-2.5"/>
+     <vertex x="1.77574539" y="-0.976807475" z="-2.5"/>
+     <vertex x="1.62699747" y="-0.889942944" z="-2.5"/>
+     <vertex x="1.48023462" y="-0.808914542" z="-2.5"/>
+     <vertex x="1.33553934" y="-0.733400106" z="-2.5"/>
+     <vertex x="1.19206619" y="-0.66265285" z="-2.5"/>
+     <vertex x="1.04565144" y="-0.594623566" z="-2.5"/>
+     <vertex x="0.895683289" y="-0.529188395" z="-2.5"/>
+     <vertex x="0.742050648" y="-0.466468632" z="-2.5"/>
+     <vertex x="0.58464241" y="-0.406585515" z="-2.5"/>
+     <vertex x="0.423346519" y="-0.349660337" z="-2.5"/>
+     <vertex x="0.258052349" y="-0.295814335" z="-2.5"/>
+     <vertex x="0.0886473656" y="-0.245168716" z="-2.5"/>
+     <vertex x="-0.0849790573" y="-0.197844774" z="-2.5"/>
+     <vertex x="-0.262938499" y="-0.153963774" z="-2.5"/>
+     <vertex x="-0.445342541" y="-0.113646924" z="-2.5"/>
+     <vertex x="-0.632302284" y="-0.0770154893" z="-2.5"/>
+     <vertex x="-0.82392931" y="-0.0441907644" z="-2.5"/>
+     <vertex x="-1.02033567" y="-0.015293926" z="-2.5"/>
+     <vertex x="-1.22163153" y="0.00955373049" z="-2.5"/>
+     <vertex x="-1.4279294" y="0.0302309394" z="-2.5"/>
+     <vertex x="-1.6393199" y="0.0466151834" z="-2.5"/>
+     <vertex x="-1.85275984" y="0.0584586859" z="-2.5"/>
+     <vertex x="-2.06587553" y="0.0657855868" z="-2.5"/>
+     <vertex x="-2.27845883" y="0.0688022375" z="-2.5"/>
+     <vertex x="-2.49030018" y="0.06771487" z="-2.5"/>
+     <vertex x="-2.70119095" y="0.0627296567" z="-2.5"/>
+     <vertex x="-2.910923" y="0.0540528893" z="-2.5"/>
+     <vertex x="-3.11928701" y="0.0418908596" z="-2.5"/>
+     <vertex x="-3.32607436" y="0.0264497995" z="-2.5"/>
+     <vertex x="-3.53107667" y="0.00793594122" z="-2.5"/>
+     <vertex x="-3.73408484" y="-0.0134444833" z="-2.5"/>
+     <vertex x="-3.93489027" y="-0.0374851525" z="-2.5"/>
+     <vertex x="-4.13328457" y="-0.0639798641" z="-2.5"/>
+     <vertex x="-4.32905817" y="-0.0927223563" z="-2.5"/>
+     <vertex x="-4.52200317" y="-0.123506367" z="-2.5"/>
+     <vertex x="-4.71191025" y="-0.156125665" z="-2.5"/>
+     <vertex x="-4.89857101" y="-0.190373957" z="-2.5"/>
+     <vertex x="-5.0817771" y="-0.226045042" z="-2.5"/>
+     <vertex x="-5.26131916" y="-0.262932599" z="-2.5"/>
+     <vertex x="-5.43698883" y="-0.300830454" z="-2.5"/>
+     <vertex x="-5.60857677" y="-0.339532316" z="-2.5"/>
+     <vertex x="-5.77587509" y="-0.378831923" z="-2.5"/>
+     <vertex x="-5.93867493" y="-0.418523043" z="-2.5"/>
+     <vertex x="-6.09676695" y="-0.458399415" z="-2.5"/>
+     <vertex x="-6.24994278" y="-0.498254776" z="-2.5"/>
+     <vertex x="4.98103333" y="-4.35883427" z="2.12400293"/>
+     <vertex x="5.06501675" y="-4.49794054" z="-1.99890554"/>
+     <vertex x="5.06501675" y="-4.49794054" z="1.99890566"/>
+     <vertex x="5.1475544" y="-4.63804293" z="1.87394524"/>
+     <vertex x="5.1475544" y="-4.63804293" z="-1.87394524"/>
+     <vertex x="5.22864819" y="-4.77907419" z="-1.74913311"/>
+     <vertex x="5.22864819" y="-4.77907419" z="1.74913311"/>
+     <vertex x="5.38651657" y="-5.06364679" z="-1.5"/>
+     <vertex x="5.38651657" y="-5.06364679" z="1.5"/>
+     <vertex x="-6.16983366" y="-0.361795545" z="-2.5"/>
+     <vertex x="-6.08626461" y="-0.221846879" z="-2.5"/>
+     <vertex x="-5.99923754" y="-0.0787020028" z="-2.5"/>
+     <vertex x="-5.90875435" y="0.0673458576" z="-2.5"/>
+     <vertex x="-5.81481695" y="0.216003537" z="-2.5"/>
+     <vertex x="-5.71742678" y="0.366977811" z="-2.5"/>
+     <vertex x="-5.61658573" y="0.519975424" z="-2.5"/>
+     <vertex x="-5.51229525" y="0.674703121" z="-2.5"/>
+     <vertex x="-5.40455723" y="0.830867887" z="-2.5"/>
+     <vertex x="-5.29337406" y="0.988176227" z="-2.5"/>
+     <vertex x="-5.1787467" y="1.14633512" z="-2.5"/>
+     <vertex x="-5.06067705" y="1.30505133" z="-2.5"/>
+     <vertex x="-4.93916702" y="1.46403158" z="-2.5"/>
+     <vertex x="-4.81421804" y="1.62298274" z="-2.5"/>
+     <vertex x="-4.6858325" y="1.78161144" z="-2.5"/>
+     <vertex x="-4.55401134" y="1.93962479" z="-2.5"/>
+     <vertex x="-4.41875696" y="2.09672928" z="-2.5"/>
+     <vertex x="-4.28007078" y="2.25263166" z="-2.5"/>
+     <vertex x="-4.13795471" y="2.40703893" z="-2.5"/>
+     <vertex x="-3.99241042" y="2.55965781" z="-2.5"/>
+     <vertex x="-3.84343958" y="2.71019483" z="-2.5"/>
+     <vertex x="-3.69104409" y="2.85835719" z="-2.5"/>
+     <vertex x="-3.53522563" y="3.00385141" z="-2.5"/>
+     <vertex x="-3.37598586" y="3.14638448" z="-2.5"/>
+     <vertex x="-3.21496391" y="3.28427935" z="-2.5"/>
+     <vertex x="-3.05450463" y="3.41554189" z="-2.5"/>
+     <vertex x="-2.89463282" y="3.54032135" z="-2.5"/>
+     <vertex x="-2.73535538" y="3.65878153" z="-2.5"/>
+     <vertex x="-2.57667923" y="3.77108669" z="-2.5"/>
+     <vertex x="-2.41861129" y="3.87740183" z="-2.5"/>
+     <vertex x="-2.26115847" y="3.97789145" z="-2.5"/>
+     <vertex x="-2.10432768" y="4.07271957" z="-2.5"/>
+     <vertex x="-1.94812632" y="4.16205025" z="-2.5"/>
+     <vertex x="-1.79256058" y="4.24604893" z="-2.5"/>
+     <vertex x="-1.63763809" y="4.32487869" z="-2.5"/>
+     <vertex x="-1.48336506" y="4.39870501" z="-2.5"/>
+     <vertex x="-1.32974911" y="4.4676919" z="-2.5"/>
+     <vertex x="-1.17679691" y="4.53200388" z="-2.5"/>
+     <vertex x="-1.02451563" y="4.59180546" z="-2.5"/>
+     <vertex x="-0.872911453" y="4.64726067" z="-2.5"/>
+     <vertex x="-0.72149086" y="4.69870567" z="-2.5"/>
+     <vertex x="-0.565872669" y="4.74763584" z="-2.5"/>
+     <vertex x="-0.404898167" y="4.79413271" z="-2.5"/>
+     <vertex x="-0.238397598" y="4.83791065" z="-2.5"/>
+     <vertex x="-0.0662007332" y="4.878685" z="-2.5"/>
+     <vertex x="0.0220866203" y="4.89785671" z="-2.5"/>
+     <vertex x="0.111861706" y="4.91617012" z="-2.5"/>
+     <vertex x="0.203145504" y="4.93358946" z="-2.5"/>
+     <vertex x="0.295959949" y="4.95007992" z="-2.5"/>
+     <vertex x="0.390325546" y="4.96560526" z="-2.5"/>
+     <vertex x="0.486263752" y="4.98012972" z="-2.5"/>
+     <vertex x="0.583796024" y="4.99361753" z="-2.5"/>
+     <vertex x="0.666102886" y="5.00343227" z="2.5"/>
+     <vertex x="0.682943344" y="5.0060339" z="-2.5"/>
+     <vertex x="0.76905489" y="5.01523447" z="2.5"/>
+     <vertex x="0.783727169" y="5.01734209" z="-2.5"/>
+     <vertex x="0.873378754" y="5.02581835" z="2.5"/>
+     <vertex x="0.88616848" y="5.02750683" z="-2.5"/>
+     <vertex x="0.979088783" y="5.03515673" z="2.5"/>
+     <vertex x="0.990289211" y="5.03649235" z="-2.5"/>
+     <vertex x="1.08620024" y="5.04322386" z="2.5"/>
+     <vertex x="1.09610939" y="5.04426336" z="-2.5"/>
+     <vertex x="1.19472742" y="5.04999256" z="2.5"/>
+     <vertex x="1.20365143" y="5.05078363" z="-2.5"/>
+     <vertex x="1.30468512" y="5.05543613" z="2.5"/>
+     <vertex x="1.31293583" y="5.05601788" z="-2.5"/>
+     <vertex x="1.41608715" y="5.05952835" z="2.5"/>
+     <vertex x="1.42398405" y="5.05993032" z="-2.5"/>
+     <vertex x="1.52894926" y="5.06224203" z="2.5"/>
+     <vertex x="1.53681755" y="5.06248522" z="-2.5"/>
+     <vertex x="1.6432848" y="5.06355047" z="2.5"/>
+     <vertex x="1.65145731" y="5.06364679" z="-2.5"/>
+     <vertex x="1.75814533" y="5.06349564" z="2.5"/>
+     <vertex x="1.76792431" y="5.06337976" z="-2.5"/>
+     <vertex x="1.87146091" y="5.06222677" z="2.5"/>
+     <vertex x="1.88624096" y="5.06164789" z="-2.5"/>
+     <vertex x="1.98324966" y="5.05977345" z="2.5"/>
+     <vertex x="2.00564957" y="5.0584774" z="-2.5"/>
+     <vertex x="2.09360981" y="5.05615854" z="2.5"/>
+     <vertex x="2.12329769" y="5.05408955" z="-2.5"/>
+     <vertex x="2.23904228" y="5.04852867" z="-2.5"/>
+     <vertex x="2.31043339" y="5.04553938" z="2.5"/>
+     <vertex x="2.35302353" y="5.0418191" z="-2.5"/>
+     <vertex x="2.46538162" y="5.03398418" z="-2.5"/>
+     <vertex x="2.52270985" y="5.03055859" z="2.5"/>
+     <vertex x="2.57625771" y="5.02504778" z="-2.5"/>
+     <vertex x="2.73121738" y="5.01140594" z="2.5"/>
+     <vertex x="2.68579292" y="5.0150342" z="-2.5"/>
+     <vertex x="2.90139866" y="4.9918685" z="-2.5"/>
+     <vertex x="2.9367342" y="4.98827076" z="2.5"/>
+     <vertex x="3.11332512" y="4.96467781" z="-2.5"/>
+     <vertex x="3.14003944" y="4.96134138" z="2.5"/>
+     <vertex x="3.32269478" y="4.93365288" z="-2.5"/>
+     <vertex x="3.34191132" y="4.93080759" z="2.5"/>
+     <vertex x="3.53063297" y="4.898983" z="-2.5"/>
+     <vertex x="3.54312897" y="4.89685822" z="2.5"/>
+     <vertex x="3.73826504" y="4.86085892" z="-2.5"/>
+     <vertex x="3.74446964" y="4.85968304" z="2.5"/>
+     <vertex x="3.94671345" y="4.81947136" z="-2.5"/>
+     <vertex x="3.94671345" y="4.81947136" z="2.5"/>
+     <vertex x="4.10513496" y="4.78597593" z="2.37456131"/>
+     <vertex x="4.10513496" y="4.78597593" z="-2.37456155"/>
+     <vertex x="4.2633791" y="4.75060272" z="2.24922514"/>
+     <vertex x="4.2633791" y="4.75060272" z="-2.24922514"/>
+     <vertex x="4.42139816" y="4.71340227" z="2.12400293"/>
+     <vertex x="4.42139816" y="4.71340227" z="-2.1240027"/>
+     <vertex x="4.57914639" y="4.67442465" z="1.99890566"/>
+     <vertex x="4.57914639" y="4.67442465" z="-1.99890554"/>
+     <vertex x="4.73657703" y="4.6337204" z="1.87394524"/>
+     <vertex x="4.73657703" y="4.6337204" z="-1.87394524"/>
+     <vertex x="4.89364338" y="4.59133863" z="1.74913311"/>
+     <vertex x="4.89364338" y="4.59133863" z="-1.74913311"/>
+     <vertex x="5.20649624" y="4.50174522" z="1.5"/>
+     <vertex x="5.20649624" y="4.50174522" z="-1.5"/>
+     <vertex x="4.07037449" y="4.57530832" z="-2.5"/>
+     <vertex x="4.18819141" y="4.32827139" z="-2.5"/>
+     <vertex x="4.30009556" y="4.07850122" z="-2.5"/>
+     <vertex x="5.31892967" y="4.23579168" z="-1.5"/>
+     <vertex x="4.40602398" y="3.8261385" z="-2.5"/>
+     <vertex x="5.42518902" y="3.96731234" z="-1.5"/>
+     <vertex x="4.5059166" y="3.57132626" z="-2.5"/>
+     <vertex x="5.52521992" y="3.69644976" z="-1.5"/>
+     <vertex x="4.59971714" y="3.31420898" z="-2.5"/>
+     <vertex x="5.61896706" y="3.42334938" z="-1.5"/>
+     <vertex x="4.68737221" y="3.05493236" z="-2.5"/>
+     <vertex x="5.7063818" y="3.14815617" z="-1.5"/>
+     <vertex x="4.76883221" y="2.79364324" z="-2.5"/>
+     <vertex x="5.7874155" y="2.87101746" z="-1.5"/>
+     <vertex x="4.84405136" y="2.53048944" z="-2.5"/>
+     <vertex x="5.86202717" y="2.59208107" z="-1.5"/>
+     <vertex x="4.91298676" y="2.26562023" z="-2.5"/>
+     <vertex x="5.93017673" y="2.31149554" z="-1.5"/>
+     <vertex x="4.97559929" y="1.99918532" z="-2.5"/>
+     <vertex x="5.99182606" y="2.02941084" z="-1.5"/>
+     <vertex x="5.03185368" y="1.73133612" z="-2.5"/>
+     <vertex x="6.04694366" y="1.7459774" z="-1.5"/>
+     <vertex x="5.08171749" y="1.46222377" z="-2.5"/>
+     <vertex x="6.09549999" y="1.46134663" z="-1.5"/>
+     <vertex x="5.12516308" y="1.19200122" z="-2.5"/>
+     <vertex x="6.13746929" y="1.17567015" z="-1.5"/>
+     <vertex x="5.16216564" y="0.92082119" z="-2.5"/>
+     <vertex x="6.17282867" y="0.889100432" z="-1.5"/>
+     <vertex x="5.1927042" y="0.648837328" z="-2.5"/>
+     <vertex x="6.20155907" y="0.601790428" z="-1.5"/>
+     <vertex x="5.21676254" y="0.376203835" z="-2.5"/>
+     <vertex x="6.22364616" y="0.313893557" z="-1.5"/>
+     <vertex x="5.23432446" y="0.103075027" z="-2.5"/>
+     <vertex x="6.23907661" y="0.0255632401" z="-1.5"/>
+     <vertex x="5.24538231" y="-0.170394421" z="-2.5"/>
+     <vertex x="6.24784374" y="-0.263046503" z="-1.5"/>
+     <vertex x="5.24992943" y="-0.444049567" z="-2.5"/>
+     <vertex x="6.24994278" y="-0.551781774" z="-1.5"/>
+     <vertex x="5.24796295" y="-0.71773541" z="-2.5"/>
+     <vertex x="6.24537182" y="-0.840488553" z="-1.5"/>
+     <vertex x="5.23948288" y="-0.991296887" z="-2.5"/>
+     <vertex x="6.23413277" y="-1.12901258" z="-1.5"/>
+     <vertex x="5.22449589" y="-1.26457918" z="-2.5"/>
+     <vertex x="6.21623325" y="-1.41720009" z="-1.5"/>
+     <vertex x="5.20300961" y="-1.53742731" z="-2.5"/>
+     <vertex x="6.19168186" y="-1.7048974" z="-1.5"/>
+     <vertex x="5.17503643" y="-1.8096869" z="-2.5"/>
+     <vertex x="6.16049099" y="-1.99195075" z="-1.5"/>
+     <vertex x="5.14059162" y="-2.0812037" z="-2.5"/>
+     <vertex x="6.12267876" y="-2.27820706" z="-1.5"/>
+     <vertex x="5.09969521" y="-2.35182381" z="-2.5"/>
+     <vertex x="6.07826519" y="-2.56351376" z="-1.5"/>
+     <vertex x="5.05237007" y="-2.62139416" z="-2.5"/>
+     <vertex x="6.02727318" y="-2.84771824" z="-1.5"/>
+     <vertex x="4.99864388" y="-2.88976192" z="-2.5"/>
+     <vertex x="5.96972942" y="-3.13066936" z="-1.5"/>
+     <vertex x="4.93854523" y="-3.15677524" z="-2.5"/>
+     <vertex x="5.90566635" y="-3.41221571" z="-1.5"/>
+     <vertex x="4.87211037" y="-3.42228246" z="-2.5"/>
+     <vertex x="5.83511734" y="-3.6922071" z="-1.5"/>
+     <vertex x="4.79937553" y="-3.68613362" z="-2.5"/>
+     <vertex x="5.75811958" y="-3.97049451" z="-1.5"/>
+     <vertex x="5.67471409" y="-4.24692917" z="-1.5"/>
+     <vertex x="5.58494663" y="-4.52136326" z="-1.5"/>
+     <vertex x="5.48886299" y="-4.7936511" z="-1.5"/>
+     <vertex x="5.48886299" y="-4.7936511" z="1.5"/>
+     <vertex x="5.58494663" y="-4.52136326" z="1.5"/>
+     <vertex x="5.67471409" y="-4.24692917" z="1.5"/>
+     <vertex x="5.75811958" y="-3.97049451" z="1.5"/>
+     <vertex x="5.83511734" y="-3.6922071" z="1.5"/>
+     <vertex x="5.90566635" y="-3.41221571" z="1.5"/>
+     <vertex x="5.96972942" y="-3.13066936" z="1.5"/>
+     <vertex x="6.02727318" y="-2.84771824" z="1.5"/>
+     <vertex x="6.07826519" y="-2.56351376" z="1.5"/>
+     <vertex x="6.12267876" y="-2.27820706" z="1.5"/>
+     <vertex x="6.16049099" y="-1.99195075" z="1.5"/>
+     <vertex x="6.19168186" y="-1.7048974" z="1.5"/>
+     <vertex x="6.21623325" y="-1.41720009" z="1.5"/>
+     <vertex x="6.23413277" y="-1.12901258" z="1.5"/>
+     <vertex x="6.24537182" y="-0.840488553" z="1.5"/>
+     <vertex x="6.24994278" y="-0.551781774" z="1.5"/>
+     <vertex x="6.24784374" y="-0.263046503" z="1.5"/>
+     <vertex x="6.23907661" y="0.0255632401" z="1.5"/>
+     <vertex x="6.22364616" y="0.313893557" z="1.5"/>
+     <vertex x="6.20155907" y="0.601790428" z="1.5"/>
+     <vertex x="6.17282867" y="0.889100432" z="1.5"/>
+     <vertex x="6.13746929" y="1.17567015" z="1.5"/>
+     <vertex x="6.09549999" y="1.46134663" z="1.5"/>
+     <vertex x="6.04694366" y="1.7459774" z="1.5"/>
+     <vertex x="5.99182606" y="2.02941084" z="1.5"/>
+     <vertex x="5.93017673" y="2.31149554" z="1.5"/>
+     <vertex x="5.86202717" y="2.59208107" z="1.5"/>
+     <vertex x="5.7874155" y="2.87101746" z="1.5"/>
+     <vertex x="5.7063818" y="3.14815617" z="1.5"/>
+     <vertex x="5.61896706" y="3.42334938" z="1.5"/>
+     <vertex x="5.52521992" y="3.69644976" z="1.5"/>
+     <vertex x="5.42518902" y="3.96731234" z="1.5"/>
+     <vertex x="5.31892967" y="4.23579168" z="1.5"/>
+     <vertex x="4.30009556" y="4.07850122" z="2.5"/>
+     <vertex x="4.18819141" y="4.32827139" z="2.5"/>
+     <vertex x="4.07037449" y="4.57530832" z="2.5"/>
+     <vertex x="4.40602398" y="3.8261385" z="2.5"/>
+     <vertex x="4.5059166" y="3.57132626" z="2.5"/>
+     <vertex x="4.59971714" y="3.31420898" z="2.5"/>
+     <vertex x="4.68737221" y="3.05493236" z="2.5"/>
+     <vertex x="4.76883221" y="2.79364324" z="2.5"/>
+     <vertex x="4.84405136" y="2.53048944" z="2.5"/>
+     <vertex x="4.91298676" y="2.26562023" z="2.5"/>
+     <vertex x="4.97559929" y="1.99918532" z="2.5"/>
+     <vertex x="5.03185368" y="1.73133612" z="2.5"/>
+     <vertex x="5.08171749" y="1.46222377" z="2.5"/>
+     <vertex x="5.12516308" y="1.19200122" z="2.5"/>
+     <vertex x="5.16216564" y="0.92082119" z="2.5"/>
+     <vertex x="5.1927042" y="0.648837328" z="2.5"/>
+     <vertex x="5.21676254" y="0.376203835" z="2.5"/>
+     <vertex x="5.23432446" y="0.103075027" z="2.5"/>
+     <vertex x="5.24538231" y="-0.170394421" z="2.5"/>
+     <vertex x="5.24992943" y="-0.444049567" z="2.5"/>
+     <vertex x="5.24796295" y="-0.71773541" z="2.5"/>
+     <vertex x="5.23948288" y="-0.991296887" z="2.5"/>
+     <vertex x="5.22449589" y="-1.26457918" z="2.5"/>
+     <vertex x="5.20300961" y="-1.53742731" z="2.5"/>
+     <vertex x="5.17503643" y="-1.8096869" z="2.5"/>
+     <vertex x="5.14059162" y="-2.0812037" z="2.5"/>
+     <vertex x="5.09969521" y="-2.35182381" z="2.5"/>
+     <vertex x="5.05237007" y="-2.62139416" z="2.5"/>
+     <vertex x="4.99864388" y="-2.88976192" z="2.5"/>
+     <vertex x="4.93854523" y="-3.15677524" z="2.5"/>
+     <vertex x="4.87211037" y="-3.42228246" z="2.5"/>
+     <vertex x="4.79937553" y="-3.68613362" z="2.5"/>
+    </vertices>
+    <triangles>
+     <triangle v1="0" v2="1" v3="2"/>
+     <triangle v1="2" v2="1" v3="3"/>
+     <triangle v1="2" v2="3" v3="4"/>
+     <triangle v1="4" v2="3" v3="5"/>
+     <triangle v1="4" v2="5" v3="6"/>
+     <triangle v1="6" v2="5" v3="7"/>
+     <triangle v1="6" v2="7" v3="8"/>
+     <triangle v1="8" v2="7" v3="9"/>
+     <triangle v1="8" v2="9" v3="10"/>
+     <triangle v1="10" v2="9" v3="11"/>
+     <triangle v1="10" v2="11" v3="12"/>
+     <triangle v1="12" v2="11" v3="13"/>
+     <triangle v1="12" v2="13" v3="14"/>
+     <triangle v1="14" v2="13" v3="15"/>
+     <triangle v1="14" v2="15" v3="16"/>
+     <triangle v1="16" v2="15" v3="17"/>
+     <triangle v1="16" v2="17" v3="18"/>
+     <triangle v1="18" v2="17" v3="19"/>
+     <triangle v1="18" v2="19" v3="20"/>
+     <triangle v1="20" v2="19" v3="21"/>
+     <triangle v1="20" v2="21" v3="22"/>
+     <triangle v1="22" v2="21" v3="23"/>
+     <triangle v1="22" v2="23" v3="24"/>
+     <triangle v1="24" v2="23" v3="25"/>
+     <triangle v1="24" v2="25" v3="26"/>
+     <triangle v1="26" v2="25" v3="27"/>
+     <triangle v1="26" v2="27" v3="28"/>
+     <triangle v1="28" v2="27" v3="29"/>
+     <triangle v1="28" v2="29" v3="30"/>
+     <triangle v1="30" v2="29" v3="31"/>
+     <triangle v1="30" v2="31" v3="32"/>
+     <triangle v1="32" v2="31" v3="33"/>
+     <triangle v1="32" v2="33" v3="34"/>
+     <triangle v1="34" v2="33" v3="35"/>
+     <triangle v1="34" v2="35" v3="36"/>
+     <triangle v1="36" v2="35" v3="37"/>
+     <triangle v1="36" v2="37" v3="38"/>
+     <triangle v1="38" v2="37" v3="39"/>
+     <triangle v1="38" v2="39" v3="40"/>
+     <triangle v1="40" v2="39" v3="41"/>
+     <triangle v1="40" v2="41" v3="42"/>
+     <triangle v1="42" v2="41" v3="43"/>
+     <triangle v1="42" v2="43" v3="44"/>
+     <triangle v1="0" v2="45" v3="1"/>
+     <triangle v1="1" v2="45" v3="46"/>
+     <triangle v1="1" v2="46" v3="47"/>
+     <triangle v1="47" v2="46" v3="48"/>
+     <triangle v1="47" v2="48" v3="49"/>
+     <triangle v1="49" v2="50" v3="47"/>
+     <triangle v1="47" v2="50" v3="51"/>
+     <triangle v1="47" v2="51" v3="52"/>
+     <triangle v1="52" v2="51" v3="53"/>
+     <triangle v1="52" v2="53" v3="54"/>
+     <triangle v1="54" v2="53" v3="55"/>
+     <triangle v1="54" v2="55" v3="56"/>
+     <triangle v1="50" v2="57" v3="51"/>
+     <triangle v1="51" v2="57" v3="58"/>
+     <triangle v1="51" v2="58" v3="59"/>
+     <triangle v1="51" v2="59" v3="53"/>
+     <triangle v1="53" v2="59" v3="60"/>
+     <triangle v1="53" v2="60" v3="61"/>
+     <triangle v1="61" v2="62" v3="53"/>
+     <triangle v1="53" v2="62" v3="55"/>
+     <triangle v1="56" v2="63" v3="54"/>
+     <triangle v1="54" v2="63" v3="64"/>
+     <triangle v1="54" v2="64" v3="65"/>
+     <triangle v1="54" v2="65" v3="66"/>
+     <triangle v1="66" v2="65" v3="67"/>
+     <triangle v1="66" v2="67" v3="68"/>
+     <triangle v1="68" v2="69" v3="66"/>
+     <triangle v1="66" v2="69" v3="70"/>
+     <triangle v1="66" v2="70" v3="71"/>
+     <triangle v1="71" v2="70" v3="72"/>
+     <triangle v1="71" v2="72" v3="73"/>
+     <triangle v1="73" v2="74" v3="71"/>
+     <triangle v1="71" v2="74" v3="75"/>
+     <triangle v1="71" v2="75" v3="76"/>
+     <triangle v1="76" v2="75" v3="77"/>
+     <triangle v1="76" v2="77" v3="78"/>
+     <triangle v1="78" v2="79" v3="76"/>
+     <triangle v1="76" v2="79" v3="80"/>
+     <triangle v1="76" v2="80" v3="81"/>
+     <triangle v1="81" v2="80" v3="82"/>
+     <triangle v1="81" v2="82" v3="83"/>
+     <triangle v1="81" v2="83" v3="84"/>
+     <triangle v1="84" v2="83" v3="85"/>
+     <triangle v1="84" v2="85" v3="86"/>
+     <triangle v1="84" v2="86" v3="81"/>
+     <triangle v1="81" v2="86" v3="87"/>
+     <triangle v1="81" v2="87" v3="88"/>
+     <triangle v1="88" v2="89" v3="81"/>
+     <triangle v1="81" v2="89" v3="90"/>
+     <triangle v1="81" v2="90" v3="91"/>
+     <triangle v1="91" v2="92" v3="81"/>
+     <triangle v1="81" v2="92" v3="93"/>
+     <triangle v1="81" v2="93" v3="94"/>
+     <triangle v1="94" v2="95" v3="81"/>
+     <triangle v1="81" v2="95" v3="96"/>
+     <triangle v1="81" v2="96" v3="97"/>
+     <triangle v1="97" v2="98" v3="81"/>
+     <triangle v1="81" v2="98" v3="99"/>
+     <triangle v1="81" v2="99" v3="100"/>
+     <triangle v1="100" v2="101" v3="81"/>
+     <triangle v1="81" v2="101" v3="102"/>
+     <triangle v1="81" v2="102" v3="103"/>
+     <triangle v1="103" v2="104" v3="81"/>
+     <triangle v1="52" v2="54" v3="81"/>
+     <triangle v1="81" v2="54" v3="66"/>
+     <triangle v1="81" v2="66" v3="71"/>
+     <triangle v1="105" v2="3" v3="52"/>
+     <triangle v1="52" v2="3" v3="1"/>
+     <triangle v1="52" v2="1" v3="47"/>
+     <triangle v1="106" v2="15" v3="105"/>
+     <triangle v1="105" v2="15" v3="13"/>
+     <triangle v1="105" v2="13" v3="11"/>
+     <triangle v1="107" v2="27" v3="106"/>
+     <triangle v1="106" v2="27" v3="25"/>
+     <triangle v1="106" v2="25" v3="23"/>
+     <triangle v1="108" v2="33" v3="107"/>
+     <triangle v1="107" v2="33" v3="31"/>
+     <triangle v1="107" v2="31" v3="29"/>
+     <triangle v1="108" v2="109" v3="33"/>
+     <triangle v1="33" v2="109" v3="110"/>
+     <triangle v1="33" v2="110" v3="35"/>
+     <triangle v1="35" v2="110" v3="111"/>
+     <triangle v1="35" v2="111" v3="112"/>
+     <triangle v1="112" v2="113" v3="35"/>
+     <triangle v1="35" v2="113" v3="37"/>
+     <triangle v1="113" v2="114" v3="37"/>
+     <triangle v1="37" v2="114" v3="115"/>
+     <triangle v1="37" v2="115" v3="116"/>
+     <triangle v1="116" v2="117" v3="37"/>
+     <triangle v1="37" v2="117" v3="39"/>
+     <triangle v1="117" v2="118" v3="39"/>
+     <triangle v1="39" v2="118" v3="119"/>
+     <triangle v1="39" v2="119" v3="41"/>
+     <triangle v1="44" v2="120" v3="42"/>
+     <triangle v1="42" v2="120" v3="121"/>
+     <triangle v1="42" v2="121" v3="122"/>
+     <triangle v1="123" v2="124" v3="122"/>
+     <triangle v1="122" v2="124" v3="125"/>
+     <triangle v1="122" v2="125" v3="42"/>
+     <triangle v1="42" v2="125" v3="40"/>
+     <triangle v1="123" v2="126" v3="124"/>
+     <triangle v1="124" v2="126" v3="127"/>
+     <triangle v1="124" v2="127" v3="128"/>
+     <triangle v1="128" v2="129" v3="124"/>
+     <triangle v1="124" v2="129" v3="130"/>
+     <triangle v1="130" v2="129" v3="131"/>
+     <triangle v1="130" v2="131" v3="132"/>
+     <triangle v1="132" v2="133" v3="130"/>
+     <triangle v1="130" v2="133" v3="134"/>
+     <triangle v1="130" v2="134" v3="135"/>
+     <triangle v1="135" v2="134" v3="136"/>
+     <triangle v1="135" v2="136" v3="137"/>
+     <triangle v1="137" v2="138" v3="135"/>
+     <triangle v1="135" v2="138" v3="139"/>
+     <triangle v1="135" v2="139" v3="140"/>
+     <triangle v1="135" v2="140" v3="141"/>
+     <triangle v1="141" v2="140" v3="142"/>
+     <triangle v1="141" v2="142" v3="143"/>
+     <triangle v1="143" v2="144" v3="141"/>
+     <triangle v1="141" v2="144" v3="145"/>
+     <triangle v1="145" v2="144" v3="146"/>
+     <triangle v1="145" v2="146" v3="147"/>
+     <triangle v1="147" v2="148" v3="145"/>
+     <triangle v1="145" v2="148" v3="149"/>
+     <triangle v1="145" v2="149" v3="150"/>
+     <triangle v1="150" v2="149" v3="151"/>
+     <triangle v1="150" v2="151" v3="152"/>
+     <triangle v1="152" v2="153" v3="150"/>
+     <triangle v1="150" v2="153" v3="154"/>
+     <triangle v1="150" v2="154" v3="155"/>
+     <triangle v1="155" v2="154" v3="156"/>
+     <triangle v1="155" v2="156" v3="157"/>
+     <triangle v1="157" v2="158" v3="155"/>
+     <triangle v1="155" v2="158" v3="159"/>
+     <triangle v1="159" v2="158" v3="160"/>
+     <triangle v1="159" v2="160" v3="161"/>
+     <triangle v1="161" v2="162" v3="159"/>
+     <triangle v1="159" v2="162" v3="163"/>
+     <triangle v1="159" v2="163" v3="164"/>
+     <triangle v1="27" v2="107" v3="29"/>
+     <triangle v1="23" v2="21" v3="106"/>
+     <triangle v1="106" v2="21" v3="19"/>
+     <triangle v1="106" v2="19" v3="17"/>
+     <triangle v1="11" v2="9" v3="105"/>
+     <triangle v1="105" v2="9" v3="7"/>
+     <triangle v1="105" v2="7" v3="5"/>
+     <triangle v1="76" v2="81" v3="71"/>
+     <triangle v1="3" v2="105" v3="5"/>
+     <triangle v1="15" v2="106" v3="17"/>
+     <triangle v1="107" v2="106" v3="165"/>
+     <triangle v1="165" v2="106" v3="105"/>
+     <triangle v1="165" v2="105" v3="52"/>
+     <triangle v1="52" v2="81" v3="165"/>
+     <triangle v1="165" v2="81" v3="104"/>
+     <triangle v1="165" v2="104" v3="166"/>
+     <triangle v1="163" v2="167" v3="164"/>
+     <triangle v1="164" v2="167" v3="168"/>
+     <triangle v1="164" v2="168" v3="169"/>
+     <triangle v1="169" v2="168" v3="170"/>
+     <triangle v1="169" v2="170" v3="171"/>
+     <triangle v1="171" v2="170" v3="172"/>
+     <triangle v1="171" v2="172" v3="173"/>
+     <triangle v1="173" v2="172" v3="174"/>
+     <triangle v1="173" v2="174" v3="175"/>
+     <triangle v1="175" v2="174" v3="176"/>
+     <triangle v1="175" v2="176" v3="177"/>
+     <triangle v1="177" v2="176" v3="178"/>
+     <triangle v1="177" v2="178" v3="179"/>
+     <triangle v1="179" v2="178" v3="180"/>
+     <triangle v1="179" v2="180" v3="181"/>
+     <triangle v1="181" v2="180" v3="182"/>
+     <triangle v1="181" v2="182" v3="183"/>
+     <triangle v1="183" v2="182" v3="184"/>
+     <triangle v1="183" v2="184" v3="185"/>
+     <triangle v1="185" v2="184" v3="186"/>
+     <triangle v1="185" v2="186" v3="187"/>
+     <triangle v1="187" v2="186" v3="188"/>
+     <triangle v1="187" v2="188" v3="189"/>
+     <triangle v1="189" v2="188" v3="190"/>
+     <triangle v1="189" v2="190" v3="191"/>
+     <triangle v1="191" v2="190" v3="192"/>
+     <triangle v1="192" v2="190" v3="193"/>
+     <triangle v1="192" v2="193" v3="194"/>
+     <triangle v1="194" v2="193" v3="195"/>
+     <triangle v1="195" v2="193" v3="196"/>
+     <triangle v1="195" v2="196" v3="197"/>
+     <triangle v1="197" v2="196" v3="198"/>
+     <triangle v1="197" v2="198" v3="199"/>
+     <triangle v1="199" v2="198" v3="200"/>
+     <triangle v1="199" v2="200" v3="201"/>
+     <triangle v1="201" v2="200" v3="202"/>
+     <triangle v1="201" v2="202" v3="203"/>
+     <triangle v1="203" v2="202" v3="204"/>
+     <triangle v1="203" v2="204" v3="205"/>
+     <triangle v1="205" v2="204" v3="206"/>
+     <triangle v1="205" v2="206" v3="207"/>
+     <triangle v1="207" v2="206" v3="208"/>
+     <triangle v1="207" v2="208" v3="209"/>
+     <triangle v1="209" v2="208" v3="210"/>
+     <triangle v1="209" v2="210" v3="211"/>
+     <triangle v1="211" v2="210" v3="212"/>
+     <triangle v1="211" v2="212" v3="213"/>
+     <triangle v1="213" v2="212" v3="214"/>
+     <triangle v1="213" v2="214" v3="215"/>
+     <triangle v1="215" v2="214" v3="216"/>
+     <triangle v1="215" v2="216" v3="217"/>
+     <triangle v1="217" v2="216" v3="218"/>
+     <triangle v1="217" v2="218" v3="219"/>
+     <triangle v1="219" v2="218" v3="220"/>
+     <triangle v1="219" v2="220" v3="221"/>
+     <triangle v1="221" v2="220" v3="222"/>
+     <triangle v1="221" v2="222" v3="223"/>
+     <triangle v1="223" v2="222" v3="224"/>
+     <triangle v1="224" v2="222" v3="225"/>
+     <triangle v1="224" v2="225" v3="226"/>
+     <triangle v1="167" v2="163" v3="227"/>
+     <triangle v1="227" v2="163" v3="162"/>
+     <triangle v1="227" v2="162" v3="228"/>
+     <triangle v1="228" v2="162" v3="229"/>
+     <triangle v1="229" v2="162" v3="161"/>
+     <triangle v1="229" v2="161" v3="230"/>
+     <triangle v1="230" v2="161" v3="160"/>
+     <triangle v1="230" v2="160" v3="231"/>
+     <triangle v1="231" v2="160" v3="232"/>
+     <triangle v1="232" v2="160" v3="158"/>
+     <triangle v1="232" v2="158" v3="233"/>
+     <triangle v1="233" v2="158" v3="157"/>
+     <triangle v1="233" v2="157" v3="156"/>
+     <triangle v1="233" v2="156" v3="234"/>
+     <triangle v1="234" v2="156" v3="154"/>
+     <triangle v1="234" v2="154" v3="235"/>
+     <triangle v1="235" v2="154" v3="153"/>
+     <triangle v1="235" v2="153" v3="236"/>
+     <triangle v1="236" v2="153" v3="152"/>
+     <triangle v1="236" v2="152" v3="237"/>
+     <triangle v1="237" v2="152" v3="151"/>
+     <triangle v1="237" v2="151" v3="238"/>
+     <triangle v1="238" v2="151" v3="149"/>
+     <triangle v1="238" v2="149" v3="148"/>
+     <triangle v1="238" v2="148" v3="239"/>
+     <triangle v1="239" v2="148" v3="147"/>
+     <triangle v1="239" v2="147" v3="240"/>
+     <triangle v1="240" v2="147" v3="146"/>
+     <triangle v1="240" v2="146" v3="241"/>
+     <triangle v1="241" v2="146" v3="144"/>
+     <triangle v1="241" v2="144" v3="242"/>
+     <triangle v1="242" v2="144" v3="143"/>
+     <triangle v1="242" v2="143" v3="142"/>
+     <triangle v1="242" v2="142" v3="243"/>
+     <triangle v1="243" v2="142" v3="140"/>
+     <triangle v1="243" v2="140" v3="244"/>
+     <triangle v1="244" v2="140" v3="139"/>
+     <triangle v1="244" v2="139" v3="245"/>
+     <triangle v1="245" v2="139" v3="138"/>
+     <triangle v1="245" v2="138" v3="246"/>
+     <triangle v1="246" v2="138" v3="137"/>
+     <triangle v1="246" v2="137" v3="136"/>
+     <triangle v1="246" v2="136" v3="247"/>
+     <triangle v1="247" v2="136" v3="134"/>
+     <triangle v1="247" v2="134" v3="248"/>
+     <triangle v1="248" v2="134" v3="133"/>
+     <triangle v1="248" v2="133" v3="132"/>
+     <triangle v1="248" v2="132" v3="249"/>
+     <triangle v1="249" v2="132" v3="131"/>
+     <triangle v1="249" v2="131" v3="250"/>
+     <triangle v1="250" v2="131" v3="129"/>
+     <triangle v1="250" v2="129" v3="251"/>
+     <triangle v1="251" v2="129" v3="128"/>
+     <triangle v1="251" v2="128" v3="127"/>
+     <triangle v1="251" v2="127" v3="252"/>
+     <triangle v1="252" v2="127" v3="126"/>
+     <triangle v1="252" v2="126" v3="253"/>
+     <triangle v1="253" v2="126" v3="123"/>
+     <triangle v1="253" v2="123" v3="122"/>
+     <triangle v1="253" v2="122" v3="254"/>
+     <triangle v1="254" v2="122" v3="121"/>
+     <triangle v1="254" v2="121" v3="255"/>
+     <triangle v1="255" v2="121" v3="120"/>
+     <triangle v1="255" v2="120" v3="44"/>
+     <triangle v1="255" v2="44" v3="256"/>
+     <triangle v1="256" v2="44" v3="43"/>
+     <triangle v1="256" v2="43" v3="41"/>
+     <triangle v1="256" v2="41" v3="257"/>
+     <triangle v1="257" v2="41" v3="119"/>
+     <triangle v1="257" v2="119" v3="258"/>
+     <triangle v1="258" v2="119" v3="259"/>
+     <triangle v1="259" v2="119" v3="118"/>
+     <triangle v1="259" v2="118" v3="260"/>
+     <triangle v1="260" v2="118" v3="117"/>
+     <triangle v1="260" v2="117" v3="261"/>
+     <triangle v1="261" v2="117" v3="116"/>
+     <triangle v1="261" v2="116" v3="262"/>
+     <triangle v1="262" v2="116" v3="263"/>
+     <triangle v1="263" v2="116" v3="115"/>
+     <triangle v1="263" v2="115" v3="264"/>
+     <triangle v1="264" v2="115" v3="114"/>
+     <triangle v1="264" v2="114" v3="265"/>
+     <triangle v1="265" v2="114" v3="266"/>
+     <triangle v1="266" v2="114" v3="113"/>
+     <triangle v1="266" v2="113" v3="267"/>
+     <triangle v1="267" v2="113" v3="112"/>
+     <triangle v1="267" v2="112" v3="268"/>
+     <triangle v1="268" v2="112" v3="111"/>
+     <triangle v1="268" v2="111" v3="269"/>
+     <triangle v1="269" v2="111" v3="270"/>
+     <triangle v1="270" v2="111" v3="110"/>
+     <triangle v1="270" v2="110" v3="271"/>
+     <triangle v1="271" v2="110" v3="109"/>
+     <triangle v1="271" v2="109" v3="272"/>
+     <triangle v1="272" v2="109" v3="273"/>
+     <triangle v1="273" v2="109" v3="108"/>
+     <triangle v1="273" v2="108" v3="274"/>
+     <triangle v1="274" v2="108" v3="275"/>
+     <triangle v1="275" v2="108" v3="107"/>
+     <triangle v1="275" v2="107" v3="276"/>
+     <triangle v1="276" v2="107" v3="165"/>
+     <triangle v1="276" v2="165" v3="277"/>
+     <triangle v1="277" v2="165" v3="166"/>
+     <triangle v1="224" v2="226" v3="278"/>
+     <triangle v1="278" v2="226" v3="279"/>
+     <triangle v1="278" v2="279" v3="280"/>
+     <triangle v1="280" v2="279" v3="281"/>
+     <triangle v1="281" v2="279" v3="282"/>
+     <triangle v1="281" v2="282" v3="283"/>
+     <triangle v1="281" v2="283" v3="284"/>
+     <triangle v1="284" v2="283" v3="285"/>
+     <triangle v1="284" v2="285" v3="286"/>
+     <triangle v1="277" v2="166" v3="287"/>
+     <triangle v1="287" v2="166" v3="104"/>
+     <triangle v1="287" v2="104" v3="288"/>
+     <triangle v1="288" v2="104" v3="103"/>
+     <triangle v1="288" v2="103" v3="289"/>
+     <triangle v1="289" v2="103" v3="290"/>
+     <triangle v1="290" v2="103" v3="102"/>
+     <triangle v1="290" v2="102" v3="291"/>
+     <triangle v1="291" v2="102" v3="292"/>
+     <triangle v1="292" v2="102" v3="101"/>
+     <triangle v1="292" v2="101" v3="293"/>
+     <triangle v1="293" v2="101" v3="100"/>
+     <triangle v1="293" v2="100" v3="294"/>
+     <triangle v1="294" v2="100" v3="295"/>
+     <triangle v1="295" v2="100" v3="99"/>
+     <triangle v1="295" v2="99" v3="296"/>
+     <triangle v1="296" v2="99" v3="98"/>
+     <triangle v1="296" v2="98" v3="297"/>
+     <triangle v1="297" v2="98" v3="97"/>
+     <triangle v1="297" v2="97" v3="298"/>
+     <triangle v1="298" v2="97" v3="299"/>
+     <triangle v1="299" v2="97" v3="96"/>
+     <triangle v1="299" v2="96" v3="300"/>
+     <triangle v1="300" v2="96" v3="95"/>
+     <triangle v1="300" v2="95" v3="301"/>
+     <triangle v1="301" v2="95" v3="302"/>
+     <triangle v1="302" v2="95" v3="94"/>
+     <triangle v1="302" v2="94" v3="303"/>
+     <triangle v1="303" v2="94" v3="93"/>
+     <triangle v1="303" v2="93" v3="304"/>
+     <triangle v1="304" v2="93" v3="92"/>
+     <triangle v1="304" v2="92" v3="305"/>
+     <triangle v1="305" v2="92" v3="306"/>
+     <triangle v1="306" v2="92" v3="91"/>
+     <triangle v1="306" v2="91" v3="307"/>
+     <triangle v1="307" v2="91" v3="90"/>
+     <triangle v1="307" v2="90" v3="89"/>
+     <triangle v1="307" v2="89" v3="308"/>
+     <triangle v1="308" v2="89" v3="88"/>
+     <triangle v1="308" v2="88" v3="309"/>
+     <triangle v1="309" v2="88" v3="87"/>
+     <triangle v1="309" v2="87" v3="86"/>
+     <triangle v1="309" v2="86" v3="310"/>
+     <triangle v1="310" v2="86" v3="85"/>
+     <triangle v1="310" v2="85" v3="83"/>
+     <triangle v1="310" v2="83" v3="311"/>
+     <triangle v1="311" v2="83" v3="82"/>
+     <triangle v1="311" v2="82" v3="312"/>
+     <triangle v1="312" v2="82" v3="80"/>
+     <triangle v1="312" v2="80" v3="79"/>
+     <triangle v1="312" v2="79" v3="313"/>
+     <triangle v1="313" v2="79" v3="78"/>
+     <triangle v1="313" v2="78" v3="314"/>
+     <triangle v1="314" v2="78" v3="77"/>
+     <triangle v1="314" v2="77" v3="315"/>
+     <triangle v1="315" v2="77" v3="75"/>
+     <triangle v1="315" v2="75" v3="74"/>
+     <triangle v1="315" v2="74" v3="316"/>
+     <triangle v1="316" v2="74" v3="73"/>
+     <triangle v1="316" v2="73" v3="317"/>
+     <triangle v1="317" v2="73" v3="72"/>
+     <triangle v1="317" v2="72" v3="318"/>
+     <triangle v1="318" v2="72" v3="70"/>
+     <triangle v1="318" v2="70" v3="69"/>
+     <triangle v1="318" v2="69" v3="319"/>
+     <triangle v1="319" v2="69" v3="68"/>
+     <triangle v1="319" v2="68" v3="320"/>
+     <triangle v1="320" v2="68" v3="67"/>
+     <triangle v1="320" v2="67" v3="321"/>
+     <triangle v1="321" v2="67" v3="65"/>
+     <triangle v1="321" v2="65" v3="64"/>
+     <triangle v1="321" v2="64" v3="322"/>
+     <triangle v1="322" v2="64" v3="63"/>
+     <triangle v1="322" v2="63" v3="323"/>
+     <triangle v1="323" v2="63" v3="56"/>
+     <triangle v1="323" v2="56" v3="324"/>
+     <triangle v1="324" v2="56" v3="55"/>
+     <triangle v1="324" v2="55" v3="325"/>
+     <triangle v1="325" v2="55" v3="62"/>
+     <triangle v1="325" v2="62" v3="61"/>
+     <triangle v1="325" v2="61" v3="326"/>
+     <triangle v1="326" v2="61" v3="60"/>
+     <triangle v1="326" v2="60" v3="327"/>
+     <triangle v1="327" v2="60" v3="59"/>
+     <triangle v1="327" v2="59" v3="328"/>
+     <triangle v1="328" v2="59" v3="58"/>
+     <triangle v1="328" v2="58" v3="329"/>
+     <triangle v1="329" v2="58" v3="57"/>
+     <triangle v1="329" v2="57" v3="330"/>
+     <triangle v1="330" v2="57" v3="50"/>
+     <triangle v1="330" v2="50" v3="49"/>
+     <triangle v1="330" v2="49" v3="331"/>
+     <triangle v1="331" v2="49" v3="48"/>
+     <triangle v1="331" v2="48" v3="332"/>
+     <triangle v1="332" v2="48" v3="333"/>
+     <triangle v1="333" v2="48" v3="46"/>
+     <triangle v1="333" v2="46" v3="334"/>
+     <triangle v1="334" v2="46" v3="45"/>
+     <triangle v1="334" v2="45" v3="335"/>
+     <triangle v1="335" v2="45" v3="336"/>
+     <triangle v1="336" v2="45" v3="0"/>
+     <triangle v1="336" v2="0" v3="337"/>
+     <triangle v1="337" v2="0" v3="2"/>
+     <triangle v1="337" v2="2" v3="338"/>
+     <triangle v1="338" v2="2" v3="339"/>
+     <triangle v1="338" v2="339" v3="340"/>
+     <triangle v1="340" v2="339" v3="341"/>
+     <triangle v1="340" v2="341" v3="342"/>
+     <triangle v1="342" v2="341" v3="343"/>
+     <triangle v1="342" v2="343" v3="344"/>
+     <triangle v1="344" v2="343" v3="345"/>
+     <triangle v1="344" v2="345" v3="346"/>
+     <triangle v1="346" v2="345" v3="347"/>
+     <triangle v1="346" v2="347" v3="348"/>
+     <triangle v1="348" v2="347" v3="349"/>
+     <triangle v1="348" v2="349" v3="350"/>
+     <triangle v1="350" v2="349" v3="351"/>
+     <triangle v1="350" v2="351" v3="352"/>
+     <triangle v1="352" v2="351" v3="353"/>
+     <triangle v1="352" v2="353" v3="354"/>
+     <triangle v1="354" v2="353" v3="355"/>
+     <triangle v1="354" v2="355" v3="356"/>
+     <triangle v1="356" v2="355" v3="357"/>
+     <triangle v1="356" v2="357" v3="358"/>
+     <triangle v1="358" v2="357" v3="359"/>
+     <triangle v1="358" v2="359" v3="360"/>
+     <triangle v1="360" v2="359" v3="361"/>
+     <triangle v1="360" v2="361" v3="362"/>
+     <triangle v1="362" v2="361" v3="363"/>
+     <triangle v1="362" v2="363" v3="364"/>
+     <triangle v1="364" v2="363" v3="365"/>
+     <triangle v1="364" v2="365" v3="366"/>
+     <triangle v1="366" v2="365" v3="367"/>
+     <triangle v1="367" v2="365" v3="368"/>
+     <triangle v1="367" v2="368" v3="369"/>
+     <triangle v1="369" v2="368" v3="370"/>
+     <triangle v1="370" v2="368" v3="371"/>
+     <triangle v1="370" v2="371" v3="372"/>
+     <triangle v1="372" v2="371" v3="373"/>
+     <triangle v1="372" v2="373" v3="374"/>
+     <triangle v1="374" v2="373" v3="375"/>
+     <triangle v1="375" v2="373" v3="376"/>
+     <triangle v1="375" v2="376" v3="377"/>
+     <triangle v1="377" v2="376" v3="378"/>
+     <triangle v1="377" v2="378" v3="379"/>
+     <triangle v1="379" v2="378" v3="380"/>
+     <triangle v1="379" v2="380" v3="381"/>
+     <triangle v1="381" v2="380" v3="382"/>
+     <triangle v1="381" v2="382" v3="383"/>
+     <triangle v1="383" v2="382" v3="384"/>
+     <triangle v1="383" v2="384" v3="385"/>
+     <triangle v1="385" v2="384" v3="386"/>
+     <triangle v1="385" v2="386" v3="387"/>
+     <triangle v1="385" v2="387" v3="388"/>
+     <triangle v1="388" v2="387" v3="389"/>
+     <triangle v1="388" v2="389" v3="390"/>
+     <triangle v1="390" v2="389" v3="391"/>
+     <triangle v1="390" v2="391" v3="392"/>
+     <triangle v1="392" v2="391" v3="393"/>
+     <triangle v1="392" v2="393" v3="394"/>
+     <triangle v1="394" v2="393" v3="395"/>
+     <triangle v1="394" v2="395" v3="396"/>
+     <triangle v1="396" v2="395" v3="397"/>
+     <triangle v1="396" v2="397" v3="398"/>
+     <triangle v1="398" v2="397" v3="399"/>
+     <triangle v1="398" v2="399" v3="400"/>
+     <triangle v1="385" v2="388" v3="401"/>
+     <triangle v1="401" v2="388" v3="390"/>
+     <triangle v1="401" v2="390" v3="392"/>
+     <triangle v1="392" v2="394" v3="401"/>
+     <triangle v1="401" v2="394" v3="402"/>
+     <triangle v1="402" v2="394" v3="396"/>
+     <triangle v1="402" v2="396" v3="398"/>
+     <triangle v1="402" v2="398" v3="403"/>
+     <triangle v1="403" v2="398" v3="400"/>
+     <triangle v1="403" v2="400" v3="404"/>
+     <triangle v1="403" v2="404" v3="405"/>
+     <triangle v1="405" v2="404" v3="406"/>
+     <triangle v1="405" v2="406" v3="407"/>
+     <triangle v1="407" v2="406" v3="408"/>
+     <triangle v1="407" v2="408" v3="409"/>
+     <triangle v1="409" v2="408" v3="410"/>
+     <triangle v1="409" v2="410" v3="411"/>
+     <triangle v1="411" v2="410" v3="412"/>
+     <triangle v1="411" v2="412" v3="413"/>
+     <triangle v1="413" v2="412" v3="414"/>
+     <triangle v1="413" v2="414" v3="415"/>
+     <triangle v1="415" v2="414" v3="416"/>
+     <triangle v1="415" v2="416" v3="417"/>
+     <triangle v1="417" v2="416" v3="418"/>
+     <triangle v1="417" v2="418" v3="419"/>
+     <triangle v1="419" v2="418" v3="420"/>
+     <triangle v1="419" v2="420" v3="421"/>
+     <triangle v1="421" v2="420" v3="422"/>
+     <triangle v1="421" v2="422" v3="423"/>
+     <triangle v1="423" v2="422" v3="424"/>
+     <triangle v1="423" v2="424" v3="425"/>
+     <triangle v1="425" v2="424" v3="426"/>
+     <triangle v1="425" v2="426" v3="427"/>
+     <triangle v1="427" v2="426" v3="428"/>
+     <triangle v1="427" v2="428" v3="429"/>
+     <triangle v1="429" v2="428" v3="430"/>
+     <triangle v1="429" v2="430" v3="431"/>
+     <triangle v1="431" v2="430" v3="432"/>
+     <triangle v1="431" v2="432" v3="433"/>
+     <triangle v1="433" v2="432" v3="434"/>
+     <triangle v1="433" v2="434" v3="435"/>
+     <triangle v1="435" v2="434" v3="436"/>
+     <triangle v1="435" v2="436" v3="437"/>
+     <triangle v1="437" v2="436" v3="438"/>
+     <triangle v1="437" v2="438" v3="439"/>
+     <triangle v1="439" v2="438" v3="440"/>
+     <triangle v1="439" v2="440" v3="441"/>
+     <triangle v1="441" v2="440" v3="442"/>
+     <triangle v1="441" v2="442" v3="443"/>
+     <triangle v1="443" v2="442" v3="444"/>
+     <triangle v1="443" v2="444" v3="445"/>
+     <triangle v1="445" v2="444" v3="446"/>
+     <triangle v1="445" v2="446" v3="447"/>
+     <triangle v1="447" v2="446" v3="448"/>
+     <triangle v1="447" v2="448" v3="449"/>
+     <triangle v1="449" v2="448" v3="450"/>
+     <triangle v1="449" v2="450" v3="451"/>
+     <triangle v1="451" v2="450" v3="452"/>
+     <triangle v1="451" v2="452" v3="453"/>
+     <triangle v1="453" v2="452" v3="454"/>
+     <triangle v1="453" v2="454" v3="455"/>
+     <triangle v1="455" v2="454" v3="456"/>
+     <triangle v1="455" v2="456" v3="457"/>
+     <triangle v1="457" v2="456" v3="458"/>
+     <triangle v1="457" v2="458" v3="459"/>
+     <triangle v1="459" v2="458" v3="460"/>
+     <triangle v1="459" v2="460" v3="461"/>
+     <triangle v1="461" v2="460" v3="462"/>
+     <triangle v1="461" v2="462" v3="220"/>
+     <triangle v1="220" v2="462" v3="463"/>
+     <triangle v1="220" v2="463" v3="222"/>
+     <triangle v1="222" v2="463" v3="464"/>
+     <triangle v1="222" v2="464" v3="225"/>
+     <triangle v1="225" v2="464" v3="226"/>
+     <triangle v1="226" v2="464" v3="279"/>
+     <triangle v1="279" v2="464" v3="465"/>
+     <triangle v1="279" v2="465" v3="282"/>
+     <triangle v1="282" v2="465" v3="283"/>
+     <triangle v1="283" v2="465" v3="285"/>
+     <triangle v1="286" v2="285" v3="466"/>
+     <triangle v1="466" v2="285" v3="465"/>
+     <triangle v1="466" v2="465" v3="467"/>
+     <triangle v1="467" v2="465" v3="464"/>
+     <triangle v1="467" v2="464" v3="468"/>
+     <triangle v1="468" v2="464" v3="463"/>
+     <triangle v1="468" v2="463" v3="469"/>
+     <triangle v1="469" v2="463" v3="462"/>
+     <triangle v1="469" v2="462" v3="470"/>
+     <triangle v1="470" v2="462" v3="460"/>
+     <triangle v1="470" v2="460" v3="471"/>
+     <triangle v1="471" v2="460" v3="458"/>
+     <triangle v1="471" v2="458" v3="472"/>
+     <triangle v1="472" v2="458" v3="456"/>
+     <triangle v1="472" v2="456" v3="473"/>
+     <triangle v1="473" v2="456" v3="454"/>
+     <triangle v1="473" v2="454" v3="474"/>
+     <triangle v1="474" v2="454" v3="452"/>
+     <triangle v1="474" v2="452" v3="475"/>
+     <triangle v1="475" v2="452" v3="450"/>
+     <triangle v1="475" v2="450" v3="476"/>
+     <triangle v1="476" v2="450" v3="448"/>
+     <triangle v1="476" v2="448" v3="477"/>
+     <triangle v1="477" v2="448" v3="446"/>
+     <triangle v1="477" v2="446" v3="478"/>
+     <triangle v1="478" v2="446" v3="444"/>
+     <triangle v1="478" v2="444" v3="479"/>
+     <triangle v1="479" v2="444" v3="442"/>
+     <triangle v1="479" v2="442" v3="480"/>
+     <triangle v1="480" v2="442" v3="440"/>
+     <triangle v1="480" v2="440" v3="481"/>
+     <triangle v1="481" v2="440" v3="438"/>
+     <triangle v1="481" v2="438" v3="482"/>
+     <triangle v1="482" v2="438" v3="436"/>
+     <triangle v1="482" v2="436" v3="483"/>
+     <triangle v1="483" v2="436" v3="434"/>
+     <triangle v1="483" v2="434" v3="484"/>
+     <triangle v1="484" v2="434" v3="432"/>
+     <triangle v1="484" v2="432" v3="485"/>
+     <triangle v1="485" v2="432" v3="430"/>
+     <triangle v1="485" v2="430" v3="486"/>
+     <triangle v1="486" v2="430" v3="428"/>
+     <triangle v1="486" v2="428" v3="487"/>
+     <triangle v1="487" v2="428" v3="426"/>
+     <triangle v1="487" v2="426" v3="488"/>
+     <triangle v1="488" v2="426" v3="424"/>
+     <triangle v1="488" v2="424" v3="489"/>
+     <triangle v1="489" v2="424" v3="422"/>
+     <triangle v1="489" v2="422" v3="490"/>
+     <triangle v1="490" v2="422" v3="420"/>
+     <triangle v1="490" v2="420" v3="491"/>
+     <triangle v1="491" v2="420" v3="418"/>
+     <triangle v1="491" v2="418" v3="492"/>
+     <triangle v1="492" v2="418" v3="416"/>
+     <triangle v1="492" v2="416" v3="493"/>
+     <triangle v1="493" v2="416" v3="414"/>
+     <triangle v1="493" v2="414" v3="494"/>
+     <triangle v1="494" v2="414" v3="412"/>
+     <triangle v1="494" v2="412" v3="495"/>
+     <triangle v1="495" v2="412" v3="410"/>
+     <triangle v1="495" v2="410" v3="496"/>
+     <triangle v1="496" v2="410" v3="408"/>
+     <triangle v1="496" v2="408" v3="497"/>
+     <triangle v1="497" v2="408" v3="406"/>
+     <triangle v1="497" v2="406" v3="498"/>
+     <triangle v1="498" v2="406" v3="404"/>
+     <triangle v1="498" v2="404" v3="399"/>
+     <triangle v1="399" v2="404" v3="400"/>
+     <triangle v1="498" v2="399" v3="499"/>
+     <triangle v1="499" v2="399" v3="397"/>
+     <triangle v1="499" v2="397" v3="500"/>
+     <triangle v1="500" v2="397" v3="395"/>
+     <triangle v1="500" v2="395" v3="393"/>
+     <triangle v1="500" v2="393" v3="501"/>
+     <triangle v1="501" v2="393" v3="391"/>
+     <triangle v1="501" v2="391" v3="389"/>
+     <triangle v1="389" v2="387" v3="501"/>
+     <triangle v1="501" v2="387" v3="386"/>
+     <triangle v1="499" v2="502" v3="498"/>
+     <triangle v1="498" v2="502" v3="497"/>
+     <triangle v1="497" v2="502" v3="503"/>
+     <triangle v1="497" v2="503" v3="496"/>
+     <triangle v1="496" v2="503" v3="504"/>
+     <triangle v1="496" v2="504" v3="495"/>
+     <triangle v1="495" v2="504" v3="505"/>
+     <triangle v1="495" v2="505" v3="494"/>
+     <triangle v1="494" v2="505" v3="506"/>
+     <triangle v1="494" v2="506" v3="493"/>
+     <triangle v1="493" v2="506" v3="507"/>
+     <triangle v1="493" v2="507" v3="492"/>
+     <triangle v1="492" v2="507" v3="508"/>
+     <triangle v1="492" v2="508" v3="491"/>
+     <triangle v1="491" v2="508" v3="509"/>
+     <triangle v1="491" v2="509" v3="490"/>
+     <triangle v1="490" v2="509" v3="510"/>
+     <triangle v1="490" v2="510" v3="489"/>
+     <triangle v1="489" v2="510" v3="511"/>
+     <triangle v1="489" v2="511" v3="488"/>
+     <triangle v1="488" v2="511" v3="512"/>
+     <triangle v1="488" v2="512" v3="487"/>
+     <triangle v1="487" v2="512" v3="513"/>
+     <triangle v1="487" v2="513" v3="486"/>
+     <triangle v1="486" v2="513" v3="514"/>
+     <triangle v1="486" v2="514" v3="485"/>
+     <triangle v1="485" v2="514" v3="515"/>
+     <triangle v1="485" v2="515" v3="484"/>
+     <triangle v1="484" v2="515" v3="516"/>
+     <triangle v1="484" v2="516" v3="483"/>
+     <triangle v1="483" v2="516" v3="517"/>
+     <triangle v1="483" v2="517" v3="482"/>
+     <triangle v1="482" v2="517" v3="518"/>
+     <triangle v1="482" v2="518" v3="481"/>
+     <triangle v1="481" v2="518" v3="519"/>
+     <triangle v1="481" v2="519" v3="480"/>
+     <triangle v1="480" v2="519" v3="520"/>
+     <triangle v1="480" v2="520" v3="479"/>
+     <triangle v1="479" v2="520" v3="521"/>
+     <triangle v1="479" v2="521" v3="478"/>
+     <triangle v1="478" v2="521" v3="522"/>
+     <triangle v1="478" v2="522" v3="477"/>
+     <triangle v1="477" v2="522" v3="523"/>
+     <triangle v1="477" v2="523" v3="476"/>
+     <triangle v1="476" v2="523" v3="524"/>
+     <triangle v1="476" v2="524" v3="475"/>
+     <triangle v1="475" v2="524" v3="525"/>
+     <triangle v1="475" v2="525" v3="474"/>
+     <triangle v1="474" v2="525" v3="526"/>
+     <triangle v1="474" v2="526" v3="473"/>
+     <triangle v1="473" v2="526" v3="527"/>
+     <triangle v1="473" v2="527" v3="472"/>
+     <triangle v1="472" v2="527" v3="528"/>
+     <triangle v1="472" v2="528" v3="471"/>
+     <triangle v1="471" v2="528" v3="529"/>
+     <triangle v1="471" v2="529" v3="470"/>
+     <triangle v1="470" v2="529" v3="530"/>
+     <triangle v1="470" v2="530" v3="469"/>
+     <triangle v1="469" v2="530" v3="221"/>
+     <triangle v1="469" v2="221" v3="468"/>
+     <triangle v1="468" v2="221" v3="223"/>
+     <triangle v1="468" v2="223" v3="467"/>
+     <triangle v1="467" v2="223" v3="224"/>
+     <triangle v1="467" v2="224" v3="278"/>
+     <triangle v1="278" v2="280" v3="467"/>
+     <triangle v1="467" v2="280" v3="466"/>
+     <triangle v1="466" v2="280" v3="281"/>
+     <triangle v1="466" v2="281" v3="284"/>
+     <triangle v1="284" v2="286" v3="466"/>
+     <triangle v1="2" v2="4" v3="339"/>
+     <triangle v1="339" v2="4" v3="341"/>
+     <triangle v1="341" v2="4" v3="6"/>
+     <triangle v1="341" v2="6" v3="343"/>
+     <triangle v1="343" v2="6" v3="345"/>
+     <triangle v1="345" v2="6" v3="8"/>
+     <triangle v1="345" v2="8" v3="347"/>
+     <triangle v1="347" v2="8" v3="349"/>
+     <triangle v1="349" v2="8" v3="10"/>
+     <triangle v1="349" v2="10" v3="351"/>
+     <triangle v1="351" v2="10" v3="12"/>
+     <triangle v1="351" v2="12" v3="353"/>
+     <triangle v1="353" v2="12" v3="355"/>
+     <triangle v1="355" v2="12" v3="14"/>
+     <triangle v1="355" v2="14" v3="357"/>
+     <triangle v1="357" v2="14" v3="16"/>
+     <triangle v1="357" v2="16" v3="359"/>
+     <triangle v1="359" v2="16" v3="361"/>
+     <triangle v1="361" v2="16" v3="18"/>
+     <triangle v1="361" v2="18" v3="363"/>
+     <triangle v1="363" v2="18" v3="365"/>
+     <triangle v1="365" v2="18" v3="20"/>
+     <triangle v1="365" v2="20" v3="368"/>
+     <triangle v1="368" v2="20" v3="22"/>
+     <triangle v1="368" v2="22" v3="24"/>
+     <triangle v1="368" v2="24" v3="371"/>
+     <triangle v1="371" v2="24" v3="26"/>
+     <triangle v1="371" v2="26" v3="373"/>
+     <triangle v1="373" v2="26" v3="28"/>
+     <triangle v1="373" v2="28" v3="376"/>
+     <triangle v1="376" v2="28" v3="30"/>
+     <triangle v1="376" v2="30" v3="378"/>
+     <triangle v1="378" v2="30" v3="32"/>
+     <triangle v1="378" v2="32" v3="380"/>
+     <triangle v1="380" v2="32" v3="34"/>
+     <triangle v1="380" v2="34" v3="382"/>
+     <triangle v1="382" v2="34" v3="499"/>
+     <triangle v1="382" v2="499" v3="500"/>
+     <triangle v1="34" v2="36" v3="499"/>
+     <triangle v1="499" v2="36" v3="502"/>
+     <triangle v1="502" v2="36" v3="503"/>
+     <triangle v1="503" v2="36" v3="38"/>
+     <triangle v1="503" v2="38" v3="504"/>
+     <triangle v1="504" v2="38" v3="505"/>
+     <triangle v1="505" v2="38" v3="40"/>
+     <triangle v1="505" v2="40" v3="506"/>
+     <triangle v1="506" v2="40" v3="125"/>
+     <triangle v1="506" v2="125" v3="507"/>
+     <triangle v1="507" v2="125" v3="508"/>
+     <triangle v1="508" v2="125" v3="124"/>
+     <triangle v1="508" v2="124" v3="509"/>
+     <triangle v1="509" v2="124" v3="510"/>
+     <triangle v1="510" v2="124" v3="130"/>
+     <triangle v1="510" v2="130" v3="511"/>
+     <triangle v1="511" v2="130" v3="512"/>
+     <triangle v1="512" v2="130" v3="135"/>
+     <triangle v1="512" v2="135" v3="513"/>
+     <triangle v1="513" v2="135" v3="514"/>
+     <triangle v1="514" v2="135" v3="183"/>
+     <triangle v1="514" v2="183" v3="515"/>
+     <triangle v1="515" v2="183" v3="516"/>
+     <triangle v1="516" v2="183" v3="517"/>
+     <triangle v1="517" v2="183" v3="518"/>
+     <triangle v1="518" v2="183" v3="519"/>
+     <triangle v1="519" v2="183" v3="520"/>
+     <triangle v1="520" v2="183" v3="521"/>
+     <triangle v1="521" v2="183" v3="522"/>
+     <triangle v1="522" v2="183" v3="523"/>
+     <triangle v1="523" v2="183" v3="524"/>
+     <triangle v1="524" v2="183" v3="185"/>
+     <triangle v1="524" v2="185" v3="187"/>
+     <triangle v1="135" v2="141" v3="183"/>
+     <triangle v1="183" v2="141" v3="145"/>
+     <triangle v1="183" v2="145" v3="181"/>
+     <triangle v1="181" v2="145" v3="179"/>
+     <triangle v1="179" v2="145" v3="150"/>
+     <triangle v1="179" v2="150" v3="177"/>
+     <triangle v1="177" v2="150" v3="175"/>
+     <triangle v1="175" v2="150" v3="155"/>
+     <triangle v1="175" v2="155" v3="173"/>
+     <triangle v1="173" v2="155" v3="171"/>
+     <triangle v1="171" v2="155" v3="159"/>
+     <triangle v1="171" v2="159" v3="169"/>
+     <triangle v1="169" v2="159" v3="164"/>
+     <triangle v1="524" v2="187" v3="525"/>
+     <triangle v1="525" v2="187" v3="189"/>
+     <triangle v1="525" v2="189" v3="191"/>
+     <triangle v1="191" v2="192" v3="525"/>
+     <triangle v1="525" v2="192" v3="194"/>
+     <triangle v1="525" v2="194" v3="526"/>
+     <triangle v1="526" v2="194" v3="195"/>
+     <triangle v1="526" v2="195" v3="197"/>
+     <triangle v1="197" v2="199" v3="526"/>
+     <triangle v1="526" v2="199" v3="527"/>
+     <triangle v1="527" v2="199" v3="201"/>
+     <triangle v1="527" v2="201" v3="203"/>
+     <triangle v1="203" v2="205" v3="527"/>
+     <triangle v1="527" v2="205" v3="528"/>
+     <triangle v1="528" v2="205" v3="207"/>
+     <triangle v1="528" v2="207" v3="209"/>
+     <triangle v1="209" v2="211" v3="528"/>
+     <triangle v1="528" v2="211" v3="529"/>
+     <triangle v1="529" v2="211" v3="213"/>
+     <triangle v1="529" v2="213" v3="215"/>
+     <triangle v1="529" v2="215" v3="530"/>
+     <triangle v1="530" v2="215" v3="217"/>
+     <triangle v1="530" v2="217" v3="219"/>
+     <triangle v1="219" v2="221" v3="530"/>
+     <triangle v1="382" v2="500" v3="384"/>
+     <triangle v1="384" v2="500" v3="501"/>
+     <triangle v1="384" v2="501" v3="386"/>
+     <triangle v1="385" v2="401" v3="383"/>
+     <triangle v1="383" v2="401" v3="381"/>
+     <triangle v1="381" v2="401" v3="402"/>
+     <triangle v1="381" v2="402" v3="379"/>
+     <triangle v1="379" v2="402" v3="377"/>
+     <triangle v1="377" v2="402" v3="403"/>
+     <triangle v1="377" v2="403" v3="375"/>
+     <triangle v1="375" v2="403" v3="374"/>
+     <triangle v1="374" v2="403" v3="405"/>
+     <triangle v1="374" v2="405" v3="372"/>
+     <triangle v1="372" v2="405" v3="370"/>
+     <triangle v1="370" v2="405" v3="369"/>
+     <triangle v1="369" v2="405" v3="407"/>
+     <triangle v1="369" v2="407" v3="367"/>
+     <triangle v1="367" v2="407" v3="366"/>
+     <triangle v1="366" v2="407" v3="364"/>
+     <triangle v1="364" v2="407" v3="362"/>
+     <triangle v1="362" v2="407" v3="409"/>
+     <triangle v1="362" v2="409" v3="360"/>
+     <triangle v1="360" v2="409" v3="358"/>
+     <triangle v1="358" v2="409" v3="356"/>
+     <triangle v1="356" v2="409" v3="354"/>
+     <triangle v1="354" v2="409" v3="411"/>
+     <triangle v1="354" v2="411" v3="352"/>
+     <triangle v1="352" v2="411" v3="350"/>
+     <triangle v1="350" v2="411" v3="348"/>
+     <triangle v1="348" v2="411" v3="346"/>
+     <triangle v1="346" v2="411" v3="344"/>
+     <triangle v1="344" v2="411" v3="413"/>
+     <triangle v1="344" v2="413" v3="342"/>
+     <triangle v1="342" v2="413" v3="340"/>
+     <triangle v1="340" v2="413" v3="338"/>
+     <triangle v1="338" v2="413" v3="337"/>
+     <triangle v1="337" v2="413" v3="336"/>
+     <triangle v1="336" v2="413" v3="335"/>
+     <triangle v1="335" v2="413" v3="334"/>
+     <triangle v1="334" v2="413" v3="415"/>
+     <triangle v1="334" v2="415" v3="333"/>
+     <triangle v1="333" v2="415" v3="332"/>
+     <triangle v1="332" v2="415" v3="331"/>
+     <triangle v1="331" v2="415" v3="330"/>
+     <triangle v1="330" v2="415" v3="329"/>
+     <triangle v1="329" v2="415" v3="328"/>
+     <triangle v1="328" v2="415" v3="417"/>
+     <triangle v1="328" v2="417" v3="327"/>
+     <triangle v1="327" v2="417" v3="326"/>
+     <triangle v1="326" v2="417" v3="325"/>
+     <triangle v1="325" v2="417" v3="324"/>
+     <triangle v1="324" v2="417" v3="323"/>
+     <triangle v1="323" v2="417" v3="419"/>
+     <triangle v1="323" v2="419" v3="322"/>
+     <triangle v1="322" v2="419" v3="321"/>
+     <triangle v1="321" v2="419" v3="320"/>
+     <triangle v1="320" v2="419" v3="319"/>
+     <triangle v1="319" v2="419" v3="421"/>
+     <triangle v1="319" v2="421" v3="318"/>
+     <triangle v1="318" v2="421" v3="317"/>
+     <triangle v1="317" v2="421" v3="316"/>
+     <triangle v1="316" v2="421" v3="315"/>
+     <triangle v1="315" v2="421" v3="423"/>
+     <triangle v1="315" v2="423" v3="314"/>
+     <triangle v1="314" v2="423" v3="313"/>
+     <triangle v1="313" v2="423" v3="425"/>
+     <triangle v1="313" v2="425" v3="312"/>
+     <triangle v1="312" v2="425" v3="311"/>
+     <triangle v1="311" v2="425" v3="310"/>
+     <triangle v1="310" v2="425" v3="309"/>
+     <triangle v1="309" v2="425" v3="308"/>
+     <triangle v1="308" v2="425" v3="307"/>
+     <triangle v1="307" v2="425" v3="306"/>
+     <triangle v1="306" v2="425" v3="305"/>
+     <triangle v1="305" v2="425" v3="304"/>
+     <triangle v1="304" v2="425" v3="303"/>
+     <triangle v1="303" v2="425" v3="302"/>
+     <triangle v1="302" v2="425" v3="301"/>
+     <triangle v1="301" v2="425" v3="427"/>
+     <triangle v1="301" v2="427" v3="300"/>
+     <triangle v1="300" v2="427" v3="299"/>
+     <triangle v1="299" v2="427" v3="298"/>
+     <triangle v1="298" v2="427" v3="297"/>
+     <triangle v1="297" v2="427" v3="296"/>
+     <triangle v1="296" v2="427" v3="295"/>
+     <triangle v1="295" v2="427" v3="429"/>
+     <triangle v1="295" v2="429" v3="294"/>
+     <triangle v1="294" v2="429" v3="293"/>
+     <triangle v1="293" v2="429" v3="431"/>
+     <triangle v1="293" v2="431" v3="292"/>
+     <triangle v1="292" v2="431" v3="433"/>
+     <triangle v1="292" v2="433" v3="291"/>
+     <triangle v1="291" v2="433" v3="290"/>
+     <triangle v1="290" v2="433" v3="256"/>
+     <triangle v1="290" v2="256" v3="257"/>
+     <triangle v1="435" v2="229" v3="433"/>
+     <triangle v1="433" v2="229" v3="230"/>
+     <triangle v1="433" v2="230" v3="231"/>
+     <triangle v1="437" v2="227" v3="435"/>
+     <triangle v1="435" v2="227" v3="228"/>
+     <triangle v1="435" v2="228" v3="229"/>
+     <triangle v1="439" v2="168" v3="437"/>
+     <triangle v1="437" v2="168" v3="167"/>
+     <triangle v1="437" v2="167" v3="227"/>
+     <triangle v1="441" v2="174" v3="439"/>
+     <triangle v1="439" v2="174" v3="172"/>
+     <triangle v1="439" v2="172" v3="170"/>
+     <triangle v1="443" v2="178" v3="441"/>
+     <triangle v1="441" v2="178" v3="176"/>
+     <triangle v1="441" v2="176" v3="174"/>
+     <triangle v1="445" v2="184" v3="443"/>
+     <triangle v1="443" v2="184" v3="182"/>
+     <triangle v1="443" v2="182" v3="180"/>
+     <triangle v1="447" v2="188" v3="445"/>
+     <triangle v1="445" v2="188" v3="186"/>
+     <triangle v1="445" v2="186" v3="184"/>
+     <triangle v1="449" v2="193" v3="447"/>
+     <triangle v1="447" v2="193" v3="190"/>
+     <triangle v1="447" v2="190" v3="188"/>
+     <triangle v1="193" v2="449" v3="196"/>
+     <triangle v1="196" v2="449" v3="451"/>
+     <triangle v1="196" v2="451" v3="198"/>
+     <triangle v1="198" v2="451" v3="200"/>
+     <triangle v1="200" v2="451" v3="202"/>
+     <triangle v1="202" v2="451" v3="453"/>
+     <triangle v1="202" v2="453" v3="204"/>
+     <triangle v1="204" v2="453" v3="206"/>
+     <triangle v1="206" v2="453" v3="455"/>
+     <triangle v1="206" v2="455" v3="208"/>
+     <triangle v1="208" v2="455" v3="210"/>
+     <triangle v1="210" v2="455" v3="457"/>
+     <triangle v1="210" v2="457" v3="212"/>
+     <triangle v1="212" v2="457" v3="459"/>
+     <triangle v1="212" v2="459" v3="214"/>
+     <triangle v1="214" v2="459" v3="461"/>
+     <triangle v1="214" v2="461" v3="216"/>
+     <triangle v1="216" v2="461" v3="218"/>
+     <triangle v1="218" v2="461" v3="220"/>
+     <triangle v1="180" v2="178" v3="443"/>
+     <triangle v1="170" v2="168" v3="439"/>
+     <triangle v1="231" v2="232" v3="433"/>
+     <triangle v1="433" v2="232" v3="233"/>
+     <triangle v1="433" v2="233" v3="234"/>
+     <triangle v1="234" v2="235" v3="433"/>
+     <triangle v1="433" v2="235" v3="236"/>
+     <triangle v1="433" v2="236" v3="237"/>
+     <triangle v1="237" v2="238" v3="433"/>
+     <triangle v1="433" v2="238" v3="239"/>
+     <triangle v1="433" v2="239" v3="240"/>
+     <triangle v1="240" v2="241" v3="433"/>
+     <triangle v1="433" v2="241" v3="242"/>
+     <triangle v1="433" v2="242" v3="243"/>
+     <triangle v1="243" v2="244" v3="433"/>
+     <triangle v1="433" v2="244" v3="245"/>
+     <triangle v1="433" v2="245" v3="246"/>
+     <triangle v1="246" v2="247" v3="433"/>
+     <triangle v1="433" v2="247" v3="248"/>
+     <triangle v1="433" v2="248" v3="249"/>
+     <triangle v1="249" v2="250" v3="433"/>
+     <triangle v1="433" v2="250" v3="251"/>
+     <triangle v1="433" v2="251" v3="252"/>
+     <triangle v1="252" v2="253" v3="433"/>
+     <triangle v1="433" v2="253" v3="254"/>
+     <triangle v1="433" v2="254" v3="255"/>
+     <triangle v1="255" v2="256" v3="433"/>
+     <triangle v1="257" v2="258" v3="290"/>
+     <triangle v1="290" v2="258" v3="259"/>
+     <triangle v1="290" v2="259" v3="289"/>
+     <triangle v1="289" v2="259" v3="260"/>
+     <triangle v1="289" v2="260" v3="261"/>
+     <triangle v1="261" v2="262" v3="289"/>
+     <triangle v1="289" v2="262" v3="263"/>
+     <triangle v1="289" v2="263" v3="264"/>
+     <triangle v1="264" v2="265" v3="289"/>
+     <triangle v1="289" v2="265" v3="266"/>
+     <triangle v1="289" v2="266" v3="288"/>
+     <triangle v1="288" v2="266" v3="267"/>
+     <triangle v1="288" v2="267" v3="268"/>
+     <triangle v1="268" v2="269" v3="288"/>
+     <triangle v1="288" v2="269" v3="270"/>
+     <triangle v1="288" v2="270" v3="287"/>
+     <triangle v1="287" v2="270" v3="271"/>
+     <triangle v1="287" v2="271" v3="272"/>
+     <triangle v1="272" v2="273" v3="287"/>
+     <triangle v1="287" v2="273" v3="274"/>
+     <triangle v1="287" v2="274" v3="275"/>
+     <triangle v1="275" v2="276" v3="287"/>
+     <triangle v1="287" v2="276" v3="277"/>
+    </triangles>
+   </mesh>
+  </object>
+ </resources>
+ <build/>
+</model>
+"##;
+
+const SLICE_CONFIG:&[u8]=br##"<?xml version="1.0" encoding="UTF-8"?>
+<config>
+  <header>
+    <header_item key="X-BBL-Client-Type" value="slicer"/>
+    <header_item key="X-BBL-Client-Version" value="01.10.01.50"/>
+  </header>
+  <plate>
+    <metadata key="index" value="1"/>
+    <metadata key="printer_model_id" value="C12"/>
+    <metadata key="nozzle_diameters" value="0.4"/>
+    <metadata key="timelapse_type" value="0"/>
+    <metadata key="prediction" value="9541"/>
+    <metadata key="weight" value="38.24"/>
+    <metadata key="outside" value="false"/>
+    <metadata key="support_used" value="false"/>
+    <metadata key="label_object_enabled" value="false"/>
+    <object identify_id="150" name="part1" skipped="false" />
+    <filament id="1" tray_info_idx="GFL99" type="PLA" color="#0000FF" used_m="2.44" used_g="7.26" />
+    <filament id="2" tray_info_idx="GFL03" type="PLA" color="#FFFFFF" used_m="6.10" used_g="18.35" />
+    <filament id="3" tray_info_idx="GFA00" type="PLA" color="#8E9089" used_m="1.51" used_g="4.58" />
+    <filament id="4" tray_info_idx="GFA00" type="PLA" color="#000000" used_m="2.66" used_g="8.05" />
+    <warning msg="bed_temperature_too_high_than_filament" level="1" error_code ="1000C001"  />
+  </plate>
+</config>
+"##;
+
+const MODEL_CONFIG_RELS:&[u8]=br##"<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+ <Relationship Target="/Metadata/plate_1.gcode" Id="rel-1" Type="http://schemas.bambulab.com/package/2021/gcode"/>
+</Relationships>
+"##;
 
 impl ModelContainer {
     pub fn encode(&self) -> anyhow::Result<Vec<u8>> {
@@ -47,56 +14082,32 @@ impl ModelContainer {
         zip.start_file("_rels/.rels", opts.clone())?;
         zip.write_all(RELS_FILE)?;
         zip.add_directory("3D/", opts.clone())?;
-        zip.start_file("3D/model.model", opts.clone())?;
-        zip.write_all(serde_xml_rs::to_string(&self.model)?.as_bytes())?;
-        // zip.write_all(br#"<?xml version="1.0" encoding="utf-8"?>
-        //     <model xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02" unit="millimeter">
-        //       <metadata name="a">b</metadata>
-        //       <resources>
-        //         <object id="1">
-        //           <mesh>
-        //             <vertices>
-        //               <vertex x="0" y="0" z="0"/>
-        //               <vertex x="100" y="0" z="0"/>
-        //               <vertex x="0" y="100" z="0"/>
-        //               <vertex x="0" y="0" z="100"/>
-        //             </vertices>
-        //             <triangles>
-        //               <triangle v1="0" v2="1" v3="2"/>
-        //               <triangle v1="1" v2="0" v3="3"/>
-        //               <triangle v1="2" v2="1" v3="3"/>
-        //               <triangle v1="0" v2="2" v3="3"/>
-        //             </triangles>
-        //           </mesh>
-        //         </object>
-        //         <object id="2">
-        //           <mesh>
-        //             <vertices>
-        //               <vertex x="100" y="100" z="100"/>
-        //               <vertex x="100" y="0" z="0"/>
-        //               <vertex x="0" y="100" z="0"/>
-        //               <vertex x="0" y="0" z="100"/>
-        //             </vertices>
-        //             <triangles>
-        //               <triangle v1="0" v2="1" v3="2"/>
-        //               <triangle v1="1" v2="0" v3="3"/>
-        //               <triangle v1="2" v2="1" v3="3"/>
-        //               <triangle v1="0" v2="2" v3="3"/>
-        //             </triangles>
-        //           </mesh>
-        //         </object>
-        //         <object id="3">
-        //           <components>
-        //             <component objectid="1"/>
-        //             <component objectid="2"/>
-        //           </components>
-        //         </object>
-        //       </resources>
-        //       <build>
-        //         <item objectid="3"/>
-        //       </build>
-        //     </model>
-        // "#)?;
+        zip.add_directory("3D/_rels", opts.clone())?;
+        zip.start_file("3D/_rels/3dmodel.model.rels", opts.clone())?;
+        zip.write_all(RELS_FILE_3D)?;
+        zip.start_file("3D/3dmodel.model", opts.clone())?;
+        let model = serde_xml_rs::SerdeXml::new()
+            .emitter(EmitterConfig::new().perform_indent(true))
+            .to_string(&self.model)?;
+        zip.write_all(MODEL_BYTES)?;
+        zip.add_directory("3D/Objects", opts.clone())?;
+        zip.start_file("3D/Objects/object_3.model", opts.clone())?;
+        zip.write_all(MODEL_SUB_FILE)?;
+        zip.add_directory("Metadata", opts.clone())?;
+        zip.add_directory("Metadata/_rels", opts.clone())?;
+        zip.start_file("Metadata/_rels/model_settings.config.rels", opts.clone())?;
+        zip.write_all(MODEL_CONFIG_RELS)?;
+        zip.start_file("Metadata/model_settings.config", opts.clone())?;
+        zip.write_all(MODEL_CONFIG)?;
+        zip.start_file("Metadata/project_settings.config", opts.clone())?;
+        zip.write_all(PROJECT_CONFIG)?;
+        zip.start_file("Metadata/slice_info.config", opts.clone())?;
+        zip.write_all(SLICE_CONFIG)?;
+        // zip.start_file("Metadata/Slic3r_PE_model.config", opts.clone())?;
+        // zip.write_all(SLICER_PE_MODEL_CONFIG)?;
+        // zip.start_file("Metadata/Slic3r_PE.config", opts.clone())?;
+        // zip.write_all(SLICER_PE_CONFIG)?;
+        // zip.start_file("Metadata/thumbnail.png", opts.clone())?;
         zip.finish()?;
         Ok(buffer)
     }
