@@ -1,175 +1,63 @@
 #![feature(exit_status_error)]
 #![deny(unused_must_use)]
 
-use patina_3mf::mesh::{Mesh, Triangle, Triangles, Vertex, Vertices};
-use patina_3mf::model::{Build, Component, Components, Item, Metadata, Model, Object, ObjectType, Resources, Unit, Xmlns};
 use patina_3mf::ModelContainer;
+use patina_3mf::mesh::{Mesh, Triangle, Triangles, Vertex, Vertices};
+use patina_3mf::model::{
+    Build, Component, Components, Item, Metadata, Model, Object, ObjectType, Resources, Unit, Xmlns,
+};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let model_cont = ModelContainer {
-        model: Model {
-            xmlns: Xmlns::Model,
-            metadata: vec![Metadata {
-                name: "Application".to_string(),
-                value: Some("BambuStudio-01.10.01.50".to_string()),
-            }],
-            resources: Resources {
-                object: vec![
-                    Object {
-                        id: 1,
-                        partnumber: None,
-                        name: None,
-                        pid: None,    //Some(10),
-                        pindex: None, //Some(0),
-                        mesh: Some(Mesh {
-                            vertices: Vertices {
-                                vertex: vec![
-                                    Vertex {
-                                        x: 0.0,
-                                        y: 0.0,
-                                        z: 0.0,
-                                    },
-                                    Vertex {
-                                        x: 10.0,
-                                        y: 0.0,
-                                        z: 0.0,
-                                    },
-                                    Vertex {
-                                        x: 0.0,
-                                        y: 10.0,
-                                        z: 0.0,
-                                    },
-                                    Vertex {
-                                        x: 0.0,
-                                        y: 0.0,
-                                        z: 10.0,
-                                    },
-                                ],
-                            },
-                            triangles: Triangles {
-                                triangle: vec![
-                                    Triangle {
-                                        v1: 0,
-                                        v2: 1,
-                                        v3: 2,
-                                    },
-                                    Triangle {
-                                        v1: 0,
-                                        v2: 3,
-                                        v3: 1,
-                                    },
-                                    Triangle {
-                                        v1: 2,
-                                        v2: 3,
-                                        v3: 0,
-                                    },
-                                    Triangle {
-                                        v1: 1,
-                                        v2: 3,
-                                        v3: 2,
-                                    },
-                                ],
-                            },
-                        }),
-                        components: None,
-                        object_type: Some(ObjectType::Model),
-                    },
-                    Object {
-                        id: 2,
-                        partnumber: None,
-                        name: None,
-                        pid: None,    //Some(10),
-                        pindex: None, //Some(1),
-                        mesh: Some(Mesh {
-                            vertices: Vertices {
-                                vertex: vec![
-                                    Vertex {
-                                        x: 0.0,
-                                        y: 0.0,
-                                        z: 0.0,
-                                    },
-                                    Vertex {
-                                        x: -10.0,
-                                        y: 0.0,
-                                        z: 0.0,
-                                    },
-                                    Vertex {
-                                        x: 0.0,
-                                        y: -10.0,
-                                        z: 0.0,
-                                    },
-                                    Vertex {
-                                        x: 0.0,
-                                        y: 0.0,
-                                        z: 10.0,
-                                    },
-                                ],
-                            },
-                            triangles: Triangles {
-                                triangle: vec![
-                                    Triangle {
-                                        v1: 0,
-                                        v2: 1,
-                                        v3: 2,
-                                    },
-                                    Triangle {
-                                        v1: 0,
-                                        v2: 3,
-                                        v3: 1,
-                                    },
-                                    Triangle {
-                                        v1: 2,
-                                        v2: 3,
-                                        v3: 0,
-                                    },
-                                    Triangle {
-                                        v1: 1,
-                                        v2: 3,
-                                        v3: 2,
-                                    },
-                                ],
-                            },
-                        }),
-                        components: None,
-                        object_type: Some(ObjectType::Model),
-                    },
-                    Object {
-                        id: 9,
-                        partnumber: None,
-                        name: None,
-                        pid: None,    //Some(10),
-                        pindex: None, //Some(2),
-                        mesh: None,
-                        components: Some(Components {
-                            component: vec![
-                                Component {
-                                    objectid: 1,
-                                    transform: None,
-                                },
-                                Component {
-                                    objectid: 2,
-                                    transform: None,
-                                },
-                            ],
-                        }),
-                        object_type: Some(ObjectType::Model),
-                    },
-                ],
-                basematerials: vec![],
-                colorgroup: vec![],
-            },
-            build: Build {
-                item: vec![Item {
-                    objectid: 9,
-                    transform: None,
-                    partnumber: None,
-                    printable: Some(true),
-                }],
-            },
-            unit: Unit::Millimeter,
-        },
-    };
+    let mut application_metadata =
+        Metadata::new("Application".to_string()).value(Some("BambuStudio-01.10.01.50".to_string()));
+    let mesh1 = Mesh::new(
+        Vertices::new(vec![
+            Vertex::new(0.0, 0.0, 0.0),
+            Vertex::new(10.0, 0.0, 0.0),
+            Vertex::new(0.0, 10.0, 0.0),
+            Vertex::new(0.0, 0.0, 10.0),
+        ]),
+        Triangles::new(vec![
+            Triangle::new(0, 1, 2),
+            Triangle::new(0, 3, 1),
+            Triangle::new(2, 3, 0),
+            Triangle::new(1, 3, 2),
+        ]),
+    );
+    let mesh2 = Mesh::new(
+        Vertices::new(vec![
+            Vertex::new(0.0, 0.0, 0.0),
+            Vertex::new(-10.0, 0.0, 0.0),
+            Vertex::new(0.0, -10.0, 0.0),
+            Vertex::new(0.0, 0.0, 10.0),
+        ]),
+        Triangles::new(vec![
+            Triangle::new(0, 1, 2),
+            Triangle::new(0, 3, 1),
+            Triangle::new(2, 3, 0),
+            Triangle::new(1, 3, 2),
+        ]),
+    );
+    let object1 = Object::new(1)
+        .mesh(Some(mesh1))
+        .object_type(Some(ObjectType::Model));
+    let object2 = Object::new(2)
+        .mesh(Some(mesh2))
+        .object_type(Some(ObjectType::Model));
+    let object9 = Object::new(9)
+        .components(Some(Components::new(vec![
+            Component::new(1),
+            Component::new(2),
+        ])))
+        .object_type(Some(ObjectType::Model));
+    let model = Model::new()
+        .xmlns(Xmlns::Model)
+        .metadata(vec![application_metadata])
+        .resources(Resources::new().object(vec![object1, object2, object9]))
+        .build(Build::new().item(vec![Item::new(9).printable(Some(true))]))
+        .unit(Unit::Millimeter);
+    let model_cont = ModelContainer::new(model);
     let encoded = model_cont.encode()?;
     tokio::fs::write("examples/flap/output.3mf", encoded).await?;
     tokio::fs::remove_dir_all("examples/flap/output").await.ok();

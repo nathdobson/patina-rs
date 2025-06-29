@@ -1,16 +1,15 @@
 pub mod mesh;
 pub mod model;
 
+use crate::model::Model;
 use serde::{Deserialize, Serialize};
 #[deny(unused_must_use)]
 use std::io::{Cursor, Write};
-use std::mem;
 use xml::EmitterConfig;
 use zip::ZipWriter;
-use zip::result::ZipResult;
 use zip::write::SimpleFileOptions;
-use crate::model::Model;
 
+#[non_exhaustive]
 pub struct ModelContainer {
     pub model: Model,
 }
@@ -135,55 +134,6 @@ const PROJECT_CONFIG: &[u8] = br##"{
     ]
 }"##;
 
-const MODEL_BYTES:&[u8]=br##"<?xml version='1.0' encoding='UTF-8'?>
-<model xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02" unit="millimeter" >
- <metadata name="Application">BambuStudio-01.10.01.50</metadata>
- <resources>
-  <object id="1" type="model">
-   <mesh>
-    <vertices>
-     <vertex x="0" y="0" z="0" />
-     <vertex x="10" y="0" z="0" />
-     <vertex x="0" y="10" z="0" />
-     <vertex x="0" y="0" z="10" />
-    </vertices>
-    <triangles>
-     <triangle v1="0" v2="1" v3="2"/>
-     <triangle v1="1" v2="0" v3="3"/>
-     <triangle v1="2" v2="3" v3="0"/>
-     <triangle v1="3" v2="2" v3="1"/>
-    </triangles>
-   </mesh>
-  </object>
-  <object id="2" type="model">
-   <mesh>
-    <vertices>
-     <vertex x="0" y="0" z="0" />
-     <vertex x="-10" y="0" z="0" />
-     <vertex x="0" y="-10" z="0" />
-     <vertex x="0" y="0" z="10" />
-    </vertices>
-    <triangles>
-     <triangle v1="0" v2="1" v3="2"/>
-     <triangle v1="1" v2="0" v3="3"/>
-     <triangle v1="2" v2="3" v3="0"/>
-     <triangle v1="3" v2="2" v3="1"/>
-    </triangles>
-   </mesh>
-  </object>
-  <object id="9" type="model">
-   <components>
-    <component objectid="1" />
-    <component objectid="2"  />
-   </components>
-  </object>
- </resources>
- <build>
-  <item objectid="9" printable="1" />
- </build>
-</model>
-"##;
-
 const SLICE_CONFIG:&[u8]=br##"<?xml version="1.0" encoding="UTF-8"?>
 <config>
   <header>
@@ -211,6 +161,9 @@ const SLICE_CONFIG:&[u8]=br##"<?xml version="1.0" encoding="UTF-8"?>
 "##;
 
 impl ModelContainer {
+    pub fn new(model: Model) -> Self {
+        ModelContainer { model }
+    }
     pub fn encode(&self) -> anyhow::Result<Vec<u8>> {
         let mut buffer = vec![];
         let mut zip = ZipWriter::new(Cursor::new(&mut buffer));
@@ -226,7 +179,6 @@ impl ModelContainer {
             .emitter(EmitterConfig::new().perform_indent(true))
             .to_string(&self.model)?;
         zip.write_all(model.as_bytes())?;
-        // zip.write_all(MODEL_BYTES)?;
         zip.add_directory("Metadata", opts.clone())?;
         zip.start_file("Metadata/model_settings.config", opts.clone())?;
         zip.write_all(MODEL_CONFIG)?;
