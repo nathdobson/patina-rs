@@ -4,14 +4,14 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, PartialEq, Clone)]
 #[non_exhaustive]
-pub struct Mesh {
-    pub vertices: Vertices,
-    pub triangles: Triangles,
+pub struct ModelMesh {
+    pub vertices: ModelVertices,
+    pub triangles: ModelTriangles,
 }
 
-impl Mesh {
-    pub fn new(vertices: Vertices, triangles: Triangles) -> Self {
-        Mesh {
+impl ModelMesh {
+    pub fn new(vertices: ModelVertices, triangles: ModelTriangles) -> Self {
+        ModelMesh {
             vertices,
             triangles,
         }
@@ -20,33 +20,33 @@ impl Mesh {
 
 #[derive(Serialize, Deserialize, PartialEq, Clone)]
 #[non_exhaustive]
-pub struct Vertices {
+pub struct ModelVertices {
     #[serde(default)]
-    pub vertex: Vec<Vertex>,
+    pub vertex: Vec<ModelVertex>,
 }
 
-impl Vertices {
-    pub fn new(vertex: Vec<Vertex>) -> Self {
-        Vertices { vertex }
+impl ModelVertices {
+    pub fn new(vertex: Vec<ModelVertex>) -> Self {
+        ModelVertices { vertex }
     }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Clone)]
 #[non_exhaustive]
-pub struct Triangles {
+pub struct ModelTriangles {
     #[serde(default)]
-    pub triangle: Vec<Triangle>,
+    pub triangle: Vec<ModelTriangle>,
 }
 
-impl Triangles {
-    pub fn new(triangle: Vec<Triangle>) -> Self {
-        Triangles { triangle }
+impl ModelTriangles {
+    pub fn new(triangle: Vec<ModelTriangle>) -> Self {
+        ModelTriangles { triangle }
     }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Clone)]
 #[non_exhaustive]
-pub struct Vertex {
+pub struct ModelVertex {
     #[serde(rename = "@x")]
     pub x: f64,
     #[serde(rename = "@y")]
@@ -55,15 +55,15 @@ pub struct Vertex {
     pub z: f64,
 }
 
-impl Vertex {
+impl ModelVertex {
     pub fn new(x: f64, y: f64, z: f64) -> Self {
-        Vertex { x, y, z }
+        ModelVertex { x, y, z }
     }
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Clone)]
 #[non_exhaustive]
-pub struct Triangle {
+pub struct ModelTriangle {
     #[serde(rename = "@v1")]
     pub v1: usize,
     #[serde(rename = "@v2")]
@@ -72,8 +72,8 @@ pub struct Triangle {
     pub v3: usize,
 }
 
-impl Triangle {
+impl ModelTriangle {
     pub fn new(v1: usize, v2: usize, v3: usize) -> Self {
-        Triangle { v1, v2, v3 }
+        ModelTriangle { v1, v2, v3 }
     }
 }

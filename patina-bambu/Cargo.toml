@@ -1,0 +1,10 @@
+[package]
+name = "patina-bambu"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+patina-cad = {workspace = true}
+patina-3mf = {workspace = true}
+anyhow = "1.0.98"
+tokio = "1.45.1"

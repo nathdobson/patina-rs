@@ -325,6 +325,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "patina-3mf",
+ "patina-bambu",
  "patina-cad",
  "tokio",
 ]
@@ -622,6 +623,16 @@ dependencies = [
  "serde_with",
  "xml",
  "zip",
+]
+
+[[package]]
+name = "patina-bambu"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "patina-3mf",
+ "patina-cad",
+ "tokio",
 ]
 
 [[package]]

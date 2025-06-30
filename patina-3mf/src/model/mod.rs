@@ -1,6 +1,6 @@
 use crate::xmlns::Xmlns;
-use build::Build;
-use resources::Resources;
+use build::ModelBuild;
+use resources::ModelResources;
 use serde::{Deserialize, Serialize};
 
 pub mod build;
@@ -15,25 +15,25 @@ pub struct Model {
     #[serde(rename = "@xmlns")]
     pub xmlns: Xmlns,
     #[serde(rename = "@unit", default)]
-    pub unit: Unit,
+    pub unit: ModelUnit,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub metadata: Vec<Metadata>,
-    pub resources: Resources,
-    pub build: Build,
+    pub metadata: Vec<ModelMetadata>,
+    pub resources: ModelResources,
+    pub build: ModelBuild,
 }
 
 #[derive(Serialize, Deserialize)]
 #[non_exhaustive]
-pub struct Metadata {
+pub struct ModelMetadata {
     #[serde(rename = "@name")]
     pub name: String,
     #[serde(rename = "#text")]
     pub value: Option<String>,
 }
 
-impl Metadata {
+impl ModelMetadata {
     pub fn new(name: String) -> Self {
-        Metadata { name, value: None }
+        ModelMetadata { name, value: None }
     }
     pub fn value(mut self, value: Option<String>) -> Self {
         self.value = value;
@@ -47,7 +47,7 @@ impl Model {
             xmlns: Xmlns::Model,
             unit: Default::default(),
             metadata: vec![],
-            resources: Resources::new(),
+            resources: ModelResources::new(),
             build: Default::default(),
         }
     }
@@ -55,19 +55,19 @@ impl Model {
         self.xmlns = xmlns;
         self
     }
-    pub fn unit(mut self, unit: Unit) -> Self {
+    pub fn unit(mut self, unit: ModelUnit) -> Self {
         self.unit = unit;
         self
     }
-    pub fn metadata(mut self, metadata: Vec<Metadata>) -> Self {
+    pub fn metadata(mut self, metadata: Vec<ModelMetadata>) -> Self {
         self.metadata = metadata;
         self
     }
-    pub fn resources(mut self, resources: Resources) -> Self {
+    pub fn resources(mut self, resources: ModelResources) -> Self {
         self.resources = resources;
         self
     }
-    pub fn build(mut self, build: Build) -> Self {
+    pub fn build(mut self, build: ModelBuild) -> Self {
         self.build = build;
         self
     }
@@ -76,7 +76,7 @@ impl Model {
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 #[non_exhaustive]
-pub enum Unit {
+pub enum ModelUnit {
     Micron,
     Millimeter,
     Centimeter,
@@ -85,9 +85,9 @@ pub enum Unit {
     Meter,
 }
 
-impl Default for Unit {
+impl Default for ModelUnit {
     fn default() -> Self {
-        Unit::Millimeter
+        ModelUnit::Millimeter
     }
 }
 

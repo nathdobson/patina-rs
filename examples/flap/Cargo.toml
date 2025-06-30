@@ -8,3 +8,4 @@ patina-cad = {workspace = true}
 anyhow = "1.0.98"
 tokio = {version="1.45.1",features = ["macros","rt-multi-thread","process"]}
 patina-3mf = {workspace = true}
+patina-bambu = {workspace = true}

@@ -4,16 +4,16 @@ use crate::bool_from_int_string::BoolFromIntString;
 
 #[derive(Serialize, Deserialize, Default)]
 #[non_exhaustive]
-pub struct Build {
+pub struct ModelBuild {
     #[serde(default)]
-    pub item: Vec<Item>,
+    pub item: Vec<ModelItem>,
 }
 
-impl Build {
+impl ModelBuild {
     pub fn new() -> Self {
-        Build { item: vec![] }
+        ModelBuild { item: vec![] }
     }
-    pub fn item(mut self, item: Vec<Item>) -> Self {
+    pub fn item(mut self, item: Vec<ModelItem>) -> Self {
         self.item = item;
         self
     }
@@ -22,7 +22,7 @@ impl Build {
 #[serde_as]
 #[derive(Serialize, Deserialize)]
 #[non_exhaustive]
-pub struct Item {
+pub struct ModelItem {
     #[serde(rename = "@objectid")]
     pub objectid: usize,
 
@@ -37,9 +37,9 @@ pub struct Item {
     pub printable: Option<bool>,
 }
 
-impl Item {
-    pub fn new(objectid: usize) -> Item {
-        Item {
+impl ModelItem {
+    pub fn new(objectid: usize) -> ModelItem {
+        ModelItem {
             objectid,
             transform: None,
             partnumber: None,

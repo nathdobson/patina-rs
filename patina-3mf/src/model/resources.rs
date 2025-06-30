@@ -1,50 +1,50 @@
 use serde::{Deserialize, Serialize};
-use crate::model::mesh::Mesh;
+use crate::model::mesh::ModelMesh;
 
 #[derive(Serialize, Deserialize, Default)]
 #[non_exhaustive]
-pub struct Color {
+pub struct ModelColor {
     #[serde(rename = "@color", default)]
     pub color: String,
 }
 
 #[derive(Serialize, Deserialize, Default)]
 #[non_exhaustive]
-pub struct Colorgroup {
+pub struct ModelColorGroup {
     #[serde(rename = "@id")]
     pub id: usize,
     #[serde(rename = "m:color", default)]
-    pub color: Vec<Color>,
+    pub color: Vec<ModelColor>,
 }
 
 #[derive(Serialize, Deserialize)]
 #[non_exhaustive]
-pub struct Resources {
+pub struct ModelResources {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub basematerials: Vec<BaseMaterials>,
+    pub basematerials: Vec<ModelBaseMaterials>,
     #[serde(default, rename = "m:colorgroup")]
-    pub colorgroup: Vec<Colorgroup>,
+    pub colorgroup: Vec<ModelColorGroup>,
     #[serde(default)]
-    pub object: Vec<Object>,
+    pub object: Vec<ModelObject>,
 }
 
-impl Resources {
-    pub fn new() -> Resources {
-        Resources {
+impl ModelResources {
+    pub fn new() -> ModelResources {
+        ModelResources {
             basematerials: vec![],
             colorgroup: vec![],
             object: vec![],
         }
     }
-    pub fn basematerials(mut self, basematerials: Vec<BaseMaterials>) -> Resources {
+    pub fn basematerials(mut self, basematerials: Vec<ModelBaseMaterials>) -> ModelResources {
         self.basematerials = basematerials;
         self
     }
-    pub fn colorgroup(mut self, colorgroup: Vec<Colorgroup>) -> Resources {
+    pub fn colorgroup(mut self, colorgroup: Vec<ModelColorGroup>) -> ModelResources {
         self.colorgroup = colorgroup;
         self
     }
-    pub fn object(mut self, object: Vec<Object>) -> Resources {
+    pub fn object(mut self, object: Vec<ModelObject>) -> ModelResources {
         self.object = object;
         self
     }
@@ -52,15 +52,15 @@ impl Resources {
 
 #[derive(Serialize, Deserialize)]
 #[non_exhaustive]
-pub struct BaseMaterials {
+pub struct ModelBaseMaterials {
     #[serde(rename = "@id")]
     pub id: usize,
-    pub base: Vec<BaseMaterial>,
+    pub base: Vec<ModelBaseMaterial>,
 }
 
 #[derive(Serialize, Deserialize)]
 #[non_exhaustive]
-pub struct BaseMaterial {
+pub struct ModelBaseMaterial {
     #[serde(rename = "@name")]
     pub name: String,
     #[serde(rename = "@displaycolor")]
@@ -70,14 +70,14 @@ pub struct BaseMaterial {
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 #[non_exhaustive]
-pub enum ObjectType {
+pub enum ModelObjectType {
     Model,
 }
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 #[non_exhaustive]
-pub struct Object {
+pub struct ModelObject {
     #[serde(rename = "@id")]
     pub id: usize,
 
@@ -94,18 +94,18 @@ pub struct Object {
     pub pindex: Option<usize>,
 
     #[serde(rename = "@type", skip_serializing_if = "Option::is_none")]
-    pub object_type: Option<ObjectType>,
+    pub object_type: Option<ModelObjectType>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub mesh: Option<Mesh>,
+    pub mesh: Option<ModelMesh>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub components: Option<Components>,
+    pub components: Option<ModelComponents>,
 }
 
-impl Object {
+impl ModelObject {
     pub fn new(id: usize) -> Self {
-        Object {
+        ModelObject {
             id,
             partnumber: None,
             name: None,
@@ -132,15 +132,15 @@ impl Object {
         self.pindex = pindex;
         self
     }
-    pub fn object_type(mut self, object_type: Option<ObjectType>) -> Self {
+    pub fn object_type(mut self, object_type: Option<ModelObjectType>) -> Self {
         self.object_type = object_type;
         self
     }
-    pub fn mesh(mut self, mesh: Option<Mesh>) -> Self {
+    pub fn mesh(mut self, mesh: Option<ModelMesh>) -> Self {
         self.mesh = mesh;
         self
     }
-    pub fn components(mut self, components: Option<Components>) -> Self {
+    pub fn components(mut self, components: Option<ModelComponents>) -> Self {
         self.components = components;
         self
     }
@@ -148,19 +148,19 @@ impl Object {
 
 #[derive(Serialize, Deserialize)]
 #[non_exhaustive]
-pub struct Components {
-    pub component: Vec<Component>,
+pub struct ModelComponents {
+    pub component: Vec<ModelComponent>,
 }
 
-impl Components {
-    pub fn new(component: Vec<Component>) -> Components {
-        Components { component }
+impl ModelComponents {
+    pub fn new(component: Vec<ModelComponent>) -> ModelComponents {
+        ModelComponents { component }
     }
 }
 
 #[derive(Serialize, Deserialize)]
 #[non_exhaustive]
-pub struct Component {
+pub struct ModelComponent {
     #[serde(rename = "@objectid")]
     pub objectid: usize,
 
@@ -168,9 +168,9 @@ pub struct Component {
     pub transform: Option<[f64; 12]>,
 }
 
-impl Component {
-    pub fn new(objectid: usize) -> Component {
-        Component {
+impl ModelComponent {
+    pub fn new(objectid: usize) -> ModelComponent {
+        ModelComponent {
             objectid,
             transform: None,
         }
