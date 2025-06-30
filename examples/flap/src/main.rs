@@ -12,6 +12,7 @@ use patina_3mf::model_settings::{
     Assemble, AssembleItem, ModelInstance, ModelSettings, ObjectSettings, Part, Plate,
     SettingsMetadata,
 };
+use patina_3mf::project_settings::ProjectSettings;
 use patina_3mf::relationships::{Relationship, Relationships};
 
 #[tokio::main]
@@ -142,10 +143,49 @@ async fn main() -> anyhow::Result<()> {
         .assemble(Some(
             Assemble::new().assemble_item(vec![AssembleItem::new("9".to_string())]),
         ));
+    let project_settings = ProjectSettings::new()
+        .filament_colour(Some(vec![
+            "#0000FF".to_string(),
+            "#FFFFFF".to_string(),
+            "#8E9089".to_string(),
+            "#000000".to_string(),
+            "#000000".to_string(),
+        ]))
+        .filament_is_support(Some(vec![false, false, false, false, false]))
+        .filament_settings_id(Some(vec![
+            "Bambu PLA Basic @BBL A1M".to_string(),
+            "Bambu PLA Basic @BBL A1M".to_string(),
+            "Bambu PLA Basic @BBL A1M".to_string(),
+            "Bambu PLA Basic @BBL A1M".to_string(),
+            "Bambu PLA Basic @BBL A1M".to_string(),
+        ]))
+        .filament_type(Some(vec![
+            "PLA".to_string(),
+            "PLA".to_string(),
+            "PLA".to_string(),
+            "PLA".to_string(),
+            "PLA".to_string(),
+        ]))
+        .flush_volumes_matrix(Some(vec![
+            0.0, 100.0, 100.0, 100.0, 100.0, //
+            100.0, 0.0, 100.0, 100.0, 100.0, //
+            100.0, 100.0, 0.0, 100.0, 100.0, //
+            100.0, 100.0, 100.0, 0.0, 100.0, //
+            100.0, 100.0, 100.0, 100.0, 0.0, //
+        ]))
+        .nozzle_diameter(Some(vec![0.4]))
+        .print_settings_id(Some("0.20mm Standard @BBL A1M".to_string()))
+        .printable_height(Some(180.0))
+        .printer_settings_id(Some("Bambu Lab A1 mini 0.4 nozzle".to_string()))
+        .enable_prime_tower(Some(true))
+        .wipe_tower_x(Some(50.0))
+        .wipe_tower_y(Some(50.0));
+
     let model_cont = ModelContainer::new(model)
         .content_types(Some(content_types))
         .relationships(Some(relationships))
-        .model_settings(Some(model_settings));
+        .model_settings(Some(model_settings))
+        .project_settings(Some(project_settings));
 
     let encoded = model_cont.encode()?;
     tokio::fs::write("examples/flap/output.3mf", encoded).await?;
