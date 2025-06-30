@@ -2,6 +2,7 @@
 #![deny(unused_must_use)]
 #![allow(unused_mut)]
 #![allow(unused_imports)]
+#![allow(dead_code)]
 
 use patina_3mf::ModelContainer;
 use patina_3mf::color::Color;
@@ -32,9 +33,61 @@ use patina_cad::math::vec2::Vec2;
 use patina_cad::math::vec3::Vec3;
 use patina_cad::meshes::mesh::Mesh;
 use patina_cad::meshes::mesh_triangle::MeshTriangle;
+use std::io::{Cursor, Read, Write};
+use std::path::Path;
+use zip::write::{FileOptions, SimpleFileOptions};
+use zip::{ZipArchive, ZipWriter};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    build_output().await?;
+    Ok(())
+}
+
+async fn filter() -> anyhow::Result<()> {
+    let mut output = vec![];
+    let mut writer = ZipWriter::new(Cursor::new(&mut output));
+    let file = tokio::fs::read("examples/flap/input.3mf").await?;
+    let mut zip = ZipArchive::new(Cursor::new(file.as_slice()))?;
+    for i in 0..zip.len() {
+        let mut file = zip.by_index(i)?;
+        match file.name() {
+            "[Content_Types].xml"
+            // | "Metadata/plate_1.png"
+            // | "Metadata/plate_1_small.png"
+            // | "Metadata/plate_no_light_1.png"
+            // | "Metadata/top_1.png"
+            // | "Metadata/pick_1.png"
+            // | "Metadata/plate_1.json"
+            | "3D/3dmodel.model"
+            | "3D/_rels/3dmodel.model.rels"
+            | "3D/Objects/object_1.model"
+            | "Metadata/project_settings.config"
+            // | "Metadata/filament_settings_1.config"
+            | "Metadata/model_settings.config"
+            // | "Metadata/cut_information.xml"
+            // | "Metadata/slice_info.config"
+            | "_rels/.rels" => {}
+            _ => {
+                println!("| {:?}", file.name());
+                continue;
+            }
+        }
+        if file.is_file() {
+            writer.start_file(file.name(), SimpleFileOptions::default())?;
+            let mut buf = vec![];
+            file.read_to_end(&mut buf)?;
+            writer.write_all(&buf)?;
+        } else if file.is_dir() {
+            writer.add_directory(file.name(), SimpleFileOptions::default())?;
+        }
+    }
+    writer.finish()?;
+    tokio::fs::write("examples/flap/filtered.3mf", &output).await?;
+    Ok(())
+}
+
+async fn build_output() -> anyhow::Result<()> {
     let mut bambu = BambuBuilder::new();
     let printer = Printer::A1Mini;
     let nozzle = Nozzle::Nozzle0_4;

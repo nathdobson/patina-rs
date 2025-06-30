@@ -328,6 +328,7 @@ dependencies = [
  "patina-bambu",
  "patina-cad",
  "tokio",
+ "zip",
 ]
 
 [[package]]

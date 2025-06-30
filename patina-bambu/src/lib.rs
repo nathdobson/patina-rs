@@ -142,8 +142,10 @@ impl BambuBuilder {
         self.prime_tower_position = position;
     }
     pub async fn build(self) -> anyhow::Result<()> {
-        let mut application_metadata = ModelMetadata::new("Application".to_string())
-            .value(Some("BambuStudio-01.10.01.50".to_string()));
+        let application_metadata = ModelMetadata::new("Application".to_string())
+            .value(Some("BambuStudio-02.01.01.52".to_string()));
+        let version =
+            ModelMetadata::new("BambuStudio:3mfVersion".to_string()).value(Some("1".to_string()));
         let mut model_objects = vec![];
         let mut model_items = vec![];
         let mut object_settings = vec![];
@@ -231,7 +233,7 @@ impl BambuBuilder {
             );
         }
         let model = Model::new()
-            .metadata(vec![application_metadata])
+            .metadata(vec![application_metadata, version])
             .resources(ModelResources::new().object(model_objects))
             .build(ModelBuild::new().item(model_items))
             .unit(ModelUnit::Millimeter);
