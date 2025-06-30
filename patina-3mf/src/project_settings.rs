@@ -1,20 +1,24 @@
 use crate::bool_from_int_string::BoolFromIntString;
+use crate::color::Color;
+use crate::settings_id::filament_settings_id::FilamentSettingsId;
+use crate::settings_id::print_settings_id::PrintSettingsId;
+use crate::settings_id::printer_settings_id::PrinterSettingsId;
 use serde::de::Error;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde_with::{DeserializeAs, SerializeAs, serde_as};
 use serde_with::DisplayFromStr;
+use serde_with::{DeserializeAs, SerializeAs, serde_as};
 
 #[serde_as]
 #[derive(Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct ProjectSettings {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub filament_colour: Option<Vec<String>>,
+    pub filament_colour: Option<Vec<Color>>,
     #[serde_as(as = "Option<Vec<BoolFromIntString>>")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub filament_is_support: Option<Vec<bool>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub filament_settings_id: Option<Vec<String>>,
+    pub filament_settings_id: Option<Vec<FilamentSettingsId>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub filament_type: Option<Vec<String>>,
     #[serde_as(as = "Option<Vec<DisplayFromStr>>")]
@@ -24,12 +28,12 @@ pub struct ProjectSettings {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub nozzle_diameter: Option<Vec<f64>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub print_settings_id: Option<String>,
+    pub print_settings_id: Option<PrintSettingsId>,
     #[serde_as(as = "Option<DisplayFromStr>")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub printable_height: Option<f64>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub printer_settings_id: Option<String>,
+    pub printer_settings_id: Option<PrinterSettingsId>,
     #[serde_as(as = "Option<BoolFromIntString>")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enable_prime_tower: Option<bool>,
@@ -39,6 +43,17 @@ pub struct ProjectSettings {
     #[serde_as(as = "Option<DisplayFromStr>")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub wipe_tower_y: Option<f64>,
+    #[serde_as(as = "Option<BoolFromIntString>")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prime_tower_rib_wall: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prime_tower_infill_gap: Option<String>,
+    #[serde_as(as = "Option<BoolFromIntString>")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub enable_timelapse: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde_as(as = "Option<DisplayFromStr>")]
+    pub timelapse_type: Option<usize>,
 }
 
 impl ProjectSettings {
@@ -56,9 +71,13 @@ impl ProjectSettings {
             enable_prime_tower: None,
             wipe_tower_x: None,
             wipe_tower_y: None,
+            prime_tower_rib_wall: None,
+            prime_tower_infill_gap: None,
+            enable_timelapse: None,
+            timelapse_type: None,
         }
     }
-    pub fn filament_colour(mut self, filament_colour: Option<Vec<String>>) -> Self {
+    pub fn filament_colour(mut self, filament_colour: Option<Vec<Color>>) -> Self {
         self.filament_colour = filament_colour;
         self
     }
@@ -66,7 +85,10 @@ impl ProjectSettings {
         self.filament_is_support = filament_support;
         self
     }
-    pub fn filament_settings_id(mut self, filament_settings_id: Option<Vec<String>>) -> Self {
+    pub fn filament_settings_id(
+        mut self,
+        filament_settings_id: Option<Vec<FilamentSettingsId>>,
+    ) -> Self {
         self.filament_settings_id = filament_settings_id;
         self
     }
@@ -82,7 +104,7 @@ impl ProjectSettings {
         self.nozzle_diameter = nozzle_diameter;
         self
     }
-    pub fn print_settings_id(mut self, print_settings_id: Option<String>) -> Self {
+    pub fn print_settings_id(mut self, print_settings_id: Option<PrintSettingsId>) -> Self {
         self.print_settings_id = print_settings_id;
         self
     }
@@ -90,7 +112,7 @@ impl ProjectSettings {
         self.printable_height = printable_height;
         self
     }
-    pub fn printer_settings_id(mut self, printer_settings_id: Option<String>) -> Self {
+    pub fn printer_settings_id(mut self, printer_settings_id: Option<PrinterSettingsId>) -> Self {
         self.printer_settings_id = printer_settings_id;
         self
     }
@@ -104,6 +126,22 @@ impl ProjectSettings {
     }
     pub fn wipe_tower_y(mut self, wipe_tower_y: Option<f64>) -> Self {
         self.wipe_tower_y = wipe_tower_y;
+        self
+    }
+    pub fn prime_tower_rib_wall(mut self, prime_tower_rib_wall: Option<bool>) -> Self {
+        self.prime_tower_rib_wall = prime_tower_rib_wall;
+        self
+    }
+    pub fn prime_tower_infill_gap(mut self, prime_tower_infill_gap: Option<String>) -> Self {
+        self.prime_tower_infill_gap = prime_tower_infill_gap;
+        self
+    }
+    pub fn enable_timelapse(mut self, enable_timelapse: Option<bool>) -> Self {
+        self.enable_timelapse = enable_timelapse;
+        self
+    }
+    pub fn timelapse_type(mut self, timelapse_type: Option<usize>) -> Self {
+        self.timelapse_type = timelapse_type;
         self
     }
 }

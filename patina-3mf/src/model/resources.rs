@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::model::mesh::ModelMesh;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Default)]
 #[non_exhaustive]
@@ -174,5 +174,9 @@ impl ModelComponent {
             objectid,
             transform: None,
         }
+    }
+    pub fn transform(mut self, transform: Option<[f64; 12]>) -> Self {
+        self.transform = transform;
+        self
     }
 }

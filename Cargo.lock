@@ -617,6 +617,8 @@ name = "patina-3mf"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "arrayvec",
+ "itertools",
  "serde",
  "serde-xml-rs",
  "serde_json",

@@ -1,3 +1,4 @@
+#![feature(iter_array_chunks)]
 #![allow(dead_code, unused_imports, unused_mut,unused_variables)]
 
 pub mod content_types;
@@ -7,6 +8,8 @@ pub mod project_settings;
 pub mod relationships;
 pub mod xmlns;
 mod bool_from_int_string;
+pub mod color;
+pub mod settings_id;
 
 use crate::content_types::ContentTypes;
 use crate::model::Model;
