@@ -1,7 +1,16 @@
-pub mod mesh;
-pub mod model;
+#![allow(dead_code, unused_imports, unused_mut)]
 
+mod bool_as_int;
+pub mod content_types;
+pub mod model;
+pub mod model_settings;
+pub mod relationships;
+pub mod xmlns;
+
+use crate::content_types::ContentTypes;
 use crate::model::Model;
+use crate::model_settings::ModelSettings;
+use crate::relationships::Relationships;
 use serde::{Deserialize, Serialize};
 #[deny(unused_must_use)]
 use std::io::{Cursor, Write};
@@ -12,30 +21,11 @@ use zip::write::SimpleFileOptions;
 #[non_exhaustive]
 pub struct ModelContainer {
     pub model: Model,
+    pub content_types: Option<ContentTypes>,
+    pub relationships: Option<Relationships>,
+    pub model_settings: Option<ModelSettings>,
 }
 
-const CONTENT_TYPES_FILE: &[u8] = //
-    br#"<?xml version="1.0" encoding="utf-8"?>
-    <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
-        <Default
-            Extension="model"
-            ContentType="application/vnd.ms-package.3dmanufacturing-3dmodel+xml" />
-        <Default
-            Extension="rels"
-            ContentType="application/vnd.openxmlformats-package.relationships+xml" />
-        <Default
-            Extension="texture"
-            ContentType="application/vnd.ms-package.3dmanufacturing-3dmodeltexture" />
-        <Default Extension="png" ContentType="image/png"/>
-    </Types>
-"#;
-
-const RELS_FILE:&[u8]=//
-    br#"<?xml version="1.0" encoding="UTF-8"?>
-            <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-                <Relationship Target="/3D/3dmodel.model" Id="rel-1" Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel"/>
-            </Relationships>
-        "#;
 const MODEL_CONFIG: &[u8] = //
     br#"<?xml version="1.0" encoding="UTF-8"?>
 <config>
@@ -162,26 +152,51 @@ const SLICE_CONFIG:&[u8]=br##"<?xml version="1.0" encoding="UTF-8"?>
 
 impl ModelContainer {
     pub fn new(model: Model) -> Self {
-        ModelContainer { model }
+        ModelContainer {
+            model,
+            content_types: None,
+            relationships: None,
+            model_settings: None,
+        }
+    }
+    pub fn content_types(mut self, content_types: Option<ContentTypes>) -> Self {
+        self.content_types = content_types;
+        self
+    }
+    pub fn relationships(mut self, relationships: Option<Relationships>) -> Self {
+        self.relationships = relationships;
+        self
+    }
+    pub fn model_settings(mut self, model_settings: Option<ModelSettings>) -> Self {
+        self.model_settings = model_settings;
+        self
+    }
+    fn to_xml_string<T: Serialize>(&self, value: &T) -> anyhow::Result<String> {
+        Ok(serde_xml_rs::SerdeXml::new()
+            .emitter(EmitterConfig::new().perform_indent(true))
+            .to_string(value)?)
     }
     pub fn encode(&self) -> anyhow::Result<Vec<u8>> {
         let mut buffer = vec![];
         let mut zip = ZipWriter::new(Cursor::new(&mut buffer));
         let opts = SimpleFileOptions::default();
-        zip.start_file("[Content_Types].xml", opts.clone())?;
-        zip.write_all(CONTENT_TYPES_FILE)?;
-        zip.add_directory("_rels", opts.clone())?;
-        zip.start_file("_rels/.rels", opts.clone())?;
-        zip.write_all(RELS_FILE)?;
+        if let Some(content_types) = &self.content_types {
+            zip.start_file("[Content_Types].xml", opts.clone())?;
+            zip.write_all(self.to_xml_string(content_types)?.as_bytes())?;
+        }
+        if let Some(relationships) = &self.relationships {
+            zip.add_directory("_rels", opts.clone())?;
+            zip.start_file("_rels/.rels", opts.clone())?;
+            zip.write_all(self.to_xml_string(relationships)?.as_bytes())?;
+        }
         zip.add_directory("3D/", opts.clone())?;
         zip.start_file("3D/3dmodel.model", opts.clone())?;
-        let model = serde_xml_rs::SerdeXml::new()
-            .emitter(EmitterConfig::new().perform_indent(true))
-            .to_string(&self.model)?;
-        zip.write_all(model.as_bytes())?;
+        zip.write_all(self.to_xml_string(&self.model)?.as_bytes())?;
         zip.add_directory("Metadata", opts.clone())?;
-        zip.start_file("Metadata/model_settings.config", opts.clone())?;
-        zip.write_all(MODEL_CONFIG)?;
+        if let Some(model_settings) = &self.model_settings {
+            zip.start_file("Metadata/model_settings.config", opts.clone())?;
+            zip.write_all(self.to_xml_string(model_settings)?.as_bytes())?;
+        }
         zip.start_file("Metadata/project_settings.config", opts.clone())?;
         zip.write_all(PROJECT_CONFIG)?;
         zip.finish()?;
