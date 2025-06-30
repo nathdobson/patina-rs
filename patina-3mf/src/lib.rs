@@ -1,15 +1,11 @@
 #![allow(dead_code, unused_imports, unused_mut,unused_variables)]
 
-mod bool_as_int;
 pub mod content_types;
 pub mod model;
 pub mod model_settings;
 pub mod project_settings;
 pub mod relationships;
 pub mod xmlns;
-mod vec_bool_as_vec_int_string;
-mod vec_as_vec_string;
-mod as_string;
 mod bool_from_int_string;
 
 use crate::content_types::ContentTypes;

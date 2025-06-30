@@ -1,4 +1,6 @@
 use serde::{Deserialize, Serialize};
+use serde_with::serde_as;
+use crate::bool_from_int_string::BoolFromIntString;
 
 #[derive(Serialize, Deserialize, Default)]
 #[non_exhaustive]
@@ -17,6 +19,7 @@ impl Build {
     }
 }
 
+#[serde_as]
 #[derive(Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct Item {
@@ -29,11 +32,8 @@ pub struct Item {
     #[serde(rename = "@partnumber", skip_serializing_if = "Option::is_none")]
     pub partnumber: Option<String>,
 
-    #[serde(
-        rename = "@printable",
-        skip_serializing_if = "Option::is_none",
-        with = "crate::bool_as_int"
-    )]
+    #[serde_as(as = "Option<BoolFromIntString>")]
+    #[serde(rename = "@printable", skip_serializing_if = "Option::is_none")]
     pub printable: Option<bool>,
 }
 

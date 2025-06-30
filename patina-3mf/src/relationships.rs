@@ -27,6 +27,14 @@ impl Relationships {
         self.relationship = relationship;
         self
     }
+    pub fn minimal() -> Self {
+        Relationships::new().relationship(vec![
+            Relationship::new()
+                .target("/3D/3dmodel.model".to_string())
+                .id("rel-1".to_string())
+                .typ("http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel".to_string()),
+        ])
+    }
 }
 
 #[derive(Serialize, Deserialize)]

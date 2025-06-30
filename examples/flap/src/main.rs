@@ -64,47 +64,8 @@ async fn main() -> anyhow::Result<()> {
         .resources(Resources::new().object(vec![object1, object2, object9]))
         .build(Build::new().item(vec![Item::new(9).printable(Some(true))]))
         .unit(Unit::Millimeter);
-    let content_types = ContentTypes::new().defaults(vec![
-        ContentTypeDefault::new(
-            "model".to_string(),
-            "application/vnd.ms-package.3dmanufacturing-3dmodel+xml".to_string(),
-        ),
-        ContentTypeDefault::new(
-            "rels".to_string(),
-            "application/vnd.openxmlformats-package.relationships+xml".to_string(),
-        ),
-    ]);
-    let relationships = Relationships::new().relationship(vec![
-        Relationship::new()
-            .target("/3D/3dmodel.model".to_string())
-            .id("rel-1".to_string())
-            .typ("http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel".to_string()),
-    ]);
-    br#"<?xml version="1.0" encoding="UTF-8"?>
-<config>
-  <object id="9">
-    <metadata key="name" value="part1"/>
-    <metadata key="extruder" value="1"/>
-    <part id="1" subtype="normal_part">
-      <metadata key="name" value="part1.stl"/>
-      <metadata key="extruder" value="1"/>
-    </part>
-    <part id="2" subtype="normal_part">
-      <metadata key="name" value="part2.stl"/>
-      <metadata key="extruder" value="2"/>
-    </part>
-  </object>
-  <plate>
-    <metadata key="plater_id" value="1"/>
-    <model_instance>
-      <metadata key="object_id" value="9"/>
-    </model_instance>
-  </plate>
-  <assemble>
-   <assemble_item object_id="9" />
-  </assemble>
-</config>
-"#;
+    let content_types = ContentTypes::minimal();
+    let relationships = Relationships::minimal();
     let model_settings = ModelSettings::new()
         .object(vec![
             ObjectSettings::new("9".to_string())

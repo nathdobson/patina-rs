@@ -41,6 +41,18 @@ impl ContentTypes {
         self.defaults = defaults;
         self
     }
+    pub fn minimal() -> Self {
+        ContentTypes::new().defaults(vec![
+            ContentTypeDefault::new(
+                "model".to_string(),
+                "application/vnd.ms-package.3dmanufacturing-3dmodel+xml".to_string(),
+            ),
+            ContentTypeDefault::new(
+                "rels".to_string(),
+                "application/vnd.openxmlformats-package.relationships+xml".to_string(),
+            ),
+        ])
+    }
 }
 
 #[derive(Serialize, Deserialize)]
