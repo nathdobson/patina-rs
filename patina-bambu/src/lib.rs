@@ -3,6 +3,9 @@
 #![allow(dead_code)]
 #![allow(unused_mut)]
 #![allow(unused_imports)]
+#![allow(unused_variables)]
+
+pub mod cli;
 
 use patina_3mf::ModelContainer;
 use patina_3mf::color::Color;
@@ -30,6 +33,9 @@ use patina_3mf::settings_id::printer::Printer;
 use patina_3mf::settings_id::printer_settings_id::PrinterSettingsId;
 use patina_cad::math::vec2::Vec2;
 use patina_cad::meshes::mesh::Mesh;
+
+#[test]
+fn nothing() {}
 
 pub struct BambuPart {
     mesh: Mesh,
@@ -141,7 +147,7 @@ impl BambuBuilder {
     pub fn prime_tower_position(&mut self, position: Option<Vec2>) {
         self.prime_tower_position = position;
     }
-    pub async fn build(self) -> anyhow::Result<()> {
+    pub fn build(self) -> anyhow::Result<Vec<u8>> {
         let application_metadata = ModelMetadata::new("Application".to_string())
             .value(Some("BambuStudio-02.01.01.52".to_string()));
         let version =
@@ -277,48 +283,6 @@ impl BambuBuilder {
             .project_settings(Some(project_settings));
 
         let encoded = model_cont.encode()?;
-        tokio::fs::write("examples/flap/output.3mf", encoded).await?;
-        tokio::fs::remove_dir_all("examples/flap/output").await.ok();
-        tokio::fs::create_dir("examples/flap/output").await.ok();
-
-        tokio::process::Command::new("unzip")
-            .arg("-q")
-            .arg("../output.3mf")
-            .current_dir("examples/flap/output")
-            .spawn()?
-            .wait()
-            .await?
-            .exit_ok()?;
-        let mut slicer = tokio::process::Command::new(
-            "/Applications/BambuStudio.app/Contents/MacOS/BambuStudio",
-        );
-        slicer.arg("--debug").arg("2");
-        slicer.arg("--slice").arg("0");
-        slicer.arg("--arrange").arg("0");
-        let filament = "/Applications/BambuStudio.app/Contents/Resources/profiles/BBL/filament/Bambu PLA Basic @BBL A1M 0.2 nozzle.json";
-        slicer.arg("--load-filaments").arg(filament);
-        let machine = "/Applications/BambuStudio.app/Contents/Resources/profiles/BBL/machine/Bambu Lab A1 mini 0.4 nozzle.json";
-        let process = "/Applications/BambuStudio.app/Contents/Resources/profiles/BBL/process/0.20mm Standard @BBL A1M.json";
-        slicer
-            .arg("--load-settings")
-            .arg(format!("{};{}", machine, process));
-        slicer.arg("--enable-timelapse");
-        slicer.arg("--timelapse-type=1");
-        slicer
-            .arg("--export-3mf")
-            .arg("/Users/nathan/Documents/workspace/patina/examples/flap/sliced.3mf");
-        slicer.arg("examples/flap/output.3mf");
-        slicer.spawn()?.wait().await?.exit_ok()?;
-        tokio::fs::remove_dir_all("examples/flap/sliced").await.ok();
-        tokio::fs::create_dir("examples/flap/sliced").await.ok();
-        tokio::process::Command::new("unzip")
-            .arg("-q")
-            .arg("../sliced.3mf")
-            .current_dir("examples/flap/sliced")
-            .spawn()?
-            .wait()
-            .await?
-            .exit_ok()?;
-        Ok(())
+        Ok(encoded)
     }
 }

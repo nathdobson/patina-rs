@@ -18,10 +18,10 @@ pub enum FilamentBrand {
 pub enum FilamentMaterial {
     #[serde(rename = "ABS")]
     Abs,
-    #[serde(rename = "PLA")]
-    Pla,
     #[serde(rename = "PLA Basic")]
     PlaBasic,
+    #[serde(rename = "PLA Matte")]
+    PlaMatte,
     #[serde(rename = "Support for PLA")]
     SupportForPla,
 }

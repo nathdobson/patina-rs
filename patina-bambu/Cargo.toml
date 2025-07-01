@@ -7,4 +7,5 @@ edition = "2024"
 patina-cad = {workspace = true}
 patina-3mf = {workspace = true}
 anyhow = "1.0.98"
-tokio = "1.45.1"
+tokio = {version="1.45.1",features=["process"]}
+itertools = "0.14.0"
