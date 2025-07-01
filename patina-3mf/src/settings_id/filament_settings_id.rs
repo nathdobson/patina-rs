@@ -22,7 +22,7 @@ pub enum FilamentMaterial {
     PlaBasic,
     #[serde(rename = "PLA Matte")]
     PlaMatte,
-    #[serde(rename = "Support for PLA")]
+    #[serde(rename = "Support For PLA")]
     SupportForPla,
 }
 

@@ -1,5 +1,6 @@
 use crate::bool_from_int_string::BoolFromIntString;
 use crate::color::Color;
+use crate::option_or_nil::OptionOrNil;
 use crate::settings_id::filament_settings_id::FilamentSettingsId;
 use crate::settings_id::print_settings_id::PrintSettingsId;
 use crate::settings_id::printer_settings_id::PrinterSettingsId;
@@ -13,12 +14,17 @@ use serde_with::{DeserializeAs, SerializeAs, serde_as};
 #[non_exhaustive]
 pub struct ProjectSettings {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub filament_colour: Option<Vec<Color>>,
-    #[serde_as(as = "Option<Vec<BoolFromIntString>>")]
+    pub filament_colour: Option<Vec<Option<Color>>>,
+    #[serde_as(as = "Option<Vec<OptionOrNil<BoolFromIntString>>>")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub filament_is_support: Option<Vec<bool>>,
+    pub filament_is_support: Option<Vec<Option<bool>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub filament_settings_id: Option<Vec<FilamentSettingsId>>,
+    pub filament_settings_id: Option<Vec<Option<FilamentSettingsId>>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub filament_shrink: Option<Vec<Option<String>>>,
+    #[serde_as(as = "Option<Vec<OptionOrNil<DisplayFromStr>>>")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub filament_diameter: Option<Vec<Option<f64>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub filament_type: Option<Vec<String>>,
     #[serde_as(as = "Option<Vec<DisplayFromStr>>")]
@@ -37,12 +43,12 @@ pub struct ProjectSettings {
     #[serde_as(as = "Option<BoolFromIntString>")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enable_prime_tower: Option<bool>,
-    #[serde_as(as = "Option<DisplayFromStr>")]
+    #[serde_as(as = "Option<Vec<DisplayFromStr>>")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub wipe_tower_x: Option<f64>,
-    #[serde_as(as = "Option<DisplayFromStr>")]
+    pub wipe_tower_x: Option<Vec<f64>>,
+    #[serde_as(as = "Option<Vec<DisplayFromStr>>")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub wipe_tower_y: Option<f64>,
+    pub wipe_tower_y: Option<Vec<f64>>,
     #[serde_as(as = "Option<BoolFromIntString>")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub prime_tower_rib_wall: Option<bool>,
@@ -62,6 +68,8 @@ impl ProjectSettings {
             filament_colour: None,
             filament_is_support: None,
             filament_settings_id: None,
+            filament_shrink: None,
+            filament_diameter: None,
             filament_type: None,
             flush_volumes_matrix: None,
             nozzle_diameter: None,
@@ -77,19 +85,27 @@ impl ProjectSettings {
             timelapse_type: None,
         }
     }
-    pub fn filament_colour(mut self, filament_colour: Option<Vec<Color>>) -> Self {
+    pub fn filament_colour(mut self, filament_colour: Option<Vec<Option<Color>>>) -> Self {
         self.filament_colour = filament_colour;
         self
     }
-    pub fn filament_is_support(mut self, filament_support: Option<Vec<bool>>) -> Self {
+    pub fn filament_is_support(mut self, filament_support: Option<Vec<Option<bool>>>) -> Self {
         self.filament_is_support = filament_support;
         self
     }
     pub fn filament_settings_id(
         mut self,
-        filament_settings_id: Option<Vec<FilamentSettingsId>>,
+        filament_settings_id: Option<Vec<Option<FilamentSettingsId>>>,
     ) -> Self {
         self.filament_settings_id = filament_settings_id;
+        self
+    }
+    pub fn filament_shrink(mut self, filament_shrink: Option<Vec<Option<String>>>) -> Self {
+        self.filament_shrink = filament_shrink;
+        self
+    }
+    pub fn filament_diameter(mut self, filament_diameter: Option<Vec<Option<f64>>>) -> Self {
+        self.filament_diameter = filament_diameter;
         self
     }
     pub fn filament_type(mut self, filament_type: Option<Vec<String>>) -> Self {
@@ -120,11 +136,11 @@ impl ProjectSettings {
         self.enable_prime_tower = enable_prime_tower;
         self
     }
-    pub fn wipe_tower_x(mut self, wipe_tower_x: Option<f64>) -> Self {
+    pub fn wipe_tower_x(mut self, wipe_tower_x: Option<Vec<f64>>) -> Self {
         self.wipe_tower_x = wipe_tower_x;
         self
     }
-    pub fn wipe_tower_y(mut self, wipe_tower_y: Option<f64>) -> Self {
+    pub fn wipe_tower_y(mut self, wipe_tower_y: Option<Vec<f64>>) -> Self {
         self.wipe_tower_y = wipe_tower_y;
         self
     }

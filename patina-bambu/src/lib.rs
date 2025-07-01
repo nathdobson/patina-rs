@@ -55,25 +55,44 @@ pub struct BambuPlate {
 }
 
 pub struct BambuFilament {
-    color: Color,
-    support: bool,
-    settings_id: FilamentSettingsId,
+    color: Option<Color>,
+    support: Option<bool>,
+    settings_id: Option<FilamentSettingsId>,
+    diameter: Option<f64>,
+    shrink: Option<String>,
 }
 pub struct BambuBuilder {
     printer_settings_id: Option<PrinterSettingsId>,
     print_settings_id: Option<PrintSettingsId>,
     plates: Vec<BambuPlate>,
     filaments: Vec<BambuFilament>,
-    prime_tower_position: Option<Vec2>,
+    prime_tower_positions: Option<Vec<Vec2>>,
 }
 
 impl BambuFilament {
-    pub fn new(color: Color, support: bool, settings_id: FilamentSettingsId) -> BambuFilament {
+    pub fn new() -> BambuFilament {
         BambuFilament {
-            color,
-            support,
-            settings_id,
+            color: None,
+            support: None,
+            settings_id: None,
+            diameter: None,
+            shrink: None,
         }
+    }
+    pub fn color(&mut self, color: Option<Color>) {
+        self.color = color;
+    }
+    pub fn support(&mut self, support: Option<bool>) {
+        self.support = support;
+    }
+    pub fn settings_id(&mut self, settings_id: Option<FilamentSettingsId>) {
+        self.settings_id = settings_id;
+    }
+    pub fn diameter(&mut self, diameter: Option<f64>) {
+        self.diameter = diameter;
+    }
+    pub fn shrink(&mut self, shrink: Option<String>) {
+        self.shrink = shrink;
     }
 }
 
@@ -105,6 +124,9 @@ impl BambuObject {
             transform: None,
         }
     }
+    pub fn name(&mut self, name: Option<String>) {
+        self.name = name;
+    }
     pub fn transform(&mut self, transform: Option<[f64; 12]>) {
         self.transform = transform;
     }
@@ -129,7 +151,7 @@ impl BambuBuilder {
             print_settings_id: None,
             plates: vec![],
             filaments: vec![],
-            prime_tower_position: None,
+            prime_tower_positions: None,
         }
     }
     pub fn add_plate(&mut self, p: BambuPlate) {
@@ -144,8 +166,8 @@ impl BambuBuilder {
     pub fn print_settings_id(&mut self, id: Option<PrintSettingsId>) {
         self.print_settings_id = id;
     }
-    pub fn prime_tower_position(&mut self, position: Option<Vec2>) {
-        self.prime_tower_position = position;
+    pub fn prime_tower_positions(&mut self, position: Option<Vec<Vec2>>) {
+        self.prime_tower_positions = position;
     }
     pub fn build(self) -> anyhow::Result<Vec<u8>> {
         let application_metadata = ModelMetadata::new("Application".to_string())
@@ -256,6 +278,8 @@ impl BambuBuilder {
             .iter()
             .map(|x| x.settings_id.clone())
             .collect();
+        let filament_shrink = self.filaments.iter().map(|x| x.shrink.clone()).collect();
+        let filament_diameter = self.filaments.iter().map(|x| x.diameter.clone()).collect();
         let flush_volumes_matrix: Vec<_> = (0..self.filaments.len())
             .flat_map(|f1| {
                 (0..self.filaments.len()).map(move |f2| if f1 == f2 { 0.0 } else { 100.0 })
@@ -265,16 +289,27 @@ impl BambuBuilder {
             .filament_colour(Some(filament_color))
             .filament_is_support(Some(filament_is_support))
             .filament_settings_id(Some(filament_settings_id))
+            .filament_shrink(Some(filament_shrink))
+            .filament_diameter(Some(filament_diameter))
             .flush_volumes_matrix(Some(flush_volumes_matrix))
             .nozzle_diameter(Some(vec![0.4]))
             .print_settings_id(self.print_settings_id.clone())
             .printable_height(Some(180.0))
             .printer_settings_id(self.printer_settings_id.clone())
-            .enable_prime_tower(Some(true))
-            .wipe_tower_x(self.prime_tower_position.map(|p| p.x()))
-            .wipe_tower_y(self.prime_tower_position.map(|p| p.y()))
-            .enable_timelapse(Some(true))
-            .timelapse_type(Some(1));
+            // .enable_prime_tower(Some(true))
+            .wipe_tower_x(
+                self.prime_tower_positions
+                    .as_ref()
+                    .map(|ps| ps.iter().map(|p| p.x()).collect()),
+            )
+            .wipe_tower_y(
+                self.prime_tower_positions
+                    .as_ref()
+                    .map(|ps| ps.iter().map(|p| p.y()).collect()),
+            )
+            // .enable_timelapse(Some(true))
+            // .timelapse_type(Some(1))
+            ;
 
         let model_cont = ModelContainer::new(model)
             .content_types(Some(content_types))
