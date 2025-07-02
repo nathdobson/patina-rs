@@ -7,8 +7,8 @@
 
 pub mod cli;
 
+use itertools::Itertools;
 use patina_3mf::ModelContainer;
-use patina_3mf::color::Color;
 use patina_3mf::content_types::ContentTypes;
 use patina_3mf::model::build::{ModelBuild, ModelItem};
 use patina_3mf::model::mesh::{
@@ -23,6 +23,10 @@ use patina_3mf::model_settings::{
     SettingsMetadata,
 };
 use patina_3mf::project_settings::ProjectSettings;
+use patina_3mf::project_settings::color::Color;
+use patina_3mf::project_settings::support_interface_pattern::SupportInterfacePattern;
+use patina_3mf::project_settings::support_style::SupportStyle;
+use patina_3mf::project_settings::support_type::SupportType;
 use patina_3mf::relationships::Relationships;
 use patina_3mf::settings_id::filament_settings_id::{
     FilamentBrand, FilamentMaterial, FilamentSettingsId,
@@ -36,6 +40,18 @@ use patina_cad::meshes::mesh::Mesh;
 
 #[test]
 fn nothing() {}
+
+pub struct BambuSupport {
+    independent_support_layer_height: Option<usize>,
+    support_bottom_z_distance: Option<usize>,
+    support_filament: Option<usize>,
+    support_interface_filament: Option<usize>,
+    support_interface_pattern: Option<SupportInterfacePattern>,
+    support_interface_spacing: Option<usize>,
+    support_style: Option<SupportStyle>,
+    support_top_z_distance: Option<usize>,
+    support_type: Option<SupportType>,
+}
 
 pub struct BambuPart {
     mesh: Mesh,
@@ -67,6 +83,53 @@ pub struct BambuBuilder {
     plates: Vec<BambuPlate>,
     filaments: Vec<BambuFilament>,
     prime_tower_positions: Option<Vec<Vec2>>,
+    support: Option<BambuSupport>,
+}
+
+impl BambuSupport {
+    pub fn new() -> Self {
+        BambuSupport {
+            independent_support_layer_height: None,
+            support_bottom_z_distance: None,
+            support_filament: None,
+            support_interface_filament: None,
+            support_interface_pattern: None,
+            support_interface_spacing: None,
+            support_style: None,
+            support_top_z_distance: None,
+            support_type: None,
+        }
+    }
+    pub fn independent_support_layer_height(&mut self, layer_height: usize) {
+        self.independent_support_layer_height = Some(layer_height);
+    }
+    pub fn support_bottom_z_distance(&mut self, support_bottom_z_distance: usize) {
+        self.support_bottom_z_distance = Some(support_bottom_z_distance);
+    }
+    pub fn support_filament(&mut self, support_filament: usize) {
+        self.support_filament = Some(support_filament);
+    }
+    pub fn support_interface_filament(&mut self, support_interface_filament: usize) {
+        self.support_interface_filament = Some(support_interface_filament);
+    }
+    pub fn support_interface_pattern(
+        &mut self,
+        support_interface_pattern: SupportInterfacePattern,
+    ) {
+        self.support_interface_pattern = Some(support_interface_pattern);
+    }
+    pub fn support_interface_spacing(&mut self, support_interface_spacing: usize) {
+        self.support_interface_spacing = Some(support_interface_spacing);
+    }
+    pub fn support_style(&mut self, support_style: SupportStyle) {
+        self.support_style = Some(support_style);
+    }
+    pub fn support_top_z_distance(&mut self, support_top_z_distance: usize) {
+        self.support_top_z_distance = Some(support_top_z_distance);
+    }
+    pub fn support_type(&mut self, support_type: SupportType) {
+        self.support_type = Some(support_type);
+    }
 }
 
 impl BambuFilament {
@@ -152,6 +215,7 @@ impl BambuBuilder {
             plates: vec![],
             filaments: vec![],
             prime_tower_positions: None,
+            support: None,
         }
     }
     pub fn add_plate(&mut self, p: BambuPlate) {
@@ -168,6 +232,9 @@ impl BambuBuilder {
     }
     pub fn prime_tower_positions(&mut self, position: Option<Vec<Vec2>>) {
         self.prime_tower_positions = position;
+    }
+    pub fn support(&mut self, support: BambuSupport) {
+        self.support = Some(support);
     }
     pub fn build(self) -> anyhow::Result<Vec<u8>> {
         let application_metadata = ModelMetadata::new("Application".to_string())
@@ -285,37 +352,90 @@ impl BambuBuilder {
                 (0..self.filaments.len()).map(move |f2| if f1 == f2 { 0.0 } else { 100.0 })
             })
             .collect();
-        let project_settings = ProjectSettings::new()
-            .filament_colour(Some(filament_color))
-            .filament_is_support(Some(filament_is_support))
-            .filament_settings_id(Some(filament_settings_id))
-            .filament_shrink(Some(filament_shrink))
-            .filament_diameter(Some(filament_diameter))
-            .flush_volumes_matrix(Some(flush_volumes_matrix))
-            .nozzle_diameter(Some(vec![0.4]))
-            .print_settings_id(self.print_settings_id.clone())
-            .printable_height(Some(180.0))
-            .printer_settings_id(self.printer_settings_id.clone())
-            // .enable_prime_tower(Some(true))
-            .wipe_tower_x(
-                self.prime_tower_positions
-                    .as_ref()
-                    .map(|ps| ps.iter().map(|p| p.x()).collect()),
-            )
-            .wipe_tower_y(
-                self.prime_tower_positions
-                    .as_ref()
-                    .map(|ps| ps.iter().map(|p| p.y()).collect()),
-            )
-            // .enable_timelapse(Some(true))
-            // .timelapse_type(Some(1))
-            ;
+        let mut project_settings = ProjectSettings::new();
+        project_settings.filament_colour = Some(filament_color);
+        project_settings.filament_is_support = Some(filament_is_support);
+        project_settings.filament_settings_id = Some(filament_settings_id);
+        project_settings.filament_shrink = Some(filament_shrink);
+        project_settings.filament_diameter = Some(filament_diameter);
+        project_settings.flush_volumes_matrix = Some(flush_volumes_matrix);
+        project_settings.nozzle_diameter = Some(vec![0.4]);
+        project_settings.print_settings_id = self.print_settings_id.clone();
+        project_settings.printable_height = Some(180.0);
+        project_settings.printer_settings_id = self.printer_settings_id.clone();
+        project_settings.wipe_tower_x = self
+            .prime_tower_positions
+            .as_ref()
+            .map(|ps| ps.iter().map(|p| p.x()).collect());
+        project_settings.wipe_tower_y = self
+            .prime_tower_positions
+            .as_ref()
+            .map(|ps| ps.iter().map(|p| p.y()).collect());
+        let mut different_settings_to_system = vec![];
+        if let Some(support) = self.support {
+            project_settings.enable_support = Some(true);
+            different_settings_to_system.push("enable_support");
+            if let Some(independent_support_layer_height) = support.independent_support_layer_height
+            {
+                project_settings.independent_support_layer_height =
+                    Some(independent_support_layer_height);
+                different_settings_to_system.push("independent_support_layer_height");
+            }
+            if let Some(support_bottom_z_distance) = support.support_bottom_z_distance {
+                project_settings.support_bottom_z_distance = Some(support_bottom_z_distance);
+                different_settings_to_system.push("support_bottom_z_distance");
+            }
 
-        let model_cont = ModelContainer::new(model)
-            .content_types(Some(content_types))
-            .relationships(Some(relationships))
-            .model_settings(Some(model_settings))
-            .project_settings(Some(project_settings));
+            if let Some(support_bottom_z_distance) = support.support_bottom_z_distance {
+                project_settings.support_bottom_z_distance = Some(support_bottom_z_distance);
+                different_settings_to_system.push("support_bottom_z_distance");
+            }
+            if let Some(support_filament) = support.support_filament {
+                project_settings.support_filament = Some(support_filament);
+                different_settings_to_system.push("support_filament");
+            }
+            if let Some(support_filament) = support.support_filament {
+                project_settings.support_filament = Some(support_filament);
+                different_settings_to_system.push("support_filament");
+            }
+            if let Some(support_interface_filament) = support.support_interface_filament {
+                project_settings.support_interface_filament = Some(support_interface_filament);
+                different_settings_to_system.push("support_interface_filament");
+            }
+            if let Some(support_interface_pattern) = support.support_interface_pattern {
+                project_settings.support_interface_pattern = Some(support_interface_pattern);
+                different_settings_to_system.push("support_interface_pattern");
+            }
+            if let Some(support_interface_spacing) = support.support_interface_spacing {
+                project_settings.support_interface_spacing = Some(support_interface_spacing);
+                different_settings_to_system.push("support_interface_spacing");
+            }
+            if let Some(support_style) = support.support_style {
+                project_settings.support_style = Some(support_style);
+                different_settings_to_system.push("support_style");
+            }
+            if let Some(support_top_z_distance) = support.support_top_z_distance {
+                project_settings.support_top_z_distance = Some(support_top_z_distance);
+                different_settings_to_system.push("support_top_z_distance");
+            }
+            if let Some(support_type) = support.support_type {
+                project_settings.support_type = Some(support_type);
+                different_settings_to_system.push("support_type");
+            }
+        }
+
+        project_settings.different_settings_to_system = Some(vec![
+            different_settings_to_system.into_iter().join(";"),
+            "".to_string(),
+            "".to_string(),
+            "".to_string(),
+        ]);
+
+        let mut model_cont = ModelContainer::new(model);
+        model_cont.content_types = Some(content_types);
+        model_cont.relationships = Some(relationships);
+        model_cont.model_settings = Some(model_settings);
+        model_cont.project_settings = Some(project_settings);
 
         let encoded = model_cont.encode()?;
         Ok(encoded)

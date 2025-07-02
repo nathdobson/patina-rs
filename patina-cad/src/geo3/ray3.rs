@@ -26,7 +26,9 @@ impl Ray3 {
             let b = self.origin[axis];
             let min = aabb.min()[axis];
             let max = aabb.max()[axis];
-            let part = Interval::new((min - b) / m, (max - b) / m);
+            let r1 = (min - b) / m;
+            let r2 = (max - b) / m;
+            let part = Interval::new(r1.min(r2), r1.max(r2));
             interval = interval.intersect(part);
         }
         (interval.is_empty(eps).not(), interval)

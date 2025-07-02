@@ -13,3 +13,4 @@ mod simplify;
 mod mesh_test;
 mod intersect_bvh_bvh;
 mod intersect_bvh_ray;
+mod remove_empty_triangles;

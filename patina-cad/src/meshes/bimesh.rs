@@ -1,3 +1,4 @@
+use crate::geo3::aabb::AABB;
 use crate::geo3::plane::Plane;
 use crate::geo3::ray3::Ray3;
 use crate::math::disjoint_paths::DisjointPaths;
@@ -142,6 +143,13 @@ impl<'a> Bimesh<'a> {
                 self.vertices.push(*v);
                 self.vertex_origins.push(VertexOrigin::Mesh);
                 offset += 1;
+            }
+        }
+    }
+    pub fn check_degenerate(&self) {
+        for mesh in 0..2 {
+            for tri in &self.input_tris[mesh] {
+                assert!(tri.for_vertices(&self.vertices).area() > self.eps.value());
             }
         }
     }
@@ -706,21 +714,28 @@ impl<'a> Bimesh<'a> {
     pub fn build_triangulation(&mut self) {
         for mesh in 0..2 {
             for (tri, face) in &mut self.new_faces[mesh].iter_mut().enumerate() {
+                println!("{} {:#?}", tri, face);
                 let ptri = self.input_tris[mesh][tri].for_vertices(&self.vertices);
                 let mut triangulation = Triangulation::new(self.eps);
+                println!("a");
                 for v in self.input_tris[mesh][tri] {
+                    println!("{}",self.vertices[v]);
                     let mut proj = ptri.project(self.vertices[v]);
                     triangulation.add_vertex(v, proj);
                 }
+                println!("b");
                 for vs in &face.edge_vertices {
                     for &v in vs {
+                        println!("{}",self.vertices[v]);
                         triangulation.add_vertex(v, ptri.project(self.vertices[v]));
                     }
                 }
                 for (&v1, &v2) in face.border_vertices.iter().circular_tuple_windows() {
                     triangulation.add_boundary(v1, v2);
                 }
+                println!("c");
                 for &v in &face.internal_vertices {
+                    println!("{}",self.vertices[v]);
                     let proj = ptri.project(self.vertices[v]);
                     let proj_mid = ptri.project(ptri.midpoint());
                     triangulation.add_vertex(
@@ -747,7 +762,9 @@ impl<'a> Bimesh<'a> {
                 let mut actual_area = 0.0;
                 for &tri in &triangulation {
                     let tri3 = tri.for_vertices(&self.vertices);
-                    actual_area += tri3.area();
+                    let area = tri3.area();
+                    // assert!(area >= self.eps.value(), "{:?} {:?}", tri, area);
+                    actual_area += area;
                 }
                 assert!(
                     (actual_area - expected_area).abs() < 1e-10,
@@ -842,6 +859,7 @@ impl<'a> Bimesh<'a> {
                     panic!("inconsistent loop ordering");
                 }
                 if !forward && !reverse {
+                    println!("Testing inside");
                     if self.bvhs[1 - mesh]
                         .root_view(&self.input_tris[1 - mesh], &self.vertices)
                         .intersects_point(self.vertices[cc[0].vertices()[0]], self.eps, rng)
@@ -861,6 +879,7 @@ impl<'a> Bimesh<'a> {
     }
     pub fn build(&mut self, rng: &mut impl Rng) {
         self.build_relabel();
+        self.check_degenerate();
         self.build_new_faces();
         self.build_intersects();
         self.build_new_vertices();
@@ -903,7 +922,8 @@ impl<'a> Bimesh<'a> {
         let tris = tris1.chain(tris2).collect();
         let mesh = Mesh::new(vertices, tris);
         let mesh = mesh.without_dead_vertices();
-        mesh.check_manifold().unwrap();
+        let mesh=mesh.without_empty_triangles(self.eps);
+        mesh.check_manifold(self.eps).unwrap();
         mesh
     }
     pub fn union(&self) -> Mesh {
@@ -994,12 +1014,12 @@ fn rand_tetr(rng: &mut XorShiftRng, steps: usize) -> Mesh {
 
 #[cfg(test)]
 #[tokio::test]
-async fn test_random() -> anyhow::Result<()> {
+async fn test_random_tetrahedron() -> anyhow::Result<()> {
     let eps = Epsilon::new(1e-10);
     let dir = PathBuf::from("../")
         .join("target")
         .join("test_outputs")
-        .join("test_random");
+        .join("test_random_tetrahedron");
     tokio::fs::create_dir_all(&dir).await?;
 
     for steps in 99..100 {
@@ -1038,17 +1058,52 @@ async fn test_random() -> anyhow::Result<()> {
                 assert!(in_union.matches(in_m1.or(in_m2)));
                 assert!(in_inter.matches(in_m1.and(in_m2)));
             }
+        }
+    }
+    Ok(())
+}
 
-            // for m in 0..2 {
-            //     for (cci, cc) in bm.new_tri_ccs[m].iter().enumerate() {
-            //         let mesh = Mesh::new(bm.vertices.clone(), cc.clone());
-            //         write_stl_file(
-            //             &mesh,
-            //             &PathBuf::from(format!("../target/mesh_{}_cc_{}.stl", m, cci)),
-            //         )
-            //         .await?
-            //     }
-            // }
+pub fn rand_prism(rng: &mut impl Rng) -> Mesh {
+    let v1: Vec3 = rng.random();
+    let v2: Vec3 = rng.random();
+    AABB::new(v1.min(v2), v1.max(v2)).as_mesh()
+}
+
+#[cfg(test)]
+#[tokio::test]
+async fn test_random_prism() -> anyhow::Result<()> {
+    let eps = Epsilon::new(1e-10);
+    let dir = PathBuf::from("../")
+        .join("target")
+        .join("test_outputs")
+        .join("test_random_prism");
+    tokio::fs::create_dir_all(&dir).await?;
+
+    for seed in 172..1000 {
+        println!("seed={:?}", seed);
+        let mut rng = XorShiftRng::seed_from_u64(seed);
+        let m1 = rand_prism(&mut rng);
+        let m2 = rand_prism(&mut rng);
+        println!("{:#?}\n{:#?}", m1, m2);
+        write_stl_file(&m1, &dir.join("mesh1.stl")).await?;
+        write_stl_file(&m2, &dir.join("mesh2.stl")).await?;
+        let bm = Bimesh::new(&m1, &m2, eps, &mut rng);
+        write_stl_file(&bm.new_mesh(0, false), &dir.join("mesh1_outside.stl")).await?;
+        write_stl_file(&bm.new_mesh(0, true), &dir.join("mesh1_inside.stl")).await?;
+        write_stl_file(&bm.new_mesh(1, false), &dir.join("mesh2_outside.stl")).await?;
+        write_stl_file(&bm.new_mesh(1, true), &dir.join("mesh2_inside.stl")).await?;
+        let union = bm.union();
+        let inter = bm.intersect();
+        write_stl_file(&union, &dir.join("union.stl")).await?;
+        write_stl_file(&inter, &dir.join("inter.stl")).await?;
+        for i in 2..100 {
+            let p: Vec3 = rng.random();
+            let in_m1 = m1.intersects_point(p, eps, &mut rng);
+            let in_m2 = m2.intersects_point(p, eps, &mut rng);
+            let in_union = union.intersects_point(p, eps, &mut rng);
+            let in_inter = inter.intersects_point(p, eps, &mut rng);
+            assert!(in_union.matches(in_m1.or(in_m2)));
+            assert!(in_inter.matches(in_m1.and(in_m2)));
         }
     }
     Ok(())

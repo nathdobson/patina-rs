@@ -4,9 +4,9 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
+use std::collections::HashSet;
 use anyhow::anyhow;
 use patina_3mf::ModelContainer;
-use patina_3mf::color::Color;
 use patina_3mf::content_types::{ContentTypeDefault, ContentTypes};
 use patina_3mf::model::build::{ModelBuild, ModelItem};
 use patina_3mf::model::mesh::{
@@ -21,6 +21,10 @@ use patina_3mf::model_settings::{
     SettingsMetadata,
 };
 use patina_3mf::project_settings::ProjectSettings;
+use patina_3mf::project_settings::color::Color;
+use patina_3mf::project_settings::support_interface_pattern::SupportInterfacePattern;
+use patina_3mf::project_settings::support_style::SupportStyle;
+use patina_3mf::project_settings::support_type::SupportType;
 use patina_3mf::relationships::{Relationship, Relationships};
 use patina_3mf::settings_id::filament_settings_id::{
     FilamentBrand, FilamentMaterial, FilamentSettingsId,
@@ -30,13 +34,15 @@ use patina_3mf::settings_id::print_settings_id::{PrintQuality, PrintSettingsId};
 use patina_3mf::settings_id::printer::Printer;
 use patina_3mf::settings_id::printer_settings_id::PrinterSettingsId;
 use patina_bambu::cli::{BambuStudioCommand, DebugLevel, Slice};
-use patina_bambu::{BambuBuilder, BambuFilament, BambuObject, BambuPart, BambuPlate};
+use patina_bambu::{BambuBuilder, BambuFilament, BambuObject, BambuPart, BambuPlate, BambuSupport};
 use patina_cad::geo3::aabb::AABB;
+use patina_cad::math::float_bool::Epsilon;
 use patina_cad::math::mat4::Mat4;
 use patina_cad::math::vec2::Vec2;
 use patina_cad::math::vec3::Vec3;
 use patina_cad::meshes::mesh::Mesh;
 use patina_cad::meshes::mesh_triangle::MeshTriangle;
+use patina_cad::ser::stl::write_stl_file;
 use std::env;
 use std::io::{Cursor, Read, Write};
 use std::path::Path;
@@ -63,16 +69,41 @@ pub struct LetterBuilder {
 }
 
 impl LetterBuilder {
-    fn blank(&self, thickness: f64) -> Mesh {
+    async fn blank(&self, thickness: f64) -> Mesh {
         let mut mesh = AABB::new(
             Vec3::new(-self.width / 2.0, 0.0, 0.0),
             Vec3::new(self.width / 2.0, self.length, thickness),
         )
         .as_mesh();
+        mesh = mesh.difference(
+            &AABB::new(
+                Vec3::new(self.width / 2.0 - self.incut, -1.0, -self.thickness),
+                Vec3::new(self.width, self.extension, self.thickness * 2.0),
+            )
+            .as_mesh(),
+            Epsilon::new(1e-10),
+        );
+        // write_stl_file(&mesh, Path::new("examples/flap/output/cut.stl"))
+        //     .await
+        //     .unwrap();
+        // println!("{:?}", mesh.vertices().len());
+        // println!("{:?}", mesh.triangles().len());
+        mesh = mesh.difference(
+            &AABB::new(
+                Vec3::new(
+                    self.width / 2.0 - self.incut,
+                    self.extension + self.axle_diameter,
+                    -self.thickness,
+                ),
+                Vec3::new(self.width, self.drum_diameter, self.thickness * 2.0),
+            )
+            .as_mesh(),
+            Epsilon::new(1e-10),
+        );
         mesh
     }
-    pub fn build(&self) -> Vec<BambuPart> {
-        let mut body = BambuPart::new(self.blank(self.thickness));
+    pub async fn build(&self) -> Vec<BambuPart> {
+        let mut body = BambuPart::new(self.blank(self.thickness).await);
         body.material(Some(2));
         body.name(Some(format!("part({})", self.letter)));
         body.transform(Some(
@@ -86,20 +117,20 @@ impl LetterBuilder {
             .unwrap(),
         ));
 
-        let mut support = BambuPart::new(self.blank(self.support_thickness));
-        support.material(Some(3));
-        support.name(Some(format!("support({})", self.letter)));
-        support.transform(Some(
-            Mat4::translate(Vec3::new(
-                90.0,
-                90.0 - self.length / 2.0,
-                (self.index as f64) * (self.thickness + self.support_thickness),
-            ))
-            .as_affine()
-            .unwrap(),
-        ));
+        // let mut support = BambuPart::new(self.blank(self.support_thickness));
+        // support.material(Some(3));
+        // support.name(Some(format!("support({})", self.letter)));
+        // support.transform(Some(
+        //     Mat4::translate(Vec3::new(
+        //         90.0,
+        //         90.0 - self.length / 2.0,
+        //         (self.index as f64) * (self.thickness + self.support_thickness),
+        //     ))
+        //     .as_affine()
+        //     .unwrap(),
+        // ));
 
-        vec![support, body]
+        vec![body]
     }
 }
 
@@ -107,30 +138,41 @@ async fn build_output() -> anyhow::Result<()> {
     let mut bambu = BambuBuilder::new();
     let printer = Printer::A1Mini;
     let nozzle = Nozzle::Nozzle0_4;
-    let machine = PrinterSettingsId::new(printer.clone(), Some(nozzle.clone()));
+    let mut machine = PrinterSettingsId::new(printer.clone());
+    machine.nozzle = Some(nozzle.clone());
     let process = PrintSettingsId::new(0.2, PrintQuality::Standard, printer.clone(), nozzle);
     let pla_basic = FilamentSettingsId::new(
         FilamentBrand::Bambu,
         FilamentMaterial::PlaBasic,
         printer.clone(),
-        None,
     );
     let pla_matte = FilamentSettingsId::new(
         FilamentBrand::Bambu,
         FilamentMaterial::PlaMatte,
         printer.clone(),
-        None,
     );
     let pla_support = FilamentSettingsId::new(
         FilamentBrand::Bambu,
         FilamentMaterial::SupportForPla,
         printer.clone(),
-        None,
     );
 
     bambu.printer_settings_id(Some(machine.clone()));
     bambu.print_settings_id(Some(process.clone()));
     bambu.prime_tower_positions(Some(vec![Vec2::new(5.0, 5.0)]));
+    bambu.support({
+        let mut support = BambuSupport::new();
+        support.independent_support_layer_height(0);
+        support.support_bottom_z_distance(0);
+        support.support_filament(3);
+        support.support_interface_filament(3);
+        support.support_interface_pattern(SupportInterfacePattern::RectilinearInterlaced);
+        support.support_interface_spacing(0);
+        support.support_style(SupportStyle::Snug);
+        support.support_top_z_distance(0);
+        support.support_type(SupportType::NormalAuto);
+        support
+    });
     bambu.add_plate({
         let mut plate = BambuPlate::new();
         let mut object = BambuObject::new();
@@ -139,7 +181,7 @@ async fn build_output() -> anyhow::Result<()> {
             let parts = LetterBuilder {
                 index,
                 letter: *letter,
-                width: 39.0,
+                width: 43.0,
                 length: 35.0,
                 thickness: 1.0,
                 support_thickness: 0.2,
@@ -148,7 +190,8 @@ async fn build_output() -> anyhow::Result<()> {
                 axle_diameter: 1.2,
                 drum_diameter: 18.0,
             }
-            .build();
+            .build()
+            .await;
             for part in parts {
                 object.add_part(part);
             }
@@ -183,21 +226,6 @@ async fn build_output() -> anyhow::Result<()> {
         filament.shrink(Some("100%".to_string()));
         filament
     });
-    // bambu.add_filament(BambuFilament::new().color(Color::new(255, 255, 255))
-    //     ,
-    //     false,
-    //     pla_matte.clone(),
-    // ));
-    // bambu.add_filament(BambuFilament::new(
-    //     Color::new(85, 140, 76),
-    //     false,
-    //     pla_basic.clone(),
-    // ));
-    // bambu.add_filament(BambuFilament::new(
-    //     Color::new(255, 255, 255),
-    //     true,
-    //     pla_support.clone(),
-    // ));
     tokio::fs::create_dir_all("examples/flap/output").await?;
     tokio::fs::write("examples/flap/output/original.3mf", bambu.build()?).await?;
     let mut command = BambuStudioCommand::new();

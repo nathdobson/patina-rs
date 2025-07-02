@@ -5,6 +5,7 @@ use crate::meshes::bimesh::Bimesh;
 use crate::meshes::error::ManifoldError;
 use crate::meshes::intersect_bvh_ray::MeshRayIntersection;
 use crate::meshes::mesh_triangle::MeshTriangle;
+use crate::meshes::remove_empty_triangles::RemoveEmptyTriangles;
 use itertools::Itertools;
 use rand::{Rng, rng};
 use std::collections::HashMap;
@@ -37,7 +38,7 @@ impl Mesh {
     pub fn vertices_mut(&mut self) -> &mut [Vec3] {
         &mut self.vertices
     }
-    pub fn check_manifold(&self) -> Result<(), ManifoldError> {
+    pub fn check_manifold(&self, eps: Epsilon) -> Result<(), ManifoldError> {
         let mut edge_table = HashMap::<usize, HashMap<usize, Vec<usize>>>::new();
         for t in &self.triangles {
             if t[0] == t[1] || t[0] == t[2] || t[1] == t[2] {
@@ -82,13 +83,12 @@ impl Mesh {
         if !edge_table.is_empty() {
             return Err(ManifoldError::BadVertex);
         }
-        // for t in &self.triangles {
-        //     let t = t.for_vertices(&self.vertices);
-        //     if t.area() <= 10e-15 {
-        //         println!("{:?}",t.area());
-        //         return Err(ManifoldError::EmptyTriangle);
-        //     }
-        // }
+        for t in &self.triangles {
+            let t = t.for_vertices(&self.vertices);
+            if t.area() <= eps.value() {
+                return Err(ManifoldError::EmptyTriangle);
+            }
+        }
         Ok(())
     }
     pub fn new(vertices: Vec<Vec3>, triangles: Vec<MeshTriangle>) -> Self {
@@ -116,8 +116,21 @@ impl Mesh {
         }
         Mesh::new(new_vertices, new_triangles)
     }
+    pub fn without_empty_triangles(&self, eps: Epsilon) -> Mesh {
+        let mut result = self.clone();
+        while let Some(next) = RemoveEmptyTriangles::new(eps, &result).build() {
+            result = next;
+        }
+        result
+    }
     pub fn union(&self, other: &Mesh, eps: Epsilon) -> Mesh {
         Bimesh::new(self, other, eps, &mut rng()).union()
+    }
+    pub fn intersect(&self, other: &Mesh, eps: Epsilon) -> Mesh {
+        Bimesh::new(self, other, eps, &mut rng()).intersect()
+    }
+    pub fn difference(&self, other: &Mesh, eps: Epsilon) -> Mesh {
+        Bimesh::new(self, other, eps, &mut rng()).forward_difference()
     }
     pub fn intersect_ray(&self, ray: &Ray3, eps: Epsilon) -> Vec<MeshRayIntersection> {
         let mut result = vec![];
@@ -146,13 +159,14 @@ impl Mesh {
 
 #[test]
 fn test_check_manifold() {
+    let eps: Epsilon = Epsilon::new(1e-10);
     assert_eq!(
         Err(ManifoldError::DuplicateVertex),
         Mesh::new(
             vec![Vec3::zero(), Vec3::zero()],
             vec![MeshTriangle::new(0, 0, 1)]
         )
-        .check_manifold()
+        .check_manifold(eps)
     );
     assert_eq!(
         Err(ManifoldError::MissingVertex),
@@ -165,7 +179,7 @@ fn test_check_manifold() {
                 MeshTriangle::new(1, 0, 3)
             ]
         )
-        .check_manifold()
+        .check_manifold(eps)
     );
     assert_eq!(
         Ok(()),
@@ -178,7 +192,7 @@ fn test_check_manifold() {
                 MeshTriangle::new(1, 0, 3)
             ]
         )
-        .check_manifold()
+        .check_manifold(eps)
     );
     assert_eq!(
         Err(ManifoldError::BrokenFan(0, 3)),
@@ -190,7 +204,7 @@ fn test_check_manifold() {
                 MeshTriangle::new(0, 2, 3)
             ]
         )
-        .check_manifold()
+        .check_manifold(eps)
     );
     assert_eq!(
         Err(ManifoldError::SplitFan(2)),
@@ -207,7 +221,7 @@ fn test_check_manifold() {
                 MeshTriangle::new(3, 2, 5)
             ]
         )
-        .check_manifold()
+        .check_manifold(eps)
     );
     assert_eq!(
         Err(ManifoldError::DuplicateFan),
@@ -224,6 +238,6 @@ fn test_check_manifold() {
                 MeshTriangle::new(4, 3, 6)
             ]
         )
-        .check_manifold()
+        .check_manifold(eps)
     );
 }

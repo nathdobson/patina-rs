@@ -15,7 +15,7 @@ pub enum ManifoldError {
     // A triangle contains an unknown vertex.
     BadVertex,
     // A triangle has no area
-    // EmptyTriangle,
+    EmptyTriangle,
 }
 
 impl std::error::Error for ManifoldError {}

@@ -36,17 +36,12 @@ pub struct FilamentSettingsId {
 }
 
 impl FilamentSettingsId {
-    pub fn new(
-        brand: FilamentBrand,
-        material: FilamentMaterial,
-        printer: Printer,
-        nozzle: Option<Nozzle>,
-    ) -> Self {
+    pub fn new(brand: FilamentBrand, material: FilamentMaterial, printer: Printer) -> Self {
         FilamentSettingsId {
             brand,
             material,
             printer,
-            nozzle,
+            nozzle: None,
         }
     }
 }
@@ -100,6 +95,11 @@ impl<'de> Deserialize<'de> for FilamentSettingsId {
         } else {
             None
         };
-        Ok(FilamentSettingsId::new(brand, material, printer, nozzle))
+        Ok(FilamentSettingsId {
+            brand,
+            material,
+            printer,
+            nozzle,
+        })
     }
 }

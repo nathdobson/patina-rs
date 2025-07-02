@@ -33,6 +33,7 @@ impl Triangulation {
         }
     }
     pub fn add_vertex(&mut self, v: usize, p: Vec2) {
+        assert!(p.is_finite());
         self.vertices.insert(v, p);
     }
     pub fn add_boundary(&mut self, v1: usize, v2: usize) {
@@ -105,12 +106,24 @@ impl Triangulation {
                         }
                     }
                 }
-                candidates.push(v3);
+                candidates.push((
+                    NotNan::new(
+                        Triangle2::new([
+                            self.vertices[&v1],
+                            self.vertices[&v2],
+                            self.vertices[&v3],
+                        ])
+                        .area(),
+                    )
+                    .unwrap(),
+                    v3,
+                ));
             }
-            let v3 = candidates
+            let (area, v3) = candidates
                 .into_iter()
-                .min()
+                .max()
                 .unwrap_or_else(|| panic!("no viable vertices for {} {}", v1, v2));
+            // assert!(area.into_inner() > self.eps.value());
             self.triangles.push(MeshTriangle::new(v1, v2, v3));
             self.edges.insert(MeshEdge::new(v2, v3));
             self.edges.insert(MeshEdge::new(v3, v1));

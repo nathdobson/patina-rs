@@ -11,8 +11,11 @@ pub struct PrinterSettingsId {
 }
 
 impl PrinterSettingsId {
-    pub fn new(printer: Printer, nozzle: Option<Nozzle>) -> Self {
-        PrinterSettingsId { printer, nozzle }
+    pub fn new(printer: Printer) -> Self {
+        PrinterSettingsId {
+            printer,
+            nozzle: None,
+        }
     }
 }
 

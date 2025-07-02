@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
-use crate::bool_from_int_string::BoolFromIntString;
-
+use crate::custom_serde::bool_from_int_string::BoolFromIntString;
 #[derive(Serialize, Deserialize, Default)]
 #[non_exhaustive]
 pub struct ModelBuild {

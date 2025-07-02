@@ -237,6 +237,9 @@ impl Bvh {
 }
 
 impl<'a> BvhNodeView<'a> {
+    pub fn index(&self) -> usize {
+        self.node
+    }
     pub fn aabb(&self) -> &AABB {
         &self.bvh.nodes[self.node].aabb
     }
@@ -272,6 +275,7 @@ impl<'a> BvhNodeView<'a> {
         for int in &ints {
             result = result.xor(int.truth);
         }
+        println!("result={:?}", ints);
         result
     }
     // pub fn intersect_node(&self, other: &BvhNodeView, result: &mut Vec<(usize, usize)>) {
