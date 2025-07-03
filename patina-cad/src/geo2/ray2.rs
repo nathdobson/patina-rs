@@ -1,9 +1,9 @@
 use crate::geo2::segment2::Segment2;
 use crate::geo3::aabb::AABB;
 use crate::math::interval::Interval;
-use crate::math::mat2::Mat2;
-use crate::math::vec2::Vec2;
-use crate::math::vec3::Vec3;
+use patina_vec::mat2::Mat2;
+use patina_vec::vec2::Vec2;
+use patina_vec::vec3::Vec3;
 
 #[derive(Debug)]
 pub struct Ray2 {

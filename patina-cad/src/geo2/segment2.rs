@@ -1,5 +1,5 @@
 use crate::geo2::ray2::Ray2;
-use crate::math::vec2::Vec2;
+use patina_vec::vec2::Vec2;
 
 #[derive(Debug)]
 pub struct Segment2 {

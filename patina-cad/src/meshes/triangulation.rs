@@ -1,7 +1,7 @@
 use crate::geo2::segment2::Segment2;
 use crate::geo2::triangle2::Triangle2;
 use crate::math::float_bool::Epsilon;
-use crate::math::vec2::Vec2;
+use patina_vec::vec2::Vec2;
 use crate::meshes::mesh_edge::MeshEdge;
 use crate::meshes::mesh_triangle::MeshTriangle;
 use crate::meshes::ordered_mesh_edge::OrderedMeshEdge;

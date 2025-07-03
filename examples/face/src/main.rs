@@ -6,7 +6,7 @@ use glam::DVec3;
 use patina_cad::geo3::cylinder::Cylinder;
 use patina_cad::geo3::sphere::Sphere;
 use patina_cad::math::float_bool::Epsilon;
-use patina_cad::math::vec3::Vec3;
+use patina_vec::vec3::Vec3;
 use patina_cad::meshes::bimesh::Bimesh;
 use patina_cad::meshes::subdivision::subdivide;
 use patina_cad::ser::stl::write_stl_file;

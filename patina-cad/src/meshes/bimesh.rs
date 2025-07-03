@@ -4,8 +4,8 @@ use crate::geo3::ray3::Ray3;
 use crate::math::disjoint_paths::DisjointPaths;
 use crate::math::float_bool::Epsilon;
 use crate::math::loop_builder::LoopBuilder;
-use crate::math::vec2::Vec2;
-use crate::math::vec3::Vec3;
+use patina_vec::vec2::Vec2;
+use patina_vec::vec3::Vec3;
 use crate::meshes::bvh::Bvh;
 use crate::meshes::intersect_bvh_bvh::{
     IntersectBvhBvh, MeshIntersect, MeshIntersectDescriptor, MeshIntersectVertex,
@@ -714,28 +714,21 @@ impl<'a> Bimesh<'a> {
     pub fn build_triangulation(&mut self) {
         for mesh in 0..2 {
             for (tri, face) in &mut self.new_faces[mesh].iter_mut().enumerate() {
-                println!("{} {:#?}", tri, face);
                 let ptri = self.input_tris[mesh][tri].for_vertices(&self.vertices);
                 let mut triangulation = Triangulation::new(self.eps);
-                println!("a");
                 for v in self.input_tris[mesh][tri] {
-                    println!("{}",self.vertices[v]);
                     let mut proj = ptri.project(self.vertices[v]);
                     triangulation.add_vertex(v, proj);
                 }
-                println!("b");
                 for vs in &face.edge_vertices {
                     for &v in vs {
-                        println!("{}",self.vertices[v]);
                         triangulation.add_vertex(v, ptri.project(self.vertices[v]));
                     }
                 }
                 for (&v1, &v2) in face.border_vertices.iter().circular_tuple_windows() {
                     triangulation.add_boundary(v1, v2);
                 }
-                println!("c");
                 for &v in &face.internal_vertices {
-                    println!("{}",self.vertices[v]);
                     let proj = ptri.project(self.vertices[v]);
                     let proj_mid = ptri.project(ptri.midpoint());
                     triangulation.add_vertex(
@@ -856,6 +849,7 @@ impl<'a> Bimesh<'a> {
                     }
                 }
                 if forward && reverse {
+                    println!("{:#?}", self.forward_loop_adjacency);
                     panic!("inconsistent loop ordering");
                 }
                 if !forward && !reverse {
@@ -922,7 +916,7 @@ impl<'a> Bimesh<'a> {
         let tris = tris1.chain(tris2).collect();
         let mesh = Mesh::new(vertices, tris);
         let mesh = mesh.without_dead_vertices();
-        let mesh=mesh.without_empty_triangles(self.eps);
+        let mesh = mesh.without_empty_triangles(self.eps);
         mesh.check_manifold(self.eps).unwrap();
         mesh
     }

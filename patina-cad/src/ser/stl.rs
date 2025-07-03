@@ -5,7 +5,7 @@ use tokio::fs::File;
 use tokio::io::AsyncWrite;
 use tokio::io::AsyncWriteExt;
 use tokio::io::BufWriter;
-use crate::math::vec3::Vec3;
+use patina_vec::vec3::Vec3;
 
 async fn write_vec3<W: Unpin + AsyncWrite>(vec3: Vec3, w: &mut W) -> io::Result<()> {
     for c in vec3 {

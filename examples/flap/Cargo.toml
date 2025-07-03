@@ -10,3 +10,4 @@ tokio = {version="1.45.1",features = ["macros","rt-multi-thread","process","fs"]
 patina-3mf = {workspace = true}
 patina-bambu = {workspace = true}
 zip = "4.2.0"
+rand = "0.9.1"

@@ -1,12 +1,12 @@
 use crate::geo3::ray3::Ray3;
 use crate::math::float_bool::{Epsilon, FloatBool};
-use crate::math::vec3::Vec3;
 use crate::meshes::bimesh::Bimesh;
 use crate::meshes::error::ManifoldError;
 use crate::meshes::intersect_bvh_ray::MeshRayIntersection;
 use crate::meshes::mesh_triangle::MeshTriangle;
 use crate::meshes::remove_empty_triangles::RemoveEmptyTriangles;
 use itertools::Itertools;
+use patina_vec::vec3::Vec3;
 use rand::{Rng, rng};
 use std::collections::HashMap;
 
@@ -14,18 +14,6 @@ use std::collections::HashMap;
 pub struct Mesh {
     vertices: Vec<Vec3>,
     triangles: Vec<MeshTriangle>,
-}
-
-impl Mesh {
-    pub fn perturb(&mut self, rng: &mut impl Rng, factor: f64) {
-        for vertex in &mut self.vertices {
-            *vertex += Vec3::new(
-                rng.random::<f64>() * factor,
-                rng.random::<f64>() * factor,
-                rng.random::<f64>() * factor,
-            );
-        }
-    }
 }
 
 impl Mesh {
@@ -154,6 +142,45 @@ impl Mesh {
             result = result.xor(int.truth);
         }
         result
+    }
+    pub fn perturb(&mut self, rng: &mut impl Rng, factor: f64) {
+        for vertex in &mut self.vertices {
+            *vertex += Vec3::new(
+                rng.random::<f64>() * factor,
+                rng.random::<f64>() * factor,
+                rng.random::<f64>() * factor,
+            );
+        }
+    }
+    pub fn perturbed(&self, rng: &mut impl Rng, factor: f64) -> Mesh {
+        let mut mesh = self.clone();
+        mesh.perturb(rng, factor);
+        mesh
+    }
+}
+
+impl Mesh {
+    pub fn from_aabb(aabb: AABB) -> Mesh {
+        Mesh::new(
+            aabb.vertices().to_vec(),
+            vec![
+                MeshTriangle::new(0b000, 0b001, 0b011),
+                MeshTriangle::new(0b000, 0b011, 0b010),
+                MeshTriangle::new(0b100, 0b111, 0b101),
+                MeshTriangle::new(0b100, 0b110, 0b111),
+                //
+                MeshTriangle::new(0b000, 0b101, 0b001),
+                MeshTriangle::new(0b000, 0b100, 0b101),
+                MeshTriangle::new(0b010, 0b011, 0b111),
+                MeshTriangle::new(0b010, 0b111, 0b110),
+                //
+                MeshTriangle::new(0b000, 0b010, 0b110),
+                MeshTriangle::new(0b000, 0b110, 0b100),
+                MeshTriangle::new(0b001, 0b111, 0b011),
+                MeshTriangle::new(0b001, 0b101, 0b111),
+                //
+            ],
+        )
     }
 }
 

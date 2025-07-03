@@ -35,7 +35,7 @@ use patina_3mf::settings_id::nozzle::Nozzle;
 use patina_3mf::settings_id::print_settings_id::{PrintQuality, PrintSettingsId};
 use patina_3mf::settings_id::printer::Printer;
 use patina_3mf::settings_id::printer_settings_id::PrinterSettingsId;
-use patina_cad::math::vec2::Vec2;
+use patina_vec::vec2::Vec2;
 use patina_cad::meshes::mesh::Mesh;
 
 #[test]

@@ -1,6 +1,6 @@
 use crate::geo3::ray3::Ray3;
 use crate::math::float_bool::{Epsilon, FloatBool};
-use crate::math::vec3::Vec3;
+use patina_vec::vec3::Vec3;
 
 #[derive(Debug)]
 pub struct Plane {

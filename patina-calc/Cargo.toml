@@ -1,0 +1,9 @@
+[package]
+name = "patina-calc"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+by_address = "1.2.1"
+inari = "2.0.0"
+ordered-float = "5.0.0"

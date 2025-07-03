@@ -1,7 +1,7 @@
 use crate::geo3::aabb::AABB;
 use crate::math::float_bool::{Epsilon, FloatBool};
 use crate::math::interval::Interval;
-use crate::math::vec3::Vec3;
+use patina_vec::vec3::Vec3;
 
 #[derive(Debug)]
 pub struct Ray3 {

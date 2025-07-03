@@ -1,6 +1,6 @@
 use crate::geo2::ray2::Ray2;
 use crate::geo2::segment2::Segment2;
-use crate::math::vec2::Vec2;
+use patina_vec::vec2::Vec2;
 use itertools::Itertools;
 
 pub struct Triangle2([Vec2; 3]);

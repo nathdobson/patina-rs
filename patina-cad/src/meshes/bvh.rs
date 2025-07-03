@@ -5,7 +5,7 @@ use crate::geo3::sphere;
 use crate::geo3::sphere::Sphere;
 use crate::geo3::triangle3::Triangle3;
 use crate::math::float_bool::{Epsilon, FloatBool};
-use crate::math::vec3::Vec3;
+use patina_vec::vec3::Vec3;
 use crate::meshes::intersect_bvh_bvh::{IntersectBvhBvh, MeshIntersect};
 use crate::meshes::intersect_bvh_ray::{IntersectBvhRay, MeshRayIntersection};
 use crate::meshes::mesh::Mesh;

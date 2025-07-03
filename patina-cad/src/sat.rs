@@ -2,7 +2,7 @@ use crate::geo3::aabb::AABB;
 use crate::geo3::triangle3::Triangle3;
 use crate::math::float_bool::{Epsilon, FloatBool};
 use crate::math::interval::Interval;
-use crate::math::vec3::Vec3;
+use patina_vec::vec3::Vec3;
 use std::any::type_name;
 use std::fmt::Debug;
 
@@ -40,6 +40,21 @@ fn sat_intersects_partial<A: ConvexPoly + Debug, B: ConvexPoly + Debug>(
     }
     result
 }
+
+impl ConvexPoly for AABB {
+    fn normals(&self) -> impl AsRef<[Vec3]> {
+        [Vec3::axis_x(), Vec3::axis_y(), Vec3::axis_z()]
+    }
+
+    fn project_onto(&self, vector: Vec3) -> Interval {
+        let mut result = Interval::empty();
+        for x in self.vertices() {
+            result = result.union(Interval::from(x.dot(vector)));
+        }
+        result
+    }
+}
+
 
 // #[test]
 // fn test_sat() {

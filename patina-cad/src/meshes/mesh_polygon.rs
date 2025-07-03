@@ -1,6 +1,6 @@
 use crate::geo3::polygon3::Polygon3;
-use crate::math::vec2::Vec2;
-use crate::math::vec3::Vec3;
+use patina_vec::vec2::Vec2;
+use patina_vec::vec3::Vec3;
 
 #[derive(Debug, Clone)]
 pub struct MeshPolygon {

@@ -4,7 +4,6 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-use std::collections::HashSet;
 use anyhow::anyhow;
 use patina_3mf::ModelContainer;
 use patina_3mf::content_types::{ContentTypeDefault, ContentTypes};
@@ -37,12 +36,14 @@ use patina_bambu::cli::{BambuStudioCommand, DebugLevel, Slice};
 use patina_bambu::{BambuBuilder, BambuFilament, BambuObject, BambuPart, BambuPlate, BambuSupport};
 use patina_cad::geo3::aabb::AABB;
 use patina_cad::math::float_bool::Epsilon;
-use patina_cad::math::mat4::Mat4;
-use patina_cad::math::vec2::Vec2;
-use patina_cad::math::vec3::Vec3;
+use patina_vec::mat4::Mat4;
+use patina_vec::vec2::Vec2;
+use patina_vec::vec3::Vec3;
 use patina_cad::meshes::mesh::Mesh;
 use patina_cad::meshes::mesh_triangle::MeshTriangle;
 use patina_cad::ser::stl::write_stl_file;
+use rand::rng;
+use std::collections::HashSet;
 use std::env;
 use std::io::{Cursor, Read, Write};
 use std::path::Path;
@@ -70,24 +71,23 @@ pub struct LetterBuilder {
 
 impl LetterBuilder {
     async fn blank(&self, thickness: f64) -> Mesh {
+        let perturb = 0.1;
+        let eps = Epsilon::new(1e-14);
         let mut mesh = AABB::new(
             Vec3::new(-self.width / 2.0, 0.0, 0.0),
             Vec3::new(self.width / 2.0, self.length, thickness),
         )
-        .as_mesh();
+        .as_mesh()
+        .perturbed(&mut rng(), perturb);
         mesh = mesh.difference(
             &AABB::new(
                 Vec3::new(self.width / 2.0 - self.incut, -1.0, -self.thickness),
                 Vec3::new(self.width, self.extension, self.thickness * 2.0),
             )
-            .as_mesh(),
-            Epsilon::new(1e-10),
+            .as_mesh()
+            .perturbed(&mut rng(), perturb),
+            eps,
         );
-        // write_stl_file(&mesh, Path::new("examples/flap/output/cut.stl"))
-        //     .await
-        //     .unwrap();
-        // println!("{:?}", mesh.vertices().len());
-        // println!("{:?}", mesh.triangles().len());
         mesh = mesh.difference(
             &AABB::new(
                 Vec3::new(
@@ -97,9 +97,20 @@ impl LetterBuilder {
                 ),
                 Vec3::new(self.width, self.drum_diameter, self.thickness * 2.0),
             )
-            .as_mesh(),
-            Epsilon::new(1e-10),
+            .as_mesh()
+            .perturbed(&mut rng(), perturb),
+            eps,
         );
+        write_stl_file(&mesh, Path::new("examples/flap/output/output.stl")).await.unwrap();
+        // mesh = mesh.difference(
+        //     &AABB::new(
+        //         Vec3::new(-self.width / 2.0 + self.incut, -1.0, -self.thickness),
+        //         Vec3::new(-self.width, self.extension, self.thickness * 2.0),
+        //     )
+        //     .as_mesh()
+        //     .perturbed(&mut rng(), perturb),
+        //     eps,
+        // );
         mesh
     }
     pub async fn build(&self) -> Vec<BambuPart> {

@@ -1,6 +1,6 @@
 use crate::geo2::polygon2::Polygon2;
 use crate::geo3::triangle3::Triangle3;
-use crate::math::vec3::Vec3;
+use patina_vec::vec3::Vec3;
 
 pub struct Polygon3 {
     vertices: Vec<Vec3>,

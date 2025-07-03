@@ -1,4 +1,3 @@
-use crate::math::float_bool::{Epsilon, FloatBool};
 use std::fmt::{Debug, Formatter};
 
 #[derive(Copy, Clone)]
@@ -34,13 +33,6 @@ impl Interval {
             min: self.min.max(other.min),
             max: self.max.min(other.max),
         }
-    }
-    pub fn intersects(self, other: Self, eps: Epsilon) -> FloatBool {
-        let i = self.intersect(other);
-        i.is_empty(eps).not()
-    }
-    pub fn is_empty(&self, eps: Epsilon) -> FloatBool {
-        eps.less(self.max, self.min)
     }
     pub fn min(&self) -> f64 {
         self.min

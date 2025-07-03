@@ -1,6 +1,6 @@
-use crate::math::macros::impl_ref_binop;
-use crate::math::vec2::Vec2;
 use std::ops::{Add, Div, Index, Mul, Sub};
+use crate::impl_ref_binop::impl_ref_binop;
+use crate::vec2::Vec2;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Mat2([Vec2; 2]);

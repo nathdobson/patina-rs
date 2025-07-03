@@ -1,8 +1,7 @@
-use crate::math::macros::impl_ref_binop;
-use crate::math::vec3::Vec3;
-use crate::math::vec4::Vec4;
-use itertools::Itertools;
 use std::ops::{Add, Div, Index, Mul, Sub};
+use crate::impl_ref_binop::impl_ref_binop;
+use crate::vec3::Vec3;
+use crate::vec4::Vec4;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Mat4([Vec4; 4]);

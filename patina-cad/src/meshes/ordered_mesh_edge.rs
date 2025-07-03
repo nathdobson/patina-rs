@@ -1,6 +1,6 @@
 use crate::geo3::segment3::Segment3;
 use crate::geo3::triangle3::Triangle3;
-use crate::math::vec3::Vec3;
+use patina_vec::vec3::Vec3;
 use crate::meshes::mesh_edge::MeshEdge;
 use crate::meshes::mesh_triangle::MeshTriangle;
 use std::fmt::{Debug, Formatter};
