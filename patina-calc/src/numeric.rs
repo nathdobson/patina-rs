@@ -1,7 +1,8 @@
-use crate::operator::{BinaryOperator, UnaryOperator};
+use crate::operator::{OperatorBinary, OperatorUnary};
 use inari::DecInterval;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
+/// Types that behave like a number (e.g. [f64] and [inari::DecInterval]).
 pub trait Numeric:
     Clone
     + Neg<Output = Self>

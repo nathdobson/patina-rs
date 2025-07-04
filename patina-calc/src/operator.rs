@@ -1,29 +1,25 @@
 use crate::numeric::Numeric;
-use crate::term_context::TermContext;
+use crate::term_visitor::TermVisitor;
 use ordered_float::NotNan;
 use std::fmt::{Display, Formatter};
 
+/// An operator that takes 0 inputs.
 #[derive(Clone, Debug, Hash, Ord, PartialOrd, Eq, PartialEq)]
-pub enum Operator {
-    Nullary(NullaryOperator),
-    Unary(UnaryOperator),
-    Binary(BinaryOperator),
-}
-
-#[derive(Clone, Debug, Hash, Ord, PartialOrd, Eq, PartialEq)]
-pub enum NullaryOperator {
+pub enum OperatorNullary {
     Constant(NotNan<f64>),
     Variable(usize),
 }
 
+/// An operator that takes 1 input.
 #[derive(Clone, Debug, Hash, Ord, PartialOrd, Eq, PartialEq)]
-pub enum UnaryOperator {
+pub enum OperatorUnary {
     Negate,
     Reciprocal,
 }
 
+/// An operator that takes 2 inputs.
 #[derive(Clone, Debug, Hash, Ord, PartialOrd, Eq, PartialEq)]
-pub enum BinaryOperator {
+pub enum OperatorBinary {
     Add,
     Subtract,
     Multiply,
@@ -32,46 +28,48 @@ pub enum BinaryOperator {
     Max,
 }
 
+/// An operator that takes 3 inputs.
 #[derive(Clone, Debug, Hash, Ord, PartialOrd, Eq, PartialEq)]
-pub enum TrinaryOperator {
+pub enum OperatorTrinary {
     Piecewise,
+
 }
 
-impl TrinaryOperator {
+impl OperatorTrinary {
     pub fn tokens(&self) -> (&str, &str) {
         match self {
-            TrinaryOperator::Piecewise => ("<?", ":"),
+            OperatorTrinary::Piecewise => ("<?", ":"),
         }
     }
 }
 
-impl Display for NullaryOperator {
+impl Display for OperatorNullary {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            NullaryOperator::Constant(c) => write!(f, "{}", c),
-            NullaryOperator::Variable(v) => write!(f, "x{}", v),
+            OperatorNullary::Constant(c) => write!(f, "{}", c),
+            OperatorNullary::Variable(v) => write!(f, "x{}", v),
         }
     }
 }
 
-impl Display for UnaryOperator {
+impl Display for OperatorUnary {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            UnaryOperator::Negate => write!(f, "-"),
-            UnaryOperator::Reciprocal => write!(f, "1.0/"),
+            OperatorUnary::Negate => write!(f, "-"),
+            OperatorUnary::Reciprocal => write!(f, "1.0/"),
         }
     }
 }
 
-impl Display for BinaryOperator {
+impl Display for OperatorBinary {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            BinaryOperator::Add => write!(f, "+"),
-            BinaryOperator::Subtract => write!(f, "-"),
-            BinaryOperator::Multiply => write!(f, "*"),
-            BinaryOperator::Divide => write!(f, "/"),
-            BinaryOperator::Min => write!(f, "min"),
-            BinaryOperator::Max => write!(f, "max"),
+            OperatorBinary::Add => write!(f, "+"),
+            OperatorBinary::Subtract => write!(f, "-"),
+            OperatorBinary::Multiply => write!(f, "*"),
+            OperatorBinary::Divide => write!(f, "/"),
+            OperatorBinary::Min => write!(f, "min"),
+            OperatorBinary::Max => write!(f, "max"),
         }
     }
 }

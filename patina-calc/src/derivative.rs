@@ -1,6 +1,6 @@
 use crate::expr::{Expr, ExprInner};
-use crate::operator::{BinaryOperator, NullaryOperator, TrinaryOperator, UnaryOperator};
-use crate::program::{Program};
+use crate::operator::{OperatorBinary, OperatorNullary, OperatorTrinary, OperatorUnary};
+use crate::program::Program;
 
 // impl Expr {
 //     pub fn derivative(&self, dv: usize) -> Expr {

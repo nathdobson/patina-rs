@@ -4,13 +4,13 @@ use crate::program::ProgramTerm;
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 
-pub struct DeepEqualExpr {
+pub struct ExprDeepEqual {
     table: Memoize<(Expr, Expr), bool>,
 }
 
-impl DeepEqualExpr {
+impl ExprDeepEqual {
     pub fn new() -> Self {
-        DeepEqualExpr {
+        ExprDeepEqual {
             table: Memoize::new(),
         }
     }

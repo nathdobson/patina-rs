@@ -1,16 +1,17 @@
 use crate::expr::Expr;
-use crate::expr_evaluator::ExprEvaluator;
+use crate::expr::expr_visit::ExprVisit;
 use crate::program::{Program, ProgramTerm};
 
-pub struct ExprProgram {
-    expr_evaluator: ExprEvaluator<Program>,
+/// A builder for converting a sequence of [Expr]s to a [Program].
+pub struct ExprProgramBuilder {
+    expr_evaluator: ExprVisit<Program>,
     program: Program,
 }
 
-impl ExprProgram {
-    pub fn new() -> ExprProgram {
-        ExprProgram {
-            expr_evaluator: ExprEvaluator::new(),
+impl ExprProgramBuilder {
+    pub fn new() -> ExprProgramBuilder {
+        ExprProgramBuilder {
+            expr_evaluator: ExprVisit::new(),
             program: Program::new(),
         }
     }
@@ -28,7 +29,7 @@ impl ExprProgram {
 
 impl From<Expr> for Program {
     fn from(expr: Expr) -> Self {
-        let mut expr_program = ExprProgram::new();
+        let mut expr_program = ExprProgramBuilder::new();
         expr_program.push(expr);
         expr_program.into_program()
     }
