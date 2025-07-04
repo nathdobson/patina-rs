@@ -1,4 +1,4 @@
-use crate::program::{ProgramStep, Program};
+use crate::program::{Program, ProgramStep};
 use crate::term_visitor::TermVisitor;
 use std::env::var;
 use std::rc::Rc;
@@ -9,12 +9,15 @@ pub struct ProgramVisit<C: TermVisitor> {
 }
 
 impl<C: TermVisitor> ProgramVisit<C> {
-    pub fn new(program: &Program) -> Self {
+    pub fn new() -> Self {
+        ProgramVisit { memory: Vec::new() }
+    }
+    pub fn with_capacity(program: &Program) -> Self {
         ProgramVisit {
             memory: Vec::with_capacity(program.steps().len()),
         }
     }
-    pub fn evaluate(&mut self, program: &Program, context: &mut C, outputs: &mut Vec<C::Output>) {
+    pub fn visit(&mut self, program: &Program, context: &mut C, outputs: &mut Vec<C::Output>) {
         self.memory.clear();
         for instruction in program.steps() {
             let result = match instruction {

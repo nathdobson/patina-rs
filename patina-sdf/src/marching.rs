@@ -181,8 +181,5 @@ pub fn marching_cube(verts: [bool; 8]) -> &'static CubeMesh {
             index |= 1 << i;
         }
     }
-    if index != 0 {
-        println!("{:?} {:?}", index, verts);
-    }
     &MARCHING_CUBES[index]
 }

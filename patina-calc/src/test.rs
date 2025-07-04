@@ -1,7 +1,10 @@
+use crate::solver::Solver;
 use crate::term_visitor::TermVisitorExt;
 use crate::{Expr, OperatorBinary, OperatorNullary, Program, TermVisitor};
 use inari::{IntervalError, dec_interval};
 use patina_scalar::Scalar;
+use rand::{SeedableRng, rng};
+use rand_xorshift::XorShiftRng;
 
 #[test]
 fn test_evaluator() {
@@ -96,4 +99,18 @@ fn test_derivative() {
             .derivative(0)
             .deep_equals(&(c1.clone() * y.clone() + x.clone() * c0.clone()))
     );
+}
+
+#[test]
+fn test_solve() {
+    let x = Expr::var(0);
+    let x2 = x.clone() * x.clone();
+    let x2m1 = x2 - Expr::constant(1.0);
+    let program = Program::from(x2m1);
+    let program = program.with_derivative(0);
+    for seed in 0..100 {
+        let mut rng = XorShiftRng::seed_from_u64(seed);
+        let mut solver = Solver::new();
+        assert_eq!(solver.solve(&program, -2.0..2.0).unwrap().abs(), 1.0);
+    }
 }

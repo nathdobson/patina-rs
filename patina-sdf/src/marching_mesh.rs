@@ -2,7 +2,7 @@ use crate::marching::marching_cube;
 use crate::sdf::CompiledSdf;
 use arrayvec::ArrayVec;
 use itertools::Itertools;
-use patina_calc::{EvalVisitor, Expr, ExprProgramBuilder, Program, ProgramVisit};
+use patina_calc::{EvalVisitor, Expr, ExprProgramBuilder, Program, ProgramVisit, Solver};
 use patina_mesh::mesh::Mesh;
 use patina_mesh::mesh_triangle::MeshTriangle;
 use patina_vec::vec3::Vec3;
@@ -31,11 +31,12 @@ impl MarchingMesh {
             )
     }
     pub fn build(self, sdf: &CompiledSdf) -> Mesh {
-        let mut visit = ProgramVisit::new(sdf.program());
+        let mut visit = ProgramVisit::with_capacity(sdf.program());
         let mut outputs = vec![0f64];
         let mut vertices = vec![];
         let mut vertex_table = HashMap::new();
         let mut triangles = vec![];
+        let mut solver = Solver::new();
         let evals: Vec<Vec<Vec<bool>>> = (0..self.count[0] + 1)
             .map(|x| {
                 (0..self.count[1] + 1)
@@ -44,7 +45,7 @@ impl MarchingMesh {
                             .map(|z| {
                                 let position = self.position(x, y, z);
 
-                                visit.evaluate(
+                                visit.visit(
                                     sdf.program(),
                                     &mut EvalVisitor::new(position.into_iter().collect()),
                                     &mut outputs,
@@ -103,14 +104,11 @@ impl MarchingMesh {
                                 }
                             }
                             let guided_sdf = input_program.program().and_then(sdf.program());
-                            println!("guided sdf: {}", guided_sdf);
+                            let guided_sdf = guided_sdf.with_derivative(0);
+                            let t = solver.solve(&guided_sdf, 0.0..1.0).unwrap();
+                            let position = input_program.program().evaluate_f64(vec![t]);
+                            let position = position.into_iter().collect::<Vec3>();
                             let index = vertices.len();
-                            let position = self.origin
-                                + Vec3::new(
-                                    self.delta.x() / 2.0 * (xp as f64),
-                                    self.delta.y() / 2.0 * (yp as f64),
-                                    self.delta.z() / 2.0 * (zp as f64),
-                                );
                             vertices.push(position);
                             index
                         });

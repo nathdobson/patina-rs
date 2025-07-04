@@ -76,10 +76,11 @@ mod operator;
 mod optimize;
 mod program;
 
-mod solve;
+mod solver;
 mod term_visitor;
 #[cfg(test)]
 mod test;
+mod substitute;
 
 pub use eval_visitor::EvalVisitor;
 pub use expr::Expr;
@@ -96,3 +97,4 @@ pub use program::ProgramTerm;
 pub use program::expr_program::ExprProgramBuilder;
 pub use program::program_visit::ProgramVisit;
 pub use term_visitor::TermVisitor;
+pub use solver::Solver;

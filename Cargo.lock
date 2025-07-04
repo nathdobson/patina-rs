@@ -783,6 +783,8 @@ dependencies = [
  "inari",
  "ordered-float",
  "patina-scalar",
+ "rand",
+ "rand_xorshift",
 ]
 
 [[package]]

@@ -3,6 +3,7 @@ use crate::eval_visitor::EvalVisitor;
 use crate::expr::Expr;
 use crate::expr::expr_visitor::ExprVisitor;
 use crate::operator::{OperatorBinary, OperatorNullary, OperatorTrinary, OperatorUnary};
+use crate::substitute::SubstituteTransformer;
 use crate::term_visitor::TermVisitor;
 use program_visit::ProgramVisit;
 use std::collections::HashMap;
@@ -21,7 +22,7 @@ pub enum ProgramStep {
 }
 
 /// A representation of terms as sequential steps.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Program {
     steps: Vec<ProgramStep>,
     step_table: HashMap<ProgramStep, ProgramTerm>,
@@ -70,9 +71,9 @@ impl Program {
         self.visit(&mut EvalVisitor::<f64>::new(inputs))
     }
     pub fn visit<V: TermVisitor>(&self, visitor: &mut V) -> Vec<V::Output> {
-        let mut evaluator = ProgramVisit::new(self);
+        let mut visit = ProgramVisit::with_capacity(self);
         let mut outputs = vec![];
-        evaluator.evaluate(self, visitor, &mut outputs);
+        visit.visit(self, visitor, &mut outputs);
         outputs
     }
     pub fn into_exprs(&self) -> Vec<Expr> {
@@ -85,16 +86,12 @@ impl Program {
     }
     pub fn and_then(&self, other: &Self) -> Self {
         let mut output = Program::new();
-        for step in &self.steps {
-            output.push(step.clone());
-        }
-        for step in &other.steps {
-            match step {
-                ProgramStep::Nullary(OperatorNullary::Variable(v), []) => output.push(
-                    ProgramStep::Unary(OperatorUnary::Identity, [self.outputs()[*v]]),
-                ),
-                _ => output.push(step.clone()),
-            };
+        let carried = self.visit(&mut output);
+        let mut substitute = SubstituteTransformer::new(output, carried);
+        let outputs = other.visit(&mut substitute);
+        output = substitute.into_inner();
+        for o in outputs {
+            output.push_output(o);
         }
         output
     }
@@ -104,6 +101,17 @@ impl Program {
         let outputs = self.visit(&mut derivative);
         let mut program = derivative.into_inner();
         for (f, fp) in outputs {
+            program.push_output(fp);
+        }
+        program
+    }
+    pub fn with_derivative(&self, variable: usize) -> Self {
+        let mut output = Program::new();
+        let mut derivative = DerivativeTransform::new(output, variable);
+        let outputs = self.visit(&mut derivative);
+        let mut program = derivative.into_inner();
+        for (f, fp) in outputs {
+            program.push_output(f);
             program.push_output(fp);
         }
         program
