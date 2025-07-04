@@ -52,11 +52,11 @@ impl MarchingMesh {
                                 );
                                 let inside = outputs[0] < 0.0;
                                 if inside {
-                                    let index = vertices.len();
-                                    vertices.push(position);
-                                    vertices.push(position + Vec3::new(0.1, 0.0, 0.0));
-                                    vertices.push(position + Vec3::new(0.00, 0.1, 0.0));
-                                    triangles.push(MeshTriangle::new(index, index + 1, index + 2));
+                                    // let index = vertices.len();
+                                    // vertices.push(position);
+                                    // vertices.push(position + Vec3::new(0.1, 0.0, 0.0));
+                                    // vertices.push(position + Vec3::new(0.00, 0.1, 0.0));
+                                    // triangles.push(MeshTriangle::new(index, index + 1, index + 2));
                                 }
                                 inside
                             })
@@ -94,7 +94,7 @@ impl MarchingMesh {
                                         Expr::constant(
                                             self.origin[axis]
                                                 + ([x, y, z][axis] as f64) * self.delta[axis],
-                                        ) + Expr::var(0),
+                                        ) + Expr::var(0) * Expr::constant(self.delta[axis]),
                                     ),
                                     2 => input_program.push(Expr::constant(
                                         self.origin[axis]
@@ -105,7 +105,14 @@ impl MarchingMesh {
                             }
                             let guided_sdf = input_program.program().and_then(sdf.program());
                             let guided_sdf = guided_sdf.with_derivative(0);
-                            let t = solver.solve(&guided_sdf, 0.0..1.0).unwrap();
+                            let t = solver.solve(&guided_sdf, 0.0..1.0);
+                            let t = if let Some(t) = t {
+                                t
+                            } else {
+                                println!("Cannot solve {} {} {} {} {} {}", x, y, z, xp, yp, zp);
+                                0.5
+                            };
+                            assert!(t >= 0.0 && t <= 1.0);
                             let position = input_program.program().evaluate_f64(vec![t]);
                             let position = position.into_iter().collect::<Vec3>();
                             let index = vertices.len();

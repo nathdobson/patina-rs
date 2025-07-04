@@ -21,9 +21,9 @@ impl<R: Rng> Solver<R> {
     pub fn with_rng(rng: R) -> Solver<R> {
         Solver {
             rng,
-            iterations: 10,
-            starts: 5,
-            eps: 1e-10,
+            iterations: 20,
+            starts: 100,
+            eps: 1e-8,
             visit: ProgramVisit::new(),
         }
     }
@@ -43,18 +43,16 @@ impl<R: Rng> Solver<R> {
             let mut output = vec![];
             self.visit.visit(program, &mut visitor, &mut output);
             let [y, yp] = output.as_slice().try_into().unwrap();
-            if it == self.iterations - 1 {
-                if x < range.start {
-                    return None;
-                } else if x > range.end {
-                    return None;
-                }
-                if y.abs() > self.eps {
-                    return None;
-                }
-                return Some(x);
-            } else {
+            if it < self.iterations - 1 {
                 x = x - y / yp;
+            } else if x < range.start {
+                return None;
+            } else if x > range.end {
+                return None;
+            } else if y.abs() > self.eps {
+                return None;
+            } else {
+                return Some(x);
             }
         }
         None
