@@ -39,7 +39,7 @@
 //! efficient than [Program]s.
 //! ```
 //! # use patina_calc::Expr;
-//! assert_eq!("(1.5 + 2.5)", format!("{}", Expr::from(1.5) + Expr::from(2.5)));
+//! assert_eq!("(1.5 + 2.5)", format!("{}", Expr::constant(1.5) + Expr::constant(2.5)));
 //! ```
 //!
 //! ### [Program]
@@ -65,9 +65,7 @@
 #![allow(unused_imports)]
 #![allow(unused_variables)]
 #![allow(unused_mut)]
-
-use inari::{IntervalError, dec_interval};
-use std::ops::{Add, Div, Mul, Neg, Sub};
+#![allow(unreachable_code)]
 
 mod derivative;
 mod eval_visitor;
@@ -78,11 +76,16 @@ mod operator;
 mod optimize;
 mod program;
 
+mod solve;
 mod term_visitor;
+#[cfg(test)]
+mod test;
+
 pub use eval_visitor::EvalVisitor;
 pub use expr::Expr;
 pub use expr::ExprInner;
-pub use numeric::Numeric;
+pub use expr::expr_visit::ExprVisit;
+pub use expr::expr_visitor::ExprVisitor;
 pub use operator::OperatorBinary;
 pub use operator::OperatorNullary;
 pub use operator::OperatorTrinary;
@@ -93,77 +96,3 @@ pub use program::ProgramTerm;
 pub use program::expr_program::ExprProgramBuilder;
 pub use program::program_visit::ProgramVisit;
 pub use term_visitor::TermVisitor;
-pub use expr::expr_visitor::ExprVisitor;
-pub use expr::expr_visit::ExprVisit;
-
-#[test]
-fn test_evaluator() {
-    let expr = Expr::from(1.0) + Expr::from(2.0) * Expr::var(0);
-    let program = Program::from(expr);
-    assert_eq!(vec![7.0], program.evaluate_f64(vec![3.0]));
-}
-
-#[test]
-fn test_dedup() {
-    let expr = Expr::from(1.0) + Expr::from(1.0);
-    let program = Program::from(expr);
-    assert_eq!(
-        "T0 = 1\nT1 = T0 + T0\nreturn [T1]\n",
-        format!("{}", program)
-    );
-}
-
-#[test]
-fn test_constraint() -> Result<(), IntervalError> {
-    let expr = Expr::var(0).min(Expr::var(1));
-    let program = Program::from(expr);
-    {
-        let optimized = program.constrain(vec![dec_interval!(0.0, 1.0)?, dec_interval!(0.0, 1.0)?]);
-        assert!(
-            program.deep_equals(&optimized),
-            "{}==\n{}",
-            program,
-            optimized
-        );
-    }
-    {
-        let optimized = program.constrain(vec![dec_interval!(0.0, 0.0)?, dec_interval!(0.0, 1.0)?]);
-        let expected = Program::from(Expr::var(0));
-        assert!(
-            expected.deep_equals(&optimized),
-            "{:?} == {:?}",
-            expected,
-            optimized
-        );
-    }
-    {
-        let optimized = program.constrain(vec![dec_interval!(0.0, 1.0)?, dec_interval!(0.0, 0.0)?]);
-        let expected = Program::from(Expr::var(1));
-        println!("{}", optimized);
-        println!("{}", expected);
-        assert!(
-            expected.deep_equals(&optimized),
-            "{}==\n{}",
-            expected,
-            optimized
-        );
-    }
-
-    Ok(())
-}
-
-#[test]
-fn test_remove_dead_code() {
-    let mut program = Program::new();
-    let x = program.visit_nullary(OperatorNullary::Variable(0));
-    let y = program.visit_nullary(OperatorNullary::Variable(1));
-    let z = program.visit_nullary(OperatorNullary::Variable(2));
-    let w = program.visit_nullary(OperatorNullary::Variable(3));
-    let xy = program.visit_binary(OperatorBinary::Add, x, y);
-    let xyz = program.visit_binary(OperatorBinary::Add, xy, z);
-    let yz = program.visit_binary(OperatorBinary::Add, y, z);
-    program.push_output(xyz);
-    assert_eq!(program.steps().len(), 7);
-    let without = program.without_dead_code();
-    assert_eq!(without.steps().len(), 5);
-}

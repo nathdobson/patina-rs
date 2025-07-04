@@ -1,14 +1,14 @@
 use crate::eval_visitor::EvalVisitor;
 use crate::expr::Expr;
-use crate::numeric::Numeric;
 use crate::operator::{OperatorBinary, OperatorNullary, OperatorTrinary, OperatorUnary};
 use crate::program::Program;
 use crate::term_visitor::TermVisitor;
 use inari::DecInterval;
+use patina_scalar::Scalar;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 use std::rc::Rc;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BoundedTerm<T> {
     bounds: DecInterval,
     inner: T,
@@ -54,7 +54,10 @@ impl<C: TermVisitor> TermVisitor for BoundedTermVisitor<C> {
 
     fn visit_unary(&mut self, unary: OperatorUnary, t1: Self::Output) -> Self::Output {
         match unary {
-            OperatorUnary::Negate | OperatorUnary::Reciprocal => BoundedTerm::new(
+            OperatorUnary::Negate
+            | OperatorUnary::Reciprocal
+            | OperatorUnary::Sqrt
+            | OperatorUnary::Identity => BoundedTerm::new(
                 self.bounds.visit_unary(unary.clone(), t1.bounds),
                 self.inner.visit_unary(unary, t1.inner),
             ),
@@ -68,16 +71,16 @@ impl<C: TermVisitor> TermVisitor for BoundedTermVisitor<C> {
         t2: Self::Output,
     ) -> Self::Output {
         match binary {
-            OperatorBinary::Min if t1.bounds.precedes(t2.bounds) => t1,
-            OperatorBinary::Min if t2.bounds.precedes(t1.bounds) => t2,
-            OperatorBinary::Max if t1.bounds.precedes(t2.bounds) => t2,
-            OperatorBinary::Max if t2.bounds.precedes(t1.bounds) => t1,
+            OperatorBinary::Minimum if t1.bounds.precedes(t2.bounds) => t1,
+            OperatorBinary::Minimum if t2.bounds.precedes(t1.bounds) => t2,
+            OperatorBinary::Maximum if t1.bounds.precedes(t2.bounds) => t2,
+            OperatorBinary::Maximum if t2.bounds.precedes(t1.bounds) => t1,
             OperatorBinary::Add
             | OperatorBinary::Subtract
             | OperatorBinary::Multiply
             | OperatorBinary::Divide
-            | OperatorBinary::Min
-            | OperatorBinary::Max => BoundedTerm::new(
+            | OperatorBinary::Minimum
+            | OperatorBinary::Maximum => BoundedTerm::new(
                 self.bounds
                     .visit_binary(binary.clone(), t1.bounds, t2.bounds),
                 self.inner.visit_binary(binary, t1.inner, t2.inner),

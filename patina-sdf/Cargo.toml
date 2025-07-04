@@ -5,3 +5,14 @@ edition = "2024"
 
 [dependencies]
 patina-calc = {workspace = true}
+patina-geo = { workspace = true}
+patina-vec= {workspace = true}
+patina-scalar={workspace = true}
+patina-mesh={workspace = true}
+itertools = "0.14.0"
+arrayvec = "0.7.6"
+anyhow = "1.0.98"
+
+[dev-dependencies]
+tokio = {version = "1.46.0", features=["macros","rt"]}
+target-test-dir = "0.3.0"

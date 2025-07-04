@@ -1,9 +1,12 @@
+use crate::derivative::DerivativeTransform;
 use crate::operator::{OperatorBinary, OperatorNullary, OperatorTrinary, OperatorUnary};
+use crate::{ExprVisit, ExprVisitor, TermVisitor};
 use by_address::ByAddress;
 use deep_equal::ExprDeepEqual;
 use ordered_float::NotNan;
+use patina_scalar::Scalar;
 use std::fmt::{Debug, Display, Formatter};
-use std::ops::{Add, Div, Mul, Neg, Sub};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 use std::rc::Rc;
 
 pub mod deep_equal;
@@ -45,23 +48,14 @@ impl Expr {
             [e0, e1, e2],
         ))))
     }
+    pub fn constant(x: f64) -> Self {
+        Expr::from_f64(x)
+    }
     pub fn inner(&self) -> &ExprInner {
         &**self.0
     }
     pub fn var(variable: usize) -> Self {
         Expr::new_nullary(OperatorNullary::Variable(variable))
-    }
-    pub fn recip(self) -> Self {
-        Expr::new_unary(OperatorUnary::Reciprocal, self)
-    }
-    pub fn min(self, other: Self) -> Self {
-        Expr::new_binary(OperatorBinary::Min, self, other)
-    }
-    pub fn max(self, other: Self) -> Self {
-        Expr::new_binary(OperatorBinary::Max, self, other)
-    }
-    pub fn piecewise(self, neg: Self, pos: Self) -> Self {
-        Expr::new_trinary(OperatorTrinary::Piecewise, self, neg, pos)
     }
     pub fn compose(&self, inputs: &[Self]) -> Self {
         match self.inner() {
@@ -83,11 +77,15 @@ impl Expr {
     pub fn deep_equals(&self, other: &Self) -> bool {
         ExprDeepEqual::new().eq_expr(self, other)
     }
-}
-
-impl From<f64> for Expr {
-    fn from(value: f64) -> Self {
-        Expr::new_nullary(OperatorNullary::Constant(NotNan::new(value).unwrap()))
+    pub fn visit<V: TermVisitor>(&self, visitor: &mut V) -> V::Output {
+        let mut visit = ExprVisit::new();
+        visit.visit(visitor, self)
+    }
+    pub fn derivative(&self, var: usize) -> Self {
+        let output = ExprVisitor::new();
+        let mut derivative = DerivativeTransform::new(output, var);
+        let (f, fp) = self.visit(&mut derivative);
+        fp
     }
 }
 
@@ -143,5 +141,55 @@ impl Display for Expr {
 impl Debug for Expr {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         self.inner().fmt(f)
+    }
+}
+
+impl AddAssign<Expr> for Expr {
+    fn add_assign(&mut self, rhs: Expr) {
+        *self = self.clone() + rhs;
+    }
+}
+
+impl SubAssign<Expr> for Expr {
+    fn sub_assign(&mut self, rhs: Expr) {
+        *self = self.clone() - rhs;
+    }
+}
+
+impl MulAssign<Expr> for Expr {
+    fn mul_assign(&mut self, rhs: Expr) {
+        *self = self.clone() * rhs;
+    }
+}
+
+impl DivAssign<Expr> for Expr {
+    fn div_assign(&mut self, rhs: Expr) {
+        *self = self.clone() / rhs;
+    }
+}
+
+impl Scalar for Expr {
+    fn recip(self) -> Self {
+        Expr::new_unary(OperatorUnary::Reciprocal, self)
+    }
+
+    fn minimum(self, other: Self) -> Self {
+        Expr::new_binary(OperatorBinary::Minimum, self, other)
+    }
+
+    fn maximum(self, other: Self) -> Self {
+        Expr::new_binary(OperatorBinary::Maximum, self, other)
+    }
+
+    fn piecewise(self, neg: Self, pos: Self) -> Self {
+        Expr::new_trinary(OperatorTrinary::Piecewise, self, neg, pos)
+    }
+
+    fn from_f64(value: f64) -> Self {
+        Expr::new_nullary(OperatorNullary::Constant(NotNan::new(value).unwrap()))
+    }
+
+    fn sqrt(self) -> Self {
+        Expr::new_unary(OperatorUnary::Sqrt, self)
     }
 }

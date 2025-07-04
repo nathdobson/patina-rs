@@ -16,7 +16,7 @@ impl ExprProgramBuilder {
         }
     }
     pub fn push(&mut self, expr: Expr) {
-        let term = self.expr_evaluator.evaluate(&mut self.program, &expr);
+        let term = self.expr_evaluator.visit(&mut self.program, &expr);
         self.program.push_output(term);
     }
     pub fn into_program(self) -> Program {

@@ -1,4 +1,3 @@
-use crate::numeric::Numeric;
 use crate::term_visitor::TermVisitor;
 use ordered_float::NotNan;
 use std::fmt::{Display, Formatter};
@@ -13,8 +12,10 @@ pub enum OperatorNullary {
 /// An operator that takes 1 input.
 #[derive(Clone, Debug, Hash, Ord, PartialOrd, Eq, PartialEq)]
 pub enum OperatorUnary {
+    Identity,
     Negate,
     Reciprocal,
+    Sqrt,
 }
 
 /// An operator that takes 2 inputs.
@@ -24,15 +25,14 @@ pub enum OperatorBinary {
     Subtract,
     Multiply,
     Divide,
-    Min,
-    Max,
+    Minimum,
+    Maximum,
 }
 
 /// An operator that takes 3 inputs.
 #[derive(Clone, Debug, Hash, Ord, PartialOrd, Eq, PartialEq)]
 pub enum OperatorTrinary {
     Piecewise,
-
 }
 
 impl OperatorTrinary {
@@ -57,6 +57,8 @@ impl Display for OperatorUnary {
         match self {
             OperatorUnary::Negate => write!(f, "-"),
             OperatorUnary::Reciprocal => write!(f, "1.0/"),
+            OperatorUnary::Sqrt => write!(f, "sqrt "),
+            OperatorUnary::Identity => write!(f, ""),
         }
     }
 }
@@ -68,8 +70,8 @@ impl Display for OperatorBinary {
             OperatorBinary::Subtract => write!(f, "-"),
             OperatorBinary::Multiply => write!(f, "*"),
             OperatorBinary::Divide => write!(f, "/"),
-            OperatorBinary::Min => write!(f, "min"),
-            OperatorBinary::Max => write!(f, "max"),
+            OperatorBinary::Minimum => write!(f, "min"),
+            OperatorBinary::Maximum => write!(f, "max"),
         }
     }
 }

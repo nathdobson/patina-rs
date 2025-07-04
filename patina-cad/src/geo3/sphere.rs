@@ -3,21 +3,7 @@ use crate::meshes::mesh::Mesh;
 use crate::meshes::mesh_triangle::MeshTriangle;
 use crate::meshes::subdivision::subdivide;
 
-pub struct Sphere {
-    start: Vec3,
-    radius: f64,
-}
-
-impl Sphere {
-    pub fn new(start: Vec3, radius: f64) -> Sphere {
-        Sphere { start, radius }
-    }
-    pub fn start(&self) -> Vec3 {
-        self.start
-    }
-    pub fn radius(&self) -> f64 {
-        self.radius
-    }
+fn sphere_as_mesh(sphere:&Sphere)->Mesh {
     pub fn as_mesh(&self, detail: usize) -> Mesh {
         let mut mesh = icosphere(detail);
         for v in mesh.vertices_mut() {

@@ -1,6 +1,6 @@
-use crate::numeric::Numeric;
 use crate::operator::{OperatorBinary, OperatorNullary, OperatorTrinary, OperatorUnary};
 use crate::term_visitor::TermVisitor;
+use patina_scalar::Scalar;
 
 /// A visitor for numerically evaluating terms.
 pub struct EvalVisitor<T> {
@@ -13,7 +13,7 @@ impl<T> EvalVisitor<T> {
     }
 }
 
-impl<T: Numeric> TermVisitor for EvalVisitor<T> {
+impl<T: Scalar> TermVisitor for EvalVisitor<T> {
     type Output = T;
 
     fn visit_nullary(&mut self, nullary: OperatorNullary) -> Self::Output {
@@ -27,6 +27,8 @@ impl<T: Numeric> TermVisitor for EvalVisitor<T> {
         match unary {
             OperatorUnary::Negate => -t1,
             OperatorUnary::Reciprocal => t1.recip(),
+            OperatorUnary::Sqrt => t1.sqrt(),
+            OperatorUnary::Identity => t1
         }
     }
 
@@ -41,8 +43,8 @@ impl<T: Numeric> TermVisitor for EvalVisitor<T> {
             OperatorBinary::Subtract => t1 - t2,
             OperatorBinary::Multiply => t1 * t2,
             OperatorBinary::Divide => t1 / t2,
-            OperatorBinary::Min => t1.min(t2),
-            OperatorBinary::Max => t1.max(t2),
+            OperatorBinary::Minimum => t1.minimum(t2),
+            OperatorBinary::Maximum => t1.maximum(t2),
         }
     }
 

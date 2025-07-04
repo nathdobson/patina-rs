@@ -7,3 +7,4 @@ edition = "2024"
 by_address = "1.2.1"
 inari = "2.0.0"
 ordered-float = "5.0.0"
+patina-scalar = {workspace = true, features = ["inari"]}

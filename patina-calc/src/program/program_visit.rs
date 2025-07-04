@@ -1,4 +1,3 @@
-use crate::numeric::Numeric;
 use crate::program::{ProgramStep, Program};
 use crate::term_visitor::TermVisitor;
 use std::env::var;

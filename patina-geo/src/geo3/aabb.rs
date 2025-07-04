@@ -10,6 +10,12 @@ impl AABB {
     pub fn new(min: Vec3, max: Vec3) -> Self {
         AABB { min, max }
     }
+    pub fn min(&self) -> Vec3 {
+        self.min
+    }
+    pub fn max(&self) -> Vec3 {
+        self.max
+    }
     pub fn from_point(p: Vec3) -> Self {
         Self::new(p, p)
     }
@@ -18,12 +24,6 @@ impl AABB {
     }
     pub fn union(&self, other: &Self) -> Self {
         Self::new(self.min.min(other.min), self.max.max(other.max))
-    }
-    pub fn min(&self) -> Vec3 {
-        self.min
-    }
-    pub fn max(&self) -> Vec3 {
-        self.max
     }
     pub fn surface_area(&self) -> f64 {
         let d = self.max - self.min;

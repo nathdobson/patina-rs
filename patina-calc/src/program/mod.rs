@@ -1,7 +1,7 @@
+use crate::derivative::DerivativeTransform;
 use crate::eval_visitor::EvalVisitor;
 use crate::expr::Expr;
 use crate::expr::expr_visitor::ExprVisitor;
-use crate::numeric::Numeric;
 use crate::operator::{OperatorBinary, OperatorNullary, OperatorTrinary, OperatorUnary};
 use crate::term_visitor::TermVisitor;
 use program_visit::ProgramVisit;
@@ -82,6 +82,31 @@ impl Program {
         self.into_exprs()
             .into_iter()
             .eq_by(other.into_exprs(), |x, y| x.deep_equals(&y))
+    }
+    pub fn and_then(&self, other: &Self) -> Self {
+        let mut output = Program::new();
+        for step in &self.steps {
+            output.push(step.clone());
+        }
+        for step in &other.steps {
+            match step {
+                ProgramStep::Nullary(OperatorNullary::Variable(v), []) => output.push(
+                    ProgramStep::Unary(OperatorUnary::Identity, [self.outputs()[*v]]),
+                ),
+                _ => output.push(step.clone()),
+            };
+        }
+        output
+    }
+    pub fn derivative(&self, variable: usize) -> Self {
+        let mut output = Program::new();
+        let mut derivative = DerivativeTransform::new(output, variable);
+        let outputs = self.visit(&mut derivative);
+        let mut program = derivative.into_inner();
+        for (f, fp) in outputs {
+            program.push_output(fp);
+        }
+        program
     }
 }
 
