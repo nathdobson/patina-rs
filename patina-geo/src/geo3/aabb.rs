@@ -1,20 +1,23 @@
 use patina_vec::vec3::Vec3;
 
 #[derive(Copy, Clone, Debug)]
-pub struct AABB {
+pub struct Aabb {
     min: Vec3,
     max: Vec3,
 }
 
-impl AABB {
+impl Aabb {
     pub fn new(min: Vec3, max: Vec3) -> Self {
-        AABB { min, max }
+        Aabb { min, max }
     }
     pub fn min(&self) -> Vec3 {
         self.min
     }
     pub fn max(&self) -> Vec3 {
         self.max
+    }
+    pub fn center(&self) -> Vec3 {
+        (self.min + self.max) / 2.0
     }
     pub fn from_point(p: Vec3) -> Self {
         Self::new(p, p)
@@ -56,6 +59,4 @@ impl AABB {
             Vec3::new(max.x(), max.y(), max.z()),
         ]
     }
-    
 }
-

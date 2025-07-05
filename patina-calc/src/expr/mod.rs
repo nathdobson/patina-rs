@@ -192,4 +192,8 @@ impl Scalar for Expr {
     fn sqrt(self) -> Self {
         Expr::new_unary(OperatorUnary::Sqrt, self)
     }
+
+    fn abs(self) -> Self {
+        Expr::new_unary(OperatorUnary::Abs, self)
+    }
 }

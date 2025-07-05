@@ -79,6 +79,9 @@ impl<T: Scalar> Vector3<T> {
     pub fn distance(self, other: Self) -> T {
         (self - other).length()
     }
+    pub fn abs(self) -> Self {
+        self.map(|x| x.abs())
+    }
 }
 
 impl<T> From<[T; 3]> for Vector3<T> {

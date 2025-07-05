@@ -44,6 +44,9 @@ pub trait TermVisitorExt: TermVisitor {
     fn sqrt(&mut self, t: Self::Output) -> Self::Output {
         self.visit_unary(OperatorUnary::Sqrt, t)
     }
+    fn abs(&mut self, t: Self::Output) -> Self::Output {
+        self.visit_unary(OperatorUnary::Abs, t)
+    }
     fn add(&mut self, t1: Self::Output, t2: Self::Output) -> Self::Output {
         self.visit_binary(OperatorBinary::Add, t1, t2)
     }

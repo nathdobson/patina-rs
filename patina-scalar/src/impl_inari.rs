@@ -1,5 +1,5 @@
-use inari::DecInterval;
 use crate::Scalar;
+use inari::DecInterval;
 
 impl Scalar for DecInterval {
     fn recip(self) -> Self {
@@ -30,5 +30,9 @@ impl Scalar for DecInterval {
 
     fn from_f64(value: f64) -> Self {
         DecInterval::try_from((value, value)).unwrap()
+    }
+
+    fn abs(self) -> Self {
+        DecInterval::abs(self)
     }
 }

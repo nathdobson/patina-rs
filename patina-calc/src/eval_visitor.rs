@@ -28,7 +28,8 @@ impl<T: Scalar> TermVisitor for EvalVisitor<T> {
             OperatorUnary::Negate => -t1,
             OperatorUnary::Reciprocal => t1.recip(),
             OperatorUnary::Sqrt => t1.sqrt(),
-            OperatorUnary::Identity => t1
+            OperatorUnary::Identity => t1,
+            OperatorUnary::Abs => t1.abs(),
         }
     }
 

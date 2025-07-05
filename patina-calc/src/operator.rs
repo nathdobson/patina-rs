@@ -16,6 +16,7 @@ pub enum OperatorUnary {
     Negate,
     Reciprocal,
     Sqrt,
+    Abs,
 }
 
 /// An operator that takes 2 inputs.
@@ -59,6 +60,7 @@ impl Display for OperatorUnary {
             OperatorUnary::Reciprocal => write!(f, "1.0/"),
             OperatorUnary::Sqrt => write!(f, "sqrt "),
             OperatorUnary::Identity => write!(f, ""),
+            OperatorUnary::Abs => write!(f, "abs "),
         }
     }
 }

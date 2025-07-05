@@ -818,6 +818,7 @@ dependencies = [
  "anyhow",
  "arrayvec",
  "itertools",
+ "ordered-float",
  "patina-calc",
  "patina-geo",
  "patina-mesh",

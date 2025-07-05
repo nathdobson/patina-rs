@@ -1,4 +1,5 @@
 use crate::{EvalVisitor, Program, ProgramVisit};
+use ordered_float::NotNan;
 use rand::rngs::ThreadRng;
 use rand::{Rng, rng};
 use std::ops::Range;
@@ -27,7 +28,7 @@ impl<R: Rng> Solver<R> {
             visit: ProgramVisit::new(),
         }
     }
-    pub fn solve(&mut self, program: &Program, range: Range<f64>) -> Option<f64> {
+    pub fn solve(&mut self, program: &Program, range: Range<f64>) -> Option<NotNan<f64>> {
         for _ in 0..self.starts {
             if let Some(x) = self.solve_once(program, range.clone()) {
                 return Some(x);
@@ -36,23 +37,38 @@ impl<R: Rng> Solver<R> {
         None
     }
 
-    fn solve_once(&mut self, program: &Program, range: Range<f64>) -> Option<f64> {
+    fn solve_once(&mut self, program: &Program, range: Range<f64>) -> Option<NotNan<f64>> {
         let mut x = self.rng.random_range(range.clone());
         for it in 0.. {
+            if !x.is_finite() {
+                return None;
+            }
             let mut visitor = EvalVisitor::new(vec![x]);
             let mut output = vec![];
             self.visit.visit(program, &mut visitor, &mut output);
             let [y, yp] = output.as_slice().try_into().unwrap();
-            if it < self.iterations - 1 {
+            if y.abs() < self.eps {
+                if x < range.start - self.eps {
+                    return None;
+                } else if x < range.start {
+                    return Some(NotNan::new(range.start).unwrap());
+                } else if x > range.end + self.eps {
+                    return None;
+                } else if x > range.end {
+                    return Some(NotNan::new(range.end).unwrap());
+                } else {
+                    return NotNan::new(x).ok();
+                }
+            } else if it < self.iterations - 1 {
                 x = x - y / yp;
             } else if x < range.start {
                 return None;
             } else if x > range.end {
                 return None;
-            } else if y.abs() > self.eps {
-                return None;
+            // } else if y.abs() > self.eps {
+            //     return None;
             } else {
-                return Some(x);
+                return None;
             }
         }
         None

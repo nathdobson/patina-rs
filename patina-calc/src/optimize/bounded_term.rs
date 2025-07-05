@@ -57,7 +57,8 @@ impl<C: TermVisitor> TermVisitor for BoundedTermVisitor<C> {
             OperatorUnary::Negate
             | OperatorUnary::Reciprocal
             | OperatorUnary::Sqrt
-            | OperatorUnary::Identity => BoundedTerm::new(
+            | OperatorUnary::Identity
+            | OperatorUnary::Abs => BoundedTerm::new(
                 self.bounds.visit_unary(unary.clone(), t1.bounds),
                 self.inner.visit_unary(unary, t1.inner),
             ),

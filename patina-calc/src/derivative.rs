@@ -51,6 +51,10 @@ impl<V: TermVisitor> TermVisitor for DerivativeTransform<V> {
                 let sf2 = self.inner.mul(t2, sf.clone());
                 (sf, self.inner.div(fp, sf2))
             }
+            OperatorUnary::Abs => {
+                let nfp = self.inner.negate(fp.clone());
+                (self.inner.abs(f.clone()), self.inner.piecewise(f, nfp, fp))
+            }
         }
     }
 
@@ -68,21 +72,36 @@ impl<V: TermVisitor> TermVisitor for DerivativeTransform<V> {
                 let fgp = self.inner.mul(f.clone(), gp);
                 (self.inner.mul(f, g), self.inner.add(fpg, fgp))
             }
-            OperatorBinary::Divide => todo!(),
-            OperatorBinary::Minimum => todo!(),
-            OperatorBinary::Maximum => todo!(),
+            OperatorBinary::Divide => {
+                let fpg = self.inner.mul(fp, g.clone());
+                let fgp = self.inner.mul(f.clone(), gp);
+                let num = self.inner.sub(fpg, fgp);
+                let denom = self.inner.mul(g.clone(), g.clone());
+                (self.inner.div(f, g), self.inner.div(num, denom))
+            }
+            OperatorBinary::Minimum => {
+                let diff = self.inner.sub(f.clone(), g.clone());
+                (self.inner.minimum(f, g), self.inner.piecewise(diff, fp, gp))
+            }
+            OperatorBinary::Maximum => {
+                let diff = self.inner.sub(g.clone(), f.clone());
+                (self.inner.maximum(f, g), self.inner.piecewise(diff, fp, gp))
+            }
         }
     }
 
     fn visit_trinary(
         &mut self,
         trinary: OperatorTrinary,
-        t1: Self::Output,
-        t2: Self::Output,
-        t3: Self::Output,
+        (f, fp): Self::Output,
+        (g, gp): Self::Output,
+        (h, hp): Self::Output,
     ) -> Self::Output {
         match trinary {
-            OperatorTrinary::Piecewise => todo!(),
+            OperatorTrinary::Piecewise => (
+                self.inner.piecewise(f.clone(), g, h),
+                self.inner.piecewise(f, gp, hp),
+            ),
         }
     }
 }

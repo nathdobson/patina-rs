@@ -2,6 +2,7 @@ use crate::marching::marching_cube;
 use crate::sdf::CompiledSdf;
 use arrayvec::ArrayVec;
 use itertools::Itertools;
+use ordered_float::NotNan;
 use patina_calc::{EvalVisitor, Expr, ExprProgramBuilder, Program, ProgramVisit, Solver};
 use patina_mesh::mesh::Mesh;
 use patina_mesh::mesh_triangle::MeshTriangle;
@@ -107,12 +108,12 @@ impl MarchingMesh {
                             let guided_sdf = guided_sdf.with_derivative(0);
                             let t = solver.solve(&guided_sdf, 0.0..1.0);
                             let t = if let Some(t) = t {
-                                t
+                                t.into_inner()
                             } else {
                                 println!("Cannot solve {} {} {} {} {} {}", x, y, z, xp, yp, zp);
                                 0.5
                             };
-                            assert!(t >= 0.0 && t <= 1.0);
+                            assert!(t >= 0.0 && t <= 1.0, "{:?}", t);
                             let position = input_program.program().evaluate_f64(vec![t]);
                             let position = position.into_iter().collect::<Vec3>();
                             let index = vertices.len();
