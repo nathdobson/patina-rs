@@ -1,13 +1,16 @@
 use crate::marching::{CubeVertex, marching_cube};
-use crate::sdf::CompiledSdf;
 use arrayvec::ArrayVec;
 use itertools::Itertools;
 use ordered_float::NotNan;
-use patina_calc::{EvalVisitor, Expr, ExprProgramBuilder, Program, ProgramVisit, Solver};
+// use patina_calc::{EvalVisitor, Expr, ExprProgramBuilder, Program, ProgramVisit, Solver};
+use crate::deriv::Deriv;
+use crate::sdf::Sdf;
+use crate::solver::Solver;
 use patina_geo::geo3::aabb::Aabb;
 use patina_mesh::mesh::Mesh;
 use patina_mesh::mesh_triangle::MeshTriangle;
 use patina_vec::vec3::Vec3;
+use patina_vec::vector3::Vector3;
 use std::collections::HashMap;
 
 #[derive(Debug)]
@@ -58,30 +61,26 @@ impl OctreeCube {
     }
 }
 
-pub struct MarchingMesh<'a> {
-    sdf: &'a CompiledSdf,
+pub struct MarchingMesh {
+    sdf: Sdf,
     render_dim: usize,
     aabb: Aabb,
-    visit: ProgramVisit<EvalVisitor<f64>>,
     evals: HashMap<[usize; 3], f64>,
     vertices: Vec<Vec3>,
     vertex_table: HashMap<[usize; 3], usize>,
     triangles: Vec<MeshTriangle>,
-    solver: Solver,
 }
 
-impl<'a> MarchingMesh<'a> {
-    pub fn new(sdf: &'a CompiledSdf, aabb: Aabb, render_dim: usize) -> Self {
+impl MarchingMesh {
+    pub fn new(sdf: Sdf, aabb: Aabb, render_dim: usize) -> Self {
         Self {
             sdf,
-            visit: ProgramVisit::with_capacity(sdf.program()),
             aabb,
             evals: Default::default(),
             vertices: vec![],
             vertex_table: HashMap::new(),
             triangles: vec![],
             render_dim,
-            solver: Solver::new(),
         }
     }
     fn position(&self, ints: [usize; 3]) -> Vec3 {
@@ -98,14 +97,10 @@ impl<'a> MarchingMesh<'a> {
     }
     fn evaluate(&mut self, ints: [usize; 3]) -> f64 {
         let position = self.position(ints);
-        let sdf = self.sdf;
-        let visit = &mut self.visit;
-        *self.evals.entry(ints).or_insert_with(|| {
-            let mut visitor = EvalVisitor::new(position.into_iter().collect());
-            let mut outputs = vec![];
-            visit.visit(&sdf.program(), &mut visitor, &mut outputs);
-            outputs.into_iter().exactly_one().unwrap()
-        })
+        *self
+            .evals
+            .entry(ints)
+            .or_insert_with(|| self.sdf.evaluate(position))
     }
     fn build_cube(&mut self, cube: OctreeCube) {
         let aabb = self.aabb(&cube);
@@ -146,23 +141,23 @@ impl<'a> MarchingMesh<'a> {
     fn add_vertex(&mut self, ints: [usize; 3]) -> usize {
         let position = self.position(ints);
         *self.vertex_table.entry(ints).or_insert_with(|| {
-            let mut input_program = ExprProgramBuilder::new();
-            for axis in 0..3 {
-                if ints[axis] % 2 == 0 {
-                    input_program.push(Expr::constant(position[axis]));
-                } else {
-                    input_program.push(
-                        Expr::constant(position[axis])
-                            + Expr::var(0)
-                                * Expr::constant(
+            let position_deriv = |t| {
+                let mut inputs = Vector3::splat(Deriv::nan());
+                for axis in 0..3 {
+                    if ints[axis] % 2 == 0 {
+                        inputs[axis] = Deriv::constant(position[axis]);
+                    } else {
+                        inputs[axis] = Deriv::constant(position[axis])
+                            + Deriv::variable(t)
+                                * Deriv::constant(
                                     self.aabb.dimensions()[axis] / (self.render_dim as f64),
-                                ),
-                    );
+                                );
+                    }
                 }
-            }
-            let guided_sdf = input_program.program().and_then(self.sdf.program());
-            let guided_sdf = guided_sdf.with_derivative(0);
-            let t = self.solver.solve(&guided_sdf, -1.0..1.0);
+                inputs
+            };
+            let lsdf = |t| self.sdf.evaluate_deriv(position_deriv(t));
+            let t = Solver::new().solve(-1.0..1.0, lsdf);
             let t = if let Some(t) = t {
                 t.into_inner()
             } else {
@@ -171,8 +166,7 @@ impl<'a> MarchingMesh<'a> {
             };
             assert!(t >= -1.0 && t <= 1.0, "{:?}", t);
             let t = t.clamp(-0.99, 0.99);
-            let position = input_program.program().evaluate_f64(vec![t]);
-            let position = position.into_iter().collect::<Vec3>();
+            let position = position_deriv(t).map(|x| x.value());
             let index = self.vertices.len();
             self.vertices.push(position);
             index

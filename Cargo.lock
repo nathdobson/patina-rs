@@ -817,13 +817,14 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "arrayvec",
+ "inari",
  "itertools",
  "ordered-float",
- "patina-calc",
  "patina-geo",
  "patina-mesh",
  "patina-scalar",
  "patina-vec",
+ "rand",
  "target-test-dir",
  "tokio",
 ]

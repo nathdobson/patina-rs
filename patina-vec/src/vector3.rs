@@ -3,8 +3,14 @@ use std::fmt::{Debug, Display, Formatter};
 use std::iter::Sum;
 use std::ops::{Add, AddAssign, Div, Index, IndexMut, Mul, Neg, Sub};
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct Vector3<T>([T; 3]);
+
+impl Vector3<f64> {
+    pub fn into_scalars<T2: Scalar>(self) -> Vector3<T2> {
+        self.map(T2::from_f64)
+    }
+}
 
 impl<T: Scalar> Vector3<T> {
     pub fn new(x: T, y: T, z: T) -> Self {

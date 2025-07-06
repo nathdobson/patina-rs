@@ -1,0 +1,42 @@
+use crate::deriv::Deriv;
+use crate::sdf::{Sdf, SdfImpl};
+use inari::DecInterval;
+use patina_geo::geo3::sphere::Sphere;
+use patina_scalar::Scalar;
+use patina_vec::vec3::Vec3;
+use patina_vec::vector3::Vector3;
+
+pub trait SdfLeafImpl: 'static + Sync + Send + Sized {
+    fn evaluate<T: Scalar>(&self, p: Vector3<T>) -> T;
+    fn into_sdf(self) -> Sdf {
+        Sdf::new(SdfLeaf::new(self))
+    }
+}
+
+pub struct SdfLeaf<T> {
+    inner: T,
+}
+
+impl<T: SdfLeafImpl> SdfLeaf<T> {
+    pub fn new(inner: T) -> SdfLeaf<T> {
+        SdfLeaf { inner }
+    }
+}
+
+impl<T: SdfLeafImpl> SdfImpl for SdfLeaf<T> {
+    fn evaluate(&self, p: Vec3) -> f64 {
+        self.inner.evaluate(Vector3::from(<[f64; 3]>::from(p)))
+    }
+    fn evaluate_deriv(&self, p: Vector3<Deriv>) -> Deriv {
+        self.inner.evaluate(p)
+    }
+    fn evaluate_constrain(&self, p: Vector3<DecInterval>) -> (Option<Sdf>, DecInterval) {
+        (None, self.inner.evaluate(p))
+    }
+}
+
+impl SdfLeafImpl for Sphere {
+    fn evaluate<T: Scalar>(&self, p: Vector3<T>) -> T {
+        (p - self.origin().into_scalars::<T>()).length() - T::from_f64(self.radius())
+    }
+}
