@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-#patina-calc = {workspace = true}
 patina-geo = { workspace = true}
 patina-vec= {workspace = true}
 patina-scalar={workspace = true,features = ["inari"]}

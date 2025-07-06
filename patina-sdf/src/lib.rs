@@ -7,9 +7,7 @@
 mod marching;
 
 pub mod sdf;
-mod deriv;
 mod marching_mesh;
-mod solver;
 // pub mod sdf;
 // pub mod geo;
 #[cfg(test)]

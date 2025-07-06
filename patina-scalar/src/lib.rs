@@ -2,6 +2,8 @@
 
 #[cfg(feature = "inari")]
 mod impl_inari;
+pub mod deriv;
+pub mod newton;
 
 use std::fmt::{Debug, Display};
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};

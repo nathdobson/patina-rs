@@ -1,11 +1,12 @@
 pub mod leaf;
 pub mod union;
 
-use crate::deriv::Deriv;
 use inari::DecInterval;
 use patina_scalar::Scalar;
+use patina_scalar::deriv::Deriv;
 use patina_vec::vec3::Vec3;
 use patina_vec::vector3::Vector3;
+use std::fmt::{Debug, Formatter};
 use std::sync::Arc;
 
 /// The [signed distance function (SDF)](https://iquilezles.org/articles/distfunctions/)
@@ -46,9 +47,14 @@ struct SdfInner<S: ?Sized> {
     imp: S,
 }
 
-pub trait SdfImpl: 'static + Sync + Send {
+pub trait SdfImpl: 'static + Sync + Send + Debug {
     fn evaluate(&self, p: Vec3) -> f64;
     fn evaluate_deriv(&self, p: Vector3<Deriv>) -> Deriv;
     fn evaluate_constrain(&self, p: Vector3<DecInterval>) -> (Option<Sdf>, DecInterval);
 }
 
+impl Debug for Sdf {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        self.0.imp.fmt(f)
+    }
+}

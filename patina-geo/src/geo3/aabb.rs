@@ -1,5 +1,7 @@
 use crate::geo1::interval::Interval;
 use patina_vec::vec3::Vec3;
+use rand::Rng;
+use rand::prelude::Distribution;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Aabb {
@@ -86,5 +88,13 @@ impl Aabb {
             Aabb::from_intervals(x23, y23, z12),
             Aabb::from_intervals(x23, y23, z23),
         ]
+    }
+}
+
+impl Distribution<Vec3> for Aabb {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Vec3 {
+        (0..3)
+            .map(|axis| rng.random_range(self.min[axis]..self.max[axis]))
+            .collect()
     }
 }

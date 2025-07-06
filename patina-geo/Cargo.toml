@@ -5,3 +5,4 @@ edition = "2024"
 
 [dependencies]
 patina-vec={workspace = true}
+rand = "0.9.1"

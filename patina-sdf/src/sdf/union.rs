@@ -1,22 +1,26 @@
-use crate::deriv::Deriv;
+use patina_scalar::deriv::Deriv;
 use crate::sdf::{Sdf, SdfImpl};
 use inari::DecInterval;
 use patina_scalar::Scalar;
 use patina_vec::vec3::Vec3;
 use patina_vec::vector3::Vector3;
 
-struct SdfbUnion {
+#[derive(Debug)]
+pub struct SdfUnion {
     a: Sdf,
     b: Sdf,
 }
 
-impl SdfbUnion {
-    fn new(a: Sdf, b: Sdf) -> Self {
+impl SdfUnion {
+    pub fn new(a: Sdf, b: Sdf) -> Self {
         Self { a, b }
+    }
+    pub fn into_sdf(self) -> Sdf {
+        Sdf::new(self)
     }
 }
 
-impl SdfImpl for SdfbUnion {
+impl SdfImpl for SdfUnion {
     fn evaluate(&self, p: Vec3) -> f64 {
         self.a.evaluate(p).minimum(self.b.evaluate(p))
     }
@@ -31,10 +35,10 @@ impl SdfImpl for SdfbUnion {
         if ai.precedes(bi) {
             (Some(a2.unwrap_or(self.a.clone())), ai)
         } else if bi.precedes(ai) {
-            (Some(b2.unwrap_or(self.a.clone())), bi)
+            (Some(b2.unwrap_or(self.b.clone())), bi)
         } else if a2.is_some() || b2.is_some() {
             (
-                Some(Sdf::new(SdfbUnion::new(
+                Some(Sdf::new(SdfUnion::new(
                     a2.unwrap_or(self.a.clone()),
                     b2.unwrap_or(self.b.clone()),
                 ))),

@@ -4,22 +4,22 @@ use rand::rngs::ThreadRng;
 use rand::{Rng, rng};
 use std::ops::Range;
 
-pub struct Solver<R = ThreadRng> {
+pub struct Newton<R = ThreadRng> {
     rng: R,
     iterations: usize,
     starts: usize,
     eps: f64,
 }
 
-impl Solver {
+impl Newton {
     pub fn new() -> Self {
         Self::with_rng(rng())
     }
 }
 
-impl<R: Rng> Solver<R> {
-    pub fn with_rng(rng: R) -> Solver<R> {
-        Solver {
+impl<R: Rng> Newton<R> {
+    pub fn with_rng(rng: R) -> Newton<R> {
+        Newton {
             rng,
             iterations: 20,
             starts: 100,
@@ -70,8 +70,6 @@ impl<R: Rng> Solver<R> {
                 return None;
             } else if x > range.end {
                 return None;
-            // } else if y.abs() > self.eps {
-            //     return None;
             } else {
                 return None;
             }

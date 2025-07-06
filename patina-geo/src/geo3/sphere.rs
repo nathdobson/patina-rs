@@ -1,5 +1,6 @@
 use patina_vec::vec3::Vec3;
 
+#[derive(Debug)]
 pub struct Sphere {
     origin: Vec3,
     radius: f64,

@@ -1,7 +1,9 @@
-use patina_scalar::Scalar;
+use crate::Scalar;
 use std::fmt::{Display, Formatter};
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
+/// A value representing both the numeric result of a computation and the derivative of that
+/// computation.
 #[derive(Debug, Copy, Clone)]
 pub struct Deriv {
     value: f64,
