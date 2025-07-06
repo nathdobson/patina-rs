@@ -16,6 +16,21 @@ impl Sdf {
     pub fn new(expr: Expr) -> Sdf {
         Sdf { expr }
     }
+    pub fn union(&self, other: &Sdf) -> Sdf {
+        Sdf {
+            expr: self.expr.clone().minimum(other.expr.clone()),
+        }
+    }
+    pub fn intersection(&self, other: &Sdf) -> Sdf {
+        Sdf {
+            expr: self.expr.clone().maximum(other.expr.clone()),
+        }
+    }
+    pub fn difference(&self, other: &Sdf) -> Sdf {
+        Sdf {
+            expr: self.expr.clone().maximum(-other.expr.clone()),
+        }
+    }
     pub fn compile(self) -> CompiledSdf {
         CompiledSdf {
             program: self.expr.into(),

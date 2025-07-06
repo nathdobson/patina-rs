@@ -11,24 +11,26 @@ use target_test_dir::with_test_dir;
 #[with_test_dir]
 async fn test_mesh() -> anyhow::Result<()> {
     let test_dir = get_test_dir!();
-    let sphere = Sdf::new_sphere(&Sphere::new(Vec3::new(0.0, 0.0, 0.0), 2.0)).compile();
+    let sphere = Sdf::new_sphere(&Sphere::new(Vec3::new(0.0, 0.0, 0.0), 0.5));
     let plane = Sdf::new_plane(&Plane::new(
         Vec3::new(0.0, 0.0, 0.0),
         Vec3::new(1.0, 1.0, 1.0),
-    ))
-    .compile();
+    ));
     let prism = Sdf::new_aabb(&Aabb::new(
-        Vec3::new(-1.0, -2.0, -3.0),
-        Vec3::new(2.0, 1.0, 0.0),
-    ))
-    .compile();
-    println!("{}", prism.program());
-    let naive = MarchingMesh::new(
-        Vec3::new(-3.0, -3.0, -3.0),
-        Vec3::new(0.251, 0.251, 0.251),
-        [30, 30, 30],
-    );
-    let mesh = naive.build(&prism);
+        Vec3::new(-0.5, -0.5, -0.5),
+        Vec3::new(0.5, 0.5, 0.5),
+    ));
+    let sdf = sphere.difference(&plane);
+    // let sdf = plane;
+    let csdf = sdf.compile();
+    let scene = Aabb::new(Vec3::new(-1.0001, -1.01, -1.1), Vec3::new(1.0, 1.0, 1.0));
+    let march = MarchingMesh::new(&csdf, scene, 1024);
+    // let naive = MarchingMesh::new(
+    //     scene.min(),
+    //     scene.dimensions() / (detail as f64),
+    //     [detail, detail, detail],
+    // );
+    let mesh = march.build();
     write_stl_file(&mesh, &test_dir.join("mesh.stl")).await?;
     Ok(())
 }

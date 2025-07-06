@@ -9,7 +9,10 @@ pub struct Plane {
 
 impl Plane {
     pub fn new(origin: Vec3, normal: Vec3) -> Self {
-        Plane { origin, normal }
+        Plane {
+            origin,
+            normal: normal.normalize(),
+        }
     }
     pub fn origin(&self) -> Vec3 {
         self.origin
