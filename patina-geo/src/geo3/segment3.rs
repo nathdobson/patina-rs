@@ -30,4 +30,10 @@ impl Segment3 {
     pub fn length(&self) -> f64 {
         (self.p2 - self.p1).length()
     }
+    pub fn midpoint(&self) -> Vec3 {
+        (self.p2 - self.p1) / 2.0 + self.p1
+    }
+    pub fn displacement(&self) -> Vec3 {
+        self.p2 - self.p1
+    }
 }

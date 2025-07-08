@@ -1,8 +1,8 @@
 #![feature(float_minimum_maximum)]
 
+pub mod deriv;
 #[cfg(feature = "inari")]
 mod impl_inari;
-pub mod deriv;
 pub mod newton;
 
 use std::fmt::{Debug, Display};

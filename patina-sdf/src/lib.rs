@@ -3,6 +3,7 @@
 #![allow(unused_imports)]
 #![allow(unused_variables)]
 #![feature(float_minimum_maximum)]
+#![allow(unused_mut)]
 
 mod marching;
 
@@ -12,3 +13,7 @@ mod marching_mesh;
 // pub mod geo;
 #[cfg(test)]
 mod test;
+mod subdivide;
+mod octree;
+mod exact;
+mod transvoxel;

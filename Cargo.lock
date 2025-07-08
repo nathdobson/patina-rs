@@ -781,6 +781,7 @@ dependencies = [
 name = "patina-mesh"
 version = "0.1.0"
 dependencies = [
+ "arrayvec",
  "itertools",
  "patina-geo",
  "patina-vec",
@@ -792,6 +793,7 @@ name = "patina-scalar"
 version = "0.1.0"
 dependencies = [
  "inari",
+ "itertools",
  "ordered-float",
  "rand",
 ]

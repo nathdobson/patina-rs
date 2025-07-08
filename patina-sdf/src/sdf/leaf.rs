@@ -29,7 +29,10 @@ impl<T: SdfLeafImpl> SdfImpl for SdfLeaf<T> {
     fn evaluate(&self, p: Vec3) -> f64 {
         self.inner.evaluate(Vector3::from(<[f64; 3]>::from(p)))
     }
-    fn evaluate_deriv(&self, p: Vector3<Deriv>) -> Deriv {
+    fn evaluate_deriv1(&self, p: Vector3<Deriv<1>>) -> Deriv<1> {
+        self.inner.evaluate(p)
+    }
+    fn evaluate_deriv3(&self, p: Vector3<Deriv<3>>) -> Deriv<3> {
         self.inner.evaluate(p)
     }
     fn evaluate_constrain(&self, p: Vector3<DecInterval>) -> (Option<Sdf>, DecInterval) {

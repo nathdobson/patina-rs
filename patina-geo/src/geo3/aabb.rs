@@ -35,18 +35,18 @@ impl Aabb {
         Self::new(Vec3::splat(f64::INFINITY), Vec3::splat(-f64::INFINITY))
     }
     pub fn union(&self, other: &Self) -> Self {
-        Self::new(self.min.min(other.min), self.max.max(other.max))
+        Self::new(self.min.minimum(other.min), self.max.maximum(other.max))
     }
     pub fn surface_area(&self) -> f64 {
         let d = self.max - self.min;
-        let d = d.max(Vec3::splat(0.0));
+        let d = d.maximum(Vec3::splat(0.0));
         d.x() * d.y() + d.x() * d.z() + d.y() * d.z()
     }
     pub fn intersect(&self, other: &Self) -> Self {
-        Self::new(self.min.max(other.min), self.max.min(other.max))
+        Self::new(self.min.maximum(other.min), self.max.minimum(other.max))
     }
     pub fn dimensions(&self) -> Vec3 {
-        (self.max - self.min).max(Vec3::zero())
+        (self.max - self.min).maximum(Vec3::zero())
     }
     pub fn intersects(&self, other: &Self) -> bool {
         self.intersect(other)

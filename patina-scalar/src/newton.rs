@@ -29,7 +29,7 @@ impl<R: Rng> Newton<R> {
     pub fn solve(
         &mut self,
         range: Range<f64>,
-        mut eval: impl FnMut(f64) -> Deriv,
+        mut eval: impl FnMut(f64) -> Deriv<1>,
     ) -> Option<NotNan<f64>> {
         for _ in 0..self.starts {
             if let Some(x) = self.solve_once(range.clone(), &mut eval) {
@@ -42,7 +42,7 @@ impl<R: Rng> Newton<R> {
     fn solve_once(
         &mut self,
         range: Range<f64>,
-        eval: &mut impl FnMut(f64) -> Deriv,
+        eval: &mut impl FnMut(f64) -> Deriv<1>,
     ) -> Option<NotNan<f64>> {
         let mut x = self.rng.random_range(range.clone());
         for it in 0.. {
@@ -51,7 +51,7 @@ impl<R: Rng> Newton<R> {
             }
             let yyp = eval(x);
             let y = yyp.value();
-            let yp = yyp.deriv();
+            let yp = yyp.deriv()[0];
             if y.abs() < self.eps {
                 if x < range.start - self.eps {
                     return None;

@@ -35,11 +35,26 @@ impl Sdf {
     pub fn evaluate(&self, p: Vec3) -> f64 {
         self.0.imp.evaluate(p)
     }
-    pub fn evaluate_deriv(&self, p: Vector3<Deriv>) -> Deriv {
-        self.0.imp.evaluate_deriv(p)
+    pub fn evaluate_deriv1(&self, p: Vector3<Deriv<1>>) -> Deriv<1> {
+        self.0.imp.evaluate_deriv1(p)
+    }
+    pub fn evaluate_deriv3(&self, p: Vector3<Deriv<3>>) -> Deriv<3> {
+        self.0.imp.evaluate_deriv3(p)
     }
     pub fn evaluate_constrain(&self, p: Vector3<DecInterval>) -> (Option<Sdf>, DecInterval) {
         self.0.imp.evaluate_constrain(p)
+    }
+    pub fn normal(&self, position: Vec3) -> Vec3 {
+        Vec3::from(
+            self.evaluate_deriv3(Vector3::new(
+                Deriv::variable(position[0], 0),
+                Deriv::variable(position[1], 1),
+                Deriv::variable(position[2], 2),
+            ))
+            .deriv()
+            .clone(),
+        )
+            .normalize()
     }
 }
 
@@ -49,7 +64,8 @@ struct SdfInner<S: ?Sized> {
 
 pub trait SdfImpl: 'static + Sync + Send + Debug {
     fn evaluate(&self, p: Vec3) -> f64;
-    fn evaluate_deriv(&self, p: Vector3<Deriv>) -> Deriv;
+    fn evaluate_deriv1(&self, p: Vector3<Deriv<1>>) -> Deriv<1>;
+    fn evaluate_deriv3(&self, p: Vector3<Deriv<3>>) -> Deriv<3>;
     fn evaluate_constrain(&self, p: Vector3<DecInterval>) -> (Option<Sdf>, DecInterval);
 }
 

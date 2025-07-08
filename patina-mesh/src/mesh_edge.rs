@@ -14,6 +14,12 @@ impl MeshEdge {
         vs.sort();
         MeshEdge { vertices: vs }
     }
+    pub fn v1(&self) -> usize {
+        self.vertices[0]
+    }
+    pub fn v2(&self) -> usize {
+        self.vertices[1]
+    }
     pub fn vertices(&self) -> [usize; 2] {
         self.vertices
     }
