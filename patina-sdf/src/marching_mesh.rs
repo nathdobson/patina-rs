@@ -9,6 +9,7 @@ use crate::transvoxel::cube_triangle::CubeTriMesh;
 use crate::transvoxel::cube_vertex;
 use crate::transvoxel::cube_vertex::{CubeVertex, CubeVertexSet, cube_corners, cube_points};
 use inari::DecInterval;
+use ordered_float::NotNan;
 use patina_geo::geo3::aabb::Aabb;
 use patina_mesh::mesh::Mesh;
 use patina_mesh::mesh_triangle::MeshTriangle;
@@ -17,6 +18,7 @@ use patina_scalar::newton::Newton;
 use patina_vec::vec3::Vec3;
 use patina_vec::vector3::Vector3;
 use std::collections::{HashMap, HashSet};
+use std::mem;
 // #[derive(Debug)]
 // struct OctreeCube {
 //     min: [usize; 3],
@@ -73,8 +75,9 @@ pub struct MarchingMesh {
     subdiv_max_dot: f64,
     aabb: Aabb,
     vertices: Vec<Vec3>,
-    vertex_table: HashMap<Vec3, usize>,
+    vertex_table: HashMap<Vector3<NotNan<f64>>, usize>,
     triangles: Vec<MeshTriangle>,
+    triangle_set: HashSet<[usize; 3]>,
 }
 
 impl Default for MarchingNode {
@@ -88,13 +91,14 @@ impl MarchingNode {}
 impl MarchingMesh {
     pub fn new(aabb: Aabb) -> Self {
         Self {
-            min_render_depth: 5,
-            max_render_depth: 9,
+            min_render_depth: 2,
+            max_render_depth: 10,
             subdiv_max_dot: 0.9,
             aabb,
             vertices: vec![],
             vertex_table: HashMap::new(),
             triangles: vec![],
+            triangle_set: HashSet::new(),
         }
     }
     // fn position(&self, ints: [usize; 3]) -> Vec3 {
@@ -267,10 +271,11 @@ impl MarchingMesh {
         let mut vertices = CubeVertexSet::new();
         for cv in cube_points() {
             if to_sample[cv] {
-                let numer = octree.path().position() * 2 + cv.map(|x| x as usize);
-                let denom = (2 << octree.path().depth()) as f64;
-                let v = numer.map(|x| x as f64) / denom;
-                let v = self.aabb.min() + v.mul_elements(self.aabb.dimensions());
+                let v = self.path_position(octree.path(), cv);
+                // let numer = octree.path().position() * 2 + cv.map(|x| x as usize);
+                // let denom = (2 << octree.path().depth()) as f64;
+                // let v = numer.map(|x| x as f64) / denom;
+                // let v = self.aabb.min() + v.mul_elements(self.aabb.dimensions());
                 // let v: Vec3 = (0..3)
                 //     .map(|axis| {
                 //
@@ -285,9 +290,6 @@ impl MarchingMesh {
                 //     })
                 //     .collect();
                 let eval = sdf.evaluate(v);
-                if eval.abs() < 1e-10 {
-                    println!("{:?}", eval);
-                }
                 vertices[cv] = eval >= 0.0;
             }
         }
@@ -295,17 +297,36 @@ impl MarchingMesh {
         let mesh2 = transvoxel.as_mesh();
 
         for tri in mesh2.triangles() {
-            self.triangles
-                .push(MeshTriangle::from(tri.vertices().map(|(v1, v2)| {
-                    let v2 = aabb.min()
-                        + aabb
-                            .dimensions()
-                            .mul_elements(Vec3::from((v1 + v2).map(|x| x as f64 / 4.0f64)));
-                    let index = self.vertices.len();
-                    self.vertices.push(v2);
-                    index
-                })));
+            let tri_verts = tri
+                .vertices()
+                .map(|(v1, v2)| self.add_vertex(octree.path(), v1, v2));
+            let tri2 = MeshTriangle::from(tri_verts);
+            let mut vs = tri2.vertices();
+            vs.sort();
+            assert!(self.triangle_set.insert(vs));
+            self.triangles.push(tri2);
         }
+    }
+    fn path_position(&self, path: &OctreePath, cv: CubeVertex) -> Vec3 {
+        let numer = path.position() * 2 + cv.map(|x| x as usize);
+        let denom = (2 << path.depth()) as f64;
+        let v = numer.map(|x| x as f64) / denom;
+        let v = self.aabb.min() + v.mul_elements(self.aabb.dimensions());
+        v
+    }
+    fn add_vertex(&mut self, path: &OctreePath, mut v1: CubeVertex, mut v2: CubeVertex) -> usize {
+        if v2 < v1 {
+            mem::swap(&mut v1, &mut v2);
+        }
+        let v1 = self.path_position(path, v1);
+        let v2 = self.path_position(path, v2);
+        let v = (v1 + v2) / 2.0;
+        let vnn = v.map(|x| NotNan::new(x).unwrap());
+        *self.vertex_table.entry(vnn).or_insert_with(|| {
+            let index = self.vertices.len();
+            self.vertices.push(v);
+            index
+        })
     }
     fn build_octree(&mut self, tree: &mut Octree<MarchingNode>, sdf: &Sdf) {
         let aabb = tree.path().aabb_inside(&self.aabb);
@@ -523,6 +544,9 @@ impl MarchingMesh {
         }
     }
     fn refine_path(&mut self, octree: &mut Octree<MarchingNode>, path: OctreePath) {
+        if path.depth() == 1 {
+            return;
+        }
         if let Some((index, path)) = path.view() {
             match octree.view_mut() {
                 OctreeViewMut::Leaf(_) => octree.set_branch(Default::default()),

@@ -4,6 +4,7 @@ use crate::transvoxel::cube_tetr::CubeTetrMesh;
 use crate::transvoxel::cube_triangle::CubeTriMesh;
 use crate::transvoxel::cube_vertex::CubeVertexSet;
 use arrayvec::ArrayVec;
+use std::collections::HashSet;
 
 pub struct CubeInput {
     faces: CubeFaceSet,
@@ -38,6 +39,12 @@ impl CubeInput {
             for tri in tetr_mesh.triangles() {
                 tris.push(*tri);
             }
+        }
+        let mut tri_set = HashSet::new();
+        for tri in &tris {
+            let mut vs = tri.vertices().map(|(v1, v2)| v1 + v2);
+            vs.sort();
+            assert!(tri_set.insert(vs));
         }
         CubeTriMesh::new(tris)
     }

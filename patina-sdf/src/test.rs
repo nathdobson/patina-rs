@@ -33,6 +33,7 @@ async fn test_mesh() -> anyhow::Result<()> {
     //     [detail, detail, detail],
     // );
     let mut mesh = march.build(&sdf);
+    println!("{:?}", mesh.check_manifold());
     write_stl_file(&mesh, &test_dir.join("mesh.stl")).await?;
     // for i in 0..2 {
     //     mesh = Subdivide::new().subdivide(&mesh, &sdf);
