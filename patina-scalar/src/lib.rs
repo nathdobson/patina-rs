@@ -1,4 +1,6 @@
 #![feature(float_minimum_maximum)]
+#![allow(unused_imports)]
+#![allow(unused_mut)]
 
 pub mod deriv;
 #[cfg(feature = "inari")]

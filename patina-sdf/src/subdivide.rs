@@ -10,7 +10,6 @@ use patina_mesh::mesh_edge::MeshEdge;
 use patina_mesh::mesh_triangle::MeshTriangle;
 use patina_scalar::deriv::Deriv;
 use patina_vec::vec3::Vec3;
-use patina_vec::vector3::Vector3;
 use std::collections::{HashMap, HashSet};
 
 pub struct Subdivide {

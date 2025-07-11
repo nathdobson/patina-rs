@@ -1,7 +1,6 @@
 use patina_geo::geo3::triangle3::Triangle3;
 use patina_mesh::mesh_triangle::MeshTriangle;
 use patina_vec::vec3::Vec3;
-use patina_vec::vector3::Vector3;
 use std::collections::HashMap;
 use std::mem;
 use std::ops::{Index, IndexMut};
@@ -15,7 +14,7 @@ use std::sync::LazyLock;
 //     vertices: Vec<CubeVertex>,
 //     triangles: Vec<MeshTriangle>,
 // }
-// 
+//
 // const V000: CubeVertex = CubeVertex::new(0, 0, 0);
 // const V002: CubeVertex = CubeVertex::new[0, 0, 2];
 // const V020: CubeVertex = CubeVertex([0, 2, 0]);
@@ -24,9 +23,9 @@ use std::sync::LazyLock;
 // const V202: CubeVertex = CubeVertex([2, 0, 2]);
 // const V220: CubeVertex = CubeVertex([2, 2, 0]);
 // const V222: CubeVertex = CubeVertex([2, 2, 2]);
-// 
+//
 // const CUBE: [CubeVertex; 8] = [V000, V002, V020, V022, V200, V202, V220, V222];
-// 
+//
 // const TETRAHEDRA: [[CubeVertex; 4]; 6] = [
 //     [V000, V002, V022, V222],
 //     [V000, V002, V202, V222],
@@ -35,7 +34,7 @@ use std::sync::LazyLock;
 //     [V000, V200, V202, V222],
 //     [V000, V200, V220, V222],
 // ];
-// 
+//
 // // impl CubeVertex {
 // //     pub fn x(self) -> u8 {
 // //         self.0[0]
@@ -70,7 +69,7 @@ use std::sync::LazyLock;
 // //         CubeVertex([x, y, z])
 // //     }
 // // }
-// 
+//
 // // impl Index<usize> for CubeVertex {
 // //     type Output = u8;
 // //     fn index(&self, index: usize) -> &Self::Output {
@@ -83,7 +82,7 @@ use std::sync::LazyLock;
 // //         self.0.index_mut(index)
 // //     }
 // // }
-// 
+//
 // impl CubeMesh {
 //     pub fn new_tetr(inside: &[CubeVertex], outside: &[CubeVertex]) -> Self {
 //         let mut vertices = vec![];
@@ -178,7 +177,7 @@ use std::sync::LazyLock;
 //         &self.triangles
 //     }
 // }
-// 
+//
 // static MARCHING_CUBES: LazyLock<Vec<CubeMesh>> = LazyLock::new(|| {
 //     let mut result = vec![];
 //     for i in 0..256 {
@@ -192,7 +191,7 @@ use std::sync::LazyLock;
 //     }
 //     result
 // });
-// 
+//
 // pub fn marching_cube(verts: [bool; 8]) -> &'static CubeMesh {
 //     let mut index = 0;
 //     for i in 0..8 {

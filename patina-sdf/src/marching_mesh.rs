@@ -15,8 +15,7 @@ use patina_mesh::mesh::Mesh;
 use patina_mesh::mesh_triangle::MeshTriangle;
 use patina_scalar::deriv::Deriv;
 use patina_scalar::newton::Newton;
-use patina_vec::vec3::Vec3;
-use patina_vec::vector3::Vector3;
+use patina_vec::vec3::{Vec3, Vector3};
 use std::collections::{HashMap, HashSet};
 use std::mem;
 
@@ -43,7 +42,7 @@ impl MarchingNode {}
 impl MarchingMesh {
     pub fn new(aabb: Aabb) -> Self {
         Self {
-            min_render_depth: 2,
+            min_render_depth: 6,
             max_render_depth: 10,
             subdiv_max_dot: 0.9,
             aabb,
@@ -229,9 +228,18 @@ impl MarchingMesh {
                 min.map(Deriv::constant) + range.map(Deriv::constant) * Deriv::variable(t, 0),
             )
         };
-        let t = Newton::new().solve(0.0..1.0, lsdf).unwrap().into_inner();
-        assert!(t >= -1.0 && t <= 1.0, "{:?}", t);
-        let vertex_position = min + range * t.clamp(-0.99, 0.99);
+        let t = Newton::new().solve(0.0..1.0, lsdf);
+        let t = if let Some(t) = t {
+            t.into_inner()
+        } else {
+            println!("{:?}->{:?}", min, max);
+            for x in -1..=11 {
+                println!("{:?} {:?}", x, lsdf(x as f64 / 10.0));
+            }
+            0.5
+        };
+        assert!(t >= 0.0 && t <= 1.0, "{:?}", t);
+        let vertex_position = min + range * t.clamp(0.00001, 0.99999);
         let eval_position = min + range * t;
         let normal: Vec3 = sdf.normal(eval_position);
         (vertex_position, normal)

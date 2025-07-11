@@ -2,8 +2,7 @@ use crate::sdf::{Sdf, SdfImpl};
 use inari::DecInterval;
 use patina_scalar::Scalar;
 use patina_scalar::deriv::Deriv;
-use patina_vec::vec3::Vec3;
-use patina_vec::vector3::Vector3;
+use patina_vec::vec3::{Vec3, Vector3};
 
 #[derive(Debug)]
 pub struct SdfUnion {

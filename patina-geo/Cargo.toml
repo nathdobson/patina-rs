@@ -6,3 +6,5 @@ edition = "2024"
 [dependencies]
 patina-vec={workspace = true}
 rand = "0.9.1"
+itertools = "0.14.0"
+ordered-float = "5.0.0"

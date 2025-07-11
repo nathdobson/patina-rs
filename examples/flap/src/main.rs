@@ -3,6 +3,8 @@
 #![allow(unused_mut)]
 #![allow(unused_imports)]
 #![allow(dead_code)]
+#![allow(unreachable_code)]
+#![allow(unused_variables)]
 
 use anyhow::anyhow;
 use patina_3mf::ModelContainer;
@@ -34,19 +36,22 @@ use patina_3mf::settings_id::printer::Printer;
 use patina_3mf::settings_id::printer_settings_id::PrinterSettingsId;
 use patina_bambu::cli::{BambuStudioCommand, DebugLevel, Slice};
 use patina_bambu::{BambuBuilder, BambuFilament, BambuObject, BambuPart, BambuPlate, BambuSupport};
-use patina_cad::geo3::aabb::AABB;
-use patina_cad::math::float_bool::Epsilon;
+use patina_geo::geo3::aabb::Aabb;
+use patina_mesh::ser::stl::{write_stl, write_stl_file};
+use patina_sdf::marching_mesh::MarchingMesh;
+use patina_sdf::sdf::Sdf;
+use patina_sdf::sdf::leaf::SdfLeafImpl;
 use patina_vec::mat4::Mat4;
 use patina_vec::vec2::Vec2;
 use patina_vec::vec3::Vec3;
-use patina_cad::meshes::mesh::Mesh;
-use patina_cad::meshes::mesh_triangle::MeshTriangle;
-use patina_cad::ser::stl::write_stl_file;
 use rand::rng;
+use rusttype::{Font, OutlineBuilder, Point, Scale};
 use std::collections::HashSet;
 use std::env;
 use std::io::{Cursor, Read, Write};
 use std::path::Path;
+use std::time::Instant;
+use tokio::fs;
 use zip::write::{FileOptions, SimpleFileOptions};
 use zip::{ZipArchive, ZipWriter};
 
@@ -67,29 +72,36 @@ pub struct LetterBuilder {
     extension: f64,
     axle_diameter: f64,
     drum_diameter: f64,
+    font: Font<'static>,
 }
 
 impl LetterBuilder {
-    async fn blank(&self, thickness: f64) -> Mesh {
-        let perturb = 0.1;
-        let eps = Epsilon::new(1e-14);
-        let mut mesh = AABB::new(
+    fn blank(&self, thickness: f64) -> Sdf {
+        let mut sdf = Aabb::new(
             Vec3::new(-self.width / 2.0, 0.0, 0.0),
             Vec3::new(self.width / 2.0, self.length, thickness),
         )
-        .as_mesh()
-        .perturbed(&mut rng(), perturb);
-        mesh = mesh.difference(
-            &AABB::new(
+        .into_sdf();
+        sdf = sdf.difference(
+            &Aabb::new(
                 Vec3::new(self.width / 2.0 - self.incut, -1.0, -self.thickness),
                 Vec3::new(self.width, self.extension, self.thickness * 2.0),
             )
-            .as_mesh()
-            .perturbed(&mut rng(), perturb),
-            eps,
+            .into_sdf(),
         );
-        mesh = mesh.difference(
-            &AABB::new(
+        sdf = sdf.difference(
+            &Aabb::new(
+                Vec3::new(-self.width, -1.0, -self.thickness),
+                Vec3::new(
+                    -self.width / 2.0 + self.incut,
+                    self.extension,
+                    self.thickness * 2.0,
+                ),
+            )
+            .into_sdf(),
+        );
+        sdf = sdf.difference(
+            &Aabb::new(
                 Vec3::new(
                     self.width / 2.0 - self.incut,
                     self.extension + self.axle_diameter,
@@ -97,24 +109,74 @@ impl LetterBuilder {
                 ),
                 Vec3::new(self.width, self.drum_diameter, self.thickness * 2.0),
             )
-            .as_mesh()
-            .perturbed(&mut rng(), perturb),
-            eps,
+            .into_sdf(),
         );
-        write_stl_file(&mesh, Path::new("examples/flap/output/output.stl")).await.unwrap();
-        // mesh = mesh.difference(
-        //     &AABB::new(
-        //         Vec3::new(-self.width / 2.0 + self.incut, -1.0, -self.thickness),
-        //         Vec3::new(-self.width, self.extension, self.thickness * 2.0),
-        //     )
-        //     .as_mesh()
-        //     .perturbed(&mut rng(), perturb),
-        //     eps,
-        // );
-        mesh
+        sdf = sdf.difference(
+            &Aabb::new(
+                Vec3::new(
+                    -self.width,
+                    self.extension + self.axle_diameter,
+                    -self.thickness,
+                ),
+                Vec3::new(
+                    -self.width / 2.0 + self.incut,
+                    self.drum_diameter,
+                    self.thickness * 2.0,
+                ),
+            )
+            .into_sdf(),
+        );
+        sdf
+    }
+    fn letter(&self) -> Sdf {
+        struct Builder;
+        impl OutlineBuilder for Builder {
+            fn move_to(&mut self, x: f32, y: f32) {
+                println!("move_to({x}, {y})");
+            }
+
+            fn line_to(&mut self, x: f32, y: f32) {
+                println!("line_to({x}, {y})");
+            }
+
+            fn quad_to(&mut self, x1: f32, y1: f32, x: f32, y: f32) {
+                println!("quad_to({x1}, {y1}, {x}, {y})");
+            }
+
+            fn curve_to(&mut self, x1: f32, y1: f32, x2: f32, y2: f32, x: f32, y: f32) {
+                println!("curve_to({x1}, {y1}, {x2}, {y2}, {x}, {y})");
+            }
+
+            fn close(&mut self) {
+                println!("close");
+            }
+        }
+        let mut builder = Builder;
+        let glyph = self
+            .font
+            .glyph(self.letter)
+            .scaled(Scale::uniform(10.0))
+            .build_outline(&mut builder);
+        todo!();
     }
     pub async fn build(&self) -> Vec<BambuPart> {
-        let mut body = BambuPart::new(self.blank(self.thickness).await);
+        let sdf = self.blank(self.thickness);
+        let letter = self.letter();
+        let start = Instant::now();
+
+        let mesh = MarchingMesh::new(Aabb::new(
+            Vec3::new(-self.width * 1.01, -self.width * 1.01, -0.01),
+            Vec3::new(self.width * 1.01, self.width * 1.01, 40.01),
+        ))
+        .build(&sdf);
+        println!("Built mesh in {}", start.elapsed().as_secs_f64());
+        write_stl_file(
+            &mesh,
+            Path::new(&format!("examples/flap/output/flap_{}.stl", self.letter)),
+        )
+        .await
+        .unwrap();
+        let mut body = BambuPart::new(mesh);
         body.material(Some(2));
         body.name(Some(format!("part({})", self.letter)));
         body.transform(Some(
@@ -146,6 +208,10 @@ impl LetterBuilder {
 }
 
 async fn build_output() -> anyhow::Result<()> {
+    let font =
+        Font::try_from_vec(fs::read("/System/Library/Fonts/Supplemental/Phosphate.ttc").await?)
+            .ok_or_else(|| anyhow!("bad font"))?;
+
     let mut bambu = BambuBuilder::new();
     let printer = Printer::A1Mini;
     let nozzle = Nozzle::Nozzle0_4;
@@ -200,6 +266,7 @@ async fn build_output() -> anyhow::Result<()> {
                 extension: 1.2,
                 axle_diameter: 1.2,
                 drum_diameter: 18.0,
+                font: font.clone(),
             }
             .build()
             .await;

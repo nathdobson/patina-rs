@@ -1,5 +1,4 @@
 mod macros;
-pub mod interval;
 pub mod float_bool;
 pub mod edmonds_karp;
 pub mod edmonds_karp_vertex;

@@ -1,11 +1,11 @@
 use crate::sdf::{Sdf, SdfImpl};
 use inari::DecInterval;
+use patina_geo::geo3::aabb::Aabb;
 use patina_geo::geo3::plane::Plane;
 use patina_geo::geo3::sphere::Sphere;
 use patina_scalar::Scalar;
 use patina_scalar::deriv::Deriv;
-use patina_vec::vec3::Vec3;
-use patina_vec::vector3::Vector3;
+use patina_vec::vec3::{Vec3, Vector3};
 use std::fmt::{Debug, Formatter};
 
 pub trait SdfLeafImpl: 'static + Sync + Send + Sized + Debug {
@@ -49,6 +49,38 @@ impl SdfLeafImpl for Sphere {
 impl SdfLeafImpl for Plane {
     fn evaluate<T: Scalar>(&self, p: Vector3<T>) -> T {
         (p - self.origin().into_scalars::<T>()).dot(self.normal().into_scalars::<T>())
+    }
+}
+
+impl SdfLeafImpl for Aabb {
+    fn evaluate<T: Scalar>(&self, p: Vector3<T>) -> T {
+        let center = self.center().into_scalars::<T>();
+        let radius = (self.dimensions() / 2.0).into_scalars::<T>();
+        let delta = (p - center).abs() - radius;
+        let [x, y, z] = delta.into_inner();
+        x.clone().piecewise(
+            y.clone().piecewise(
+                z.clone().piecewise(
+                    //
+                    x.clone().maximum(y.clone().maximum(z.clone())),
+                    z.clone(),
+                ),
+                z.clone().piecewise(
+                    y.clone(),
+                    (y.clone() * y.clone() + z.clone() * z.clone()).sqrt(),
+                ),
+            ),
+            y.clone().piecewise(
+                z.clone().piecewise(
+                    x.clone(),
+                    (x.clone() * x.clone() + z.clone() * z.clone()).sqrt(),
+                ),
+                z.clone().piecewise(
+                    (x.clone() * x.clone() + y.clone() * y.clone()).sqrt(),
+                    (x.clone() * x.clone() + y.clone() * y.clone() + z.clone() * z.clone()).sqrt(),
+                ),
+            ),
+        )
     }
 }
 

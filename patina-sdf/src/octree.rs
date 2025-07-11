@@ -7,8 +7,7 @@ use itertools::Itertools;
 use ordered_float::NotNan;
 use patina_geo::geo3::aabb::Aabb;
 use patina_scalar::Scalar;
-use patina_vec::vec3::Vec3;
-use patina_vec::vector3::Vector3;
+use patina_vec::vec3::{Vec3, Vector3};
 use std::fmt::{Debug, Formatter};
 use std::ops::{Add, Index, IndexMut};
 

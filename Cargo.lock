@@ -3,6 +3,12 @@
 version = 4
 
 [[package]]
+name = "ab_glyph_rasterizer"
+version = "0.1.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b2187590a23ab1e3df8681afdf0987c48504d80291f002fcdb651f0ef5e25169"
+
+[[package]]
 name = "addr2line"
 version = "0.24.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -361,8 +367,12 @@ dependencies = [
  "anyhow",
  "patina-3mf",
  "patina-bambu",
- "patina-cad",
+ "patina-geo",
+ "patina-mesh",
+ "patina-sdf",
+ "patina-vec",
  "rand",
+ "rusttype",
  "tokio",
  "zip",
 ]
@@ -727,6 +737,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "owned_ttf_parser"
+version = "0.15.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "05e6affeb1632d6ff6a23d2cd40ffed138e82f1532571a26f527c8a284bb2fbb"
+dependencies = [
+ "ttf-parser",
+]
+
+[[package]]
 name = "patina-3mf"
 version = "0.1.0"
 dependencies = [
@@ -748,7 +767,8 @@ dependencies = [
  "anyhow",
  "itertools",
  "patina-3mf",
- "patina-cad",
+ "patina-mesh",
+ "patina-vec",
  "tokio",
 ]
 
@@ -770,9 +790,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "patina-extrude"
+version = "0.1.0"
+
+[[package]]
 name = "patina-geo"
 version = "0.1.0"
 dependencies = [
+ "itertools",
+ "ordered-float",
  "patina-vec",
  "rand",
 ]
@@ -783,8 +809,11 @@ version = "0.1.0"
 dependencies = [
  "arrayvec",
  "itertools",
+ "ordered-float",
  "patina-geo",
  "patina-vec",
+ "rand",
+ "rand_xorshift",
  "tokio",
 ]
 
@@ -820,6 +849,7 @@ dependencies = [
 name = "patina-vec"
 version = "0.1.0"
 dependencies = [
+ "itertools",
  "patina-scalar",
  "rand",
 ]
@@ -968,6 +998,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cfcb3a22ef46e85b45de6ee7e79d063319ebb6594faafcf1c225ea92ab6e9b92"
 dependencies = [
  "semver",
+]
+
+[[package]]
+name = "rusttype"
+version = "0.9.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3ff8374aa04134254b7995b63ad3dc41c7f7236f69528b28553da7d72efaa967"
+dependencies = [
+ "ab_glyph_rasterizer",
+ "owned_ttf_parser",
 ]
 
 [[package]]
@@ -1239,6 +1279,12 @@ dependencies = [
  "quote",
  "syn",
 ]
+
+[[package]]
+name = "ttf-parser"
+version = "0.15.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7b3e06c9b9d80ed6b745c7159c40b311ad2916abb34a49e9be2653b90db0d8dd"
 
 [[package]]
 name = "typenum"

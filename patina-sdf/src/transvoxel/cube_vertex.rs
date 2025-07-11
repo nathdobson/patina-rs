@@ -1,7 +1,8 @@
 use arrayvec::ArrayVec;
 use patina_geo::geo3::triangle3::Triangle3;
-use patina_vec::vector3::Vector3;
 use std::ops::{Index, IndexMut};
+use patina_vec::vec3::Vector3;
+
 pub type CubeVertex = Vector3<u8>;
 
 #[derive(Debug, Eq, PartialEq, Ord, PartialOrd)]
@@ -59,5 +60,5 @@ pub fn cube_points() -> impl Iterator<Item = CubeVertex> {
 pub fn oriented(tri: [CubeVertex; 3], other: CubeVertex) -> bool {
     let plane = Triangle3::new(tri.map(|v| v.map(|v| v as f64))).plane();
     let other = other.map(|x| x as f64);
-    plane.outside(other)
+    !plane.outside(other)
 }

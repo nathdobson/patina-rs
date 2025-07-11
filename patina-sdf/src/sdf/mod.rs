@@ -1,11 +1,14 @@
+pub mod invert;
 pub mod leaf;
 pub mod union;
+mod polygon;
 
+use crate::sdf::invert::SdfInvert;
+use crate::sdf::union::SdfUnion;
 use inari::DecInterval;
 use patina_scalar::Scalar;
 use patina_scalar::deriv::Deriv;
-use patina_vec::vec3::Vec3;
-use patina_vec::vector3::Vector3;
+use patina_vec::vec3::{Vec3, Vector3};
 use std::fmt::{Debug, Formatter};
 use std::sync::Arc;
 
@@ -54,7 +57,16 @@ impl Sdf {
             .deriv()
             .clone(),
         )
-            .normalize()
+        .normalize()
+    }
+    pub fn union(&self, other: &Sdf) -> Sdf {
+        SdfUnion::new(self.clone(), other.clone()).into_sdf()
+    }
+    pub fn invert(&self) -> Sdf {
+        SdfInvert::new(self.clone()).into_sdf()
+    }
+    pub fn difference(&self, other: &Sdf) -> Sdf {
+        self.invert().union(other).invert()
     }
 }
 
