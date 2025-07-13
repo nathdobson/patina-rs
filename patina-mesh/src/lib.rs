@@ -11,4 +11,6 @@ pub mod mesh_triangle;
 pub mod ser;
 pub mod edge_table;
 pub mod triangulation;
+mod trap_decomp;
+mod mesh2;
 

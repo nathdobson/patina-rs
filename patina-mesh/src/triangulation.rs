@@ -434,28 +434,6 @@ fn test_traps() {
     println!("{:#?}", tris.build());
 }
 
-fn random_poly<R: Rng>(r: &mut R, size: usize) -> Polygon2 {
-    'search: loop {
-        let mut poly: Vec<Vec2> = vec![];
-        for _ in 0..size {
-            poly.push(r.random());
-        }
-        let poly = Polygon2::new(poly);
-        if poly.signed_area() <= 0.0 {
-            continue;
-        }
-        for (e1, e2) in poly.segments().tuple_combinations() {
-            if e1.p1() != e2.p1() && e1.p1() != e2.p2() && e1.p2() != e2.p1() && e1.p2() != e2.p2()
-            {
-                if e1.intersects(&e2) {
-                    continue 'search;
-                }
-            }
-        }
-        return poly;
-    }
-}
-
 #[test]
 fn test_triangulation() {
     for size in 3..=8 {
@@ -463,7 +441,7 @@ fn test_triangulation() {
         for seed in 4..1000 {
             println!("seed = {:?}", seed);
             let mut rng = XorShiftRng::seed_from_u64(seed);
-            let poly = random_poly(&mut rng, size);
+            let poly = Polygon2::random(&mut rng, size);
             println!("{}", poly);
             let mut tri = Triangulation::new();
             tri.add_polygon(&poly);
