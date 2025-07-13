@@ -20,7 +20,7 @@ pub struct EdgeKey {
     right: Vec2,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
 enum Ray {
     None,
     Edge(MeshEdge),
@@ -30,11 +30,11 @@ enum Ray {
 #[derive(Debug)]
 struct EdgeValue {
     edge: DirectedMeshEdge,
-    left_up: Ray,
-    left_down: Ray,
+    left_up: Vertical,
+    left_down: Vertical,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Vertical {
     vertex: usize,
     ray: Ray,
@@ -45,13 +45,19 @@ struct Vertical {
 pub struct Trap {
     left: Vertical,
     right: Vertical,
+    top_direction: bool,
+    bottom_direction: bool,
 }
+
+// enum TrapVertex {
+//     Original { pos: Vec2, vertex: usize },
+//     Virtual { pos: Vec2 },
+// }
 
 pub struct TrapDecomp {
     mesh: Mesh2,
     edge_map: BTreeMap<EdgeKey, EdgeValue>,
     traps: Vec<Trap>,
-    
 }
 
 impl Eq for EdgeKey {}
@@ -65,6 +71,14 @@ impl PartialEq<Self> for EdgeKey {
 impl PartialOrd<Self> for EdgeKey {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
+    }
+}
+
+impl PartialEq for Vertical {
+    fn eq(&self, other: &Self) -> bool {
+        self.vertex == other.vertex
+            && ((self.ray == other.ray && self.down == other.down)
+                || (self.ray == Ray::None && other.ray == Ray::None))
     }
 }
 
@@ -98,7 +112,6 @@ impl Ord for EdgeKey {
             .total_cmp(&other.eval_y(minx))
             .then_with(|| self.eval_y(maxx).total_cmp(&other.eval_y(maxx)))
             .then_with(|| panic!());
-        println!("{:?} cmp {:?} = {:?}", self, other, result);
         result
     }
 }
@@ -157,9 +170,7 @@ impl Trap {
         result
     }
     pub fn area(&self, vs: &[Vec2]) -> f64 {
-        println!("{:?}", self);
         let vs = self.for_vertices(vs);
-        println!("{:?}", vs);
         let mut total = 0.0;
         let v1 = vs[0];
         for (v2, v3) in vs[1..].iter().cloned().tuple_windows() {
@@ -167,7 +178,6 @@ impl Trap {
             assert!(area > 0.0);
             total += area
         }
-        println!("{:?}", total);
         total
     }
 }
@@ -189,12 +199,13 @@ impl TrapDecomp {
     pub fn build(mut self) -> Vec<Trap> {
         let mut order = (0..self.mesh.vertices().len()).collect::<Vec<usize>>();
         order.sort_by_key(|i| NotNan::new(self.mesh.vertices()[*i].x()).unwrap());
-        println!("{:?}", order);
         let mut adjacency: HashMap<usize, Vec<usize>> = HashMap::new();
+        let mut forward: HashSet<DirectedMeshEdge> = HashSet::new();
         for vertex in 0..self.mesh.vertices().len() {
             adjacency.insert(vertex, vec![]);
         }
         for edge in self.mesh.edges() {
+            forward.insert(edge.clone());
             adjacency.get_mut(&edge.v1()).unwrap().push(edge.v2());
             adjacency.get_mut(&edge.v2()).unwrap().push(edge.v1());
         }
@@ -237,48 +248,136 @@ impl TrapDecomp {
                     ))
                     .next(),
             );
-            println!("incoming_seq for {} = {:#?}", v1, incoming_seq);
             for (index, (e1, e2)) in incoming_seq.iter().tuple_windows().enumerate() {
                 if let (Some((ek1, ev1)), Some((ek2, ev2))) = (e1, e2) {
-                    let left = if ek1.left.x() < ek2.left.x() {
-                        Vertical {
-                            vertex: ev2.edge.v1(),
-                            ray: ev2.left_down.clone(),
-                            down: true,
-                        }
+                    let top = ev2.edge.inverted();
+                    let bottom = ev1.edge;
+                    let top_direction = if forward.contains(&top) {
+                        true
+                    } else if forward.contains(&top.inverted()) {
+                        false
                     } else {
-                        Vertical {
-                            vertex: ev1.edge.v1(),
-                            ray: ev1.left_up.clone(),
-                            down: false,
-                        }
+                        unreachable!()
                     };
-                    let right = if index == 0 {
-                        Vertical {
-                            vertex: v1,
-                            ray: Ray::Edge(ev1.edge.edge()),
-                            down: true,
-                        }
-                    } else if index == incoming_seq.len() - 2 {
-                        Vertical {
-                            vertex: v1,
-                            ray: Ray::Edge(ev2.edge.edge()),
-                            down: false,
-                        }
+                    let bottom_direction = if forward.contains(&bottom) {
+                        true
+                    } else if forward.contains(&bottom.inverted()) {
+                        false
                     } else {
-                        Vertical {
-                            vertex: v1,
-                            ray: Ray::None,
-                            down: false,
-                        }
+                        unreachable!()
                     };
-                    self.traps.push(Trap { left, right });
-                } else {
-                    println!("Extra trap {:?} {:?}", e1, e2);
+                    let mut lefts = ArrayVec::<_, 2>::new();
+                    if ev2.left_down == ev1.left_up {
+                        lefts.push(ev2.left_down.clone());
+                    } else {
+                        lefts.push(ev2.left_down.clone());
+                        lefts.push(ev1.left_up.clone());
+                    }
+                    for left in &lefts {
+                        if incoming_seq.len() == 2 {
+                            self.traps.push(Trap {
+                                left: Vertical {
+                                    vertex: left.vertex,
+                                    ray: if left.down { left.ray } else { Ray::None },
+                                    down: left.down,
+                                },
+                                right: Vertical {
+                                    vertex: v1,
+                                    ray: if lefts.len() == 2 && !left.down {
+                                        Ray::None
+                                    } else {
+                                        Ray::Edge(ev1.edge.edge())
+                                    },
+                                    down: true,
+                                },
+                                top_direction,
+                                bottom_direction,
+                            });
+                            self.traps.push(Trap {
+                                left: Vertical {
+                                    vertex: left.vertex,
+                                    ray: if !left.down { left.ray } else { Ray::None },
+                                    down: left.down,
+                                },
+                                right: Vertical {
+                                    vertex: v1,
+                                    ray: if lefts.len() == 2 && left.down {
+                                        Ray::None
+                                    } else {
+                                        Ray::Edge(ev2.edge.edge())
+                                    },
+                                    down: false,
+                                },
+                                top_direction,
+                                bottom_direction,
+                            });
+                        } else if index == 0 {
+                            self.traps.push(Trap {
+                                left: left.clone(),
+                                right: Vertical {
+                                    vertex: v1,
+                                    ray: if lefts.len() == 2 && !left.down {
+                                        Ray::None
+                                    } else {
+                                        Ray::Edge(ev1.edge.edge())
+                                    },
+                                    down: true,
+                                },
+                                top_direction,
+                                bottom_direction,
+                            });
+                        } else if index == incoming_seq.len() - 2 {
+                            self.traps.push(Trap {
+                                left: left.clone(),
+                                right: Vertical {
+                                    vertex: v1,
+                                    ray: if lefts.len() == 2 && left.down {
+                                        Ray::None
+                                    } else {
+                                        Ray::Edge(ev2.edge.edge())
+                                    },
+                                    down: false,
+                                },
+                                top_direction,
+                                bottom_direction,
+                            });
+                        }
+                        if 0 < index && index < incoming_seq.len() - 2 {
+                            self.traps.push(Trap {
+                                left: left.clone(),
+                                right: Vertical {
+                                    vertex: v1,
+                                    ray: Ray::None,
+                                    down: false,
+                                },
+                                top_direction,
+                                bottom_direction,
+                            });
+                        };
+                    }
                 }
             }
             for (key, v2) in incoming.iter() {
                 self.edge_map.remove(&key);
+            }
+            let center = EdgeKey::new(self.mesh.vertices()[v1], self.mesh.vertices()[v1]);
+            if let Some((dk, dv)) = self.edge_map.range_mut(..center).next_back() {
+                dv.left_up = Vertical {
+                    vertex: v1,
+                    ray: Ray::Edge(dv.edge.edge()),
+                    down: true,
+                };
+            }
+            if let Some((uk, uv)) = self
+                .edge_map
+                .range_mut((Bound::Excluded(center), Bound::Unbounded))
+                .next()
+            {
+                uv.left_down = Vertical {
+                    vertex: v1,
+                    ray: Ray::Edge(uv.edge.edge()),
+                    down: false,
+                };
             }
             if !outgoing.is_empty() {
                 let left_down = if let Some((downk, downv)) = self
@@ -309,24 +408,20 @@ impl TrapDecomp {
                     } else {
                         Ray::None
                     };
-                    println!("key = {:?}", key);
-                    println!("table = {:?}", self.edge_map);
-                    println!(
-                        "count below {:?}",
-                        self.edge_map.keys().filter(|k2| *k2 < key).count()
-                    );
-                    println!(
-                        "count above {:?}",
-                        self.edge_map.keys().filter(|k2| *k2 > key).count()
-                    );
-                    println!("left_up for {} {} = {:#?}", v1, v2, left_up);
-                    println!("left_down for {} {} = {:#?}", v1, v2, left_down);
                     self.edge_map.insert(
                         *key,
                         EdgeValue {
                             edge: DirectedMeshEdge::new(v1, *v2),
-                            left_up,
-                            left_down,
+                            left_up: Vertical {
+                                vertex: v1,
+                                ray: left_up,
+                                down: false,
+                            },
+                            left_down: Vertical {
+                                vertex: v1,
+                                ray: left_down,
+                                down: true,
+                            },
                         },
                     );
                 }
@@ -338,9 +433,9 @@ impl TrapDecomp {
 
 #[test]
 fn test_trap_decomp() {
-    for size in 4..=8 {
+    for size in 5..=10 {
         println!("size = {:?}", size);
-        for seed in 14..1000 {
+        for seed in 58..1000 {
             println!("seed = {:?}", seed);
             let mut rng = XorShiftRng::seed_from_u64(seed);
             let poly = Polygon2::random(&mut rng, size);
@@ -348,14 +443,21 @@ fn test_trap_decomp() {
             let mut mesh = Mesh2::new(vec![], vec![]);
             mesh.add_polygon(&poly);
             let mut td = TrapDecomp::new(mesh.clone()).build();
-            println!("{:#?}", td);
-            let area: f64 = td.iter().map(|td| td.area(&mesh.vertices())).sum();
+            for td in &td {
+                assert_eq!(td.bottom_direction, td.top_direction);
+            }
+            let area: f64 = td
+                .iter()
+                .filter(|td| td.bottom_direction)
+                .map(|td| td.area(&mesh.vertices()))
+                .sum();
             let expected = poly.signed_area();
             assert!(
                 (area - expected).abs() < 10e-10,
-                "area: {:?} expected: {:?}",
+                "area: {:?} expected: {:?} diff {:?}",
                 area,
-                expected
+                expected,
+                area - expected
             );
         }
     }
