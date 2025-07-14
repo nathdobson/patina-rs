@@ -3,7 +3,7 @@ use itertools::Itertools;
 use patina_geo::geo2::polygon2::Polygon2;
 use patina_vec::vec2::Vec2;
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct EdgeMesh2 {
     vertices: Vec<Vec2>,
     edges: Vec<DirectedMeshEdge>,

@@ -4,3 +4,12 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+patina-geo={workspace = true}
+patina-mesh ={workspace = true}
+ordered-float = "5.0.0"
+patina-vec={workspace = true}
+itertools = "0.14.0"
+
+[dev-dependencies]
+tokio = {version="1.46.0",features = ["rt","macros"]}
+anyhow = "1.0.98"

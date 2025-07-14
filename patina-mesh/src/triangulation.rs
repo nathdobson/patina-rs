@@ -71,17 +71,13 @@ impl<'mesh> Triangulation<'mesh> {
             tris.push(tri);
         }
     }
-    pub fn build(self) -> Vec<Triangle2> {
+    pub fn build(self) -> Vec<MeshTriangle> {
         let mut monos = MonotoneDecomp::new(self.mesh).build();
-        println!("{:?}", monos);
         let mut tris = vec![];
         for mono in &monos {
             self.diagonalize_monotonic(&mono, &mut tris);
         }
-        println!("{:?}", tris);
-        tris.into_iter()
-            .map(|x| x.for_vertices2(&self.mesh.vertices()))
-            .collect()
+        tris
     }
 }
 

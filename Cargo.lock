@@ -792,6 +792,15 @@ dependencies = [
 [[package]]
 name = "patina-extrude"
 version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "itertools",
+ "ordered-float",
+ "patina-geo",
+ "patina-mesh",
+ "patina-vec",
+ "tokio",
+]
 
 [[package]]
 name = "patina-geo"
@@ -808,6 +817,7 @@ dependencies = [
 name = "patina-mesh"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "arrayvec",
  "itertools",
  "ordered-float",
