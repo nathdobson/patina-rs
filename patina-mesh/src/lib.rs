@@ -13,4 +13,5 @@ pub mod edge_table;
 pub mod triangulation;
 mod trap_decomp;
 mod mesh2;
+mod monotone_decomp;
 

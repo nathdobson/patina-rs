@@ -1,7 +1,8 @@
 use crate::geo2::segment2::Segment2;
 use itertools::Itertools;
 use patina_vec::vec2::Vec2;
-use rand::Rng;
+use rand::{Rng, SeedableRng};
+use rand_xorshift::XorShiftRng;
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone)]
@@ -89,6 +90,17 @@ impl Polygon2 {
                 return poly;
             }
         }
+    }
+    pub fn test_cases() -> impl Iterator<Item = Self> {
+        (3..8).flat_map(|size| {
+            (0..10000).map(move |seed| {
+                println!("size {} seed {}", size, seed);
+                let mut rng = XorShiftRng::seed_from_u64(seed);
+                let xs = rng.random_range(4..10);
+                let poly = Polygon2::random_discrete(&mut rng, xs, 10, size);
+                poly
+            })
+        })
     }
 }
 

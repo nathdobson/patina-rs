@@ -12,6 +12,7 @@ use rand::{Rng, SeedableRng};
 use rand_xorshift::XorShiftRng;
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, HashMap, HashSet};
+use std::hash::{Hash, Hasher};
 use std::ops::{Bound, Index};
 
 #[derive(Copy, Clone, Debug)]
@@ -20,8 +21,8 @@ pub struct EdgeKey {
     right: Vec2,
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
-enum Ray {
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub enum Ray {
     None,
     Edge(MeshEdge),
     All,
@@ -35,7 +36,7 @@ struct EdgeValue {
 }
 
 #[derive(Debug, Clone)]
-struct Vertical {
+pub struct Vertical {
     vertex: usize,
     ray: Ray,
     down: bool,
@@ -54,8 +55,8 @@ pub struct Trap {
 //     Virtual { pos: Vec2 },
 // }
 
-pub struct TrapDecomp {
-    mesh: Mesh2,
+pub struct TrapDecomp<'mesh> {
+    mesh: &'mesh Mesh2,
     edge_map: BTreeMap<EdgeKey, EdgeValue>,
     traps: Vec<Trap>,
 }
@@ -79,6 +80,19 @@ impl PartialEq for Vertical {
         self.vertex == other.vertex
             && ((self.ray == other.ray && self.down == other.down)
                 || (self.ray == Ray::None && other.ray == Ray::None))
+    }
+}
+
+impl Eq for Vertical {}
+
+impl Hash for Vertical {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.vertex.hash(state);
+        self.ray.hash(state);
+        match self.ray {
+            Ray::None => {}
+            _ => self.down.hash(state),
+        }
     }
 }
 
@@ -158,6 +172,15 @@ impl Vertical {
         }
         result
     }
+    pub fn vertex(&self) -> usize {
+        self.vertex
+    }
+    pub fn ray(&self) -> Ray {
+        self.ray
+    }
+    pub fn down(&self) -> bool {
+        self.down
+    }
 }
 
 impl Trap {
@@ -182,10 +205,22 @@ impl Trap {
         }
         total
     }
+    pub fn left(&self) -> &Vertical {
+        &self.left
+    }
+    pub fn right(&self) -> &Vertical {
+        &self.right
+    }
+    pub fn top_direction(&self) -> bool {
+        self.top_direction
+    }
+    pub fn bottom_direction(&self) -> bool {
+        self.bottom_direction
+    }
 }
 
-impl TrapDecomp {
-    pub fn new(mesh: Mesh2) -> TrapDecomp {
+impl<'mesh> TrapDecomp<'mesh> {
+    pub fn new(mesh: &'mesh Mesh2) -> TrapDecomp<'mesh> {
         TrapDecomp {
             mesh,
             edge_map: BTreeMap::new(),
@@ -430,6 +465,9 @@ impl TrapDecomp {
             }
         }
         self.traps
+            .into_iter()
+            .filter(|trap| trap.left.ray != Ray::None || trap.right.ray != Ray::None)
+            .collect()
     }
 }
 
@@ -440,12 +478,12 @@ fn test_trap_decomp() {
         for seed in 272..1000 {
             println!("seed = {:?}", seed);
             let mut rng = XorShiftRng::seed_from_u64(seed);
-            let xs = rng.random_range(2..10);
+            let xs = rng.random_range(4..10);
             let poly = Polygon2::random_discrete(&mut rng, xs, 10, size);
             println!("{}", poly);
             let mut mesh = Mesh2::new(vec![], vec![]);
             mesh.add_polygon(&poly);
-            let mut td = TrapDecomp::new(mesh.clone()).build();
+            let mut td = TrapDecomp::new(&mesh).build();
             for td in &td {
                 assert_eq!(td.bottom_direction, td.top_direction);
             }

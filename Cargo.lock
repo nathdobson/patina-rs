@@ -801,6 +801,7 @@ dependencies = [
  "ordered-float",
  "patina-vec",
  "rand",
+ "rand_xorshift",
 ]
 
 [[package]]
