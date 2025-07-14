@@ -10,6 +10,7 @@ use patina_geo::geo2::triangle2::Triangle2;
 use patina_vec::vec2::Vec2;
 use rand::{Rng, SeedableRng};
 use rand_xorshift::XorShiftRng;
+use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::mem;
 
@@ -114,8 +115,8 @@ impl Triangulation {
                                 };
                                 assert!(ray1.dir().x() >= 0.0);
                                 assert!(ray2.dir().x() >= 0.0);
-                                ray1.above(self.vertices[vertex])
-                                    && !ray2.above(self.vertices[vertex])
+                                ray1.above(self.vertices[vertex]) != Ordering::Less
+                                    && ray2.above(self.vertices[vertex]) != Ordering::Greater
                             })
                             .exactly_one()
                             .unwrap()

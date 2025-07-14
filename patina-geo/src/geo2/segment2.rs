@@ -1,5 +1,6 @@
 use crate::geo2::ray2::Ray2;
 use patina_vec::vec2::Vec2;
+use std::cmp::Ordering;
 
 #[derive(Debug, Clone)]
 pub struct Segment2 {
@@ -27,6 +28,16 @@ impl Segment2 {
         let a12 = r1.above(other.p2);
         let a21 = r2.above(self.p1);
         let a22 = r2.above(self.p2);
-        a11 != a12 && a21 != a22
+        fn intersects_ord(x: Ordering, y: Ordering) -> bool {
+            match (x, y) {
+                (Ordering::Less, Ordering::Less) => false,
+                (Ordering::Greater, Ordering::Greater) => false,
+                _ => true,
+            }
+        }
+        intersects_ord(a11, a12) && intersects_ord(a21, a22)
+    }
+    pub fn distance(&self, other: Vec2) -> f64 {
+        (self.p2 - self.p1).cross(self.p1 - other).abs() / (self.p2 - self.p1).length()
     }
 }
