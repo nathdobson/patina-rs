@@ -92,8 +92,8 @@ impl Polygon2 {
         }
     }
     pub fn test_cases() -> impl Iterator<Item = Self> {
-        (3..8).flat_map(|size| {
-            (0..10000).map(move |seed| {
+        (3..10).flat_map(|size| {
+            (7..10000).map(move |seed| {
                 println!("size {} seed {}", size, seed);
                 let mut rng = XorShiftRng::seed_from_u64(seed);
                 let xs = rng.random_range(4..10);

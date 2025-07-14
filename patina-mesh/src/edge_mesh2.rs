@@ -4,14 +4,14 @@ use patina_geo::geo2::polygon2::Polygon2;
 use patina_vec::vec2::Vec2;
 
 #[derive(Clone)]
-pub struct Mesh2 {
+pub struct EdgeMesh2 {
     vertices: Vec<Vec2>,
     edges: Vec<DirectedMeshEdge>,
 }
 
-impl Mesh2 {
-    pub fn new(vertices: Vec<Vec2>, edges: Vec<DirectedMeshEdge>) -> Mesh2 {
-        Mesh2 { vertices, edges }
+impl EdgeMesh2 {
+    pub fn new(vertices: Vec<Vec2>, edges: Vec<DirectedMeshEdge>) -> EdgeMesh2 {
+        EdgeMesh2 { vertices, edges }
     }
     pub fn vertices(&self) -> &[Vec2] {
         &self.vertices

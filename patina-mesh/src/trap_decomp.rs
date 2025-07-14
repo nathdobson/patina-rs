@@ -1,6 +1,6 @@
 use crate::directed_mesh_edge::DirectedMeshEdge;
 use crate::mesh_edge::MeshEdge;
-use crate::mesh2::Mesh2;
+use crate::edge_mesh2::EdgeMesh2;
 use arrayvec::ArrayVec;
 use itertools::Itertools;
 use ordered_float::NotNan;
@@ -56,7 +56,7 @@ pub struct Trap {
 // }
 
 pub struct TrapDecomp<'mesh> {
-    mesh: &'mesh Mesh2,
+    mesh: &'mesh EdgeMesh2,
     edge_map: BTreeMap<EdgeKey, EdgeValue>,
     traps: Vec<Trap>,
 }
@@ -220,7 +220,7 @@ impl Trap {
 }
 
 impl<'mesh> TrapDecomp<'mesh> {
-    pub fn new(mesh: &'mesh Mesh2) -> TrapDecomp<'mesh> {
+    pub fn new(mesh: &'mesh EdgeMesh2) -> TrapDecomp<'mesh> {
         TrapDecomp {
             mesh,
             edge_map: BTreeMap::new(),
@@ -481,7 +481,7 @@ fn test_trap_decomp() {
             let xs = rng.random_range(4..10);
             let poly = Polygon2::random_discrete(&mut rng, xs, 10, size);
             println!("{}", poly);
-            let mut mesh = Mesh2::new(vec![], vec![]);
+            let mut mesh = EdgeMesh2::new(vec![], vec![]);
             mesh.add_polygon(&poly);
             let mut td = TrapDecomp::new(&mesh).build();
             for td in &td {
