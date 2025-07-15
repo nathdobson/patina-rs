@@ -13,20 +13,21 @@ async fn test() -> anyhow::Result<()> {
         Font::try_from_vec(fs::read("/System/Library/Fonts/Supplemental/Phosphate.ttc").await?)
             .ok_or_else(|| anyhow!("bad font"))?;
 
-    let mut extrusion = ExtrusionBuilder::new();
-    let mut outline = PolygonOutlineBuilder::new();
-    font.glyph('A')
-        .scaled(Scale::uniform(16.0))
-        .positioned(Point { x: 0.0, y: 0.0 })
-        .build_outline(&mut outline);
+    for letter in ' '..'~' {
+        println!("Building letter {}", letter);
+        let mut extrusion = ExtrusionBuilder::new();
+        let mut outline = PolygonOutlineBuilder::new();
+        font.glyph(letter)
+            .scaled(Scale::uniform(16.0))
+            .positioned(Point { x: 0.0, y: 0.0 })
+            .build_outline(&mut outline);
 
-    for poly in outline.build() {
-        println!("{}", poly);
-        extrusion.add_prism(poly, 0.0..1.0);
+        for poly in outline.build() {
+            extrusion.add_prism(poly, 0.0..1.0);
+        }
+        let extrusion = extrusion.build();
+        extrusion.check_manifold()?;
+        write_test_stl_file(&extrusion, &format!("{}.stl", letter as u32)).await?;
     }
-    let extrusion = extrusion.build();
-    println!("{:#?}", extrusion);
-    extrusion.check_manifold()?;
-    write_test_stl_file(&extrusion, "test.stl").await?;
     Ok(())
 }
