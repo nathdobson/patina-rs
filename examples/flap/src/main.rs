@@ -40,6 +40,7 @@ use patina_extrude::ExtrusionBuilder;
 use patina_font::PolygonOutlineBuilder;
 use patina_geo::geo2::polygon2::Polygon2;
 use patina_geo::geo3::aabb::Aabb;
+use patina_mesh::edge_mesh2::EdgeMesh2;
 use patina_mesh::ser::stl::{write_stl, write_stl_file};
 use patina_sdf::marching_mesh::MarchingMesh;
 use patina_sdf::sdf::Sdf;
@@ -75,11 +76,12 @@ pub struct LetterBuilder {
     extension: f64,
     axle_diameter: f64,
     drum_diameter: f64,
+    letter_thickness: f64,
     font: Font<'static>,
 }
 
 impl LetterBuilder {
-    fn blank(&self, thickness: f64) -> Polygon2 {
+    fn blank(&self) -> EdgeMesh2 {
         let profile = vec![
             Vec2::new(self.width / 2.0 - self.incut, 0.0),
             Vec2::new(self.width / 2.0 - self.incut, self.extension),
@@ -97,11 +99,11 @@ impl LetterBuilder {
         for v in profile.iter().rev() {
             poly.push(Vec2::new(-v.x(), v.y()));
         }
-        Polygon2::new(poly)
+        let mut mesh = EdgeMesh2::new();
+        mesh.add_polygon(poly.into_iter());
+        mesh
     }
-    pub async fn build(&self) -> Vec<BambuPart> {
-        let start = Instant::now();
-        let blank = self.blank(self.thickness);
+    fn letter(&self) -> EdgeMesh2 {
         let mut outline = PolygonOutlineBuilder::new(1.0);
         self.font
             .glyph(self.letter)
@@ -109,20 +111,28 @@ impl LetterBuilder {
             .positioned(Point { x: 0.0, y: 0.0 })
             .build_outline(&mut outline);
         let outline = outline.build();
-        let mut mesh = ExtrusionBuilder::new();
-        mesh.add_prism(blank, 0.0..1.0);
+        let mut outline_mesh = EdgeMesh2::new();
         for outline in outline {
-            let outline = Polygon2::new(
-                outline
-                    .points()
-                    .iter()
-                    .rev()
-                    .map(|v| *v + Vec2::new(-5.0, 2.0))
-                    .collect(),
-            );
-            mesh.add_prism(outline, 0.6..1.0);
+            outline_mesh.add_polygon(outline.points().iter().map(|p| *p + Vec2::new(-10.0, 5.0)));
         }
-        let mesh = mesh.build();
+        outline_mesh
+    }
+    async fn build_body(
+        &self,
+        blank: &EdgeMesh2,
+        letter: &EdgeMesh2,
+        transform: [f64; 12],
+    ) -> BambuPart {
+        let start = Instant::now();
+        let mut ext = ExtrusionBuilder::new();
+        let p1 = ext.add_plane(0.0, true);
+        let p2 = ext.add_plane(self.letter_thickness, true);
+        let p3 = ext.add_plane(self.thickness - self.letter_thickness, false);
+        let p4 = ext.add_plane(self.thickness, false);
+        ext.add_prism(&blank, (p1, false), (p4, false));
+        ext.add_prism(&letter, (p4, true), (p3, false));
+        let mesh = ext.build();
+        mesh.check_manifold().unwrap();
         println!("Built mesh in {}", start.elapsed().as_secs_f64());
         write_stl_file(
             &mesh,
@@ -133,31 +143,52 @@ impl LetterBuilder {
         let mut body = BambuPart::new(mesh);
         body.material(Some(2));
         body.name(Some(format!("part({})", self.letter)));
-        body.transform(Some(
-            Mat4::translate(Vec3::new(
-                90.0,
-                90.0 - self.length / 2.0,
-                (self.index as f64) * (self.thickness + self.support_thickness)
-                    + self.support_thickness,
-            ))
-            .as_affine()
-            .unwrap(),
-        ));
-
-        // let mut support = BambuPart::new(self.blank(self.support_thickness));
-        // support.material(Some(3));
-        // support.name(Some(format!("support({})", self.letter)));
-        // support.transform(Some(
-        //     Mat4::translate(Vec3::new(
-        //         90.0,
-        //         90.0 - self.length / 2.0,
-        //         (self.index as f64) * (self.thickness + self.support_thickness),
-        //     ))
-        //     .as_affine()
-        //     .unwrap(),
-        // ));
-
-        vec![body]
+        body.transform(Some(transform));
+        body
+    }
+    async fn build_letter(
+        &self,
+        blank: &EdgeMesh2,
+        letter: &EdgeMesh2,
+        transform: [f64; 12],
+    ) -> BambuPart {
+        let start = Instant::now();
+        let mut ext = ExtrusionBuilder::new();
+        let p1 = ext.add_plane(0.0, true);
+        let p2 = ext.add_plane(self.letter_thickness, false);
+        let p3 = ext.add_plane(self.thickness - self.letter_thickness, true);
+        let p4 = ext.add_plane(self.thickness, false);
+        ext.add_prism(&letter, (p3, false), (p4, false));
+        let mesh = ext.build();
+        mesh.check_manifold().unwrap();
+        println!("Built mesh in {}", start.elapsed().as_secs_f64());
+        write_stl_file(
+            &mesh,
+            Path::new(&format!("examples/flap/output/letter_{}.stl", self.letter)),
+        )
+        .await
+        .unwrap();
+        let mut body = BambuPart::new(mesh);
+        body.material(Some(1));
+        body.name(Some(format!("part({})", self.letter)));
+        body.transform(Some(transform));
+        body
+    }
+    pub async fn build(&self) -> Vec<BambuPart> {
+        let blank = self.blank();
+        let letter = self.letter();
+        let transform = Mat4::translate(Vec3::new(
+            90.0,
+            90.0 - self.length / 2.0,
+            (self.index as f64) * (self.thickness + self.support_thickness)
+                + self.support_thickness,
+        ))
+        .as_affine()
+        .unwrap();
+        vec![
+            self.build_body(&blank, &letter, transform).await,
+            self.build_letter(&blank, &letter, transform).await,
+        ]
     }
 }
 
@@ -221,6 +252,7 @@ async fn build_output() -> anyhow::Result<()> {
                 extension: 1.2,
                 axle_diameter: 1.2,
                 drum_diameter: 18.0,
+                letter_thickness: 0.4,
                 font: font.clone(),
             }
             .build()

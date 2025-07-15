@@ -10,8 +10,11 @@ pub struct EdgeMesh2 {
 }
 
 impl EdgeMesh2 {
-    pub fn new(vertices: Vec<Vec2>, edges: Vec<DirectedMeshEdge>) -> EdgeMesh2 {
-        EdgeMesh2 { vertices, edges }
+    pub fn new() -> EdgeMesh2 {
+        EdgeMesh2 {
+            vertices: vec![],
+            edges: vec![],
+        }
     }
     pub fn vertices(&self) -> &[Vec2] {
         &self.vertices
@@ -19,14 +22,26 @@ impl EdgeMesh2 {
     pub fn edges(&self) -> &[DirectedMeshEdge] {
         &self.edges
     }
-    pub fn add_polygon(&mut self, poly: &Polygon2) {
+    pub fn add_polygon(&mut self, poly: impl Iterator<Item = Vec2>) {
         let mut vns = vec![];
-        for v in poly.points() {
+        for v in poly {
             vns.push(self.vertices.len());
-            self.vertices.push(*v);
+            self.vertices.push(v);
         }
         for (v1, v2) in vns.into_iter().circular_tuple_windows() {
             self.edges.push(DirectedMeshEdge::new(v1, v2));
+        }
+    }
+    pub fn add_mesh(&mut self, other: &Self, invert: bool) {
+        let shift = self.vertices.len();
+        self.vertices.extend(other.vertices.iter().cloned());
+        for edge in other.edges.iter() {
+            let edge = DirectedMeshEdge::new(edge.v1() + shift, edge.v2() + shift);
+            if invert {
+                self.edges.push(edge.inverted());
+            } else {
+                self.edges.push(edge);
+            }
         }
     }
 }
