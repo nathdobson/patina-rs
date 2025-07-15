@@ -5,6 +5,7 @@ use patina_vec::vec2::Vec2;
 use rand::{Rng, SeedableRng};
 use rand_xorshift::XorShiftRng;
 use std::fmt::{Display, Formatter};
+use std::ops::Range;
 
 #[derive(Debug, Clone)]
 pub struct Polygon2(Vec<Vec2>);
@@ -40,6 +41,8 @@ impl Polygon2 {
         for &v in self.points() {
             for e in self.segments() {
                 if e.p1() != v && e.p2() != v {
+                    let distance = e.distance(v);
+                    //println!("distance({:?}, {:?}) = {:?}", e, v, distance);
                     if e.distance(v) < 10e-10 {
                         return Err(anyhow!("vertex {:?} is on edge {:?}", v, e));
                     }
@@ -95,9 +98,9 @@ impl Polygon2 {
             }
         }
     }
-    pub fn test_cases() -> impl Iterator<Item = Self> {
-        (3..10).flat_map(|size| {
-            (7..10000).map(move |seed| {
+    pub fn test_cases(sizes: Range<usize>, seeds: Range<u64>) -> impl Iterator<Item = Self> {
+        sizes.flat_map(move |size| {
+            seeds.clone().map(move |seed| {
                 println!("size {} seed {}", size, seed);
                 let mut rng = XorShiftRng::seed_from_u64(seed);
                 let xs = rng.random_range(4..10);

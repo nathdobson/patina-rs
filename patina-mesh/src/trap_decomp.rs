@@ -1,6 +1,6 @@
 use crate::directed_mesh_edge::DirectedMeshEdge;
-use crate::mesh_edge::MeshEdge;
 use crate::edge_mesh2::EdgeMesh2;
+use crate::mesh_edge::MeshEdge;
 use arrayvec::ArrayVec;
 use itertools::Itertools;
 use ordered_float::NotNan;
@@ -473,47 +473,26 @@ impl<'mesh> TrapDecomp<'mesh> {
 
 #[test]
 fn test_trap_decomp() {
-    for size in 3..=8 {
-        println!("size = {:?}", size);
-        for seed in 272..1000 {
-            println!("seed = {:?}", seed);
-            let mut rng = XorShiftRng::seed_from_u64(seed);
-            let xs = rng.random_range(4..10);
-            let poly = Polygon2::random_discrete(&mut rng, xs, 10, size);
-            println!("{}", poly);
-            let mut mesh = EdgeMesh2::new(vec![], vec![]);
-            mesh.add_polygon(&poly);
-            let mut td = TrapDecomp::new(&mesh).build();
-            for td in &td {
-                assert_eq!(td.bottom_direction, td.top_direction);
-            }
-            let area: f64 = td
-                .iter()
-                .filter(|td| td.bottom_direction)
-                .map(|td| td.area(&mesh.vertices()))
-                .sum();
-            let expected = poly.signed_area();
-            assert!(
-                (area - expected).abs() < 10e-10,
-                "area: {:?} expected: {:?} diff {:?}",
-                area,
-                expected,
-                area - expected
-            );
+    for poly in Polygon2::test_cases(3..10, 116..1000) {
+        println!("{}", poly);
+        let mut mesh = EdgeMesh2::new();
+        mesh.add_polygon(poly.points().iter().cloned());
+        let mut td = TrapDecomp::new(&mesh).build();
+        for td in &td {
+            assert_eq!(td.bottom_direction, td.top_direction);
         }
+        let area: f64 = td
+            .iter()
+            .filter(|td| td.bottom_direction)
+            .map(|td| td.area(&mesh.vertices()))
+            .sum();
+        let expected = poly.signed_area();
+        assert!(
+            (area - expected).abs() < 10e-10,
+            "area: {:?} expected: {:?} diff {:?}",
+            area,
+            expected,
+            area - expected
+        );
     }
-    //
-    // let mut td = TrapDecomp::new(vs.clone(), es.clone());
-    // let td = td.build();
-    // println!("{:#?}", td);
-    // let mut area = 0.0;
-    // for trap in td {
-    //     for (v1, v2, v3) in trap.for_vertices(&vs).into_iter().tuple_windows() {
-    //         let tri = Triangle2::new([v1, v2, v3]);
-    //         let tri_area = tri.signed_area();
-    //         assert!(tri_area > 0.0);
-    //         area += tri_area;
-    //     }
-    // }
-    // println!("{:?}", area);
 }

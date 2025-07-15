@@ -83,26 +83,29 @@ impl<'mesh> Triangulation<'mesh> {
 
 #[test]
 fn test_traps() {
-    let mut mesh = EdgeMesh2::new(vec![], vec![]);
-    mesh.add_polygon(&Polygon2::new(vec![
-        Vec2::new(0.0, 0.0),
-        Vec2::new(2.0, 1.0),
-        Vec2::new(1.0, 2.0),
-    ]));
+    let mut mesh = EdgeMesh2::new();
+    mesh.add_polygon(
+        vec![
+            Vec2::new(0.0, 0.0),
+            Vec2::new(2.0, 1.0),
+            Vec2::new(1.0, 2.0),
+        ]
+        .into_iter(),
+    );
     let mut tris = Triangulation::new(&mesh).build();
     assert_eq!(tris.len(), 1)
 }
 
 #[test]
 fn test_triangulation() {
-    for poly in Polygon2::test_cases() {
+    for poly in Polygon2::test_cases(3..10, 0..1000) {
         println!("{}", poly);
-        let mut mesh = EdgeMesh2::new(vec![], vec![]);
-        mesh.add_polygon(&poly);
+        let mut mesh = EdgeMesh2::new();
+        mesh.add_polygon(poly.points().into_iter().cloned());
         let mut tris = Triangulation::new(&mesh).build();
         let mut total = 0.0;
         for tri in tris {
-            let area = tri.signed_area();
+            let area = tri.for_vertices2(mesh.vertices()).signed_area();
             assert!(area >= 0.0);
             total += area;
         }

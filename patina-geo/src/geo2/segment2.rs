@@ -61,7 +61,7 @@ impl Segment2 {
         } else if proj_fract >= 1.0 {
             other.distance(self.p2)
         } else {
-            other.distance(u * proj_fract)
+            v.distance(u * proj_fract)
         }
     }
 }
