@@ -37,6 +37,7 @@ use patina_3mf::settings_id::printer_settings_id::PrinterSettingsId;
 use patina_bambu::cli::{BambuStudioCommand, DebugLevel, Slice};
 use patina_bambu::{BambuBuilder, BambuFilament, BambuObject, BambuPart, BambuPlate, BambuSupport};
 use patina_extrude::ExtrusionBuilder;
+use patina_font::PolygonOutlineBuilder;
 use patina_geo::geo2::polygon2::Polygon2;
 use patina_geo::geo3::aabb::Aabb;
 use patina_mesh::ser::stl::{write_stl, write_stl_file};
@@ -97,101 +98,31 @@ impl LetterBuilder {
             poly.push(Vec2::new(-v.x(), v.y()));
         }
         Polygon2::new(poly)
-        // let mut sdf = Aabb::new(
-        //     Vec3::new(-self.width / 2.0, 0.0, 0.0),
-        //     Vec3::new(self.width / 2.0, self.length, thickness),
-        // )
-        // .into_sdf();
-        // sdf = sdf.difference(
-        //     &Aabb::new(
-        //         Vec3::new(self.width / 2.0 - self.incut, -1.0, -self.thickness),
-        //         Vec3::new(self.width, self.extension, self.thickness * 2.0),
-        //     )
-        //     .into_sdf(),
-        // );
-        // sdf = sdf.difference(
-        //     &Aabb::new(
-        //         Vec3::new(-self.width, -1.0, -self.thickness),
-        //         Vec3::new(
-        //             -self.width / 2.0 + self.incut,
-        //             self.extension,
-        //             self.thickness * 2.0,
-        //         ),
-        //     )
-        //     .into_sdf(),
-        // );
-        // sdf = sdf.difference(
-        //     &Aabb::new(
-        //         Vec3::new(
-        //             self.width / 2.0 - self.incut,
-        //             self.extension + self.axle_diameter,
-        //             -self.thickness,
-        //         ),
-        //         Vec3::new(self.width, self.drum_diameter, self.thickness * 2.0),
-        //     )
-        //     .into_sdf(),
-        // );
-        // sdf = sdf.difference(
-        //     &Aabb::new(
-        //         Vec3::new(
-        //             -self.width,
-        //             self.extension + self.axle_diameter,
-        //             -self.thickness,
-        //         ),
-        //         Vec3::new(
-        //             -self.width / 2.0 + self.incut,
-        //             self.drum_diameter,
-        //             self.thickness * 2.0,
-        //         ),
-        //     )
-        //     .into_sdf(),
-        // );
-        // sdf
     }
-    // fn letter(&self) -> Sdf {
-    //     struct Builder;
-    //     impl OutlineBuilder for Builder {
-    //         fn move_to(&mut self, x: f32, y: f32) {
-    //             println!("move_to({x}, {y})");
-    //         }
-    //
-    //         fn line_to(&mut self, x: f32, y: f32) {
-    //             println!("line_to({x}, {y})");
-    //         }
-    //
-    //         fn quad_to(&mut self, x1: f32, y1: f32, x: f32, y: f32) {
-    //             println!("quad_to({x1}, {y1}, {x}, {y})");
-    //         }
-    //
-    //         fn curve_to(&mut self, x1: f32, y1: f32, x2: f32, y2: f32, x: f32, y: f32) {
-    //             println!("curve_to({x1}, {y1}, {x2}, {y2}, {x}, {y})");
-    //         }
-    //
-    //         fn close(&mut self) {
-    //             println!("close");
-    //         }
-    //     }
-    //     let mut builder = Builder;
-    //     let glyph = self
-    //         .font
-    //         .glyph(self.letter)
-    //         .scaled(Scale::uniform(10.0))
-    //         .build_outline(&mut builder);
-    //     // todo!();
-    // }
     pub async fn build(&self) -> Vec<BambuPart> {
-        let blank = self.blank(self.thickness);
-        // let letter = self.letter();
         let start = Instant::now();
-
+        let blank = self.blank(self.thickness);
+        let mut outline = PolygonOutlineBuilder::new(1.0);
+        self.font
+            .glyph(self.letter)
+            .scaled(Scale::uniform(40.0))
+            .positioned(Point { x: 0.0, y: 0.0 })
+            .build_outline(&mut outline);
+        let outline = outline.build();
         let mut mesh = ExtrusionBuilder::new();
         mesh.add_prism(blank, 0.0..1.0);
+        for outline in outline {
+            let outline = Polygon2::new(
+                outline
+                    .points()
+                    .iter()
+                    .rev()
+                    .map(|v| *v + Vec2::new(-5.0, 2.0))
+                    .collect(),
+            );
+            mesh.add_prism(outline, 0.6..1.0);
+        }
         let mesh = mesh.build();
-        // let mesh = MarchingMesh::new(Aabb::new(
-        //     Vec3::new(-self.width * 1.01, -self.width * 1.01, -0.01),
-        //     Vec3::new(self.width * 1.01, self.width * 1.01, 40.01),
-        // ))
-        // .build(&sdf);
         println!("Built mesh in {}", start.elapsed().as_secs_f64());
         write_stl_file(
             &mesh,

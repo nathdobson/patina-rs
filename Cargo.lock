@@ -368,6 +368,7 @@ dependencies = [
  "patina-3mf",
  "patina-bambu",
  "patina-extrude",
+ "patina-font",
  "patina-geo",
  "patina-mesh",
  "patina-sdf",

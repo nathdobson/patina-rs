@@ -12,3 +12,4 @@ patina-scalar= {path="patina-scalar"}
 patina-mesh={path="patina-mesh"}
 patina-sdf={path="patina-sdf"}
 patina-extrude={path="patina-extrude"}
+patina-font={path="patina-font"}

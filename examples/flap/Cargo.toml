@@ -16,3 +16,4 @@ patina-geo={workspace = true}
 patina-mesh={workspace = true}
 rusttype = "0.9.3"
 patina-extrude = {workspace = true}
+patina-font={workspace = true}

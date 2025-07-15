@@ -53,11 +53,11 @@ impl OutlineBuilder for PolygonOutlineBuilder {
 }
 
 impl PolygonOutlineBuilder {
-    pub fn new() -> Self {
+    pub fn new(quad_density: f64) -> Self {
         PolygonOutlineBuilder {
             polys: vec![],
             poly: vec![],
-            quad_density: 0.1,
+            quad_density,
         }
     }
     pub fn build(self) -> Vec<Polygon2> {
