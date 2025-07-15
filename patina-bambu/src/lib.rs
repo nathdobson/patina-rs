@@ -51,6 +51,7 @@ pub struct BambuSupport {
     support_style: Option<SupportStyle>,
     support_top_z_distance: Option<usize>,
     support_type: Option<SupportType>,
+    support_expansion: Option<f64>,
 }
 
 pub struct BambuPart {
@@ -98,6 +99,7 @@ impl BambuSupport {
             support_style: None,
             support_top_z_distance: None,
             support_type: None,
+            support_expansion: None,
         }
     }
     pub fn independent_support_layer_height(&mut self, layer_height: usize) {
@@ -129,6 +131,9 @@ impl BambuSupport {
     }
     pub fn support_type(&mut self, support_type: SupportType) {
         self.support_type = Some(support_type);
+    }
+    pub fn support_expansion(&mut self, support_expansion: f64) {
+        self.support_expansion = Some(support_expansion);
     }
 }
 
@@ -421,6 +426,10 @@ impl BambuBuilder {
             if let Some(support_type) = support.support_type {
                 project_settings.support_type = Some(support_type);
                 different_settings_to_system.push("support_type");
+            }
+            if let Some(support_expansion) = support.support_expansion {
+                project_settings.support_expansion = Some(support_expansion);
+                different_settings_to_system.push("support_expansion");
             }
         }
 

@@ -36,6 +36,8 @@ use patina_3mf::settings_id::printer::Printer;
 use patina_3mf::settings_id::printer_settings_id::PrinterSettingsId;
 use patina_bambu::cli::{BambuStudioCommand, DebugLevel, Slice};
 use patina_bambu::{BambuBuilder, BambuFilament, BambuObject, BambuPart, BambuPlate, BambuSupport};
+use patina_extrude::ExtrusionBuilder;
+use patina_geo::geo2::polygon2::Polygon2;
 use patina_geo::geo3::aabb::Aabb;
 use patina_mesh::ser::stl::{write_stl, write_stl_file};
 use patina_sdf::marching_mesh::MarchingMesh;
@@ -76,99 +78,120 @@ pub struct LetterBuilder {
 }
 
 impl LetterBuilder {
-    fn blank(&self, thickness: f64) -> Sdf {
-        let mut sdf = Aabb::new(
-            Vec3::new(-self.width / 2.0, 0.0, 0.0),
-            Vec3::new(self.width / 2.0, self.length, thickness),
-        )
-        .into_sdf();
-        sdf = sdf.difference(
-            &Aabb::new(
-                Vec3::new(self.width / 2.0 - self.incut, -1.0, -self.thickness),
-                Vec3::new(self.width, self.extension, self.thickness * 2.0),
-            )
-            .into_sdf(),
-        );
-        sdf = sdf.difference(
-            &Aabb::new(
-                Vec3::new(-self.width, -1.0, -self.thickness),
-                Vec3::new(
-                    -self.width / 2.0 + self.incut,
-                    self.extension,
-                    self.thickness * 2.0,
-                ),
-            )
-            .into_sdf(),
-        );
-        sdf = sdf.difference(
-            &Aabb::new(
-                Vec3::new(
-                    self.width / 2.0 - self.incut,
-                    self.extension + self.axle_diameter,
-                    -self.thickness,
-                ),
-                Vec3::new(self.width, self.drum_diameter, self.thickness * 2.0),
-            )
-            .into_sdf(),
-        );
-        sdf = sdf.difference(
-            &Aabb::new(
-                Vec3::new(
-                    -self.width,
-                    self.extension + self.axle_diameter,
-                    -self.thickness,
-                ),
-                Vec3::new(
-                    -self.width / 2.0 + self.incut,
-                    self.drum_diameter,
-                    self.thickness * 2.0,
-                ),
-            )
-            .into_sdf(),
-        );
-        sdf
-    }
-    fn letter(&self) -> Sdf {
-        struct Builder;
-        impl OutlineBuilder for Builder {
-            fn move_to(&mut self, x: f32, y: f32) {
-                println!("move_to({x}, {y})");
-            }
-
-            fn line_to(&mut self, x: f32, y: f32) {
-                println!("line_to({x}, {y})");
-            }
-
-            fn quad_to(&mut self, x1: f32, y1: f32, x: f32, y: f32) {
-                println!("quad_to({x1}, {y1}, {x}, {y})");
-            }
-
-            fn curve_to(&mut self, x1: f32, y1: f32, x2: f32, y2: f32, x: f32, y: f32) {
-                println!("curve_to({x1}, {y1}, {x2}, {y2}, {x}, {y})");
-            }
-
-            fn close(&mut self) {
-                println!("close");
-            }
+    fn blank(&self, thickness: f64) -> Polygon2 {
+        let profile = vec![
+            Vec2::new(self.width / 2.0 - self.incut, 0.0),
+            Vec2::new(self.width / 2.0 - self.incut, self.extension),
+            Vec2::new(self.width / 2.0, self.extension),
+            Vec2::new(self.width / 2.0, self.extension + self.axle_diameter),
+            Vec2::new(
+                self.width / 2.0 - self.incut,
+                self.extension + self.axle_diameter,
+            ),
+            Vec2::new(self.width / 2.0 - self.incut, self.drum_diameter),
+            Vec2::new(self.width / 2.0, self.drum_diameter),
+            Vec2::new(self.width / 2.0, self.length),
+        ];
+        let mut poly = profile.clone();
+        for v in profile.iter().rev() {
+            poly.push(Vec2::new(-v.x(), v.y()));
         }
-        let mut builder = Builder;
-        let glyph = self
-            .font
-            .glyph(self.letter)
-            .scaled(Scale::uniform(10.0))
-            .build_outline(&mut builder);
-        todo!();
+        Polygon2::new(poly)
+        // let mut sdf = Aabb::new(
+        //     Vec3::new(-self.width / 2.0, 0.0, 0.0),
+        //     Vec3::new(self.width / 2.0, self.length, thickness),
+        // )
+        // .into_sdf();
+        // sdf = sdf.difference(
+        //     &Aabb::new(
+        //         Vec3::new(self.width / 2.0 - self.incut, -1.0, -self.thickness),
+        //         Vec3::new(self.width, self.extension, self.thickness * 2.0),
+        //     )
+        //     .into_sdf(),
+        // );
+        // sdf = sdf.difference(
+        //     &Aabb::new(
+        //         Vec3::new(-self.width, -1.0, -self.thickness),
+        //         Vec3::new(
+        //             -self.width / 2.0 + self.incut,
+        //             self.extension,
+        //             self.thickness * 2.0,
+        //         ),
+        //     )
+        //     .into_sdf(),
+        // );
+        // sdf = sdf.difference(
+        //     &Aabb::new(
+        //         Vec3::new(
+        //             self.width / 2.0 - self.incut,
+        //             self.extension + self.axle_diameter,
+        //             -self.thickness,
+        //         ),
+        //         Vec3::new(self.width, self.drum_diameter, self.thickness * 2.0),
+        //     )
+        //     .into_sdf(),
+        // );
+        // sdf = sdf.difference(
+        //     &Aabb::new(
+        //         Vec3::new(
+        //             -self.width,
+        //             self.extension + self.axle_diameter,
+        //             -self.thickness,
+        //         ),
+        //         Vec3::new(
+        //             -self.width / 2.0 + self.incut,
+        //             self.drum_diameter,
+        //             self.thickness * 2.0,
+        //         ),
+        //     )
+        //     .into_sdf(),
+        // );
+        // sdf
     }
+    // fn letter(&self) -> Sdf {
+    //     struct Builder;
+    //     impl OutlineBuilder for Builder {
+    //         fn move_to(&mut self, x: f32, y: f32) {
+    //             println!("move_to({x}, {y})");
+    //         }
+    //
+    //         fn line_to(&mut self, x: f32, y: f32) {
+    //             println!("line_to({x}, {y})");
+    //         }
+    //
+    //         fn quad_to(&mut self, x1: f32, y1: f32, x: f32, y: f32) {
+    //             println!("quad_to({x1}, {y1}, {x}, {y})");
+    //         }
+    //
+    //         fn curve_to(&mut self, x1: f32, y1: f32, x2: f32, y2: f32, x: f32, y: f32) {
+    //             println!("curve_to({x1}, {y1}, {x2}, {y2}, {x}, {y})");
+    //         }
+    //
+    //         fn close(&mut self) {
+    //             println!("close");
+    //         }
+    //     }
+    //     let mut builder = Builder;
+    //     let glyph = self
+    //         .font
+    //         .glyph(self.letter)
+    //         .scaled(Scale::uniform(10.0))
+    //         .build_outline(&mut builder);
+    //     // todo!();
+    // }
     pub async fn build(&self) -> Vec<BambuPart> {
-        let sdf = self.blank(self.thickness);
-        let letter = self.letter();
+        let blank = self.blank(self.thickness);
+        // let letter = self.letter();
         let start = Instant::now();
 
-        let mesh = MarchingMesh::new(Aabb::new(
-            Vec3::new(-self.width * 1.01, -self.width * 1.01, -0.01),
-            Vec3::new(self.width * 1.01, self.width * 1.01, 40.01),
-        ))
-        .build(&sdf);
+        let mut mesh = ExtrusionBuilder::new();
+        mesh.add_prism(blank, 0.0..1.0);
+        let mesh = mesh.build();
+        // let mesh = MarchingMesh::new(Aabb::new(
+        //     Vec3::new(-self.width * 1.01, -self.width * 1.01, -0.01),
+        //     Vec3::new(self.width * 1.01, self.width * 1.01, 40.01),
+        // ))
+        // .build(&sdf);
         println!("Built mesh in {}", start.elapsed().as_secs_f64());
         write_stl_file(
             &mesh,
@@ -243,11 +266,12 @@ async fn build_output() -> anyhow::Result<()> {
         support.support_bottom_z_distance(0);
         support.support_filament(3);
         support.support_interface_filament(3);
-        support.support_interface_pattern(SupportInterfacePattern::RectilinearInterlaced);
+        support.support_interface_pattern(SupportInterfacePattern::Concentric);
         support.support_interface_spacing(0);
         support.support_style(SupportStyle::Snug);
         support.support_top_z_distance(0);
         support.support_type(SupportType::NormalAuto);
+        support.support_expansion(-0.25);
         support
     });
     bambu.add_plate({

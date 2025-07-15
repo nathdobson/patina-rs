@@ -97,6 +97,9 @@ pub struct ProjectSettings {
     pub support_type: Option<SupportType>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub different_settings_to_system: Option<Vec<String>>,
+    #[serde_as(as = "Option<DisplayFromStr>")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub support_expansion: Option<f64>,
 }
 
 impl ProjectSettings {
@@ -131,6 +134,7 @@ impl ProjectSettings {
             support_top_z_distance: None,
             support_type: None,
             different_settings_to_system: None,
+            support_expansion: None,
         }
     }
 }

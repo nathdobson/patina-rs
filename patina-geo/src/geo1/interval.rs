@@ -40,6 +40,9 @@ impl Interval {
     pub fn max(&self) -> f64 {
         self.max
     }
+    pub fn length(&self) -> f64 {
+        self.max - self.min
+    }
 }
 
 impl From<f64> for Interval {

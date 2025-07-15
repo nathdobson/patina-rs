@@ -367,6 +367,7 @@ dependencies = [
  "anyhow",
  "patina-3mf",
  "patina-bambu",
+ "patina-extrude",
  "patina-geo",
  "patina-mesh",
  "patina-sdf",
@@ -803,9 +804,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "patina-font"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "patina-extrude",
+ "patina-geo",
+ "patina-mesh",
+ "patina-vec",
+ "rusttype",
+ "tokio",
+]
+
+[[package]]
 name = "patina-geo"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "itertools",
  "ordered-float",
  "patina-vec",

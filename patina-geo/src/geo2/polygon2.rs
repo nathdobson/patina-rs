@@ -1,4 +1,5 @@
 use crate::geo2::segment2::Segment2;
+use anyhow::anyhow;
 use itertools::Itertools;
 use patina_vec::vec2::Vec2;
 use rand::{Rng, SeedableRng};
@@ -30,17 +31,17 @@ impl Polygon2 {
             .sum::<f64>()
             / 2.0
     }
-    pub fn is_self_intersecting(&self) -> bool {
+    pub fn check_self_separate(&self) -> anyhow::Result<()> {
         for (v1, v2) in self.points().iter().tuple_combinations() {
             if v1 == v2 {
-                return true;
+                return Err(anyhow!("vertex {} is the same as vertex {}", v1, v2));
             }
         }
         for &v in self.points() {
             for e in self.segments() {
                 if e.p1() != v && e.p2() != v {
                     if e.distance(v) < 10e-10 {
-                        return true;
+                        return Err(anyhow!("vertex {:?} is on edge {:?}", v, e));
                     }
                 }
             }
@@ -49,14 +50,17 @@ impl Polygon2 {
             if e1.p1() != e2.p1() && e1.p1() != e2.p2() && e1.p2() != e2.p1() && e1.p2() != e2.p2()
             {
                 if e1.intersects(&e2) {
-                    return true;
+                    return Err(anyhow!("edge {} intersects edge {}", e1, e2));
                 }
             }
         }
-        false
+        Ok(())
     }
-    pub fn is_simple(&self) -> bool {
-        self.signed_area() > 0.0 && !self.is_self_intersecting()
+    pub fn check_simple(&self) -> anyhow::Result<()> {
+        if self.signed_area() <= 0.0 {
+            return Err(anyhow!("clockwise"));
+        }
+        self.check_self_separate()
     }
     fn random_complex<R: Rng>(r: &mut R, size: usize) -> Self {
         let mut poly: Vec<Vec2> = vec![];
@@ -78,7 +82,7 @@ impl Polygon2 {
     pub fn random<R: Rng>(r: &mut R, size: usize) -> Self {
         loop {
             let poly = Self::random_complex(r, size);
-            if poly.is_simple() {
+            if poly.check_simple().is_ok() {
                 return poly;
             }
         }
@@ -86,7 +90,7 @@ impl Polygon2 {
     pub fn random_discrete<R: Rng>(r: &mut R, xs: usize, ys: usize, size: usize) -> Self {
         loop {
             let poly = Self::random_discrete_complex(r, xs, ys, size);
-            if poly.is_simple() {
+            if poly.check_simple().is_ok() {
                 return poly;
             }
         }

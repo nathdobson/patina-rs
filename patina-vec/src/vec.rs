@@ -154,7 +154,7 @@ impl<T, const N: usize> Vector<T, N> {
         T: Scalar,
     {
         let mut result = Self::zero();
-        result[axis] = T::from_f64(0.0);
+        result[axis] = T::from_f64(1.0);
         result
     }
 

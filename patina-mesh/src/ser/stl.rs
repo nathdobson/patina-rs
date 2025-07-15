@@ -58,10 +58,15 @@ pub async fn write_test_stl_file(mesh: &Mesh, filename: &str) -> anyhow::Result<
     }
     let mut test_name = String::new();
     for part in parts {
-        test_name.push_str(part.to_str().unwrap());
+        test_name.push_str(&part.to_str().unwrap());
         test_name.push('_');
     }
-    test_name.push_str(std::thread::current().name().unwrap_or("<unknown>"));
+    test_name.push_str(
+        &std::thread::current()
+            .name()
+            .unwrap_or("<unknown>")
+            .replace("::", "_"),
+    );
     let test_dir = target_dir.join("test_outputs").join(test_name);
     tokio::fs::create_dir_all(&test_dir).await?;
     let file = test_dir.join(filename);

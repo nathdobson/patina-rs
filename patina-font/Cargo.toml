@@ -1,0 +1,16 @@
+[package]
+name = "patina-font"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rusttype = "0.9.3"
+patina-mesh = {workspace = true}
+patina-geo ={workspace = true}
+patina-vec={workspace = true}
+
+[dev-dependencies]
+patina-extrude = {workspace = true}
+tokio = {version="1.46.0",features=["macros","rt"]}
+anyhow = "1.0.98"
+
