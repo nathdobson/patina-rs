@@ -10,6 +10,7 @@ use patina_scalar::Scalar;
 use patina_vec::vec3::{Vec3, Vector3};
 use std::fmt::{Debug, Formatter};
 use std::ops::{Add, Index, IndexMut};
+use patina_geo::geo3::aabb3::Aabb3;
 
 #[derive(Debug)]
 pub struct Octree<V> {
@@ -89,7 +90,7 @@ impl OctreePath {
         };
         Some((index, subpath))
     }
-    pub fn aabb(&self) -> Aabb {
+    pub fn aabb(&self) -> Aabb3 {
         Aabb::new(
             self.position
                 .map(|x| (x as f64) / ((1 << self.depth) as f64))
@@ -99,7 +100,7 @@ impl OctreePath {
                 .into(),
         )
     }
-    pub fn aabb_inside(&self, root: &Aabb) -> Aabb {
+    pub fn aabb_inside(&self, root: &Aabb3) -> Aabb3 {
         let fract = self.aabb();
         let base = root.min();
         let delta = root.dimensions();

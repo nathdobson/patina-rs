@@ -38,8 +38,9 @@ use patina_bambu::cli::{BambuStudioCommand, DebugLevel, Slice};
 use patina_bambu::{BambuBuilder, BambuFilament, BambuObject, BambuPart, BambuPlate, BambuSupport};
 use patina_extrude::ExtrusionBuilder;
 use patina_font::PolygonOutlineBuilder;
-use patina_geo::geo2::polygon2::Polygon2;
 use patina_geo::aabb::Aabb;
+use patina_geo::geo2::polygon2::Polygon2;
+use patina_mesh::bimesh2::Bimesh2;
 use patina_mesh::edge_mesh2::EdgeMesh2;
 use patina_mesh::ser::stl::{write_stl, write_stl_file};
 use patina_sdf::marching_mesh::MarchingMesh;
@@ -54,6 +55,8 @@ use std::collections::HashSet;
 use std::env;
 use std::io::{Cursor, Read, Write};
 use std::path::Path;
+use std::rc::Rc;
+use std::sync::Arc;
 use std::time::Instant;
 use tokio::fs;
 use zip::write::{FileOptions, SimpleFileOptions};
@@ -105,17 +108,38 @@ impl LetterBuilder {
     }
     fn letter(&self) -> EdgeMesh2 {
         let mut outline = PolygonOutlineBuilder::new(1.0);
-        self.font
+        let glyph = self
+            .font
             .glyph(self.letter)
-            .scaled(Scale::uniform(20.0))
-            .positioned(Point { x: 0.0, y: 0.0 })
-            .build_outline(&mut outline);
+            .scaled(Scale::uniform(55.0))
+            .positioned(Point { x: 0.0, y: 0.0 });
+        let bb = glyph.pixel_bounding_box().unwrap();
+        let minx = bb.min.x as f64;
+        let maxx = bb.max.x as f64;
+        glyph.build_outline(&mut outline);
         let outline = outline.build();
         let mut outline_mesh = EdgeMesh2::new();
         for outline in outline {
-            outline_mesh.add_polygon(outline.points().iter().map(|p| *p + Vec2::new(-10.0, 5.0)));
+            outline_mesh.add_polygon(
+                outline
+                    .points()
+                    .iter()
+                    .map(|p| *p + Vec2::new(-(maxx - minx) / 2.0, -10.0)),
+            );
         }
-        outline_mesh
+        let mut sub = EdgeMesh2::new();
+        let cuty = 0.001;
+        sub.add_polygon(
+            vec![
+                Vec2::new(-100.0, cuty),
+                Vec2::new(-100.0, -100.0),
+                Vec2::new(100.0, -100.0),
+                Vec2::new(100.0, cuty),
+            ]
+            .into_iter(),
+        );
+        let bimesh = Bimesh2::new(Arc::new(outline_mesh), Arc::new(sub));
+        bimesh.difference()
     }
     async fn build_body(
         &self,
@@ -243,6 +267,7 @@ async fn build_output() -> anyhow::Result<()> {
         object.name(Some("stack".to_string()));
         for (index, letter) in " ABCDEFGHIJKLMNOPQRSTUVWXYZ$&#0123456789:.-?!"
             .chars()
+            .skip(1)
             .enumerate()
         {
             let parts = LetterBuilder {

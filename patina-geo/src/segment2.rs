@@ -40,6 +40,9 @@ impl<const N: usize> Segment<N> {
     pub fn midpoint(&self) -> Vector<f64, N> {
         (self.p1() + self.p2()) / 2.0
     }
+    pub fn displacement(&self) -> Vector<f64, N> {
+        self.p2() - self.p1()
+    }
 }
 
 impl<const N: usize> Display for Segment<N> {

@@ -98,7 +98,7 @@ impl<const N: usize, V: Clone> BvhBuilder<N, V> {
         if tris.len() < self.max_split_size {
             return self.add_leaf(tris);
         }
-        let (left, right, _) = (0..3)
+        let (left, right, _) = (0..N)
             .map(|axis| {
                 let mut by_axis = tris.to_vec();
                 by_axis.sort_by_key(|x| NotNan::new(x.midpoint[axis]).unwrap());

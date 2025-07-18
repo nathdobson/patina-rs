@@ -18,6 +18,7 @@ use patina_scalar::newton::Newton;
 use patina_vec::vec3::{Vec3, Vector3};
 use std::collections::{HashMap, HashSet};
 use std::mem;
+use patina_geo::geo3::aabb3::Aabb3;
 
 #[derive(Debug)]
 struct MarchingNode {}
@@ -25,7 +26,7 @@ pub struct MarchingMesh {
     min_render_depth: usize,
     max_render_depth: usize,
     subdiv_max_dot: f64,
-    aabb: Aabb,
+    aabb: Aabb3,
     vertices: Vec<Vec3>,
     vertex_table: HashMap<Vector3<NotNan<f64>>, usize>,
     triangles: Vec<MeshTriangle>,
@@ -40,7 +41,7 @@ impl Default for MarchingNode {
 impl MarchingNode {}
 
 impl MarchingMesh {
-    pub fn new(aabb: Aabb) -> Self {
+    pub fn new(aabb: Aabb3) -> Self {
         Self {
             min_render_depth: 6,
             max_render_depth: 10,
@@ -51,7 +52,7 @@ impl MarchingMesh {
             triangles: vec![],
         }
     }
-    fn find_marching_cube(&self, aabb: &Aabb, sdf: &Sdf) -> CubeTriMesh {
+    fn find_marching_cube(&self, aabb: &Aabb3, sdf: &Sdf) -> CubeTriMesh {
         let mut result = CubeVertexSet::new();
         for cv in cube_corners() {
             let p = (0..3)
@@ -85,7 +86,7 @@ impl MarchingMesh {
         &mut self,
         root: &Octree<MarchingNode>,
         octree: &Octree<MarchingNode>,
-        aabb: &Aabb,
+        aabb: &Aabb3,
         sdf: &Sdf,
     ) {
         let mut faces = CubeFaceSet::new();
@@ -200,7 +201,7 @@ impl MarchingMesh {
             self.build_branch(tree, &sdf);
         }
     }
-    fn position(&self, aabb: &Aabb, v: CubeVertex) -> Vec3 {
+    fn position(&self, aabb: &Aabb3, v: CubeVertex) -> Vec3 {
         (0..3)
             .map(|axis| match v[axis] {
                 0 => aabb.min()[axis],
@@ -210,7 +211,7 @@ impl MarchingMesh {
             })
             .collect()
     }
-    fn position_range(&self, aabb: &Aabb, v1: CubeVertex, v2: CubeVertex) -> (Vec3, Vec3) {
+    fn position_range(&self, aabb: &Aabb3, v1: CubeVertex, v2: CubeVertex) -> (Vec3, Vec3) {
         (self.position(aabb, v1), self.position(aabb, v2))
     }
     fn find_vertex(

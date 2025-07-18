@@ -7,6 +7,7 @@ use patina_scalar::Scalar;
 use patina_scalar::deriv::Deriv;
 use patina_vec::vec3::{Vec3, Vector3};
 use std::fmt::{Debug, Formatter};
+use patina_geo::geo3::aabb3::Aabb3;
 
 pub trait SdfLeafImpl: 'static + Sync + Send + Sized + Debug {
     fn evaluate<T: Scalar>(&self, p: Vector3<T>) -> T;
@@ -52,7 +53,7 @@ impl SdfLeafImpl for Plane {
     }
 }
 
-impl SdfLeafImpl for Aabb {
+impl SdfLeafImpl for Aabb3 {
     fn evaluate<T: Scalar>(&self, p: Vector3<T>) -> T {
         let center = self.center().into_scalars::<T>();
         let radius = (self.dimensions() / 2.0).into_scalars::<T>();

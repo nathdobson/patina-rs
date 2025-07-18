@@ -78,7 +78,7 @@ impl<'a> BvhNodeView<'a, 2, EdgeMesh2, usize> {
             }
         }
         for node in self.nodes() {
-            todo!();
+            node.intersect_segment(segment, result);
         }
     }
     pub fn intersect_ray(&self, ray: &Ray2, result: &mut Vec<EdgeMeshRayIntersect>) {
@@ -97,7 +97,7 @@ impl<'a> BvhNodeView<'a, 2, EdgeMesh2, usize> {
             }
         }
         for node in self.nodes() {
-            todo!();
+            node.intersect_ray(ray, result);
         }
     }
 }
