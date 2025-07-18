@@ -1,5 +1,5 @@
 use crate::mat::Matrix;
-use crate::vec2::Vector2;
+use crate::vec2::{Vec2, Vector2};
 use patina_scalar::Scalar;
 
 pub type Matrix2<T> = Matrix<T, 2>;
@@ -16,6 +16,13 @@ impl<T> Matrix2<T> {
             self[(1, 1)].clone(),
         );
         let det = a.clone() * d.clone() - b.clone() * c.clone();
+
         Self::from_rows([Vector2::new(d, -b), Vector2::new(-c, a)]) / det
     }
+}
+
+#[test]
+fn test_invert() {
+    let mat = Mat2::from_rows([Vec2::new(1.0, 2.0), Vec2::new(3.0, 4.0)]);
+    assert_eq!(Mat2::id(), mat * mat.invert2());
 }

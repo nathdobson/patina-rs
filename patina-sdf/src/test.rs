@@ -3,7 +3,7 @@ use crate::sdf::Sdf;
 use crate::sdf::leaf::SdfLeafImpl;
 use crate::sdf::union::SdfUnion;
 use crate::subdivide::Subdivide;
-use patina_geo::geo3::aabb::Aabb;
+use patina_geo::aabb::Aabb;
 use patina_geo::geo3::plane::Plane;
 use patina_geo::geo3::sphere::Sphere;
 use patina_mesh::ser::stl::write_stl_file;

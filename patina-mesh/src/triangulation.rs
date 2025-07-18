@@ -6,8 +6,6 @@ use arrayvec::ArrayVec;
 use itertools::Itertools;
 use ordered_float::NotNan;
 use patina_geo::geo2::polygon2::Polygon2;
-use patina_geo::geo2::ray2::Ray2;
-use patina_geo::geo2::segment2::Segment2;
 use patina_geo::geo2::triangle2::Triangle2;
 use patina_vec::vec2::Vec2;
 use rand::{Rng, SeedableRng};

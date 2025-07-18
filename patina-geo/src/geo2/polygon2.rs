@@ -1,4 +1,3 @@
-use crate::geo2::segment2::Segment2;
 use anyhow::anyhow;
 use itertools::Itertools;
 use patina_vec::vec2::Vec2;
@@ -6,6 +5,7 @@ use rand::{Rng, SeedableRng};
 use rand_xorshift::XorShiftRng;
 use std::fmt::{Display, Formatter};
 use std::ops::Range;
+use crate::geo2::segment2::Segment2;
 
 #[derive(Debug, Clone)]
 pub struct Polygon2(Vec<Vec2>);
@@ -41,8 +41,6 @@ impl Polygon2 {
         for &v in self.points() {
             for e in self.segments() {
                 if e.p1() != v && e.p2() != v {
-                    let distance = e.distance(v);
-                    //println!("distance({:?}, {:?}) = {:?}", e, v, distance);
                     if e.distance(v) < 10e-10 {
                         return Err(anyhow!("vertex {:?} is on edge {:?}", v, e));
                     }

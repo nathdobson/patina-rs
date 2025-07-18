@@ -1,9 +1,9 @@
 use crate::mesh::Mesh;
 use crate::mesh_triangle::MeshTriangle;
-use patina_geo::geo3::aabb::Aabb;
+use patina_geo::aabb::Aabb;
 
 impl Mesh {
-    pub fn from_aabb(aabb: Aabb) -> Mesh {
+    pub fn from_aabb(aabb: Aabb<3>) -> Mesh {
         Mesh::new(
             aabb.vertices().to_vec(),
             vec![

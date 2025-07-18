@@ -5,7 +5,7 @@ use arrayvec::ArrayVec;
 use inari::DecInterval;
 use itertools::Itertools;
 use ordered_float::NotNan;
-use patina_geo::geo3::aabb::Aabb;
+use patina_geo::aabb::Aabb;
 use patina_scalar::Scalar;
 use patina_vec::vec3::{Vec3, Vector3};
 use std::fmt::{Debug, Formatter};

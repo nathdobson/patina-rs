@@ -10,7 +10,7 @@ use crate::transvoxel::cube_vertex;
 use crate::transvoxel::cube_vertex::{CubeVertex, CubeVertexSet, cube_corners, cube_points};
 use inari::DecInterval;
 use ordered_float::NotNan;
-use patina_geo::geo3::aabb::Aabb;
+use patina_geo::aabb::Aabb;
 use patina_mesh::mesh::Mesh;
 use patina_mesh::mesh_triangle::MeshTriangle;
 use patina_scalar::deriv::Deriv;

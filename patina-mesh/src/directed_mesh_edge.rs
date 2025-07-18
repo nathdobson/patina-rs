@@ -1,10 +1,12 @@
 use crate::mesh_edge::MeshEdge;
+use patina_geo::geo2::segment2::Segment2;
 use patina_geo::geo3::segment3::Segment3;
+use patina_geo::segment2::Segment;
+use patina_vec::vec::Vector;
+use patina_vec::vec2::Vec2;
 use patina_vec::vec3::Vec3;
 use std::fmt::{Debug, Formatter};
 use std::ops::Index;
-use patina_geo::geo2::segment2::Segment2;
-use patina_vec::vec2::Vec2;
 
 #[derive(Copy, Clone, Eq, Ord, PartialOrd, PartialEq, Hash)]
 pub struct DirectedMeshEdge {
@@ -28,11 +30,8 @@ impl DirectedMeshEdge {
     pub fn inverted(self) -> DirectedMeshEdge {
         Self::new(self.vertices[1], self.vertices[0])
     }
-    pub fn for_vertices(&self, vs: &[Vec3]) -> Segment3 {
-        Segment3::new(vs[self.vertices[0]], vs[self.vertices[1]])
-    }
-    pub fn for_vertices2(&self, vs: &[Vec2]) -> Segment2 {
-        Segment2::new(vs[self.vertices[0]], vs[self.vertices[1]])
+    pub fn for_vertices<const N: usize>(&self, vs: &[Vector<f64, N>]) -> Segment<N> {
+        Segment::new(vs[self.vertices[0]], vs[self.vertices[1]])
     }
     pub fn edge(&self) -> MeshEdge {
         MeshEdge::new(self.vertices[0], self.vertices[1])

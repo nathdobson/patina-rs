@@ -1,6 +1,6 @@
 use crate::sdf::{Sdf, SdfImpl};
 use inari::DecInterval;
-use patina_geo::geo3::aabb::Aabb;
+use patina_geo::aabb::Aabb;
 use patina_geo::geo3::plane::Plane;
 use patina_geo::geo3::sphere::Sphere;
 use patina_scalar::Scalar;

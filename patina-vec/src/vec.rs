@@ -14,6 +14,15 @@ impl<const N: usize> Vector<f64, N> {
     pub fn into_scalars<T2: Scalar>(self) -> Vector<T2, N> {
         self.map(T2::from_f64)
     }
+    pub fn random_normal<R: Rng>(rng: &mut R) -> Self {
+        loop {
+            let result = Self::from_fn(|_| rng.random_range(-1.0..1.0));
+            let length2 = result.length_squared();
+            if length2 <= 1.0 {
+                return result / length2;
+            }
+        }
+    }
 }
 
 impl<T, const N: usize> Vector<T, N>

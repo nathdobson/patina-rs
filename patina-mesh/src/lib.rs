@@ -15,4 +15,8 @@ mod trap_decomp;
 pub mod edge_mesh2;
 mod monotone_decomp;
 pub mod tri_mesh2;
+mod bimesh2;
+pub mod mesh_cut;
+mod bvh;
+mod util;
 

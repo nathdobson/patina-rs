@@ -4,8 +4,10 @@ use crate::vec3::Vec3;
 use crate::vec4::Vec4;
 use itertools::Itertools;
 use patina_scalar::Scalar;
+use std::fmt::{Debug, Display, Formatter};
 use std::ops::{Add, Div, Index, Mul, Sub};
 
+#[derive(PartialEq, PartialOrd, Copy, Clone)]
 pub struct Matrix<T, const N: usize>([Vector<T, N>; N]);
 
 pub type Matrix3<T> = Matrix<T, 3>;
@@ -91,7 +93,7 @@ impl<T: Scalar, const N: usize> Mul<Vector<T, N>> for Matrix<T, N> {
 impl<T: Scalar, const N: usize> Mul<Matrix<T, N>> for Matrix<T, N> {
     type Output = Matrix<T, N>;
     fn mul(self, rhs: Matrix<T, N>) -> Self::Output {
-        Self::from_fn(|row, col| self.row(row).dot(rhs.row(col)))
+        Self::from_fn(|row, col| self.row(row).dot(rhs.col(col)))
     }
 }
 
@@ -106,5 +108,17 @@ impl<T: Scalar, const N: usize> Sub<Matrix<T, N>> for Matrix<T, N> {
     type Output = Self;
     fn sub(self, rhs: Matrix<T, N>) -> Self::Output {
         Self::from_fn(|row, col| self[(row, col)].clone() - rhs[(row, col)].clone())
+    }
+}
+
+impl<T: Display, const N: usize> Debug for Matrix<T, N> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
+impl<T: Display, const N: usize> Display for Matrix<T, N> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
     }
 }

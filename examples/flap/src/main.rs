@@ -39,7 +39,7 @@ use patina_bambu::{BambuBuilder, BambuFilament, BambuObject, BambuPart, BambuPla
 use patina_extrude::ExtrusionBuilder;
 use patina_font::PolygonOutlineBuilder;
 use patina_geo::geo2::polygon2::Polygon2;
-use patina_geo::geo3::aabb::Aabb;
+use patina_geo::aabb::Aabb;
 use patina_mesh::edge_mesh2::EdgeMesh2;
 use patina_mesh::ser::stl::{write_stl, write_stl_file};
 use patina_sdf::marching_mesh::MarchingMesh;
@@ -107,7 +107,7 @@ impl LetterBuilder {
         let mut outline = PolygonOutlineBuilder::new(1.0);
         self.font
             .glyph(self.letter)
-            .scaled(Scale::uniform(40.0))
+            .scaled(Scale::uniform(20.0))
             .positioned(Point { x: 0.0, y: 0.0 })
             .build_outline(&mut outline);
         let outline = outline.build();
@@ -175,6 +175,7 @@ impl LetterBuilder {
         body
     }
     pub async fn build(&self) -> Vec<BambuPart> {
+        println!("Building {}", self.letter);
         let blank = self.blank();
         let letter = self.letter();
         let transform = Mat4::translate(Vec3::new(
@@ -240,10 +241,13 @@ async fn build_output() -> anyhow::Result<()> {
         let mut plate = BambuPlate::new();
         let mut object = BambuObject::new();
         object.name(Some("stack".to_string()));
-        for (index, letter) in ['a', 'b'].iter().enumerate() {
+        for (index, letter) in " ABCDEFGHIJKLMNOPQRSTUVWXYZ$&#0123456789:.-?!"
+            .chars()
+            .enumerate()
+        {
             let parts = LetterBuilder {
                 index,
-                letter: *letter,
+                letter,
                 width: 43.0,
                 length: 35.0,
                 thickness: 1.0,
