@@ -85,4 +85,16 @@ impl EdgeMesh2 {
         }
         polys
     }
+    pub fn map_vertices(&self, f: impl FnMut(Vec2) -> Vec2) -> Self {
+        Self {
+            vertices: self.vertices.iter().cloned().map(f).collect(),
+            edges: self.edges.clone(),
+        }
+    }
+    pub fn invert_edges(&self) -> Self {
+        Self {
+            vertices: self.vertices.clone(),
+            edges: self.edges.iter().map(|e| e.inverted()).collect(),
+        }
+    }
 }

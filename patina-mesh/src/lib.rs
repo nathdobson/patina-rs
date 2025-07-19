@@ -2,6 +2,7 @@
 #![allow(dead_code)]
 #![allow(unused_mut)]
 #![allow(unused_imports)]
+#![deny(unused_must_use)]
 
 pub mod directed_mesh_edge;
 pub mod mesh;

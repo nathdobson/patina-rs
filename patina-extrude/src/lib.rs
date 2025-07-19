@@ -10,7 +10,6 @@ use patina_geo::geo2::polygon2::Polygon2;
 use patina_mesh::edge_mesh2::EdgeMesh2;
 use patina_mesh::mesh::Mesh;
 use patina_mesh::mesh_triangle::MeshTriangle;
-use patina_mesh::ser::stl::{write_stl_file, write_test_stl_file};
 use patina_mesh::triangulation::Triangulation;
 use patina_vec::vec2::Vec2;
 use patina_vec::vec3::Vec3;

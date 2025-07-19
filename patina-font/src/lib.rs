@@ -6,7 +6,6 @@
 mod test;
 
 use patina_geo::geo2::polygon2::Polygon2;
-use patina_mesh::ser::stl::write_test_stl_file;
 use patina_vec::vec2::Vec2;
 use rusttype::{OutlineBuilder, Point};
 use std::fmt::Pointer;
