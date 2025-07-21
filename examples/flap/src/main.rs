@@ -78,6 +78,7 @@ async fn build_output() -> anyhow::Result<()> {
     tokio::fs::create_dir_all("examples/flap/output/flaps").await?;
     tokio::fs::create_dir_all("examples/flap/output/inserts").await?;
     tokio::fs::create_dir_all("examples/flap/output/letters").await?;
+    tokio::fs::create_dir_all("examples/flap/output/supports").await?;
 
     let mut bambu = BambuBuilder::new();
     let printer = Printer::A1Mini;
@@ -126,7 +127,7 @@ async fn build_output() -> anyhow::Result<()> {
             width: 43.0,
             length: 35.0,
             thickness: 1.0,
-            support_thickness: 0.2,
+            support_thickness: 0.4,
             incut: 2.0,
             extension: 1.2,
             axle_diameter: 1.2,
@@ -140,6 +141,8 @@ async fn build_output() -> anyhow::Result<()> {
             wall_separation: 0.01,
             letter_scale: 80.0,
             shift_letter: Vec2::new(0.0, -4.0),
+            wedge_width: 5.0,
+            wedge_height: 0.25,
         }
         .build()
         .await;
@@ -174,6 +177,7 @@ async fn build_output() -> anyhow::Result<()> {
         filament.settings_id(Some(pla_support.clone()));
         filament.diameter(Some(1.75));
         filament.shrink(Some("100%".to_string()));
+        filament.filament_flow_ratio(Some(1.15));
         filament
     });
     tokio::fs::create_dir_all("examples/flap/output").await?;

@@ -59,6 +59,7 @@ pub struct BambuPart {
     name: Option<String>,
     material: Option<usize>,
     transform: Option<[f64; 12]>,
+    subtype: Option<String>,
 }
 
 pub struct BambuObject {
@@ -77,6 +78,7 @@ pub struct BambuFilament {
     settings_id: Option<FilamentSettingsId>,
     diameter: Option<f64>,
     shrink: Option<String>,
+    filament_flow_ratio: Option<f64>,
 }
 pub struct BambuBuilder {
     printer_settings_id: Option<PrinterSettingsId>,
@@ -145,6 +147,7 @@ impl BambuFilament {
             settings_id: None,
             diameter: None,
             shrink: None,
+            filament_flow_ratio: None,
         }
     }
     pub fn color(&mut self, color: Option<Color>) {
@@ -162,6 +165,9 @@ impl BambuFilament {
     pub fn shrink(&mut self, shrink: Option<String>) {
         self.shrink = shrink;
     }
+    pub fn filament_flow_ratio(&mut self, filament_flow_ratio: Option<f64>) {
+        self.filament_flow_ratio = filament_flow_ratio;
+    }
 }
 
 impl BambuPart {
@@ -171,6 +177,7 @@ impl BambuPart {
             mesh,
             material: None,
             transform: None,
+            subtype: None,
         }
     }
     pub fn name(&mut self, name: Option<String>) {
@@ -181,6 +188,9 @@ impl BambuPart {
     }
     pub fn transform(&mut self, transform: Option<[f64; 12]>) {
         self.transform = transform;
+    }
+    pub fn subtype(&mut self, subtype: Option<String>) {
+        self.subtype = subtype;
     }
 }
 
@@ -289,7 +299,12 @@ impl BambuBuilder {
                     components.push(ModelComponent::new(part_id).transform(part.transform));
                     part_settings.push(
                         Part::new(part_id.to_string())
-                            .subtype("normal_part".to_string())
+                            .subtype(
+                                part.subtype
+                                    .as_deref()
+                                    .unwrap_or_else(|| "normal_part")
+                                    .to_string(),
+                            )
                             .metadata(vec![
                                 SettingsMetadata::new("name".to_string()).value(part.name.clone()),
                                 SettingsMetadata::new("extruder".to_string())
@@ -352,6 +367,11 @@ impl BambuBuilder {
             .collect();
         let filament_shrink = self.filaments.iter().map(|x| x.shrink.clone()).collect();
         let filament_diameter = self.filaments.iter().map(|x| x.diameter.clone()).collect();
+        let filament_flow_ratio: Vec<Option<f64>> = self
+            .filaments
+            .iter()
+            .map(|x| x.filament_flow_ratio)
+            .collect();
         let flush_volumes_matrix: Vec<_> = (0..self.filaments.len())
             .flat_map(|f1| {
                 (0..self.filaments.len()).map(move |f2| if f1 == f2 { 0.0 } else { 100.0 })
@@ -376,67 +396,73 @@ impl BambuBuilder {
             .prime_tower_positions
             .as_ref()
             .map(|ps| ps.iter().map(|p| p.y()).collect());
-        let mut different_settings_to_system = vec![];
+        let mut different_settings_to_system1 = vec![];
+        let mut different_settings_to_system4 = vec![];
+        if filament_flow_ratio.iter().any(|x| x.is_some()) {
+            project_settings.filament_flow_ratio = Some(filament_flow_ratio);
+            different_settings_to_system4.push("filament_flow_ratio");
+        }
         if let Some(support) = self.support {
             project_settings.enable_support = Some(true);
-            different_settings_to_system.push("enable_support");
+            different_settings_to_system1.push("enable_support");
             if let Some(independent_support_layer_height) = support.independent_support_layer_height
             {
                 project_settings.independent_support_layer_height =
                     Some(independent_support_layer_height);
-                different_settings_to_system.push("independent_support_layer_height");
+                different_settings_to_system1.push("independent_support_layer_height");
             }
             if let Some(support_bottom_z_distance) = support.support_bottom_z_distance {
                 project_settings.support_bottom_z_distance = Some(support_bottom_z_distance);
-                different_settings_to_system.push("support_bottom_z_distance");
+                different_settings_to_system1.push("support_bottom_z_distance");
             }
 
             if let Some(support_bottom_z_distance) = support.support_bottom_z_distance {
                 project_settings.support_bottom_z_distance = Some(support_bottom_z_distance);
-                different_settings_to_system.push("support_bottom_z_distance");
+                different_settings_to_system1.push("support_bottom_z_distance");
             }
             if let Some(support_filament) = support.support_filament {
                 project_settings.support_filament = Some(support_filament);
-                different_settings_to_system.push("support_filament");
+                different_settings_to_system1.push("support_filament");
             }
             if let Some(support_filament) = support.support_filament {
                 project_settings.support_filament = Some(support_filament);
-                different_settings_to_system.push("support_filament");
+                different_settings_to_system1.push("support_filament");
             }
             if let Some(support_interface_filament) = support.support_interface_filament {
                 project_settings.support_interface_filament = Some(support_interface_filament);
-                different_settings_to_system.push("support_interface_filament");
+                different_settings_to_system1.push("support_interface_filament");
             }
             if let Some(support_interface_pattern) = support.support_interface_pattern {
                 project_settings.support_interface_pattern = Some(support_interface_pattern);
-                different_settings_to_system.push("support_interface_pattern");
+                different_settings_to_system1.push("support_interface_pattern");
             }
             if let Some(support_interface_spacing) = support.support_interface_spacing {
                 project_settings.support_interface_spacing = Some(support_interface_spacing);
-                different_settings_to_system.push("support_interface_spacing");
+                different_settings_to_system1.push("support_interface_spacing");
             }
             if let Some(support_style) = support.support_style {
                 project_settings.support_style = Some(support_style);
-                different_settings_to_system.push("support_style");
+                different_settings_to_system1.push("support_style");
             }
             if let Some(support_top_z_distance) = support.support_top_z_distance {
                 project_settings.support_top_z_distance = Some(support_top_z_distance);
-                different_settings_to_system.push("support_top_z_distance");
+                different_settings_to_system1.push("support_top_z_distance");
             }
             if let Some(support_type) = support.support_type {
                 project_settings.support_type = Some(support_type);
-                different_settings_to_system.push("support_type");
+                different_settings_to_system1.push("support_type");
             }
             if let Some(support_expansion) = support.support_expansion {
                 project_settings.support_expansion = Some(support_expansion);
-                different_settings_to_system.push("support_expansion");
+                different_settings_to_system1.push("support_expansion");
             }
         }
 
         project_settings.different_settings_to_system = Some(vec![
-            different_settings_to_system.into_iter().join(";"),
+            different_settings_to_system1.into_iter().join(";"),
             "".to_string(),
             "".to_string(),
+            different_settings_to_system4.into_iter().join(";"),
             "".to_string(),
         ]);
 

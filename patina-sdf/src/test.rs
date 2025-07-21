@@ -6,14 +6,11 @@ use crate::subdivide::Subdivide;
 use patina_geo::aabb::Aabb;
 use patina_geo::geo3::plane::Plane;
 use patina_geo::geo3::sphere::Sphere;
-use patina_mesh::ser::stl::write_stl_file;
+use patina_mesh::ser::encode_test_file;
 use patina_vec::vec3::Vec3;
-use target_test_dir::with_test_dir;
 
 #[tokio::test]
-#[with_test_dir]
 async fn test_mesh() -> anyhow::Result<()> {
-    let test_dir = get_test_dir!();
     let sphere1 = Sphere::new(Vec3::new(-0.25, 0.0, 0.0), 0.5).into_sdf();
     let sphere2 = Sphere::new(Vec3::new(0.25, 0.0, 0.0), 0.5).into_sdf();
     // let plane = Plane::new(Vec3::new(0.0, 0.0, 0.0), Vec3::new(1.0, 1.0, 1.0)).into_sdf();
@@ -34,7 +31,7 @@ async fn test_mesh() -> anyhow::Result<()> {
     // );
     let mut mesh = march.build(&sdf);
     println!("{:?}", mesh.check_manifold());
-    write_stl_file(&mesh, &test_dir.join("mesh.stl")).await?;
+    encode_test_file(&mesh, "mesh.stl").await?;
     // for i in 0..2 {
     //     mesh = Subdivide::new().subdivide(&mesh, &sdf);
     //     write_stl_file(&mesh, &test_dir.join(format!("mesh{}.stl", i))).await?;

@@ -32,11 +32,14 @@ pub struct StackBuilder {
     pub wall_separation: f64,
     pub letter_scale: f32,
     pub shift_letter: Vec2,
+
+    pub wedge_width: f64,
+    pub wedge_height: f64,
 }
 
 impl StackBuilder {
-    fn blank_poly(&self) -> EdgeMesh2 {
-        let profile = vec![
+    fn blank_profile(&self) -> Vec<Vec2> {
+        vec![
             Vec2::new(self.width / 2.0 - self.incut, 0.0),
             Vec2::new(self.width / 2.0 - self.incut, self.extension),
             Vec2::new(self.width / 2.0, self.extension),
@@ -48,7 +51,24 @@ impl StackBuilder {
             Vec2::new(self.width / 2.0 - self.incut, self.drum_diameter),
             Vec2::new(self.width / 2.0, self.drum_diameter),
             Vec2::new(self.width / 2.0, self.length),
+        ]
+    }
+    fn support_poly(&self) -> EdgeMesh2 {
+        // let mut profile = self.blank_profile();
+        let profile = vec![
+            Vec2::new(self.wedge_width, self.length - self.wedge_height),
+            Vec2::new(self.wedge_width, self.length),
         ];
+        let mut poly = profile.clone();
+        for v in profile.iter().rev() {
+            poly.push(Vec2::new(-v.x(), v.y()));
+        }
+        let mut mesh = EdgeMesh2::new();
+        mesh.add_polygon(poly.into_iter());
+        mesh
+    }
+    fn blank_poly(&self) -> EdgeMesh2 {
+        let profile = self.blank_profile();
         let mut poly = profile.clone();
         for v in profile.iter().rev() {
             poly.push(Vec2::new(-v.x(), v.y()));
@@ -139,6 +159,36 @@ impl StackBuilder {
         .await
         .unwrap();
     }
+    async fn support_part(
+        &self,
+        index: usize,
+        support: &EdgeMesh2,
+        transform: [f64; 12],
+    ) -> BambuPart {
+        let mut ext = ExtrusionBuilder::new();
+        let p1 = ext.add_plane(0.0, true);
+        let p2 = ext.add_plane(self.support_thickness, false);
+        ext.add_prism(&support, (p1, false), (p2, false));
+        let mesh = ext.build();
+        if let Err(e) = mesh.check_manifold() {
+            eprintln!("support_part {:?}", e);
+        }
+        encode_file(
+            &mesh,
+            Path::new(&format!(
+                "examples/flap/output/supports/support_{}.stl",
+                index
+            )),
+        )
+        .await
+        .unwrap();
+        let mut body = BambuPart::new(mesh);
+        body.material(Some(3));
+        body.name(Some(format!("part({})", index)));
+        body.transform(Some(transform));
+        body.subtype(Some("support_blocker".to_string()));
+        body
+    }
     async fn body_part(
         &self,
         index: usize,
@@ -213,25 +263,37 @@ impl StackBuilder {
         &self,
         index: usize,
         blank: &EdgeMesh2,
+        support: &EdgeMesh2,
         letter1: &EdgeMesh2,
         letter2: &EdgeMesh2,
     ) -> Vec<BambuPart> {
-        let transform = Mat4::translate(Vec3::new(
+        let transform_flap = Mat4::translate(Vec3::new(
             90.0,
             90.0 - self.length / 2.0,
-            (index as f64) * (self.thickness + self.support_thickness) + self.support_thickness,
+            (index as f64) * (self.thickness + self.support_thickness),
+        ))
+        .as_affine()
+        .unwrap();
+        let transform_support = Mat4::translate(Vec3::new(
+            90.0,
+            90.0 - self.length / 2.0,
+            (index as f64) * (self.thickness + self.support_thickness)
+                + self.thickness
+                + self.support_thickness / 2.0,
         ))
         .as_affine()
         .unwrap();
         vec![
-            self.body_part(index, &blank, &letter1, &letter2, transform)
+            self.body_part(index, &blank, &letter1, &letter2, transform_flap)
                 .await,
-            self.letter_part(index, &blank, &letter1, &letter2, transform)
+            self.letter_part(index, &blank, &letter1, &letter2, transform_flap)
                 .await,
+            self.support_part(index, &support, transform_support).await,
         ]
     }
     pub async fn build(&self) -> Vec<BambuPart> {
         let blank = self.blank_poly();
+        let support = self.support_poly();
         let mut letters = vec![];
         for index in 0..self.letters.len() {
             println!("Building letter {}", index);
@@ -241,13 +303,14 @@ impl StackBuilder {
         }
         let mut result = vec![];
         let max_part = self.letters.len();
-        let max_part = 5;
+        let max_part = 2;
         for index in 0..max_part {
             println!("Building part {}", index);
             result.extend(
                 self.flap_parts(
                     index,
                     &blank,
+                    &support,
                     &letters[index][1],
                     &letters[(index + 1) % letters.len()][0],
                 )

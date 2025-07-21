@@ -11,6 +11,7 @@ use crate::transvoxel::cube_vertex::{CubeVertex, CubeVertexSet, cube_corners, cu
 use inari::DecInterval;
 use ordered_float::NotNan;
 use patina_geo::aabb::Aabb;
+use patina_geo::geo3::aabb3::Aabb3;
 use patina_mesh::mesh::Mesh;
 use patina_mesh::mesh_triangle::MeshTriangle;
 use patina_scalar::deriv::Deriv;
@@ -18,7 +19,6 @@ use patina_scalar::newton::Newton;
 use patina_vec::vec3::{Vec3, Vector3};
 use std::collections::{HashMap, HashSet};
 use std::mem;
-use patina_geo::geo3::aabb3::Aabb3;
 
 #[derive(Debug)]
 struct MarchingNode {}
@@ -51,6 +51,18 @@ impl MarchingMesh {
             vertex_table: HashMap::new(),
             triangles: vec![],
         }
+    }
+    pub fn min_render_depth(&mut self, min_render_depth: usize) -> &mut Self {
+        self.min_render_depth = min_render_depth;
+        self
+    }
+    pub fn max_render_depth(&mut self, max_render_depth: usize) -> &mut Self {
+        self.max_render_depth = max_render_depth;
+        self
+    }
+    pub fn subdiv_max_dot(&mut self, subdiv_max_dot: f64) -> &mut Self {
+        self.subdiv_max_dot = subdiv_max_dot;
+        self
     }
     fn find_marching_cube(&self, aabb: &Aabb3, sdf: &Sdf) -> CubeTriMesh {
         let mut result = CubeVertexSet::new();

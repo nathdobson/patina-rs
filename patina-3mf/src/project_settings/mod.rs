@@ -33,6 +33,9 @@ pub struct ProjectSettings {
     #[serde_as(as = "Option<Vec<OptionOrNil<DisplayFromStr>>>")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub filament_diameter: Option<Vec<Option<f64>>>,
+    #[serde_as(as = "Option<Vec<OptionOrNil<DisplayFromStr>>>")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub filament_flow_ratio: Option<Vec<Option<f64>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub filament_type: Option<Vec<String>>,
     #[serde_as(as = "Option<Vec<DisplayFromStr>>")]
@@ -110,6 +113,7 @@ impl ProjectSettings {
             filament_settings_id: None,
             filament_shrink: None,
             filament_diameter: None,
+            filament_flow_ratio: None,
             filament_type: None,
             flush_volumes_matrix: None,
             nozzle_diameter: None,

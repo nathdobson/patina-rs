@@ -1,13 +1,14 @@
 use crate::sdf::{Sdf, SdfImpl};
 use inari::DecInterval;
 use patina_geo::aabb::Aabb;
+use patina_geo::geo3::aabb3::Aabb3;
+use patina_geo::geo3::cylinder::Cylinder;
 use patina_geo::geo3::plane::Plane;
 use patina_geo::geo3::sphere::Sphere;
 use patina_scalar::Scalar;
 use patina_scalar::deriv::Deriv;
 use patina_vec::vec3::{Vec3, Vector3};
 use std::fmt::{Debug, Formatter};
-use patina_geo::geo3::aabb3::Aabb3;
 
 pub trait SdfLeafImpl: 'static + Sync + Send + Sized + Debug {
     fn evaluate<T: Scalar>(&self, p: Vector3<T>) -> T;
@@ -79,6 +80,33 @@ impl SdfLeafImpl for Aabb3 {
                 z.clone().piecewise(
                     (x.clone() * x.clone() + y.clone() * y.clone()).sqrt(),
                     (x.clone() * x.clone() + y.clone() * y.clone() + z.clone() * z.clone()).sqrt(),
+                ),
+            ),
+        )
+    }
+}
+
+impl SdfLeafImpl for Cylinder {
+    fn evaluate<T: Scalar>(&self, p: Vector3<T>) -> T {
+        let relative = p - self.origin().into_scalars();
+        let length = self.axis().length();
+        let axis_norm = self.axis() / length;
+        let elevation = relative.clone().dot(axis_norm.into_scalars());
+        let radial = (relative - axis_norm.into_scalars() * elevation.clone()).length()
+            - T::from_f64(self.radius());
+        let top_elevation = elevation.clone() - T::from_f64(length);
+        elevation.clone().piecewise(
+            radial.clone().piecewise(
+                -elevation.clone(),
+                (elevation.clone() * elevation.clone() + radial.clone() * radial.clone()).sqrt(),
+            ),
+            top_elevation.clone().piecewise(
+                radial.clone(),
+                radial.clone().piecewise(
+                    top_elevation.clone(),
+                    (top_elevation.clone() * top_elevation.clone()
+                        + radial.clone() * radial.clone())
+                    .sqrt(),
                 ),
             ),
         )

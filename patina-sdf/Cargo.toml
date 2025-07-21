@@ -17,4 +17,3 @@ rand = "0.9.1"
 
 [dev-dependencies]
 tokio = {version = "1.46.0", features=["macros","rt"]}
-target-test-dir = "0.3.0"
