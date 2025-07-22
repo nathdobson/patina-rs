@@ -1,7 +1,7 @@
 use itertools::Itertools;
 // use patina_calc::{EvalVisitor, Expr, ExprProgramBuilder, Program, ProgramVisit, Solver};
 use crate::octree::{Octree, OctreeBranch, OctreePath, OctreeView, OctreeViewMut};
-use crate::sdf::Sdf;
+use crate::sdf::{Sdf, Sdf3};
 use crate::transvoxel::cube_edge::{CubeEdge, CubeEdgeSet};
 use crate::transvoxel::cube_face::{CubeFace, CubeFaceSet};
 use crate::transvoxel::cube_input::CubeInput;
@@ -64,7 +64,7 @@ impl MarchingMesh {
         self.subdiv_max_dot = subdiv_max_dot;
         self
     }
-    fn find_marching_cube(&self, aabb: &Aabb3, sdf: &Sdf) -> CubeTriMesh {
+    fn find_marching_cube(&self, aabb: &Aabb3, sdf: &Sdf<3>) -> CubeTriMesh {
         let mut result = CubeVertexSet::new();
         for cv in cube_corners() {
             let p = (0..3)
@@ -99,7 +99,7 @@ impl MarchingMesh {
         root: &Octree<MarchingNode>,
         octree: &Octree<MarchingNode>,
         aabb: &Aabb3,
-        sdf: &Sdf,
+        sdf: &Sdf<3>,
     ) {
         let mut faces = CubeFaceSet::new();
         for face in CubeFace::all() {
@@ -159,7 +159,7 @@ impl MarchingMesh {
         path: &OctreePath,
         mut v1: CubeVertex,
         mut v2: CubeVertex,
-        sdf: &Sdf,
+        sdf: &Sdf3,
     ) -> usize {
         if v2 < v1 {
             mem::swap(&mut v1, &mut v2);
@@ -177,7 +177,7 @@ impl MarchingMesh {
         self.vertex_table.insert(vnn, index);
         index
     }
-    fn build_octree(&mut self, tree: &mut Octree<MarchingNode>, sdf: &Sdf) {
+    fn build_octree(&mut self, tree: &mut Octree<MarchingNode>, sdf: &Sdf3) {
         let aabb = tree.path().aabb_inside(&self.aabb);
         let aabb_intervals: Vector3<DecInterval> = (0..3)
             .map(|axis| DecInterval::try_from((aabb.min()[axis], aabb.max()[axis])).unwrap())
@@ -231,7 +231,7 @@ impl MarchingMesh {
         path: &OctreePath,
         v1: CubeVertex,
         v2: CubeVertex,
-        sdf: &Sdf,
+        sdf: &Sdf3,
     ) -> (Vec3, Vec3) {
         let min = self.path_position(path, v1);
         let max = self.path_position(path, v2);
@@ -257,7 +257,7 @@ impl MarchingMesh {
         let normal: Vec3 = sdf.normal(eval_position);
         (vertex_position, normal)
     }
-    fn build_branch(&mut self, tree: &mut Octree<MarchingNode>, sdf: &Sdf) {
+    fn build_branch(&mut self, tree: &mut Octree<MarchingNode>, sdf: &Sdf3) {
         match tree.view_mut() {
             OctreeViewMut::Leaf(_) => {
                 tree.set_branch(Default::default());
@@ -273,7 +273,7 @@ impl MarchingMesh {
         }
     }
 
-    fn build_mesh(&mut self, root: &Octree<MarchingNode>, tree: &Octree<MarchingNode>, sdf: &Sdf) {
+    fn build_mesh(&mut self, root: &Octree<MarchingNode>, tree: &Octree<MarchingNode>, sdf: &Sdf3) {
         match tree.view() {
             OctreeView::Leaf(_) => {
                 self.build_mesh_leaf(root, tree, sdf);
@@ -288,7 +288,7 @@ impl MarchingMesh {
         &mut self,
         root: &Octree<MarchingNode>,
         branch: &OctreeBranch<MarchingNode>,
-        sdf: &Sdf,
+        sdf: &Sdf3,
     ) {
         for child in branch.children_flat() {
             self.build_mesh(root, child, sdf);
@@ -299,7 +299,7 @@ impl MarchingMesh {
         &mut self,
         root: &Octree<MarchingNode>,
         tree: &Octree<MarchingNode>,
-        sdf: &Sdf,
+        sdf: &Sdf3,
     ) {
         let aabb = tree.path().aabb_inside(&self.aabb);
         self.add_marching_cube_sub(root, tree, &aabb, sdf);
@@ -355,7 +355,7 @@ impl MarchingMesh {
         }
     }
 
-    pub fn build(mut self, sdf: &Sdf) -> Mesh {
+    pub fn build(mut self, sdf: &Sdf3) -> Mesh {
         let mut octree = Octree::<MarchingNode>::new_root(MarchingNode::default());
         self.build_octree(&mut octree, sdf);
         self.refine_neighbors(&mut octree);

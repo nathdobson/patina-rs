@@ -1,5 +1,6 @@
 use itertools::Itertools;
 use patina_scalar::Scalar;
+use patina_scalar::deriv::Deriv;
 use rand::Rng;
 use rand::distr::{Distribution, StandardUniform};
 use std::fmt::{Debug, Display, Formatter};
@@ -13,6 +14,9 @@ pub struct Vector<T, const N: usize>([T; N]);
 impl<const N: usize> Vector<f64, N> {
     pub fn into_scalars<T2: Scalar>(self) -> Vector<T2, N> {
         self.map(T2::from_f64)
+    }
+    pub fn into_variable(&self) -> Vector<Deriv<N>, N> {
+        Vector::from_fn(|axis| Deriv::variable(self[axis], axis))
     }
     pub fn random_normal<R: Rng>(rng: &mut R) -> Self {
         loop {

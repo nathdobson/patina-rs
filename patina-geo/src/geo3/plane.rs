@@ -1,7 +1,7 @@
 use crate::geo3::ray3::Ray3;
 use patina_vec::vec3::Vec3;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Plane {
     origin: Vec3,
     normal: Vec3,

@@ -1,4 +1,4 @@
-use crate::sdf::Sdf;
+use crate::sdf::{Sdf, Sdf3};
 use arrayvec::ArrayVec;
 use itertools::Itertools;
 use ordered_float::NotNan;
@@ -24,7 +24,7 @@ impl Subdivide {
             marching_eps: 10e-10,
         }
     }
-    pub fn subdivide(&mut self, mesh: &Mesh, sdf: &Sdf) -> Mesh {
+    pub fn subdivide(&mut self, mesh: &Mesh, sdf: &Sdf3) -> Mesh {
         let mut vertex_normals: Vec<Vec3> = vec![];
         for vertex in mesh.vertices() {
             vertex_normals.push(sdf.normal(*vertex));

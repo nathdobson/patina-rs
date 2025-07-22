@@ -1,4 +1,6 @@
 #![allow(dead_code)]
+#![allow(unused_imports)]
+#![deny(unused_must_use)]
 
 use patina_geo::aabb::Aabb;
 use patina_geo::geo3::aabb3::Aabb3;
@@ -6,8 +8,8 @@ use patina_geo::geo3::cylinder::Cylinder;
 use patina_mesh::mesh::Mesh;
 use patina_mesh::ser::encode_file;
 use patina_sdf::marching_mesh::MarchingMesh;
-use patina_sdf::sdf::Sdf;
 use patina_sdf::sdf::leaf::SdfLeafImpl;
+use patina_sdf::sdf::{AsSdf, Sdf, Sdf3};
 use patina_vec::vec3::Vec3;
 use std::path::Path;
 use std::time::Instant;
@@ -19,23 +21,23 @@ struct HousingBuilder {
 }
 
 impl HousingBuilder {
-    fn build_sdf(&self) -> Sdf {
+    fn build_sdf(&self) -> Sdf3 {
         self.aabb
-            .into_sdf()
+            .as_sdf()
             .difference(
                 &Cylinder::new(
                     Vec3::new(0.0, 0.0, self.back_thickness),
                     Vec3::axis_z() * 1000.0,
                     self.drum_bounding_radius,
                 )
-                .into_sdf(),
+                .as_sdf(),
             )
             .difference(
                 &Aabb::new(
                     Vec3::new(-1000.0, -68.0, self.back_thickness),
                     Vec3::new(-1.0, -21.0, 1000.0),
                 )
-                .into_sdf(),
+                .as_sdf(),
             )
     }
     pub fn build(&self) -> Mesh {
@@ -52,7 +54,7 @@ async fn main() -> anyhow::Result<()> {
     let mesh = HousingBuilder {
         drum_bounding_radius: 56.0,
         back_thickness: 3.0,
-        aabb: Aabb::new(Vec3::new(-35.0,-71.0,0.0), Vec3::new(59.0, 59.0, 50.0)),
+        aabb: Aabb::new(Vec3::new(-35.0, -71.0, 0.0), Vec3::new(59.0, 59.0, 50.0)),
     }
     .build();
     println!("Built mesh in {:?}", start.elapsed());
