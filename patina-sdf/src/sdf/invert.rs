@@ -1,4 +1,4 @@
-use crate::sdf::{ Sdf, SdfImpl};
+use crate::sdf::{Sdf, SdfImpl};
 use inari::DecInterval;
 use patina_scalar::deriv::Deriv;
 use patina_vec::vec::Vector;
@@ -35,5 +35,9 @@ impl<const N: usize> SdfImpl<N> for SdfInvert<N> {
     fn evaluate_constrain(&self, p: Vector<DecInterval, N>) -> (Option<Sdf<N>>, DecInterval) {
         let (inner, range) = self.inner.evaluate_constrain(p);
         (inner.map(|x| x.invert()), -range)
+    }
+
+    fn complexity(&self) -> usize {
+        1 + self.inner.complexity()
     }
 }

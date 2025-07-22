@@ -41,9 +41,11 @@ impl<const N: usize, T: SdfLeafImpl<N>> SdfImpl<N> for SdfLeaf<N, T> {
     fn evaluate_constrain(&self, p: Vector<DecInterval, N>) -> (Option<Sdf<N>>, DecInterval) {
         (None, self.inner.evaluate(p))
     }
+
+    fn complexity(&self) -> usize {
+        1
+    }
 }
-
-
 
 impl<const N: usize, T: Debug> Debug for SdfLeaf<N, T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {

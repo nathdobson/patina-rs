@@ -2,13 +2,13 @@ mod aabb;
 mod cylinder;
 pub mod invert;
 pub mod leaf;
+mod plane;
 mod polygon;
 mod rotate;
-mod transform;
-pub mod union;
 mod sphere;
-mod plane;
+mod transform;
 pub mod truncated_cone;
+pub mod union;
 
 use crate::sdf::invert::SdfInvert;
 use crate::sdf::leaf::{SdfLeaf, SdfLeafImpl};
@@ -57,6 +57,7 @@ impl<const N: usize> Sdf<N> {
     pub fn evaluate(&self, p: Vector<f64, N>) -> f64 {
         self.0.imp.evaluate(p)
     }
+    #[inline(never)]
     pub fn evaluate_deriv1(&self, p: Vector<Deriv<1>, N>) -> Deriv<1> {
         self.0.imp.evaluate_deriv1(p)
     }
@@ -77,6 +78,9 @@ impl<const N: usize> Sdf<N> {
     }
     pub fn difference(&self, other: &Sdf<N>) -> Sdf<N> {
         self.invert().union(other).invert()
+    }
+    pub fn complexity(&self) -> usize {
+        self.0.imp.complexity()
     }
 }
 
@@ -115,6 +119,7 @@ pub trait SdfImpl<const N: usize>: 'static + Sync + Send + Debug {
     fn evaluate_deriv2(&self, p: Vector<Deriv<2>, N>) -> Deriv<2>;
     fn evaluate_deriv3(&self, p: Vector<Deriv<3>, N>) -> Deriv<3>;
     fn evaluate_constrain(&self, p: Vector<DecInterval, N>) -> (Option<Sdf<N>>, DecInterval);
+    fn complexity(&self) -> usize;
 }
 
 impl<const N: usize> Debug for Sdf<N> {

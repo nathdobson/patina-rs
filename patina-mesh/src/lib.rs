@@ -3,6 +3,7 @@
 #![allow(unused_mut)]
 #![allow(unused_imports)]
 #![deny(unused_must_use)]
+#![feature(try_blocks)]
 
 pub mod directed_mesh_edge;
 pub mod mesh;

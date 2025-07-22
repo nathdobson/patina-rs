@@ -1,5 +1,5 @@
 use crate::mesh::Mesh;
-use anyhow::anyhow;
+use anyhow::{anyhow, Context};
 use std::io;
 use std::path::{Path, PathBuf};
 use tokio::fs::File;
@@ -17,14 +17,17 @@ pub trait Encode {
 }
 
 pub async fn encode_file<T: Encode>(encode: &T, filename: &Path) -> anyhow::Result<()> {
-    let file = File::create(filename).await?;
-    let mut file = BufWriter::new(file);
-    encode.encode(&mut file).await?;
-    file.flush().await?;
-    Ok(())
+    let result: anyhow::Result<()> = try {
+        let file = File::create(filename).await?;
+        let mut file = BufWriter::new(file);
+        encode.encode(&mut file).await?;
+        file.flush().await?;
+        ()
+    };
+    result.with_context(|| format!("while saving file {:?}", filename))
 }
 
-pub async fn encode_test_file<T:Encode>(encode: &T, filename: &str) -> anyhow::Result<()> {
+pub async fn encode_test_file<T: Encode>(encode: &T, filename: &str) -> anyhow::Result<()> {
     let manifest_dir = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR")?);
     let mut manifest_dir: &Path = &manifest_dir;
     let mut target_dir;

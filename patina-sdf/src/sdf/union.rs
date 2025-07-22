@@ -62,4 +62,8 @@ impl<const N: usize> SdfImpl<N> for SdfUnion<N> {
             (None, ai.minimum(bi))
         }
     }
+
+    fn complexity(&self) -> usize {
+        1 + self.a.complexity() + self.b.complexity()
+    }
 }

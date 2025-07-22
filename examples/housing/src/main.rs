@@ -14,6 +14,7 @@ use patina_sdf::sdf::{AsSdf, Sdf, Sdf3};
 use patina_vec::vec3::Vec3;
 use std::path::Path;
 use std::time::Instant;
+use anyhow::Context;
 
 struct HousingBuilder {
     drum_bounding_radius: f64,
@@ -89,7 +90,10 @@ impl HousingBuilder {
             self.aabb.min() + Vec3::splat(-0.1),
             self.aabb.max() + Vec3::splat(0.1),
         ));
-        marching.min_render_depth(6).max_render_depth(9);
+        marching
+            .min_render_depth(6)
+            .max_render_depth(7)
+            .subdiv_max_dot(0.8);
         marching.build(&sdf)
     }
 }

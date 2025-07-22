@@ -68,4 +68,8 @@ impl<const NI: usize, const NO: usize, T: TransformImpl<NI, NO>> SdfImpl<NO>
             (None, int)
         }
     }
+
+    fn complexity(&self) -> usize {
+        1 + self.inner.complexity()
+    }
 }

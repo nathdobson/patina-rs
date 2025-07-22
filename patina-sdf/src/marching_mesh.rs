@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use std::cell::OnceCell;
 // use patina_calc::{EvalVisitor, Expr, ExprProgramBuilder, Program, ProgramVisit, Solver};
 use crate::octree::{Octree, OctreeBranch, OctreePath, OctreeView, OctreeViewMut};
 use crate::sdf::{Sdf, Sdf3};
@@ -17,11 +18,30 @@ use patina_mesh::mesh_triangle::MeshTriangle;
 use patina_scalar::deriv::Deriv;
 use patina_scalar::newton::Newton;
 use patina_vec::vec3::{Vec3, Vector3};
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::mem;
 
-#[derive(Debug)]
-struct MarchingNode {}
+#[derive(Debug, Default)]
+struct MarchingNodeValue {}
+
+#[derive(Debug, Clone)]
+enum SdfState {
+    Uninit,
+    Empty,
+    Sdf(Sdf<3>),
+}
+
+impl Default for SdfState {
+    fn default() -> Self {
+        SdfState::Uninit
+    }
+}
+
+#[derive(Debug, Default)]
+struct MarchingNodeKey {
+    sdf: SdfState,
+}
+
 pub struct MarchingMesh {
     min_render_depth: usize,
     max_render_depth: usize,
@@ -32,13 +52,8 @@ pub struct MarchingMesh {
     triangles: Vec<MeshTriangle>,
 }
 
-impl Default for MarchingNode {
-    fn default() -> Self {
-        MarchingNode {}
-    }
-}
-
-impl MarchingNode {}
+type MarchingOctree = Octree<MarchingNodeKey, MarchingNodeValue>;
+type MarchingOctreeBranch = OctreeBranch<MarchingNodeKey, MarchingNodeValue>;
 
 impl MarchingMesh {
     pub fn new(aabb: Aabb3) -> Self {
@@ -81,23 +96,23 @@ impl MarchingMesh {
         }
         CubeInput::new(CubeFaceSet::new(), CubeEdgeSet::new(), result).as_mesh()
     }
-    fn is_divided(&self, octree: &Octree<MarchingNode>, path: &OctreePath) -> bool {
+    fn is_divided(&self, octree: &MarchingOctree, path: &OctreePath) -> bool {
         if let Some((index, path)) = path.view() {
             match octree.view() {
-                OctreeView::Leaf(leaf) => false,
+                OctreeView::Leaf(key, value) => false,
                 OctreeView::Branch(branch) => self.is_divided(&branch[index], &path),
             }
         } else {
             match octree.view() {
-                OctreeView::Leaf(_) => false,
+                OctreeView::Leaf(_, _) => false,
                 OctreeView::Branch(_) => true,
             }
         }
     }
     fn add_marching_cube_sub(
         &mut self,
-        root: &Octree<MarchingNode>,
-        octree: &Octree<MarchingNode>,
+        root: &MarchingOctree,
+        octree: &MarchingOctree,
         aabb: &Aabb3,
         sdf: &Sdf<3>,
     ) {
@@ -177,16 +192,31 @@ impl MarchingMesh {
         self.vertex_table.insert(vnn, index);
         index
     }
-    fn build_octree(&mut self, tree: &mut Octree<MarchingNode>, sdf: &Sdf3) {
+    fn init_sdf(&mut self, tree: &mut MarchingOctree, sdf: &Sdf3) -> Option<Sdf3> {
+        match tree.key().sdf.clone() {
+            SdfState::Uninit => {}
+            SdfState::Empty => return None,
+            SdfState::Sdf(sdf) => return Some(sdf.clone()),
+        };
         let aabb = tree.path().aabb_inside(&self.aabb);
         let aabb_intervals: Vector3<DecInterval> = (0..3)
             .map(|axis| DecInterval::try_from((aabb.min()[axis], aabb.max()[axis])).unwrap())
             .collect();
         let (sdf2, range) = sdf.evaluate_constrain(aabb_intervals);
-        let sdf = sdf2.unwrap_or(sdf.clone());
         if !range.contains(0.0) {
-            return;
+            tree.key_mut().sdf = SdfState::Empty;
+            return None;
         }
+        let sdf = sdf2.unwrap_or(sdf.clone());
+        tree.key_mut().sdf = SdfState::Sdf(sdf.clone());
+        Some(sdf)
+    }
+    fn build_octree(&mut self, tree: &mut MarchingOctree, sdf: &Sdf3) {
+        let aabb = tree.path().aabb_inside(&self.aabb);
+        let sdf = self.init_sdf(tree, sdf);
+        let Some(sdf) = sdf else {
+            return;
+        };
         if tree.path().depth() < self.min_render_depth {
             self.build_branch(tree, &sdf);
             return;
@@ -257,15 +287,15 @@ impl MarchingMesh {
         let normal: Vec3 = sdf.normal(eval_position);
         (vertex_position, normal)
     }
-    fn build_branch(&mut self, tree: &mut Octree<MarchingNode>, sdf: &Sdf3) {
+    fn build_branch(&mut self, tree: &mut MarchingOctree, sdf: &Sdf3) {
         match tree.view_mut() {
-            OctreeViewMut::Leaf(_) => {
+            OctreeViewMut::Leaf(_, _) => {
                 tree.set_branch(Default::default());
             }
             OctreeViewMut::Branch(_) => {}
         }
         let branch = match tree.view_mut() {
-            OctreeViewMut::Leaf(_) => unreachable!(),
+            OctreeViewMut::Leaf(_, _) => unreachable!(),
             OctreeViewMut::Branch(branch) => branch,
         };
         for child in branch.children_flat_mut() {
@@ -273,46 +303,45 @@ impl MarchingMesh {
         }
     }
 
-    fn build_mesh(&mut self, root: &Octree<MarchingNode>, tree: &Octree<MarchingNode>, sdf: &Sdf3) {
+    fn build_mesh(&mut self, root: &MarchingOctree, tree: &MarchingOctree, root_sdf: &Sdf3) {
         match tree.view() {
-            OctreeView::Leaf(_) => {
-                self.build_mesh_leaf(root, tree, sdf);
-            }
+            OctreeView::Leaf(leaf, _) => match &leaf.sdf {
+                SdfState::Uninit => unreachable!(),
+                SdfState::Empty => {}
+                SdfState::Sdf(sdf) => {
+                    self.build_mesh_leaf(root, tree, &sdf);
+                }
+            },
             OctreeView::Branch(branch) => {
-                self.build_mesh_branch(root, branch, sdf);
+                self.build_mesh_branch(root, branch, root_sdf);
             }
         }
     }
 
     fn build_mesh_branch(
         &mut self,
-        root: &Octree<MarchingNode>,
-        branch: &OctreeBranch<MarchingNode>,
-        sdf: &Sdf3,
+        root: &MarchingOctree,
+        branch: &MarchingOctreeBranch,
+        root_sdf: &Sdf3,
     ) {
         for child in branch.children_flat() {
-            self.build_mesh(root, child, sdf);
+            self.build_mesh(root, child, root_sdf);
         }
     }
 
-    fn build_mesh_leaf(
-        &mut self,
-        root: &Octree<MarchingNode>,
-        tree: &Octree<MarchingNode>,
-        sdf: &Sdf3,
-    ) {
+    fn build_mesh_leaf(&mut self, root: &MarchingOctree, tree: &MarchingOctree, sdf: &Sdf3) {
         let aabb = tree.path().aabb_inside(&self.aabb);
         self.add_marching_cube_sub(root, tree, &aabb, sdf);
     }
 
     fn get_neighbors(
         &mut self,
-        octree: &Octree<MarchingNode>,
+        octree: &MarchingOctree,
         depth: usize,
         neighbors: &mut HashSet<OctreePath>,
     ) {
         match octree.view() {
-            OctreeView::Leaf(_) => {
+            OctreeView::Leaf(_, _) => {
                 if octree.path().depth() == depth {
                     for neighbor in octree.path().face_adjacent() {
                         neighbors.insert(neighbor);
@@ -329,37 +358,88 @@ impl MarchingMesh {
             }
         }
     }
-    fn refine_path(&mut self, octree: &mut Octree<MarchingNode>, path: OctreePath) {
+    fn refine_path(&mut self, octree: &mut MarchingOctree, path: OctreePath, sdf: Option<&Sdf3>) {
         if path.depth() == 1 {
             return;
         }
         if let Some((index, path)) = path.view() {
             match octree.view_mut() {
-                OctreeViewMut::Leaf(_) => octree.set_branch(Default::default()),
+                OctreeViewMut::Leaf(_, _) => octree.set_branch(Default::default()),
                 OctreeViewMut::Branch(branch) => {}
             }
             match octree.view_mut() {
-                OctreeViewMut::Leaf(_) => unreachable!(),
-                OctreeViewMut::Branch(branch) => self.refine_path(branch.child_mut(index), path),
+                OctreeViewMut::Leaf(_, _) => unreachable!(),
+                OctreeViewMut::Branch(branch) => {
+                    for subtree in branch.children_flat_mut() {
+                        if let Some(sdf) = sdf {
+                            self.init_sdf(subtree, sdf);
+                        } else {
+                            subtree.key_mut().sdf = SdfState::Empty;
+                        }
+                    }
+                    let sdf = match &branch.child(index).key().sdf {
+                        SdfState::Uninit => unreachable!(),
+                        SdfState::Empty => None,
+                        SdfState::Sdf(sdf) => Some(sdf.clone()),
+                    };
+                    self.refine_path(branch.child_mut(index), path, sdf.as_ref())
+                }
             }
         }
     }
 
-    fn refine_neighbors(&mut self, octree: &mut Octree<MarchingNode>) {
+    fn refine_neighbors(&mut self, octree: &mut MarchingOctree, sdf: &Sdf3) {
         for depth in (0..=self.max_render_depth).rev() {
             let mut to_refine = HashSet::new();
             self.get_neighbors(octree, depth, &mut to_refine);
             for path in to_refine {
-                self.refine_path(octree, path);
+                self.refine_path(octree, path, Some(sdf));
             }
         }
     }
 
     pub fn build(mut self, sdf: &Sdf3) -> Mesh {
-        let mut octree = Octree::<MarchingNode>::new_root(MarchingNode::default());
+        let mut octree = MarchingOctree::new_root();
         self.build_octree(&mut octree, sdf);
-        self.refine_neighbors(&mut octree);
+        self.refine_neighbors(&mut octree, sdf);
+        let mut comp = Complexity::new();
+        comp.add_tree(&octree);
+        println!("{:#?}", comp);
         self.build_mesh(&octree, &octree, sdf);
         Mesh::new(self.vertices, self.triangles)
+    }
+}
+
+#[derive(Debug)]
+struct Complexity {
+    depth_to_complexity_to_count: BTreeMap<usize, BTreeMap<usize, usize>>,
+}
+
+impl Complexity {
+    pub fn new() -> Self {
+        Complexity {
+            depth_to_complexity_to_count: BTreeMap::new(),
+        }
+    }
+    pub fn add_tree(&mut self, tree: &MarchingOctree) {
+        let comp = match &tree.key().sdf {
+            SdfState::Uninit => unreachable!(),
+            SdfState::Empty => 0,
+            SdfState::Sdf(sdf) => sdf.complexity(),
+        };
+        *self
+            .depth_to_complexity_to_count
+            .entry(tree.path().depth())
+            .or_default()
+            .entry(comp)
+            .or_default() += 1;
+        match tree.view() {
+            OctreeView::Leaf(_, _) => {}
+            OctreeView::Branch(branch) => {
+                for subtree in branch.children_flat() {
+                    self.add_tree(subtree);
+                }
+            }
+        }
     }
 }

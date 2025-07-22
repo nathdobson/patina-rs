@@ -9,36 +9,39 @@ use patina_geo::aabb::Aabb;
 use patina_geo::geo3::aabb3::Aabb3;
 use patina_scalar::Scalar;
 use patina_vec::vec3::{Vec3, Vector3};
+use std::collections::hash_map::Keys;
 use std::fmt::{Debug, Formatter};
 use std::ops::{Add, Index, IndexMut};
 
 #[derive(Debug)]
-pub struct Octree<V> {
+pub struct Octree<K, V> {
     path: OctreePath,
-    node: OctreeNode<V>,
+    key: K,
+    node: OctreeNode<K, V>,
 }
 
 #[derive(Debug)]
-enum OctreeNode<V> {
+enum OctreeNode<K, V> {
     Leaf(V),
-    Branch(Box<OctreeBranch<V>>),
+    Branch(Box<OctreeBranch<K, V>>),
 }
 
-pub enum OctreeView<'a, V> {
-    Leaf(&'a V),
-    Branch(&'a OctreeBranch<V>),
+pub enum OctreeView<'a, K, V> {
+    Leaf(&'a K, &'a V),
+    Branch(&'a OctreeBranch<K, V>),
 }
 
-pub enum OctreeViewMut<'a, V> {
-    Leaf(&'a mut V),
-    Branch(&'a mut OctreeBranch<V>),
+pub enum OctreeViewMut<'a, K, V> {
+    Leaf(&'a mut K, &'a mut V),
+    Branch(&'a mut OctreeBranch<K, V>),
 }
 
 #[derive(Debug)]
-pub struct OctreeBranch<V> {
-    children: [[[Octree<V>; 2]; 2]; 2],
+pub struct OctreeBranch<K, V> {
+    children: [[[Octree<K, V>; 2]; 2]; 2],
 }
 
+#[derive(Copy, Clone)]
 pub struct OctreeIndex([bool; 3]);
 
 #[derive(Copy, Clone, Hash, Ord, Eq, PartialEq, PartialOrd)]
@@ -205,8 +208,8 @@ impl Debug for OctreePath {
     }
 }
 
-impl<V> OctreeBranch<V> {
-    pub fn children_flat(&self) -> [&Octree<V>; 8] {
+impl<K, V> OctreeBranch<K, V> {
+    pub fn children_flat(&self) -> [&Octree<K, V>; 8] {
         self.children
             .iter()
             .flatten()
@@ -214,7 +217,7 @@ impl<V> OctreeBranch<V> {
             .collect_array()
             .unwrap()
     }
-    pub fn children_flat_mut(&mut self) -> [&mut Octree<V>; 8] {
+    pub fn children_flat_mut(&mut self) -> [&mut Octree<K, V>; 8] {
         self.children
             .iter_mut()
             .flatten()
@@ -222,43 +225,61 @@ impl<V> OctreeBranch<V> {
             .collect_array()
             .unwrap()
     }
-    pub fn child(&self, index: OctreeIndex) -> &Octree<V> {
+    pub fn child(&self, index: OctreeIndex) -> &Octree<K, V> {
         &self.children[index.0[0] as usize][index.0[1] as usize][index.0[2] as usize]
     }
-    pub fn child_mut(&mut self, index: OctreeIndex) -> &mut Octree<V> {
+    pub fn child_mut(&mut self, index: OctreeIndex) -> &mut Octree<K, V> {
         &mut self.children[index.0[0] as usize][index.0[1] as usize][index.0[2] as usize]
     }
 }
 
-impl<V> Octree<V> {
-    pub fn new_root(value: V) -> Self {
+impl<K, V> Octree<K, V> {
+    pub fn new_root() -> Self
+    where
+        K: Default,
+        V: Default,
+    {
         Octree {
             path: OctreePath::new_root(),
-            node: OctreeNode::Leaf(value),
+            key: K::default(),
+            node: OctreeNode::Leaf(V::default()),
         }
     }
-    pub fn new_leaf(path: OctreePath, value: V) -> Self {
+    pub fn new_leaf(path: OctreePath, value: V) -> Self
+    where
+        K: Default,
+    {
         Octree {
             path,
+            key: K::default(),
             node: OctreeNode::Leaf(value),
         }
     }
     pub fn path(&self) -> &OctreePath {
         &self.path
     }
-    pub fn view(&self) -> OctreeView<'_, V> {
+    pub fn key(&self) -> &K {
+        &self.key
+    }
+    pub fn key_mut(&mut self) -> &mut K {
+        &mut self.key
+    }
+    pub fn view(&self) -> OctreeView<'_, K, V> {
         match &self.node {
-            OctreeNode::Leaf(leaf) => OctreeView::Leaf(leaf),
+            OctreeNode::Leaf(leaf) => OctreeView::Leaf(&self.key, leaf),
             OctreeNode::Branch(branch) => OctreeView::Branch(branch),
         }
     }
-    pub fn view_mut(&mut self) -> OctreeViewMut<'_, V> {
+    pub fn view_mut(&mut self) -> OctreeViewMut<'_, K, V> {
         match &mut self.node {
-            OctreeNode::Leaf(leaf) => OctreeViewMut::Leaf(leaf),
+            OctreeNode::Leaf(leaf) => OctreeViewMut::Leaf(&mut self.key, leaf),
             OctreeNode::Branch(branch) => OctreeViewMut::Branch(branch),
         }
     }
-    pub fn set_branch(&mut self, values: [[[V; 2]; 2]; 2]) {
+    pub fn set_branch(&mut self, values: [[[V; 2]; 2]; 2])
+    where
+        K: Default,
+    {
         let children = values.map_with_index(|x, values| {
             values.map_with_index(|y, values| {
                 values.map_with_index(|z, value| {
@@ -283,14 +304,14 @@ impl<V> Octree<V> {
     // }
 }
 
-impl<V> Index<OctreeIndex> for OctreeBranch<V> {
-    type Output = Octree<V>;
+impl<K, V> Index<OctreeIndex> for OctreeBranch<K, V> {
+    type Output = Octree<K, V>;
     fn index(&self, index: OctreeIndex) -> &Self::Output {
         &self.children[index.0[0] as usize][index.0[1] as usize][index.0[2] as usize]
     }
 }
 
-impl<V> IndexMut<OctreeIndex> for OctreeBranch<V> {
+impl<K, V> IndexMut<OctreeIndex> for OctreeBranch<K, V> {
     fn index_mut(&mut self, index: OctreeIndex) -> &mut Self::Output {
         &mut self.children[index.0[0] as usize][index.0[1] as usize][index.0[2] as usize]
     }
