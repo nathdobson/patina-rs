@@ -9,6 +9,7 @@ use patina_mesh::mesh::Mesh;
 use patina_mesh::ser::encode_file;
 use patina_sdf::marching_mesh::MarchingMesh;
 use patina_sdf::sdf::leaf::SdfLeafImpl;
+use patina_sdf::sdf::truncated_cone::TruncatedCone;
 use patina_sdf::sdf::{AsSdf, Sdf, Sdf3};
 use patina_vec::vec3::Vec3;
 use std::path::Path;
@@ -35,15 +36,60 @@ impl HousingBuilder {
             .difference(
                 &Aabb::new(
                     Vec3::new(-1000.0, -68.0, self.back_thickness),
-                    Vec3::new(-1.0, -21.0, 1000.0),
+                    Vec3::new(-1.0, -40.0, 1000.0),
+                )
+                .as_sdf(),
+            )
+            .union(
+                &TruncatedCone::new(
+                    Vec3::new(8.0, 17.5, self.back_thickness),
+                    Vec3::new(0.0, 0.0, 18.0),
+                    6.0,
+                    4.9,
+                )
+                .as_sdf(),
+            )
+            .union(
+                &TruncatedCone::new(
+                    Vec3::new(8.0, -17.5, self.back_thickness),
+                    Vec3::new(0.0, 0.0, 18.0),
+                    6.0,
+                    4.9,
+                )
+                .as_sdf(),
+            )
+            .difference(
+                &Cylinder::new(
+                    Vec3::new(0.0, 0.0, self.back_thickness),
+                    Vec3::new(0.0, 0.0, 40.0),
+                    14.2,
+                )
+                .as_sdf(),
+            )
+            .difference(
+                &Cylinder::new(
+                    Vec3::new(8.0, 17.5, self.back_thickness + 18.0 - 8.1),
+                    Vec3::new(0.0, 0.0, 8.1),
+                    5.6 / 2.0,
+                )
+                .as_sdf(),
+            )
+            .difference(
+                &Cylinder::new(
+                    Vec3::new(8.0, -17.5, self.back_thickness + 18.0 - 8.1),
+                    Vec3::new(0.0, 0.0, 8.1),
+                    5.6 / 2.0,
                 )
                 .as_sdf(),
             )
     }
     pub fn build(&self) -> Mesh {
         let sdf = self.build_sdf();
-        let mut marching = MarchingMesh::new(self.aabb);
-        marching.min_render_depth(6).max_render_depth(8);
+        let mut marching = MarchingMesh::new(Aabb::new(
+            self.aabb.min() + Vec3::splat(-0.1),
+            self.aabb.max() + Vec3::splat(0.1),
+        ));
+        marching.min_render_depth(6).max_render_depth(9);
         marching.build(&sdf)
     }
 }
@@ -57,6 +103,7 @@ async fn main() -> anyhow::Result<()> {
         aabb: Aabb::new(Vec3::new(-35.0, -71.0, 0.0), Vec3::new(59.0, 59.0, 50.0)),
     }
     .build();
+    println!("{:?}", mesh.check_manifold());
     println!("Built mesh in {:?}", start.elapsed());
     encode_file(&mesh, Path::new("examples/housing/output/sideA.stl")).await?;
     Ok(())

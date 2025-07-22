@@ -6,8 +6,6 @@
 #![allow(unused_mut)]
 #![allow(unreachable_code)]
 
-mod marching;
-
 pub mod sdf;
 pub mod marching_mesh;
 // pub mod sdf;

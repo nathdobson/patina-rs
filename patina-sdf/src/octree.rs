@@ -6,11 +6,11 @@ use inari::DecInterval;
 use itertools::Itertools;
 use ordered_float::NotNan;
 use patina_geo::aabb::Aabb;
+use patina_geo::geo3::aabb3::Aabb3;
 use patina_scalar::Scalar;
 use patina_vec::vec3::{Vec3, Vector3};
 use std::fmt::{Debug, Formatter};
 use std::ops::{Add, Index, IndexMut};
-use patina_geo::geo3::aabb3::Aabb3;
 
 #[derive(Debug)]
 pub struct Octree<V> {
@@ -121,7 +121,7 @@ impl OctreePath {
                 depth: self.depth,
                 position: position2,
             })
-        } else if face.side() && *coord < 1 << self.depth {
+        } else if face.side() && *coord < (1 << self.depth) - 1 {
             *coord += 1;
             Some(OctreePath {
                 depth: self.depth,
@@ -136,7 +136,7 @@ impl OctreePath {
         let mut coord = &mut position2[edge.axis1() as usize];
         if !edge.side1() && *coord > 0 {
             *coord -= 1;
-        } else if edge.side1() && *coord < 1 << self.depth {
+        } else if edge.side1() && *coord < (1 << self.depth) - 1 {
             *coord += 1;
         } else {
             return None;
@@ -144,7 +144,7 @@ impl OctreePath {
         let mut coord = &mut position2[edge.axis2() as usize];
         if !edge.side2() && *coord > 0 {
             *coord -= 1;
-        } else if edge.side2() && *coord < 1 << self.depth {
+        } else if edge.side2() && *coord < (1 << self.depth) - 1 {
             *coord += 1;
         } else {
             return None;

@@ -8,6 +8,7 @@ mod transform;
 pub mod union;
 mod sphere;
 mod plane;
+pub mod truncated_cone;
 
 use crate::sdf::invert::SdfInvert;
 use crate::sdf::leaf::{SdfLeaf, SdfLeafImpl};
