@@ -11,13 +11,17 @@ use crate::transvoxel::cube_vertex;
 use crate::transvoxel::cube_vertex::{CubeVertex, CubeVertexSet, cube_corners, cube_points};
 use inari::DecInterval;
 use ordered_float::NotNan;
+use parking_lot::Mutex;
 use patina_geo::aabb::Aabb;
 use patina_geo::geo3::aabb3::Aabb3;
+use patina_geo::geo3::triangle3::Triangle3;
 use patina_mesh::mesh::Mesh;
 use patina_mesh::mesh_triangle::MeshTriangle;
 use patina_scalar::deriv::Deriv;
 use patina_scalar::newton::Newton;
 use patina_vec::vec3::{Vec3, Vector3};
+use rayon::iter::ParallelIterator;
+use rayon::iter::{IntoParallelRefIterator, IntoParallelRefMutIterator};
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::mem;
 
@@ -42,14 +46,24 @@ struct MarchingNodeKey {
     sdf: SdfState,
 }
 
+struct VertexBuilder {
+    sdf: Sdf3,
+    path: OctreePath,
+    v1: CubeVertex,
+    v2: CubeVertex,
+}
+struct MeshBuilder {
+    vertex_table: HashMap<(Vector3<NotNan<f64>>, Vector3<NotNan<f64>>), usize>,
+    vertices: Vec<VertexBuilder>,
+    triangles: Vec<MeshTriangle>,
+}
+
 pub struct MarchingMesh {
     min_render_depth: usize,
     max_render_depth: usize,
     subdiv_max_dot: f64,
     aabb: Aabb3,
-    vertices: Vec<Vec3>,
-    vertex_table: HashMap<Vector3<NotNan<f64>>, usize>,
-    triangles: Vec<MeshTriangle>,
+    mesh_builder: Mutex<MeshBuilder>,
 }
 
 type MarchingOctree = Octree<MarchingNodeKey, MarchingNodeValue>;
@@ -62,9 +76,11 @@ impl MarchingMesh {
             max_render_depth: 10,
             subdiv_max_dot: 0.9,
             aabb,
-            vertices: vec![],
-            vertex_table: HashMap::new(),
-            triangles: vec![],
+            mesh_builder: Mutex::new(MeshBuilder {
+                vertex_table: HashMap::new(),
+                vertices: vec![],
+                triangles: vec![],
+            }),
         }
     }
     pub fn min_render_depth(&mut self, min_render_depth: usize) -> &mut Self {
@@ -110,7 +126,7 @@ impl MarchingMesh {
         }
     }
     fn add_marching_cube_sub(
-        &mut self,
+        &self,
         root: &MarchingOctree,
         octree: &MarchingOctree,
         aabb: &Aabb3,
@@ -154,12 +170,12 @@ impl MarchingMesh {
         let transvoxel = CubeInput::new(faces, edges, vertices);
         let mesh2 = transvoxel.as_mesh();
 
+        let ref mut mesh_builder = *self.mesh_builder.lock();
         for tri in mesh2.triangles() {
-            let tri_verts = tri
+            let tri = tri
                 .vertices()
-                .map(|(v1, v2)| self.add_vertex(octree.path(), v1, v2, sdf));
-            let tri2 = MeshTriangle::from(tri_verts);
-            self.triangles.push(tri2);
+                .map(|(v1, v2)| self.get_vertex(octree.path(), v1, v2, sdf, mesh_builder));
+            mesh_builder.triangles.push(MeshTriangle::from(tri));
         }
     }
     fn path_position(&self, path: &OctreePath, cv: CubeVertex) -> Vec3 {
@@ -169,30 +185,36 @@ impl MarchingMesh {
         let v = self.aabb.min() + v.mul_elements(self.aabb.dimensions());
         v
     }
-    fn add_vertex(
-        &mut self,
+    fn get_vertex(
+        &self,
         path: &OctreePath,
         mut v1: CubeVertex,
         mut v2: CubeVertex,
         sdf: &Sdf3,
+        mesh_builder: &mut MeshBuilder,
     ) -> usize {
         if v2 < v1 {
             mem::swap(&mut v1, &mut v2);
         }
         let v1p = self.path_position(path, v1);
         let v2p = self.path_position(path, v2);
-        let vp = (v1p + v2p) / 2.0;
-        let vnn = vp.map(|x| NotNan::new(x).unwrap());
-        if let Some(v) = self.vertex_table.get(&vnn) {
-            return *v;
-        }
-        let p = self.find_vertex(path, v1, v2, sdf).0;
-        let index = self.vertices.len();
-        self.vertices.push(p);
-        self.vertex_table.insert(vnn, index);
-        index
+        *mesh_builder
+            .vertex_table
+            .entry((
+                v1p.map(|x| NotNan::new(x).unwrap()),
+                v2p.map(|x| NotNan::new(x).unwrap()),
+            ))
+            .or_insert_with(|| {
+                mesh_builder.vertices.push(VertexBuilder {
+                    sdf: sdf.clone(),
+                    path: *path,
+                    v1,
+                    v2,
+                });
+                mesh_builder.vertices.len() - 1
+            })
     }
-    fn init_sdf(&mut self, tree: &mut MarchingOctree, sdf: &Sdf3) -> Option<Sdf3> {
+    fn init_sdf(&self, tree: &mut MarchingOctree, sdf: &Sdf3) -> Option<Sdf3> {
         match tree.key().sdf.clone() {
             SdfState::Uninit => {}
             SdfState::Empty => return None,
@@ -211,7 +233,7 @@ impl MarchingMesh {
         tree.key_mut().sdf = SdfState::Sdf(sdf.clone());
         Some(sdf)
     }
-    fn build_octree(&mut self, tree: &mut MarchingOctree, sdf: &Sdf3) {
+    fn build_octree(&self, tree: &mut MarchingOctree, sdf: &Sdf3) {
         let aabb = tree.path().aabb_inside(&self.aabb);
         let sdf = self.init_sdf(tree, sdf);
         let Some(sdf) = sdf else {
@@ -287,7 +309,8 @@ impl MarchingMesh {
         let normal: Vec3 = sdf.normal(eval_position);
         (vertex_position, normal)
     }
-    fn build_branch(&mut self, tree: &mut MarchingOctree, sdf: &Sdf3) {
+    fn build_branch(&self, tree: &mut MarchingOctree, sdf: &Sdf3) {
+        let depth = tree.path().depth();
         match tree.view_mut() {
             OctreeViewMut::Leaf(_, _) => {
                 tree.set_branch(Default::default());
@@ -298,12 +321,12 @@ impl MarchingMesh {
             OctreeViewMut::Leaf(_, _) => unreachable!(),
             OctreeViewMut::Branch(branch) => branch,
         };
-        for child in branch.children_flat_mut() {
+        branch.children_flat_mut().par_iter_mut().for_each(|child| {
             self.build_octree(child, sdf);
-        }
+        });
     }
 
-    fn build_mesh(&mut self, root: &MarchingOctree, tree: &MarchingOctree, root_sdf: &Sdf3) {
+    fn build_mesh(&self, root: &MarchingOctree, tree: &MarchingOctree, root_sdf: &Sdf3) {
         match tree.view() {
             OctreeView::Leaf(leaf, _) => match &leaf.sdf {
                 SdfState::Uninit => unreachable!(),
@@ -319,17 +342,17 @@ impl MarchingMesh {
     }
 
     fn build_mesh_branch(
-        &mut self,
+        &self,
         root: &MarchingOctree,
         branch: &MarchingOctreeBranch,
         root_sdf: &Sdf3,
     ) {
-        for child in branch.children_flat() {
+        branch.children_flat().par_iter().for_each(|child| {
             self.build_mesh(root, child, root_sdf);
-        }
+        });
     }
 
-    fn build_mesh_leaf(&mut self, root: &MarchingOctree, tree: &MarchingOctree, sdf: &Sdf3) {
+    fn build_mesh_leaf(&self, root: &MarchingOctree, tree: &MarchingOctree, sdf: &Sdf3) {
         let aabb = tree.path().aabb_inside(&self.aabb);
         self.add_marching_cube_sub(root, tree, &aabb, sdf);
     }
@@ -398,6 +421,17 @@ impl MarchingMesh {
         }
     }
 
+    fn collect_mesh(&mut self) -> Mesh {
+        let vertices = self
+            .mesh_builder
+            .lock()
+            .vertices
+            .par_iter()
+            .map(|x| self.find_vertex(&x.path, x.v1, x.v2, &x.sdf).0)
+            .collect();
+        Mesh::new(vertices, self.mesh_builder.get_mut().triangles.clone())
+    }
+
     pub fn build(mut self, sdf: &Sdf3) -> Mesh {
         let mut octree = MarchingOctree::new_root();
         self.build_octree(&mut octree, sdf);
@@ -406,7 +440,7 @@ impl MarchingMesh {
         comp.add_tree(&octree);
         println!("{:#?}", comp);
         self.build_mesh(&octree, &octree, sdf);
-        Mesh::new(self.vertices, self.triangles)
+        self.collect_mesh()
     }
 }
 
