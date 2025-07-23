@@ -1,5 +1,5 @@
 use crate::sdf::{Sdf, SdfImpl};
-use inari::DecInterval;
+use inari::{DecInterval, dec_interval};
 use patina_geo::aabb::Aabb;
 use patina_geo::geo3::aabb3::Aabb3;
 use patina_geo::geo3::cylinder::Cylinder;
@@ -39,7 +39,17 @@ impl<const N: usize, T: SdfLeafImpl<N>> SdfImpl<N> for SdfLeaf<N, T> {
         self.inner.evaluate(p)
     }
     fn evaluate_constrain(&self, p: Vector<DecInterval, N>) -> (Option<Sdf<N>>, DecInterval) {
-        (None, self.inner.evaluate(p))
+        let center = p.map(|x| x.mid());
+        let range = p.map(|x| x.sup() - x.inf()).length() / 2.0;
+        let d = self.inner.evaluate(center);
+        if d < -range {
+            (Some(Sdf::full()), DecInterval::from_f64(f64::MIN))
+        } else if d > range {
+            (Some(Sdf::empty()), DecInterval::from_f64(f64::MAX))
+        } else {
+            let int = self.inner.evaluate(p);
+            (None, int)
+        }
     }
 
     fn complexity(&self) -> usize {

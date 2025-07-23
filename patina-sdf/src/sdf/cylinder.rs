@@ -21,7 +21,7 @@ impl SdfLeafImpl<2> for CylinderCrossSection {
                 (radial.clone() * radial.clone() + p.y() * p.y()).sqrt(),
             ),
             y2.clone().piecewise(
-                radial.clone(),
+                radial.clone().maximum(y2.clone()).maximum(-p.y().clone()),
                 radial.clone().piecewise(
                     y2.clone(),
                     (radial.clone() * radial.clone() + y2.clone() * y2.clone()).sqrt(),

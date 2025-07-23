@@ -1,5 +1,5 @@
 use crate::marching_mesh::MarchingMesh;
-use crate::sdf::Sdf;
+use crate::sdf::{AsSdf, Sdf};
 use crate::sdf::leaf::SdfLeafImpl;
 use crate::sdf::union::SdfUnion;
 use crate::subdivide::Subdivide;
@@ -11,8 +11,8 @@ use patina_vec::vec3::Vec3;
 
 #[tokio::test]
 async fn test_mesh() -> anyhow::Result<()> {
-    let sphere1 = Sphere::new(Vec3::new(-0.25, 0.0, 0.0), 0.5).into_sdf();
-    let sphere2 = Sphere::new(Vec3::new(0.25, 0.0, 0.0), 0.5).into_sdf();
+    let sphere1 = Sphere::new(Vec3::new(-0.25, 0.0, 0.0), 0.5).as_sdf();
+    let sphere2 = Sphere::new(Vec3::new(0.25, 0.0, 0.0), 0.5).as_sdf();
     // let plane = Plane::new(Vec3::new(0.0, 0.0, 0.0), Vec3::new(1.0, 1.0, 1.0)).into_sdf();
     // let prism = Sdf::new_aabb(&Aabb::new(
     //     Vec3::new(-0.5, -0.5, -0.5),

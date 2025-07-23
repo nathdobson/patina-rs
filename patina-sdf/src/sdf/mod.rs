@@ -1,5 +1,6 @@
 mod aabb;
 mod cylinder;
+mod empty;
 pub mod invert;
 pub mod leaf;
 mod plane;
@@ -10,6 +11,7 @@ mod transform;
 pub mod truncated_cone;
 pub mod union;
 
+use crate::sdf::empty::{SdfEmpty, SdfFull};
 use crate::sdf::invert::SdfInvert;
 use crate::sdf::leaf::{SdfLeaf, SdfLeafImpl};
 use crate::sdf::rotate::Rotate;
@@ -78,6 +80,12 @@ impl<const N: usize> Sdf<N> {
     }
     pub fn difference(&self, other: &Sdf<N>) -> Sdf<N> {
         self.invert().union(other).invert()
+    }
+    pub fn empty() -> Sdf<N> {
+        Sdf::new(SdfLeaf::new(SdfEmpty))
+    }
+    pub fn full() -> Sdf<N> {
+        Sdf::new(SdfLeaf::new(SdfFull))
     }
     pub fn complexity(&self) -> usize {
         self.0.imp.complexity()

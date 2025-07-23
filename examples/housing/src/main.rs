@@ -92,8 +92,8 @@ impl HousingBuilder {
         ));
         marching
             .min_render_depth(6)
-            .max_render_depth(7)
-            .subdiv_max_dot(0.8);
+            .max_render_depth(9)
+            .subdiv_max_dot(0.99);
         marching.build(&sdf)
     }
 }
