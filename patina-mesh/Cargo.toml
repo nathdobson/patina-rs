@@ -13,6 +13,7 @@ ordered-float = "5.0.0"
 rand_xorshift = "0.4.0"
 rand = "0.9.1"
 anyhow = "1.0.98"
+slab = "0.4.10"
 
 [dev-dependencies]
 tokio = {version = "1.46.0",features = ["rt","macros"]}

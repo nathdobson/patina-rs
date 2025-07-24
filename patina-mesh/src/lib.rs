@@ -4,6 +4,7 @@
 #![allow(unused_imports)]
 #![deny(unused_must_use)]
 #![feature(try_blocks)]
+#![feature(debug_closure_helpers)]
 
 pub mod directed_mesh_edge;
 pub mod mesh;
@@ -21,4 +22,5 @@ pub mod bimesh2;
 pub mod mesh_cut;
 mod bvh;
 mod util;
+pub mod half_edge_mesh;
 

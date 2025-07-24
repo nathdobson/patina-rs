@@ -1,10 +1,10 @@
 use crate::mesh_triangle::MeshTriangle;
+use itertools::Itertools;
 use patina_vec::vec3::Vec3;
 use std::collections::HashMap;
 use std::fmt::{Debug, Display, Formatter};
-use itertools::Itertools;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Mesh {
     vertices: Vec<Vec3>,
     triangles: Vec<MeshTriangle>,

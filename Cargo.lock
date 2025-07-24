@@ -867,6 +867,7 @@ dependencies = [
  "patina-vec",
  "rand",
  "rand_xorshift",
+ "slab",
  "tokio",
 ]
 
