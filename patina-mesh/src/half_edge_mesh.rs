@@ -2,8 +2,15 @@ use crate::directed_mesh_edge::DirectedMeshEdge;
 use crate::mesh::{ManifoldError, Mesh};
 use crate::mesh_edge::MeshEdge;
 use crate::mesh_triangle::MeshTriangle;
+use crate::ser::encode_test_file;
+use arrayvec::ArrayVec;
 use itertools::Itertools;
+use patina_geo::aabb::Aabb;
+use patina_geo::geo3::triangle3::Triangle3;
+use patina_vec::vec2::Vec2;
 use patina_vec::vec3::Vec3;
+use rand::{Rng, SeedableRng};
+use rand_xorshift::XorShiftRng;
 use slab::Slab;
 use std::collections::{HashMap, HashSet};
 use std::fmt::{Debug, Formatter};
@@ -41,11 +48,19 @@ impl HalfEdgeId {
     }
 }
 
+impl HalfEdgeVertex {
+    pub fn position(&self) -> Vec3 {
+        self.position
+    }
+}
+
 #[derive(Debug, Copy, Clone, Eq, Ord, PartialEq, PartialOrd, Hash)]
 pub enum HalfEdgeError {
     BadTwin(HalfEdgeId),
     BadFace(HalfEdgeId),
     BadFan(usize, HalfEdgeId),
+    FanDuplicate(usize, HalfEdgeId),
+    CollapsedEdge(HalfEdgeId, usize),
 }
 
 pub struct FanWalker {
@@ -89,8 +104,6 @@ impl HalfEdgeMesh {
                 directed_edges.push(edge);
             }
         }
-        println!("{:#?}", tris);
-        println!("{:#?}", directed_edges);
         for (id, edge) in directed_edges.iter().enumerate() {
             vertices[edge.v1()].edge = HalfEdgeId(id);
         }
@@ -124,8 +137,11 @@ impl HalfEdgeMesh {
     pub fn edges(&self) -> impl Iterator<Item = (HalfEdgeId, &'_ HalfEdge)> {
         self.edges.iter().map(|(i, x)| (HalfEdgeId(i), x))
     }
-    pub fn vertices(&self) -> impl Iterator<Item = (usize, &'_ HalfEdgeVertex)> {
-        self.vertices.iter()
+    // pub fn vertices(&self) -> impl Iterator<Item = (usize, &'_ HalfEdgeVertex)> {
+    //     self.vertices.iter()
+    // }
+    pub fn vertices(&self) -> &Slab<HalfEdgeVertex> {
+        &self.vertices
     }
     pub fn walk(&self, vertex: usize) -> FanWalker {
         FanWalker::new(self.vertices[vertex].edge)
@@ -179,6 +195,9 @@ impl HalfEdgeMesh {
             if self[e.twin].twin != id {
                 return Err(HalfEdgeError::BadTwin(id));
             }
+            if self[e.twin].vertex == e.vertex {
+                return Err(HalfEdgeError::CollapsedEdge(id, e.vertex));
+            }
         }
         for (id1, e1) in self.edges() {
             let id2 = e1.next;
@@ -197,8 +216,14 @@ impl HalfEdgeMesh {
         }
         for (vid, v) in self.vertices() {
             let mut expected = expected_fans[vid].iter().cloned().collect::<HashSet<_>>();
+            let mut vs = HashSet::new();
             for actual in self.fan(vid) {
-                expected.remove(&actual);
+                if !expected.remove(&actual) {
+                    return Err(HalfEdgeError::BadFan(vid, actual));
+                }
+                if !vs.insert(self[self[actual].twin].vertex) {
+                    return Err(HalfEdgeError::FanDuplicate(vid, actual));
+                }
             }
             if let Some(diff) = expected.iter().next() {
                 return Err(HalfEdgeError::BadFan(vid, *diff));
@@ -211,10 +236,15 @@ impl HalfEdgeMesh {
             .get_mut(index.0)
             .unwrap_or_else(|| panic!("Cannot find index {:?}", index))
     }
-    pub fn contract_edge(&mut self, f1: HalfEdgeId) {
-        // Eliminate references to the old vertex
+    pub fn contract_edge(&mut self, f1: HalfEdgeId) -> ArrayVec<HalfEdgeId, 6> {
+
+        let mut removed = ArrayVec::new();
         let mut v1 = self[f1].vertex;
         let mut v2 = self[self[f1].twin].vertex;
+        assert_ne!(v1, v2);
+        // println!("Contracting {:?} into {:?} ({:?})", v1, v2, f1);
+
+        // Eliminate references to the old vertex
         let mut fan = self.walk(self[f1].vertex);
         while let Some(e) = fan.step(self) {
             self.edge_mut(e).vertex = v2;
@@ -222,6 +252,7 @@ impl HalfEdgeMesh {
         let v1 = self.vertices.remove(v1);
 
         let f2 = self[f1].next;
+        let f2p = self[self[f1].next].twin;
         let f3 = self[f1].prev;
         let f3p = self[f3].twin;
 
@@ -242,6 +273,30 @@ impl HalfEdgeMesh {
             let v = self[r3].vertex;
             self.vertices[v].edge = r3;
         }
+
+        if f3p == r2 {
+            assert_eq!(r2p, f3);
+            removed.extend([f1, r1, f3, f3p, f2, r2]);
+            let stitch = f2p != r3;
+            let f1 = self.edges.remove(f1.0);
+            let r1 = self.edges.remove(r1.0);
+            let f3 = self.edges.remove(f3.0);
+            let f3p = self.edges.remove(f3p.0);
+            let f2 = self.edges.remove(f2.0);
+            let r3 = self.edges.remove(r3.0);
+            if stitch {
+                // Removed an ear: stitch the edge together.
+                self.edge_mut(f2.twin()).twin = r3.twin();
+                self.edge_mut(r3.twin()).twin = f2.twin();
+            } else {
+                // Removed a pair of triangles forming the entire connected component.
+                self.vertices.remove(v2);
+                self.vertices.remove(r3.vertex);
+            }
+            return removed;
+        }
+
+        removed.extend([f1, f3, f3p, r1, r2, r2p]);
 
         // remove the "top" edges
         let f1 = self.edges.remove(f1.0);
@@ -264,6 +319,22 @@ impl HalfEdgeMesh {
         self.edge_mut(r3).next = r2p.next;
         self.edge_mut(r2p.prev).next = r3;
         self.edge_mut(r3).prev = r2p.prev;
+
+        removed
+    }
+    pub fn triangle(&self, id: HalfEdgeId) -> Triangle3 {
+        Triangle3::new(
+            self.mesh_triangle(id)
+                .vertices()
+                .map(|v| self.vertices[v].position),
+        )
+    }
+    pub fn mesh_triangle(&self, id: HalfEdgeId) -> MeshTriangle {
+        MeshTriangle::new(
+            self[id].vertex,
+            self[self[id].next].vertex,
+            self[self[id].prev].vertex,
+        )
     }
 }
 
@@ -303,6 +374,21 @@ impl From<HalfEdgeId> for usize {
     }
 }
 
+impl HalfEdge {
+    pub fn vertex(&self) -> usize {
+        self.vertex
+    }
+    pub fn twin(&self) -> HalfEdgeId {
+        self.twin
+    }
+    pub fn next(&self) -> HalfEdgeId {
+        self.next
+    }
+    pub fn prev(&self) -> HalfEdgeId {
+        self.prev
+    }
+}
+
 #[test]
 fn test() {
     let mesh = Mesh::new(
@@ -320,7 +406,6 @@ fn test() {
         ],
     );
     let mut hem = HalfEdgeMesh::new(&mesh);
-    println!("{:#?}", hem);
     hem.check_manifold().unwrap();
     assert_eq!(
         vec![9, 3, 0],
@@ -344,4 +429,29 @@ fn test() {
     hem.contract_edge(HalfEdgeId(0));
     println!("{:#?}", hem);
     hem.check_manifold().unwrap();
+    hem.contract_edge(HalfEdgeId(1));
+    println!("{:#?}", hem);
+    hem.check_manifold().unwrap();
+}
+
+#[tokio::test]
+async fn test_cube() {
+    for seed in 51..1000 {
+        println!("\n seed {:?}", seed);
+        let mut rng = XorShiftRng::seed_from_u64(seed);
+        let mesh = Mesh::from_aabb(Aabb::new(Vec3::splat(0.0), Vec3::splat(1.0)));
+        let mut hem = HalfEdgeMesh::new(&mesh);
+        while hem.vertices.len() > 5 {
+            let next = rng.random_range(0..hem.edges.capacity());
+            if hem.edges.contains(next) {
+                hem.contract_edge(HalfEdgeId(next));
+                encode_test_file(
+                    &hem.as_mesh(),
+                    &format!("seed_{}_{}.stl", seed, hem.vertices.len()),
+                ).await.unwrap();
+                println!("{:#?}", hem);
+                hem.check_manifold().unwrap();
+            }
+        }
+    }
 }

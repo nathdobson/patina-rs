@@ -5,6 +5,7 @@
 #![deny(unused_must_use)]
 #![feature(try_blocks)]
 #![feature(debug_closure_helpers)]
+#![feature(float_minimum_maximum)]
 
 pub mod directed_mesh_edge;
 pub mod mesh;
@@ -23,4 +24,5 @@ pub mod mesh_cut;
 mod bvh;
 mod util;
 pub mod half_edge_mesh;
+pub mod decimate;
 

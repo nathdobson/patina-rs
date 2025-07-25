@@ -1,5 +1,6 @@
 use crate::mesh_triangle::MeshTriangle;
 use itertools::Itertools;
+use patina_geo::aabb::Aabb;
 use patina_vec::vec3::Vec3;
 use std::collections::HashMap;
 use std::fmt::{Debug, Display, Formatter};
@@ -116,6 +117,13 @@ impl Mesh {
             })));
         }
         Mesh::new(new_vertices, new_triangles)
+    }
+
+    pub fn area(&self) -> f64 {
+        self.triangles
+            .iter()
+            .map(|t| t.for_vertices(self.vertices()).area())
+            .sum::<f64>()
     }
 }
 

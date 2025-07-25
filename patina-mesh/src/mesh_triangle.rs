@@ -1,11 +1,13 @@
 use crate::directed_mesh_edge::DirectedMeshEdge;
+use crate::half_edge_mesh::{HalfEdgeMesh, HalfEdgeVertex};
 use crate::mesh_edge::MeshEdge;
+use itertools::Itertools;
 use patina_geo::geo2::triangle2::Triangle2;
 use patina_geo::geo3::triangle3::Triangle3;
+use patina_vec::vec2::Vec2;
 use patina_vec::vec3::Vec3;
 use std::fmt::{Debug, Formatter};
 use std::ops::Index;
-use patina_vec::vec2::Vec2;
 
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub struct MeshTriangle {
@@ -42,17 +44,17 @@ impl MeshTriangle {
             MeshEdge::new(self.vertices[2], self.vertices[0]),
         ]
     }
-    pub fn for_vertices(&self, vs: &[Vec3]) -> Triangle3 {
-        Triangle3::new(self.vertices.map(|v| {
-            *vs.get(v)
-                .unwrap_or_else(|| panic!("Vertex count is {} but the vertex is {}", vs.len(), v))
-        }))
+    pub fn for_vertices<I: ?Sized + Index<usize, Output = Vec3>>(&self, vs: &I) -> Triangle3 {
+        Triangle3::new(self.vertices.map(|v| *vs.index(v)))
     }
     pub fn for_vertices2(&self, vs: &[Vec2]) -> Triangle2 {
         Triangle2::new(self.vertices.map(|v| {
             *vs.get(v)
                 .unwrap_or_else(|| panic!("Vertex count is {} but the vertex is {}", vs.len(), v))
         }))
+    }
+    pub fn for_half_mesh(&self, mesh: &HalfEdgeMesh) -> Triangle3 {
+        Triangle3::new(self.vertices.map(|x| mesh.vertices()[x].position()))
     }
 }
 

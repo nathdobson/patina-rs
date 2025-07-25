@@ -2,9 +2,11 @@
 #![allow(unused_imports)]
 #![deny(unused_must_use)]
 
+use anyhow::Context;
 use patina_geo::aabb::Aabb;
 use patina_geo::geo3::aabb3::Aabb3;
 use patina_geo::geo3::cylinder::Cylinder;
+use patina_mesh::half_edge_mesh::HalfEdgeMesh;
 use patina_mesh::mesh::Mesh;
 use patina_mesh::ser::encode_file;
 use patina_sdf::marching_mesh::MarchingMesh;
@@ -14,7 +16,7 @@ use patina_sdf::sdf::{AsSdf, Sdf, Sdf3};
 use patina_vec::vec3::Vec3;
 use std::path::Path;
 use std::time::Instant;
-use anyhow::Context;
+use patina_mesh::decimate::Decimate;
 
 struct HousingBuilder {
     drum_bounding_radius: f64,
@@ -92,9 +94,14 @@ impl HousingBuilder {
         ));
         marching
             .min_render_depth(6)
-            .max_render_depth(10)
-            .subdiv_max_dot(0.999);
-        marching.build(&sdf)
+            .max_render_depth(7)
+            .subdiv_max_dot(0.5);
+        let mesh = marching.build(&sdf);
+        let mut hem = HalfEdgeMesh::new(&mesh);
+        let mut decimate = Decimate::new(&mut hem);
+        decimate.run();
+        let mesh = hem.as_mesh();
+        mesh
     }
 }
 

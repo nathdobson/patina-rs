@@ -49,6 +49,9 @@ impl Triangle3 {
             Segment3::new(self.points()[2], self.points()[0]),
         ]
     }
+    pub fn area_vector(&self) -> Vec3 {
+        (self.points()[1] - self.points()[0]).cross(self.points()[2] - self.points()[0])
+    }
     pub fn area(&self) -> f64 {
         (self.points()[1] - self.points()[0])
             .cross(self.points()[2] - self.points()[0])
