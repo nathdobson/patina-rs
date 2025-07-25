@@ -237,7 +237,6 @@ impl HalfEdgeMesh {
             .unwrap_or_else(|| panic!("Cannot find index {:?}", index))
     }
     pub fn contract_edge(&mut self, f1: HalfEdgeId) -> ArrayVec<HalfEdgeId, 6> {
-
         let mut removed = ArrayVec::new();
         let mut v1 = self[f1].vertex;
         let mut v2 = self[self[f1].twin].vertex;
@@ -335,6 +334,9 @@ impl HalfEdgeMesh {
             self[self[id].next].vertex,
             self[self[id].prev].vertex,
         )
+    }
+    pub fn get(&self, id: HalfEdgeId) -> Option<&HalfEdge> {
+        self.edges.get(id.0)
     }
 }
 
@@ -448,7 +450,9 @@ async fn test_cube() {
                 encode_test_file(
                     &hem.as_mesh(),
                     &format!("seed_{}_{}.stl", seed, hem.vertices.len()),
-                ).await.unwrap();
+                )
+                .await
+                .unwrap();
                 println!("{:#?}", hem);
                 hem.check_manifold().unwrap();
             }

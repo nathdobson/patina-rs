@@ -438,7 +438,6 @@ impl MarchingMesh {
         self.refine_neighbors(&mut octree, sdf);
         let mut comp = Complexity::new();
         comp.add_tree(&octree);
-        println!("{:#?}", comp);
         self.build_mesh(&octree, &octree, sdf);
         self.collect_mesh()
     }
