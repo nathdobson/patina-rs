@@ -24,6 +24,9 @@ use std::time::Instant;
 struct HousingBuilder {
     drum_bounding_radius: f64,
     back_thickness: f64,
+    tab_size: f64,
+    tab_thickness: f64,
+    tab_wall_size: f64,
     aabb: Aabb3,
 }
 
@@ -53,6 +56,7 @@ impl HousingBuilder {
         let mount_rad2 = 4.9;
         let pilot_depth_m4 = 8.1;
         let pilot_radius_m4 = 5.6 / 2.0;
+        let through_hole_m4 = 4.2;
         sdf = sdf.union(
             &TruncatedCone::new(
                 Vec3::new(mount_off_x, mount_off_y, self.back_thickness),
@@ -199,13 +203,97 @@ impl HousingBuilder {
             .as_sdf()
             .extrude_y(mount_off_y - brace_width / 2.0..mount_off_y + brace_width / 2.0),
         );
+        sdf = sdf.difference(
+            &Aabb::new(Vec3::new(16.0, -8.0, -1000.0), Vec3::new(23.0, 8.0, 1000.0)).as_sdf(),
+        );
+        let bottom_tab_x = 20.0;
+        sdf = sdf.union(
+            &Polygon2::new(vec![
+                Vec2::new(self.aabb.max().z(), bottom_tab_x - self.tab_size),
+                Vec2::new(self.aabb.max().z(), bottom_tab_x + self.tab_size),
+                Vec2::new(self.aabb.max().z() + self.tab_size, bottom_tab_x),
+            ])
+            .as_sdf()
+            .extrude_y(self.aabb.min().y()..self.aabb.min().y() + self.tab_thickness),
+        );
+        sdf = sdf.difference(
+            &Cylinder::new(
+                Vec3::new(
+                    bottom_tab_x,
+                    self.aabb.min().y(),
+                    self.aabb.max().z() + self.tab_wall_size + 2.0,
+                ),
+                Vec3::axis_y() * 10.0,
+                through_hole_m4 / 2.0,
+            )
+            .as_sdf(),
+        );
+        sdf = sdf.difference(
+            &Cylinder::new(
+                Vec3::new(
+                    bottom_tab_x,
+                    self.aabb.min().y(),
+                    self.aabb.max().z() + self.tab_wall_size + 2.0,
+                ),
+                Vec3::axis_y() * 2.5,
+                4.0,
+            )
+            .as_sdf(),
+        );
+        sdf = sdf.difference(
+            &Polygon2::new(vec![
+                Vec2::new(0.0, bottom_tab_x - self.tab_size),
+                Vec2::new(0.0, bottom_tab_x + self.tab_size),
+                Vec2::new(self.tab_size, bottom_tab_x),
+            ])
+            .as_sdf()
+            .extrude_y(self.aabb.min().y()..self.aabb.min().y() + self.tab_thickness),
+        );
+        sdf = sdf.difference(
+            &Cylinder::new(
+                Vec3::new(
+                    bottom_tab_x,
+                    self.aabb.min().y() + self.tab_thickness,
+                    self.tab_wall_size + 2.0,
+                ),
+                Vec3::axis_y() * pilot_depth_m4,
+                pilot_radius_m4,
+            )
+            .as_sdf(),
+        );
+        let tube_height = 8.0;
+        let tube_start = 23.0;
+        let tube_length = self.aabb.max().x() - tube_start;
+        sdf = sdf.difference(
+            &Aabb::new(
+                Vec3::new(tube_start, -tube_height / 2.0, 1.0),
+                Vec3::new(1000.0, tube_height / 2.0, 3.0),
+            )
+            .as_sdf(),
+        );
+        sdf = sdf.difference(
+            &Aabb::new(
+                Vec3::new(tube_start, -tube_height / 2.0, -10.0),
+                Vec3::new(tube_start + tube_length, -tube_height / 2.0 + 1.0, 2.0),
+            )
+            .as_sdf(),
+        );
+        sdf = sdf.union(
+            &Polygon2::new(vec![
+                Vec2::new(-tube_height / 2.0 + 1.0, 1.0),
+                Vec2::new(-tube_height / 2.0 + 3.0, 1.0),
+                Vec2::new(-tube_height / 2.0 + 3.0, 2.8),
+            ])
+            .as_sdf()
+            .extrude_x(tube_start..tube_start + tube_length),
+        );
         sdf
     }
     pub fn build(&self) -> Mesh {
         let sdf = self.build_sdf();
         let mut marching = MarchingMesh::new(Aabb::new(
             self.aabb.min() + Vec3::splat(-0.1),
-            self.aabb.max() + Vec3::splat(0.1),
+            self.aabb.max() + Vec3::new(0.1, 0.1, self.tab_size + 0.1),
         ));
         marching
             // .min_render_depth(6)
@@ -230,7 +318,10 @@ async fn main() -> anyhow::Result<()> {
     let start = Instant::now();
     let mesh = HousingBuilder {
         drum_bounding_radius: 56.0,
-        back_thickness: 3.0,
+        back_thickness: 4.0,
+        tab_size: 14.0,
+        tab_thickness: 5.0,
+        tab_wall_size: 4.0,
         aabb: Aabb::new(Vec3::new(-35.0, -71.0, 0.0), Vec3::new(59.0, 59.0, 50.0)),
     }
     .build();
