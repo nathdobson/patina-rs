@@ -21,287 +21,361 @@ use patina_vec::vec3::Vec3;
 use std::path::Path;
 use std::time::Instant;
 
+struct Tab {
+    size: f64,
+    thickness: f64,
+    wall_size: f64,
+    bottom_x: f64,
+    top_x: f64,
+    right_y: f64,
+}
+
+struct Catch {
+    bottom_thickness: f64,
+    max_x: f64,
+}
+
+struct Mount {
+    off_x: f64,
+    off_y: f64,
+    length: f64,
+    motor_radius: f64,
+    motor_fit: f64,
+    rad1: f64,
+    rad2: f64,
+}
+
+struct Thread {
+    ruthex_depth: f64,
+    ruthex_radius: f64,
+    through_radius: f64,
+    countersink_radius: f64,
+    countersink_depth: f64,
+}
+
+struct Brace {
+    width: f64,
+    extent: f64,
+    indent: f64,
+}
+
+struct Port {
+    start_x: f64,
+    width: f64,
+    length: f64,
+}
+
+struct Tube {
+    width: f64,
+    wall_bottom: f64,
+    wall_top: f64,
+    wire_inlet1: f64,
+    wire_inlet2: f64,
+    tab_width: f64,
+}
+
 struct HousingBuilder {
+    aabb: Aabb3,
+    inf: f64,
+    m4: Thread,
     drum_bounding_radius: f64,
     back_thickness: f64,
-    tab_size: f64,
-    tab_thickness: f64,
-    tab_wall_size: f64,
-    aabb: Aabb3,
+    catch: Catch,
+    mount: Mount,
+    brace: Brace,
+    port: Port,
+    tab: Tab,
+    tube: Tube,
 }
 
 impl HousingBuilder {
-    fn build_sdf(&self) -> Sdf3 {
+    fn main_body(&self) -> Sdf3 {
         let mut sdf = self.aabb.as_sdf().difference(
             &Cylinder::new(
                 Vec3::new(0.0, 0.0, self.back_thickness),
-                Vec3::axis_z() * 1000.0,
+                Vec3::axis_z() * self.inf,
                 self.drum_bounding_radius,
             )
             .as_sdf(),
         );
         sdf = sdf.difference(
             &Aabb::new(
-                Vec3::new(-1000.0, -68.0, self.back_thickness),
-                Vec3::new(-1.0, -40.0, 1000.0),
+                Vec3::new(
+                    -self.inf,
+                    self.aabb.min().y() + self.catch.bottom_thickness,
+                    self.back_thickness,
+                ),
+                Vec3::new(-self.catch.max_x, 0.0, self.inf),
             )
             .as_sdf(),
         );
-        let mount_off_x = 8.0;
-        let mount_off_y = 17.5;
-        let mount_length = 18.0;
-        let motor_radius = 14.0;
-        let soft_fit = 0.2;
-        let mount_rad1 = 6.0;
-        let mount_rad2 = 4.9;
-        let pilot_depth_m4 = 8.1;
-        let pilot_radius_m4 = 5.6 / 2.0;
-        let through_hole_m4 = 4.2;
+        sdf
+    }
+    fn mount(&self, y: f64) -> Sdf3 {
+        let mut sdf = Sdf::empty();
         sdf = sdf.union(
             &TruncatedCone::new(
-                Vec3::new(mount_off_x, mount_off_y, self.back_thickness),
-                Vec3::new(0.0, 0.0, mount_length),
-                mount_rad1,
-                mount_rad2,
+                Vec3::new(self.mount.off_x, y, self.back_thickness),
+                Vec3::new(0.0, 0.0, self.mount.length),
+                self.mount.rad1,
+                self.mount.rad2,
             )
             .as_sdf(),
         );
+        sdf = sdf.difference(
+            &Cylinder::new(
+                Vec3::new(
+                    self.mount.off_x,
+                    y,
+                    self.back_thickness + self.mount.length - self.m4.ruthex_depth,
+                ),
+                Vec3::new(0.0, 0.0, self.m4.ruthex_depth),
+                self.m4.ruthex_radius,
+            )
+            .as_sdf(),
+        );
+        sdf
+    }
+    fn brace_x(&self, y: f64, dy: f64) -> Sdf3 {
+        let mut sdf = Sdf::empty();
         sdf = sdf.union(
-            &TruncatedCone::new(
-                Vec3::new(mount_off_x, -mount_off_y, self.back_thickness),
-                Vec3::new(0.0, 0.0, mount_length),
-                mount_rad1,
-                mount_rad2,
-            )
-            .as_sdf(),
+            &Polygon2::new(vec![
+                Vec2::new(
+                    y + dy * (self.mount.rad2 - self.brace.indent),
+                    self.back_thickness,
+                ),
+                Vec2::new(
+                    y + dy * (self.mount.rad2 - self.brace.indent + self.brace.extent),
+                    self.back_thickness,
+                ),
+                Vec2::new(
+                    y + dy * (self.mount.rad2 - self.brace.indent),
+                    self.back_thickness + self.mount.length,
+                ),
+            ])
+            .as_sdf()
+            .extrude_x(
+                self.mount.off_x - self.brace.width / 2.0
+                    ..self.mount.off_x + self.brace.width / 2.0,
+            ),
         );
+        sdf
+    }
+    fn brace_y(&self, y: f64, dx: f64) -> Sdf3 {
+        let mut sdf = Sdf::empty();
+        sdf = sdf.union(
+            &Polygon2::new(vec![
+                Vec2::new(
+                    self.mount.off_x + dx * (self.mount.rad2 - self.brace.indent),
+                    self.back_thickness,
+                ),
+                Vec2::new(
+                    self.mount.off_x
+                        + dx * (self.mount.rad2 - self.brace.indent + self.brace.extent),
+                    self.back_thickness,
+                ),
+                Vec2::new(
+                    self.mount.off_x + dx * (self.mount.rad2 - self.brace.indent),
+                    self.back_thickness + self.mount.length,
+                ),
+            ])
+            .as_sdf()
+            .extrude_y(-y - self.brace.width / 2.0..-y + self.brace.width / 2.0),
+        );
+        sdf
+    }
+    fn mounts(&self) -> Sdf3 {
+        let mut sdf = Sdf::empty();
+        sdf = sdf.union(&self.mount(self.mount.off_y));
+        sdf = sdf.union(&self.mount(-self.mount.off_y));
         sdf = sdf.difference(
             &Cylinder::new(
                 Vec3::new(0.0, 0.0, self.back_thickness),
-                Vec3::new(0.0, 0.0, mount_length * 2.0),
-                motor_radius + soft_fit,
+                Vec3::new(0.0, 0.0, self.inf),
+                self.mount.motor_radius + self.mount.motor_fit,
             )
             .as_sdf(),
         );
-        sdf = sdf.difference(
-            &Cylinder::new(
-                Vec3::new(
-                    mount_off_x,
-                    mount_off_y,
-                    self.back_thickness + mount_length - pilot_depth_m4,
-                ),
-                Vec3::new(0.0, 0.0, pilot_depth_m4),
-                pilot_radius_m4,
-            )
-            .as_sdf(),
-        );
-        sdf = sdf.difference(
-            &Cylinder::new(
-                Vec3::new(
-                    mount_off_x,
-                    -mount_off_y,
-                    self.back_thickness + mount_length - pilot_depth_m4,
-                ),
-                Vec3::new(0.0, 0.0, pilot_depth_m4),
-                pilot_radius_m4,
-            )
-            .as_sdf(),
-        );
-        let brace_width = 2.0;
-        let brace_extent = 6.0;
-        let brace_indent = 0.2;
-        sdf = sdf.union(
-            &Polygon2::new(vec![
-                Vec2::new(mount_off_y + mount_rad2 - brace_indent, self.back_thickness),
-                Vec2::new(
-                    mount_off_y + mount_rad2 - brace_indent + brace_extent,
-                    self.back_thickness,
-                ),
-                Vec2::new(
-                    mount_off_y + mount_rad2 - brace_indent,
-                    self.back_thickness + mount_length,
-                ),
-            ])
-            .as_sdf()
-            .extrude_x(mount_off_x - brace_width / 2.0..mount_off_x + brace_width / 2.0),
-        );
+        sdf = sdf.union(&self.brace_x(self.mount.off_y, 1.0));
+        sdf = sdf.union(&self.brace_x(-self.mount.off_y, -1.0));
+        sdf = sdf.union(&self.brace_y(self.mount.off_y, 1.0));
+        sdf = sdf.union(&self.brace_y(self.mount.off_y, -1.0));
+        sdf = sdf.union(&self.brace_y(-self.mount.off_y, 1.0));
+        sdf = sdf.union(&self.brace_y(-self.mount.off_y, -1.0));
+        sdf
+    }
+    fn wiring_pos(&self) -> Sdf3 {
+        let mut sdf = Sdf::empty();
         sdf = sdf.union(
             &Polygon2::new(vec![
                 Vec2::new(
-                    -mount_off_y - mount_rad2 + brace_indent,
-                    self.back_thickness,
+                    self.tube.width / 2.0 - self.tube.wire_inlet1,
+                    self.tube.wall_bottom,
                 ),
                 Vec2::new(
-                    -mount_off_y - mount_rad2 + brace_indent - brace_extent,
-                    self.back_thickness,
+                    self.tube.width / 2.0 - self.tube.wire_inlet1 - self.tube.tab_width,
+                    self.tube.wall_bottom,
                 ),
                 Vec2::new(
-                    -mount_off_y - mount_rad2 + brace_indent,
-                    self.back_thickness + mount_length,
+                    self.tube.width / 2.0 - self.tube.wire_inlet1 - self.tube.tab_width,
+                    self.back_thickness - self.tube.wall_top - self.tube.wire_inlet2,
                 ),
             ])
             .as_sdf()
-            .extrude_x(mount_off_x - brace_width / 2.0..mount_off_x + brace_width / 2.0),
+            .extrude_x(self.port.start_x + self.port.width..self.aabb.max().x()),
         );
+        sdf
+    }
+    fn wiring_neg(&self) -> Sdf3 {
+        let mut sdf = Sdf::empty();
         sdf = sdf.union(
-            &Polygon2::new(vec![
-                Vec2::new(self.back_thickness, mount_off_x + mount_rad2 - brace_indent),
-                Vec2::new(
-                    self.back_thickness,
-                    mount_off_x + mount_rad2 - brace_indent + brace_extent,
-                ),
-                Vec2::new(
-                    self.back_thickness + mount_length,
-                    mount_off_x + mount_rad2 - brace_indent,
-                ),
-            ])
-            .as_sdf()
-            .extrude_y(-mount_off_y - brace_width / 2.0..-mount_off_y + brace_width / 2.0),
-        );
-        sdf = sdf.union(
-            &Polygon2::new(vec![
-                Vec2::new(self.back_thickness, mount_off_x - mount_rad2 + brace_indent),
-                Vec2::new(
-                    self.back_thickness,
-                    mount_off_x - mount_rad2 + brace_indent - brace_extent,
-                ),
-                Vec2::new(
-                    self.back_thickness + mount_length,
-                    mount_off_x - mount_rad2 + brace_indent,
-                ),
-            ])
-            .as_sdf()
-            .extrude_y(-mount_off_y - brace_width / 2.0..-mount_off_y + brace_width / 2.0),
-        );
-        sdf = sdf.union(
-            &Polygon2::new(vec![
-                Vec2::new(self.back_thickness, mount_off_x + mount_rad2 - brace_indent),
-                Vec2::new(
-                    self.back_thickness,
-                    mount_off_x + mount_rad2 - brace_indent + brace_extent,
-                ),
-                Vec2::new(
-                    self.back_thickness + mount_length,
-                    mount_off_x + mount_rad2 - brace_indent,
-                ),
-            ])
-            .as_sdf()
-            .extrude_y(mount_off_y - brace_width / 2.0..mount_off_y + brace_width / 2.0),
-        );
-        sdf = sdf.union(
-            &Polygon2::new(vec![
-                Vec2::new(self.back_thickness, mount_off_x - mount_rad2 + brace_indent),
-                Vec2::new(
-                    self.back_thickness,
-                    mount_off_x - mount_rad2 + brace_indent - brace_extent,
-                ),
-                Vec2::new(
-                    self.back_thickness + mount_length,
-                    mount_off_x - mount_rad2 + brace_indent,
-                ),
-            ])
-            .as_sdf()
-            .extrude_y(mount_off_y - brace_width / 2.0..mount_off_y + brace_width / 2.0),
-        );
-        sdf = sdf.difference(
-            &Aabb::new(Vec3::new(16.0, -8.0, -1000.0), Vec3::new(23.0, 8.0, 1000.0)).as_sdf(),
-        );
-        let bottom_tab_x = 20.0;
-        sdf = sdf.union(
-            &Polygon2::new(vec![
-                Vec2::new(self.aabb.max().z(), bottom_tab_x - self.tab_size),
-                Vec2::new(self.aabb.max().z(), bottom_tab_x + self.tab_size),
-                Vec2::new(self.aabb.max().z() + self.tab_size, bottom_tab_x),
-            ])
-            .as_sdf()
-            .extrude_y(self.aabb.min().y()..self.aabb.min().y() + self.tab_thickness),
-        );
-        sdf = sdf.difference(
-            &Cylinder::new(
-                Vec3::new(
-                    bottom_tab_x,
-                    self.aabb.min().y(),
-                    self.aabb.max().z() + self.tab_wall_size + 2.0,
-                ),
-                Vec3::axis_y() * 10.0,
-                through_hole_m4 / 2.0,
-            )
-            .as_sdf(),
-        );
-        sdf = sdf.difference(
-            &Cylinder::new(
-                Vec3::new(
-                    bottom_tab_x,
-                    self.aabb.min().y(),
-                    self.aabb.max().z() + self.tab_wall_size + 2.0,
-                ),
-                Vec3::axis_y() * 2.5,
-                4.0,
-            )
-            .as_sdf(),
-        );
-        sdf = sdf.difference(
-            &Polygon2::new(vec![
-                Vec2::new(0.0, bottom_tab_x - self.tab_size),
-                Vec2::new(0.0, bottom_tab_x + self.tab_size),
-                Vec2::new(self.tab_size, bottom_tab_x),
-            ])
-            .as_sdf()
-            .extrude_y(self.aabb.min().y()..self.aabb.min().y() + self.tab_thickness),
-        );
-        sdf = sdf.difference(
-            &Cylinder::new(
-                Vec3::new(
-                    bottom_tab_x,
-                    self.aabb.min().y() + self.tab_thickness,
-                    self.tab_wall_size + 2.0,
-                ),
-                Vec3::axis_y() * pilot_depth_m4,
-                pilot_radius_m4,
-            )
-            .as_sdf(),
-        );
-        let tube_height = 8.0;
-        let tube_start = 23.0;
-        let tube_length = self.aabb.max().x() - tube_start;
-        sdf = sdf.difference(
             &Aabb::new(
-                Vec3::new(tube_start, -tube_height / 2.0, 1.0),
-                Vec3::new(1000.0, tube_height / 2.0, 3.0),
-            )
-            .as_sdf(),
-        );
-        sdf = sdf.difference(
-            &Aabb::new(
-                Vec3::new(tube_start, -tube_height / 2.0, -10.0),
-                Vec3::new(tube_start + tube_length, -tube_height / 2.0 + 1.0, 2.0),
+                Vec3::new(self.port.start_x, -self.port.length / 2.0, -self.inf),
+                Vec3::new(
+                    self.port.start_x + self.port.width,
+                    self.port.length / 2.0,
+                    self.inf,
+                ),
             )
             .as_sdf(),
         );
         sdf = sdf.union(
+            &Aabb::new(
+                Vec3::new(
+                    self.port.start_x + self.port.width,
+                    -self.tube.width / 2.0,
+                    self.tube.wall_bottom,
+                ),
+                Vec3::new(
+                    self.inf,
+                    self.tube.width / 2.0,
+                    self.back_thickness - self.tube.wall_top,
+                ),
+            )
+            .as_sdf(),
+        );
+        sdf = sdf.union(
+            &Aabb::new(
+                Vec3::new(
+                    self.port.start_x + self.port.width,
+                    self.tube.width / 2.0 - self.tube.wire_inlet1,
+                    -self.inf,
+                ),
+                Vec3::new(
+                    self.inf,
+                    self.tube.width / 2.0,
+                    (self.tube.wall_bottom + self.back_thickness - self.tube.wall_top) / 2.0,
+                ),
+            )
+            .as_sdf(),
+        );
+        sdf
+    }
+    fn tab(&self, mut sdf: Sdf3, origin: Vec2, axis: Vec3) -> Sdf3 {
+        let axis2 = Vec3::axis_z();
+        let axis1 = -axis.cross(axis2);
+        sdf = sdf.union(
             &Polygon2::new(vec![
-                Vec2::new(-tube_height / 2.0 + 1.0, 1.0),
-                Vec2::new(-tube_height / 2.0 + 3.0, 1.0),
-                Vec2::new(-tube_height / 2.0 + 3.0, 2.8),
+                Vec2::new(-self.tab.size, 0.0),
+                Vec2::new(self.tab.size, 0.0),
+                Vec2::new(0.0, self.tab.size),
             ])
             .as_sdf()
-            .extrude_x(tube_start..tube_start + tube_length),
+            .extrude(
+                Vec3::new(origin.x(), origin.y(), self.aabb.max().z()),
+                axis1,
+                axis2,
+                self.tab.thickness,
+            ),
         );
+        sdf = sdf.difference(
+            &Polygon2::new(vec![
+                Vec2::new(-self.tab.size, 0.0),
+                Vec2::new(self.tab.size, 0.0),
+                Vec2::new(0.0, self.tab.size),
+            ])
+            .as_sdf()
+            .extrude(
+                Vec3::new(origin.x(), origin.y(), 0.0),
+                axis1,
+                axis2,
+                self.tab.thickness,
+            ),
+        );
+
+        sdf = sdf.difference(
+            &Cylinder::new(
+                Vec3::new(
+                    origin.x(),
+                    origin.y(),
+                    self.aabb.max().z() + self.tab.wall_size,
+                ),
+                axis * self.tab.thickness * 2.0,
+                self.m4.through_radius,
+            )
+            .as_sdf(),
+        );
+        sdf = sdf.difference(
+            &Cylinder::new(
+                Vec3::new(
+                    origin.x(),
+                    origin.y(),
+                    self.aabb.max().z() + self.tab.wall_size,
+                ),
+                axis * self.m4.countersink_depth,
+                self.m4.countersink_radius,
+            )
+            .as_sdf(),
+        );
+        sdf = sdf.difference(
+            &Cylinder::new(
+                Vec3::new(origin.x(), origin.y(), self.tab.wall_size),
+                axis * (self.tab.thickness + self.m4.ruthex_depth),
+                self.m4.ruthex_radius,
+            )
+            .as_sdf(),
+        );
+        sdf
+    }
+    fn hall_slot(&self) -> Sdf3 {
+        Polygon2::new(vec![Vec2::new()])
+    }
+    fn build_sdf(&self) -> Sdf3 {
+        let mut sdf = self.main_body();
+        sdf = sdf.union(&self.mounts());
+        sdf = sdf.difference(&self.wiring_neg());
+        sdf = sdf.union(&self.wiring_pos());
+        sdf = self.tab(
+            sdf,
+            Vec2::new(self.tab.bottom_x, self.aabb.min().y()),
+            Vec3::axis_y(),
+        );
+        sdf = self.tab(
+            sdf,
+            Vec2::new(self.tab.top_x, self.aabb.max().y()),
+            -Vec3::axis_y(),
+        );
+        sdf = self.tab(
+            sdf,
+            Vec2::new(self.aabb.max().x(), self.tab.right_y),
+            -Vec3::axis_x(),
+        );
+        sdf = sdf.difference(&self.hall_slot());
         sdf
     }
     pub fn build(&self) -> Mesh {
         let sdf = self.build_sdf();
         let mut marching = MarchingMesh::new(Aabb::new(
             self.aabb.min() + Vec3::splat(-0.1),
-            self.aabb.max() + Vec3::new(0.1, 0.1, self.tab_size + 0.1),
+            self.aabb.max() + Vec3::new(0.1, 0.1, self.tab.size + 0.1),
         ));
         marching
-            // .min_render_depth(6)
-            // .max_render_depth(7)
-            // .subdiv_max_dot(0.9);
-        .min_render_depth(6)
-        .max_render_depth(10)
-        .subdiv_max_dot(0.999);
+            .min_render_depth(6)
+            .max_render_depth(7)
+            .subdiv_max_dot(0.9);
+        // .min_render_depth(6)
+        // .max_render_depth(10)
+        // .subdiv_max_dot(0.999);
         let mesh = marching.build(&sdf);
         // let mut hem = HalfEdgeMesh::new(&mesh);
         // let mut decimate = Decimate::new(&mut hem);
@@ -317,12 +391,56 @@ impl HousingBuilder {
 async fn main() -> anyhow::Result<()> {
     let start = Instant::now();
     let mesh = HousingBuilder {
+        inf: 1000.0,
+        aabb: Aabb::new(Vec3::new(-35.0, -71.0, 0.0), Vec3::new(59.0, 70.0, 50.0)),
         drum_bounding_radius: 56.0,
         back_thickness: 4.0,
-        tab_size: 14.0,
-        tab_thickness: 5.0,
-        tab_wall_size: 4.0,
-        aabb: Aabb::new(Vec3::new(-35.0, -71.0, 0.0), Vec3::new(59.0, 59.0, 50.0)),
+        tab: Tab {
+            size: 14.0,
+            thickness: 5.0,
+            wall_size: 6.0,
+            bottom_x: 20.0,
+            top_x: -20.0,
+            right_y: 45.0,
+        },
+        catch: Catch {
+            bottom_thickness: 3.0,
+            max_x: 1.0,
+        },
+        mount: Mount {
+            off_x: 8.0,
+            off_y: 17.5,
+            length: 18.0,
+            motor_radius: 14.0,
+            motor_fit: 0.2,
+            rad1: 6.0,
+            rad2: 4.9,
+        },
+        brace: Brace {
+            width: 2.0,
+            extent: 6.0,
+            indent: 0.2,
+        },
+        m4: Thread {
+            ruthex_depth: 8.1,
+            ruthex_radius: 5.6 / 2.0,
+            through_radius: 4.2 / 2.0,
+            countersink_radius: 4.0,
+            countersink_depth: 2.5,
+        },
+        port: Port {
+            start_x: 16.0,
+            width: 7.0,
+            length: 16.0,
+        },
+        tube: Tube {
+            width: 8.0,
+            wall_bottom: 1.0,
+            wall_top: 1.0,
+            wire_inlet1: 1.0,
+            wire_inlet2: 0.2,
+            tab_width: 2.0,
+        },
     }
     .build();
     println!("{:?}", mesh.check_manifold());

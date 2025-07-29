@@ -144,9 +144,9 @@ impl Sdf<2> {
     }
     pub fn extrude_y(&self, range: Range<f64>) -> Sdf<3> {
         self.extrude(
-            Vec3::new(0.0, range.start, 0.0),
-            Vec3::axis_z(),
+            Vec3::new(0.0, range.end, 0.0),
             Vec3::axis_x(),
+            Vec3::axis_z(),
             range.end - range.start,
         )
     }
