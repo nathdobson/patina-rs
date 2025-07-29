@@ -1,4 +1,3 @@
-pub mod sphere;
 pub mod triangle3;
 pub mod plane;
 pub mod ray3;

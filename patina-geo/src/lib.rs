@@ -10,3 +10,4 @@ pub mod geo2;
 pub mod aabb;
 pub mod segment2;
 pub mod ray;
+pub mod sphere;

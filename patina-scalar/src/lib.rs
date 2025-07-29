@@ -35,6 +35,9 @@ pub trait Scalar:
     fn from_f64(value: f64) -> Self;
     fn sqrt(self) -> Self;
     fn abs(self) -> Self;
+    fn sign(self) -> Self {
+        self.piecewise(Self::from_f64(-1.0), Self::from_f64(1.0))
+    }
 }
 
 impl Scalar for f64 {

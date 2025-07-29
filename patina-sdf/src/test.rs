@@ -5,7 +5,7 @@ use crate::sdf::union::SdfUnion;
 use crate::subdivide::Subdivide;
 use patina_geo::aabb::Aabb;
 use patina_geo::geo3::plane::Plane;
-use patina_geo::geo3::sphere::Sphere;
+use patina_geo::sphere::Sphere;
 use patina_mesh::ser::encode_test_file;
 use patina_vec::vec3::Vec3;
 

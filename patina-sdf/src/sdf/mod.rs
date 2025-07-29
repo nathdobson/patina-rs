@@ -1,6 +1,7 @@
 mod aabb;
 mod cylinder;
 mod empty;
+mod extrude;
 pub mod invert;
 pub mod leaf;
 mod plane;
@@ -8,10 +9,13 @@ mod polygon;
 mod rotate;
 mod sphere;
 mod transform;
+mod triangle;
 pub mod truncated_cone;
 pub mod union;
+mod circle;
 
 use crate::sdf::empty::{SdfEmpty, SdfFull};
+use crate::sdf::extrude::Extrude;
 use crate::sdf::invert::SdfInvert;
 use crate::sdf::leaf::{SdfLeaf, SdfLeafImpl};
 use crate::sdf::rotate::Rotate;
@@ -28,6 +32,7 @@ use patina_vec::vec3::{Vec3, Vector3};
 use std::any::{Any, TypeId};
 use std::fmt::{Debug, Formatter};
 use std::mem;
+use std::ops::Range;
 use std::sync::Arc;
 
 /// The [signed distance function (SDF)](https://iquilezles.org/articles/distfunctions/)
@@ -114,6 +119,36 @@ impl Sdf<2> {
     }
     pub fn rotate(&self, origin: Vec3, axis: Vec3) -> Sdf<3> {
         Sdf::new(Transform::new(Rotate::new(origin, axis), self.clone()))
+    }
+    pub fn extrude(&self, origin: Vec3, axis1: Vec3, axis2: Vec3, distance: f64) -> Sdf<3> {
+        Sdf::new(Transform::new(
+            Extrude::new(origin, axis1, axis2, distance),
+            self.clone(),
+        ))
+    }
+    pub fn extrude_z(&self, range: Range<f64>) -> Sdf<3> {
+        self.extrude(
+            Vec3::new(0.0, 0.0, range.start),
+            Vec3::axis_x(),
+            Vec3::axis_y(),
+            range.end - range.start,
+        )
+    }
+    pub fn extrude_x(&self, range: Range<f64>) -> Sdf<3> {
+        self.extrude(
+            Vec3::new(range.start, 0.0, 0.0),
+            Vec3::axis_y(),
+            Vec3::axis_z(),
+            range.end - range.start,
+        )
+    }
+    pub fn extrude_y(&self, range: Range<f64>) -> Sdf<3> {
+        self.extrude(
+            Vec3::new(0.0, range.start, 0.0),
+            Vec3::axis_z(),
+            Vec3::axis_x(),
+            range.end - range.start,
+        )
     }
 }
 

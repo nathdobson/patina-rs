@@ -4,7 +4,7 @@ use patina_geo::aabb::Aabb;
 use patina_geo::geo3::aabb3::Aabb3;
 use patina_geo::geo3::cylinder::Cylinder;
 use patina_geo::geo3::plane::Plane;
-use patina_geo::geo3::sphere::Sphere;
+use patina_geo::sphere::Sphere;
 use patina_scalar::Scalar;
 use patina_scalar::deriv::Deriv;
 use patina_vec::vec::Vector;
