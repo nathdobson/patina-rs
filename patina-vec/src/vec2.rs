@@ -1,5 +1,6 @@
 use crate::vec::Vector;
 use std::ops::{Mul, Sub};
+use std::f64;
 
 pub type Vector2<T> = Vector<T, 2>;
 pub type Vec2 = Vector2<f64>;
@@ -23,6 +24,12 @@ impl Vec2 {
         } else {
             self.y() / self.x()
         }
+    }
+    pub fn from_deg(x: f64) -> Self {
+        Self::from_rad(x * (2.0 * f64::consts::PI / 360.0))
+    }
+    pub fn from_rad(x: f64) -> Self {
+        Self::new(x.cos(), x.sin())
     }
 }
 
