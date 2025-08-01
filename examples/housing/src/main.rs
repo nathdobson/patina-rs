@@ -499,6 +499,26 @@ impl HousingBuilder {
         );
         sdf
     }
+    fn drillium(&self) -> Sdf3 {
+        let mut sdf = Sdf::empty();
+        sdf = sdf.union(
+            &Cylinder::new(
+                Vec3::new(42.0, 57.0, -self.inf),
+                Vec3::axis_z() * self.inf * 2.0,
+                10.0,
+            )
+            .as_sdf(),
+        );
+        sdf = sdf.union(
+            &Cylinder::new(
+                Vec3::new(44.0, -57.0, -self.inf),
+                Vec3::axis_z() * self.inf * 2.0,
+                12.0,
+            )
+                .as_sdf(),
+        );
+        sdf
+    }
     fn build_sdf(&self) -> Sdf3 {
         let mut sdf = self.main_body();
         sdf = sdf.union(&self.mounts());
@@ -522,6 +542,7 @@ impl HousingBuilder {
         sdf = sdf.union(&self.hall_mount());
         sdf = sdf.difference(&self.motor_clearance());
         sdf = sdf.union(&self.drum_guide());
+        sdf = sdf.difference(&self.drillium());
         sdf
     }
     pub fn build(&self) -> Mesh {
@@ -532,11 +553,11 @@ impl HousingBuilder {
         ));
         marching
             // .min_render_depth(6)
-            // .max_render_depth(8)
+            // .max_render_depth(7)
             // .subdiv_max_dot(0.9);
-        .min_render_depth(7)
-        .max_render_depth(10)
-        .subdiv_max_dot(0.999);
+            .min_render_depth(7)
+            .max_render_depth(10)
+            .subdiv_max_dot(0.999);
         let mesh = marching.build(&sdf);
         // let mut hem = HalfEdgeMesh::new(&mesh);
         // let mut decimate = Decimate::new(&mut hem);
