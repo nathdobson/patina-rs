@@ -2,6 +2,7 @@ use itertools::Itertools;
 use std::cell::OnceCell;
 // use patina_calc::{EvalVisitor, Expr, ExprProgramBuilder, Program, ProgramVisit, Solver};
 use crate::octree::{Octree, OctreeBranch, OctreePath, OctreeView, OctreeViewMut};
+use crate::progress::ProgressGuard;
 use crate::sdf::{Sdf, Sdf3};
 use crate::transvoxel::cube_edge::{CubeEdge, CubeEdgeSet};
 use crate::transvoxel::cube_face::{CubeFace, CubeFaceSet};
@@ -10,6 +11,8 @@ use crate::transvoxel::cube_triangle::CubeTriMesh;
 use crate::transvoxel::cube_vertex;
 use crate::transvoxel::cube_vertex::{CubeVertex, CubeVertexSet, cube_corners, cube_points};
 use inari::DecInterval;
+use indicatif::{MultiProgress, ProgressBar, ProgressIterator, ProgressStyle};
+use indicatif::{ParallelProgressIterator, ProgressFinish};
 use ordered_float::NotNan;
 use parking_lot::Mutex;
 use patina_geo::aabb::Aabb;
@@ -21,10 +24,11 @@ use patina_scalar::deriv::Deriv;
 use patina_scalar::newton::Newton;
 use patina_vec::vec3::{Vec3, Vector3};
 use rayon::iter::ParallelIterator;
+use rayon::iter::{IndexedParallelIterator, ParallelBridge};
 use rayon::iter::{IntoParallelRefIterator, IntoParallelRefMutIterator};
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::mem;
-
+use std::sync::atomic::{AtomicUsize, Ordering};
 #[derive(Debug, Default)]
 struct MarchingNodeValue {}
 
@@ -64,6 +68,7 @@ pub struct MarchingMesh {
     subdiv_max_dot: f64,
     aabb: Aabb3,
     mesh_builder: Mutex<MeshBuilder>,
+    progress_style: ProgressStyle,
 }
 
 type MarchingOctree = Octree<MarchingNodeKey, MarchingNodeValue>;
@@ -81,6 +86,11 @@ impl MarchingMesh {
                 vertices: vec![],
                 triangles: vec![],
             }),
+            progress_style: ProgressStyle::with_template(
+                "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
+            )
+            .unwrap()
+            .progress_chars("##-"),
         }
     }
     pub fn min_render_depth(&mut self, min_render_depth: usize) -> &mut Self {
@@ -233,14 +243,14 @@ impl MarchingMesh {
         tree.key_mut().sdf = SdfState::Sdf(sdf.clone());
         Some(sdf)
     }
-    fn build_octree(&self, tree: &mut MarchingOctree, sdf: &Sdf3) {
+    fn build_octree(&self, tree: &mut MarchingOctree, sdf: &Sdf3, progress: ProgressGuard) {
         let aabb = tree.path().aabb_inside(&self.aabb);
         let sdf = self.init_sdf(tree, sdf);
         let Some(sdf) = sdf else {
             return;
         };
         if tree.path().depth() < self.min_render_depth {
-            self.build_branch(tree, &sdf);
+            self.build_branch(tree, &sdf, progress);
             return;
         }
         if tree.path().depth() >= self.max_render_depth {
@@ -262,7 +272,7 @@ impl MarchingMesh {
             .tuple_combinations()
             .any(|(n1, n2)| n1.dot(*n2) < self.subdiv_max_dot)
         {
-            self.build_branch(tree, &sdf);
+            self.build_branch(tree, &sdf, progress);
         }
     }
     fn position(&self, aabb: &Aabb3, v: CubeVertex) -> Vec3 {
@@ -309,7 +319,7 @@ impl MarchingMesh {
         let normal: Vec3 = sdf.normal(eval_position);
         (vertex_position, normal)
     }
-    fn build_branch(&self, tree: &mut MarchingOctree, sdf: &Sdf3) {
+    fn build_branch(&self, tree: &mut MarchingOctree, sdf: &Sdf3, progress: ProgressGuard) {
         let depth = tree.path().depth();
         match tree.view_mut() {
             OctreeViewMut::Leaf(_, _) => {
@@ -321,12 +331,28 @@ impl MarchingMesh {
             OctreeViewMut::Leaf(_, _) => unreachable!(),
             OctreeViewMut::Branch(branch) => branch,
         };
-        branch.children_flat_mut().par_iter_mut().for_each(|child| {
-            self.build_octree(child, sdf);
-        });
+        branch
+            .children_flat_mut()
+            .par_iter_mut()
+            .zip_eq(
+                progress
+                    .divide(8)
+                    .collect_array::<8>()
+                    .unwrap()
+                    .par_iter_mut(),
+            )
+            .for_each(|(child, progress)| {
+                self.build_octree(child, sdf, progress.take());
+            });
     }
 
-    fn build_mesh(&self, root: &MarchingOctree, tree: &MarchingOctree, root_sdf: &Sdf3) {
+    fn build_mesh(
+        &self,
+        root: &MarchingOctree,
+        tree: &MarchingOctree,
+        root_sdf: &Sdf3,
+        progress: ProgressGuard,
+    ) {
         match tree.view() {
             OctreeView::Leaf(leaf, _) => match &leaf.sdf {
                 SdfState::Uninit => unreachable!(),
@@ -336,7 +362,7 @@ impl MarchingMesh {
                 }
             },
             OctreeView::Branch(branch) => {
-                self.build_mesh_branch(root, branch, root_sdf);
+                self.build_mesh_branch(root, branch, root_sdf, progress);
             }
         }
     }
@@ -346,10 +372,21 @@ impl MarchingMesh {
         root: &MarchingOctree,
         branch: &MarchingOctreeBranch,
         root_sdf: &Sdf3,
+        progress: ProgressGuard,
     ) {
-        branch.children_flat().par_iter().for_each(|child| {
-            self.build_mesh(root, child, root_sdf);
-        });
+        branch
+            .children_flat()
+            .par_iter()
+            .zip_eq(
+                progress
+                    .divide(8)
+                    .collect_array::<8>()
+                    .unwrap()
+                    .par_iter_mut(),
+            )
+            .for_each(|(child, progress)| {
+                self.build_mesh(root, child, root_sdf, progress.take());
+            });
     }
 
     fn build_mesh_leaf(&self, root: &MarchingOctree, tree: &MarchingOctree, sdf: &Sdf3) {
@@ -412,9 +449,14 @@ impl MarchingMesh {
     }
 
     fn refine_neighbors(&mut self, octree: &mut MarchingOctree, sdf: &Sdf3) {
-        for depth in (0..=self.max_render_depth).rev() {
+        for depth in (0..=self.max_render_depth as u16)
+            .rev()
+            .progress_with_style(self.progress_style.clone())
+            .with_message("refining neighbors")
+            .with_finish(ProgressFinish::Abandon)
+        {
             let mut to_refine = HashSet::new();
-            self.get_neighbors(octree, depth, &mut to_refine);
+            self.get_neighbors(octree, depth as usize, &mut to_refine);
             for path in to_refine {
                 self.refine_path(octree, path, Some(sdf));
             }
@@ -428,17 +470,43 @@ impl MarchingMesh {
             .vertices
             .par_iter()
             .map(|x| self.find_vertex(&x.path, x.v1, x.v2, &x.sdf).0)
+            .progress_with_style(self.progress_style.clone())
+            .with_message("collecting mesh")
+            .with_finish(ProgressFinish::Abandon)
             .collect();
         Mesh::new(vertices, self.mesh_builder.get_mut().triangles.clone())
     }
 
     pub fn build(mut self, sdf: &Sdf3) -> Mesh {
         let mut octree = MarchingOctree::new_root();
-        self.build_octree(&mut octree, sdf);
+
+        let max_progress = 1 << (3 * self.max_render_depth);
+        let progress = ProgressBar::new(max_progress)
+            .with_message("building tree")
+            .with_style(self.progress_style.clone())
+            .with_finish(ProgressFinish::Abandon);
+
+        self.build_octree(
+            &mut octree,
+            sdf,
+            ProgressGuard::new(&progress, max_progress),
+        );
+        progress.finish();
+
         self.refine_neighbors(&mut octree, sdf);
-        let mut comp = Complexity::new();
-        comp.add_tree(&octree);
-        self.build_mesh(&octree, &octree, sdf);
+        // let mut comp = Complexity::new();
+        // comp.add_tree(&octree);
+        let progress = ProgressBar::new(max_progress)
+            .with_message("building mesh")
+            .with_style(self.progress_style.clone())
+            .with_finish(ProgressFinish::Abandon);
+        self.build_mesh(
+            &octree,
+            &octree,
+            sdf,
+            ProgressGuard::new(&progress, max_progress),
+        );
+        progress.finish();
         self.collect_mesh()
     }
 }

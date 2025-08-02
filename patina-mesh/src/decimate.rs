@@ -161,6 +161,7 @@ impl<'mesh> Decimate<'mesh> {
     }
 }
 
+#[cfg(test)]
 #[tokio::test]
 async fn decimate_test() {
     let mut vertices = vec![];

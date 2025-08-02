@@ -87,6 +87,7 @@ struct HallMount {
     rad2: f64,
     tilt_deg: f64,
     extra_cone: f64,
+    hole_bias: f64,
 }
 
 struct DrumGuide {
@@ -116,6 +117,7 @@ struct HousingBuilder {
     hall_mount: HallMount,
     drum_guide: DrumGuide,
     hall_channel: HallChannel,
+    top_catch: TopCatch,
 }
 
 impl HousingBuilder {
@@ -433,7 +435,7 @@ impl HousingBuilder {
             &Plane::new(
                 Vec3::new(
                     0.0,
-                    self.hall_mount.off_y,
+                    self.hall_mount.off_y + self.hall_mount.hole_bias,
                     self.back_thickness + self.hall_mount.length,
                 ),
                 -norm,
@@ -445,7 +447,7 @@ impl HousingBuilder {
             &Cylinder::new(
                 Vec3::new(
                     self.hall_mount.hole1_x - self.hall_mount.width,
-                    self.hall_mount.off_y,
+                    self.hall_mount.off_y + self.hall_mount.hole_bias,
                     self.back_thickness + self.hall_mount.length,
                 ),
                 -norm * self.m2.ruthex_depth,
@@ -457,7 +459,7 @@ impl HousingBuilder {
             &Cylinder::new(
                 Vec3::new(
                     self.hall_mount.hole1_x,
-                    self.hall_mount.off_y,
+                    self.hall_mount.off_y + self.hall_mount.hole_bias,
                     self.back_thickness + self.hall_mount.length,
                 ),
                 -norm * self.m2.ruthex_depth,
@@ -515,12 +517,28 @@ impl HousingBuilder {
                 Vec3::axis_z() * self.inf * 2.0,
                 12.0,
             )
-                .as_sdf(),
+            .as_sdf(),
         );
         sdf
     }
+    fn top_catch(&self) -> Sdf3 {
+        Aabb::new(
+            Vec3::new(
+                self.aabb.min().x(),
+                self.top_catch.min_y,
+                self.back_thickness,
+            ),
+            Vec3::new(
+                self.aabb.min().x() + self.top_catch.thickness,
+                self.top_catch.max_y,
+                self.aabb.max().z(),
+            ),
+        )
+        .as_sdf()
+    }
     fn build_sdf(&self) -> Sdf3 {
         let mut sdf = self.main_body();
+        sdf = sdf.union(&self.top_catch());
         sdf = sdf.union(&self.mounts());
         sdf = sdf.difference(&self.wiring_neg());
         sdf = sdf.union(&self.wiring_pos());
@@ -552,12 +570,12 @@ impl HousingBuilder {
             self.aabb.max() + Vec3::new(0.1, 0.1, self.tab.size + 0.1),
         ));
         marching
-            // .min_render_depth(6)
-            // .max_render_depth(7)
-            // .subdiv_max_dot(0.9);
-            .min_render_depth(7)
-            .max_render_depth(10)
-            .subdiv_max_dot(0.999);
+            .min_render_depth(6)
+            .max_render_depth(7)
+            .subdiv_max_dot(0.9);
+        // .min_render_depth(7)
+        // .max_render_depth(10)
+        // .subdiv_max_dot(0.999);
         let mesh = marching.build(&sdf);
         // let mut hem = HalfEdgeMesh::new(&mesh);
         // let mut decimate = Decimate::new(&mut hem);
@@ -567,6 +585,12 @@ impl HousingBuilder {
         // let mesh = hem.as_mesh();
         mesh
     }
+}
+
+struct TopCatch {
+    min_y: f64,
+    max_y: f64,
+    thickness: f64,
 }
 
 #[tokio::main]
@@ -631,23 +655,24 @@ async fn main() -> anyhow::Result<()> {
             length: 16.0,
         },
         tube: Tube {
-            width: 8.0,
+            width: 12.0,
             wall_bottom: 1.0,
             wall_top: 1.0,
-            wire_inlet1: 1.0,
-            wire_inlet2: 0.2,
+            wire_inlet1: 1.2,
+            wire_inlet2: 0.6,
             tab_width: 2.0,
         },
         hall_mount: HallMount {
             width: 10.0,
             thickness: 6.0,
             length: 20.0,
-            hole1_x: -8.5,
-            off_y: -10.0,
-            rad1: 6.0,
+            hole1_x: -9.0,
+            off_y: -13.0,
+            rad1: 4.0,
             rad2: 4.0,
-            tilt_deg: 45.0,
-            extra_cone: 3.5,
+            tilt_deg: 60.0,
+            extra_cone: 2.0,
+            hole_bias: 2.0,
         },
         drum_guide: DrumGuide {
             length: 20.0,
@@ -657,6 +682,11 @@ async fn main() -> anyhow::Result<()> {
         hall_channel: HallChannel {
             width: 6.0,
             length: 30.0,
+        },
+        top_catch: TopCatch {
+            min_y: 34.0,
+            max_y: 50.0,
+            thickness: 2.0,
         },
     }
     .build();

@@ -436,6 +436,7 @@ fn test() {
     hem.check_manifold().unwrap();
 }
 
+#[cfg(test)]
 #[tokio::test]
 async fn test_cube() {
     for seed in 51..1000 {
