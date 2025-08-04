@@ -2,6 +2,9 @@
 #![allow(unused_imports)]
 #![deny(unused_must_use)]
 
+mod inner;
+mod outer;
+
 use anyhow::Context;
 use patina_geo::aabb::Aabb;
 use patina_geo::geo2::polygon2::Polygon2;
@@ -599,27 +602,7 @@ async fn main() -> anyhow::Result<()> {
     let mesh = HousingBuilder {
         inf: 1000.0,
         aabb: Aabb::new(Vec3::new(-35.0, -71.0, 0.0), Vec3::new(59.0, 70.0, 50.0)),
-        m2: Thread {
-            ruthex_depth: 4.0,
-            ruthex_radius: 3.2 / 2.0,
-            through_radius: 2.2 / 2.0,
-            countersink_radius: 4.0 / 2.0,
-            countersink_depth: 1.6,
-        },
-        m3: Thread {
-            ruthex_depth: 5.7,
-            ruthex_radius: 4.6 / 2.0,
-            through_radius: 3.2 / 2.0,
-            countersink_radius: 6.0 / 2.0,
-            countersink_depth: 2.0,
-        },
-        m4: Thread {
-            ruthex_depth: 8.1,
-            ruthex_radius: 5.6 / 2.0,
-            through_radius: 4.2 / 2.0,
-            countersink_radius: 8.0 / 2.0,
-            countersink_depth: 2.5,
-        },
+
         drum_bounding_radius: 56.0,
         back_thickness: 4.0,
         tab: Tab {

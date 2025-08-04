@@ -3,6 +3,14 @@ name = "housing"
 version = "0.1.0"
 edition = "2024"
 
+[[bin]]
+name = "inner"
+path = "src/main.rs"
+
+[[bin]]
+name = "outer"
+path = "src/outer.rs"
+
 [dependencies]
 patina-geo={workspace = true}
 patina-mesh = {workspace = true}
@@ -10,3 +18,4 @@ patina-vec={workspace = true}
 tokio = {version="1.46.1",features=["rt","macros","rt-multi-thread"]}
 anyhow = "1.0.98"
 patina-sdf= {workspace = true}
+patina-threads={workspace = true}

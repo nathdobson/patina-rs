@@ -343,6 +343,15 @@ dependencies = [
 [[package]]
 name = "drum"
 version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "patina-geo",
+ "patina-mesh",
+ "patina-sdf",
+ "patina-threads",
+ "patina-vec",
+ "tokio",
+]
 
 [[package]]
 name = "dyn-clone"
@@ -502,6 +511,7 @@ dependencies = [
  "patina-geo",
  "patina-mesh",
  "patina-sdf",
+ "patina-threads",
  "patina-vec",
  "tokio",
 ]
@@ -948,6 +958,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "patina-threads"
+version = "0.1.0"
+
+[[package]]
 name = "patina-vec"
 version = "0.1.0"
 dependencies = [
@@ -1374,9 +1388,9 @@ dependencies = [
 
 [[package]]
 name = "tokio"
-version = "1.46.1"
+version = "1.47.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0cc3a2344dafbe23a245241fe8b09735b521110d30fcefbbd5feb1797ca35d17"
+checksum = "89e49afdadebb872d3145a5638b59eb0691ea23e46ca484037cfab3b76b95038"
 dependencies = [
  "backtrace",
  "bytes",
@@ -1387,7 +1401,7 @@ dependencies = [
  "signal-hook-registry",
  "slab",
  "tokio-macros",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -1577,15 +1591,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "56e6c93f3a0c3b36176cb1327a4958a0353d5d166c2a35cb268ace15e91d3b57"
 dependencies = [
  "windows-link",
-]
-
-[[package]]
-name = "windows-sys"
-version = "0.52.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "282be5f36a8ce781fad8c8ae18fa3f9beff57ec1b52cb3de0789201425d9a33d"
-dependencies = [
- "windows-targets 0.52.6",
 ]
 
 [[package]]
