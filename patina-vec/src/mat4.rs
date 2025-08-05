@@ -1,4 +1,5 @@
 use crate::mat::Matrix;
+use crate::mat3::Mat3;
 use crate::vec3::Vec3;
 use crate::vec4::Vec4;
 
@@ -24,6 +25,17 @@ impl Matrix4<f64> {
             Vec4::axis_y(),
             Vec4::axis_z(),
             Vec4::new(v.x(), v.y(), v.z(), 1.0),
+        ])
+    }
+    pub fn rotate(axis: Vec3, angle: f64) -> Self {
+        Self::from_mat3(Mat3::rotate(axis, angle))
+    }
+    pub fn from_mat3(m: Mat3) -> Self {
+        Mat4::from_rows([
+            Vec4::from_vec3(m.row(0)),
+            Vec4::from_vec3(m.row(1)),
+            Vec4::from_vec3(m.row(2)),
+            Vec4::axis_w(),
         ])
     }
 }

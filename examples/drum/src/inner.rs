@@ -279,7 +279,7 @@ async fn main() -> anyhow::Result<()> {
         magnet_ring_inner_radius: 19.0,
         magnet_ring_outer_radius: 22.0,
         magnet_depth: 1.0,
-        magnet_radius: 1.1,
+        magnet_radius: 1.2,
         magnet_height: 16.4,
     }
     .build();

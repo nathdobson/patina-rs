@@ -17,3 +17,4 @@ patina-mesh={workspace = true}
 rusttype = "0.9.3"
 patina-extrude = {workspace = true}
 patina-font={workspace = true}
+itertools = "0.14.0"

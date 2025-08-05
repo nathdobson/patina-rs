@@ -1,4 +1,5 @@
-use patina_bambu::BambuPart;
+use itertools::Itertools;
+use patina_bambu::{BambuObject, BambuPart, BambuPlate};
 use patina_extrude::ExtrusionBuilder;
 use patina_font::PolygonOutlineBuilder;
 use patina_mesh::bimesh2::Bimesh2;
@@ -8,6 +9,8 @@ use patina_vec::mat4::Mat4;
 use patina_vec::vec2::Vec2;
 use patina_vec::vec3::Vec3;
 use rusttype::{Font, Point, Rect, Scale};
+use std::f64;
+use std::iter::repeat_n;
 use std::path::Path;
 use std::rc::Rc;
 use std::sync::Arc;
@@ -35,6 +38,11 @@ pub struct StackBuilder {
 
     pub wedge_width: f64,
     pub wedge_height: f64,
+    pub flap_grid_width: usize,
+    pub flap_grid_height: usize,
+    pub max_concurrent_flaps: usize,
+    pub horizontal_gap: f64,
+    pub replicas: usize,
 }
 
 impl StackBuilder {
@@ -261,26 +269,39 @@ impl StackBuilder {
     }
     pub async fn flap_parts(
         &self,
+        x_index: usize,
+        y_index: usize,
+        z_index: usize,
         index: usize,
+        angle: f64,
         blank: &EdgeMesh2,
         support: &EdgeMesh2,
         letter1: &EdgeMesh2,
         letter2: &EdgeMesh2,
     ) -> Vec<BambuPart> {
-        let transform_flap = Mat4::translate(Vec3::new(
-            90.0,
-            90.0 - self.length / 2.0,
-            (index as f64) * (self.thickness + self.support_thickness),
-        ))
+        let x = 90.0
+            + (x_index as f64 + 0.5 - (self.flap_grid_width as f64) / 2.0)
+                * (self.width + self.horizontal_gap);
+        let y = 90.0
+            + 21.0
+            + (y_index as f64 + 0.5 - (self.flap_grid_height as f64) / 2.0)
+                * (self.length + self.horizontal_gap);
+        let transform_flap = (Mat4::translate(Vec3::new(
+            x,
+            y,
+            (z_index as f64) * (self.thickness + self.support_thickness),
+        )) * Mat4::rotate(Vec3::axis_z(), angle)
+            * Mat4::translate(Vec3::new(0.0, -self.length / 2.0, 0.0)))
         .as_affine()
         .unwrap();
-        let transform_support = Mat4::translate(Vec3::new(
-            90.0,
-            90.0 - self.length / 2.0,
-            (index as f64) * (self.thickness + self.support_thickness)
+        let transform_support = (Mat4::translate(Vec3::new(
+            x,
+            y,
+            (z_index as f64) * (self.thickness + self.support_thickness)
                 + self.thickness
                 + self.support_thickness / 2.0,
-        ))
+        )) * Mat4::rotate(Vec3::axis_z(), angle)
+            * Mat4::translate(Vec3::new(0.0, -self.length / 2.0, 0.0)))
         .as_affine()
         .unwrap();
         vec![
@@ -291,7 +312,7 @@ impl StackBuilder {
             self.support_part(index, &support, transform_support).await,
         ]
     }
-    pub async fn build(&self) -> Vec<BambuPart> {
+    pub async fn build(&self) -> BambuPlate {
         let blank = self.blank_poly();
         let support = self.support_poly();
         let mut letters = vec![];
@@ -301,22 +322,47 @@ impl StackBuilder {
             self.render_svg(index, &blank, &split).await;
             letters.push(split);
         }
-        let mut result = vec![];
-        let max_part = self.letters.len();
-        let max_part = 2;
-        for index in 0..max_part {
-            println!("Building part {}", index);
-            result.extend(
-                self.flap_parts(
-                    index,
-                    &blank,
-                    &support,
-                    &letters[index][1],
-                    &letters[(index + 1) % letters.len()][0],
-                )
-                .await,
-            );
+        let mut plate = BambuPlate::new();
+        let stacks: Vec<Vec<usize>> = (0..self.letters.len())
+            .chunks(self.letters.len() / self.max_concurrent_flaps)
+            .into_iter()
+            .map(|x| {
+                repeat_n(x.collect::<Vec<_>>().into_iter(), self.replicas)
+                    .flatten()
+                    .collect()
+            })
+            .collect();
+        for (x_index, row) in stacks
+            .iter()
+            .chunks(self.flap_grid_width)
+            .into_iter()
+            .enumerate()
+        {
+            for (y_index, stack) in row.enumerate() {
+                let mut object = BambuObject::new();
+                for (z_index, &index) in stack.iter().enumerate() {
+                    println!("Building part {}", index);
+                    let angle = 0.0;
+                    for part in self
+                        .flap_parts(
+                            x_index,
+                            y_index,
+                            z_index,
+                            index,
+                            angle,
+                            &blank,
+                            &support,
+                            &letters[index][1],
+                            &letters[(index + 1) % letters.len()][0],
+                        )
+                        .await
+                    {
+                        object.add_part(part);
+                    }
+                }
+                plate.add_object(object);
+            }
         }
-        result
+        plate
     }
 }

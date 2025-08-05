@@ -104,7 +104,7 @@ async fn build_output() -> anyhow::Result<()> {
 
     bambu.printer_settings_id(Some(machine.clone()));
     bambu.print_settings_id(Some(process.clone()));
-    bambu.prime_tower_positions(Some(vec![Vec2::new(5.0, 5.0)]));
+    bambu.prime_tower_positions(Some(vec![Vec2::new(15.0, 15.0)]));
     bambu.support({
         let mut support = BambuSupport::new();
         support.independent_support_layer_height(0);
@@ -123,7 +123,7 @@ async fn build_output() -> anyhow::Result<()> {
         let mut plate = BambuPlate::new();
         let mut object = BambuObject::new();
         object.name(Some("stack".to_string()));
-        let parts = StackBuilder {
+        StackBuilder {
             width: 43.0,
             length: 35.0,
             thickness: 1.0,
@@ -137,20 +137,20 @@ async fn build_output() -> anyhow::Result<()> {
                 .chars()
                 .collect(),
             font,
-            flap_separation: 1.0,
+            flap_separation: 3.0,
             wall_separation: 0.01,
             letter_scale: 80.0,
             shift_letter: Vec2::new(0.0, -4.0),
             wedge_width: 5.0,
-            wedge_height: 0.25,
+            wedge_height: 0.5,
+            flap_grid_width: 3,
+            flap_grid_height: 3,
+            max_concurrent_flaps: 9,
+            horizontal_gap: 2.0,
+            replicas: 1,
         }
         .build()
-        .await;
-        for part in parts {
-            object.add_part(part);
-        }
-        plate.add_object(object);
-        plate
+        .await
     });
     bambu.add_filament({
         let mut filament = BambuFilament::new();
