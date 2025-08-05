@@ -137,6 +137,9 @@ impl HalfEdgeMesh {
     pub fn edges(&self) -> impl Iterator<Item = (HalfEdgeId, &'_ HalfEdge)> {
         self.edges.iter().map(|(i, x)| (HalfEdgeId(i), x))
     }
+    pub fn edge_count(&self) -> usize {
+        self.edges.len()
+    }
     // pub fn vertices(&self) -> impl Iterator<Item = (usize, &'_ HalfEdgeVertex)> {
     //     self.vertices.iter()
     // }

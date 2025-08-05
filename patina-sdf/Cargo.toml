@@ -16,6 +16,7 @@ inari = "2.0.0"
 rayon="1.10.0"
 parking_lot = "0.12.4"
 indicatif = {version="0.18.0",features = ["rayon"]}
+patina-progress = {workspace = true}
 
 [dev-dependencies]
 tokio = {version = "1.46.0", features=["macros","rt"]}

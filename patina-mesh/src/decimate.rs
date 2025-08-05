@@ -2,6 +2,7 @@ use crate::half_edge_mesh::{HalfEdgeId, HalfEdgeMesh};
 use crate::mesh::Mesh;
 use crate::mesh_triangle::MeshTriangle;
 use crate::ser::encode_test_file;
+use indicatif::ProgressBar;
 use ordered_float::NotNan;
 use patina_geo::aabb::Aabb;
 use patina_vec::vec3::{Vec3, Vector3};
@@ -11,12 +12,14 @@ use rand::{Rng, SeedableRng, rng};
 use rand_xorshift::XorShiftRng;
 use std::collections::{HashMap, HashSet};
 use std::time::Instant;
+use patina_progress::ProgressBuilder;
 
 pub struct Decimate<'mesh> {
     mesh: &'mesh mut HalfEdgeMesh,
     priorities: PriorityQueue<HalfEdgeId, Score>,
     max_degree: usize,
     min_score: f64,
+    progress_builder: ProgressBuilder,
 }
 
 #[derive(Ord, Eq, PartialEq, PartialOrd, Clone, Copy, Hash, Debug)]
@@ -32,6 +35,7 @@ impl<'mesh> Decimate<'mesh> {
             priorities: PriorityQueue::new(),
             max_degree: 30,
             min_score: 0.9999,
+            progress_builder: ProgressBuilder::new(),
         }
     }
     pub fn max_degree(&mut self, degree: usize) -> &mut Self {
@@ -133,6 +137,7 @@ impl<'mesh> Decimate<'mesh> {
         }
     }
     pub fn run_arbitrary(&mut self) {
+        let progress_bar = self.progress_builder.build(self.mesh.edge_count() as u64);
         loop {
             let mut priorities: Vec<Score> =
                 self.mesh.edges().map(|(e, _)| self.priority(e)).collect();
@@ -148,6 +153,7 @@ impl<'mesh> Decimate<'mesh> {
                 if self.mesh.get(score.id).is_some()
                     && self.priority(score.id).score.into_inner() > self.min_score
                 {
+                    progress_bar.inc(1);
                     self.mesh.contract_edge(score.id);
                     progress += 1;
                 }
@@ -158,6 +164,7 @@ impl<'mesh> Decimate<'mesh> {
             }
         }
         self.run_heap();
+        progress_bar.finish();
     }
 }
 

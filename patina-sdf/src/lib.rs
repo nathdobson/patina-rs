@@ -16,4 +16,3 @@ mod subdivide;
 mod octree;
 mod exact;
 mod transvoxel;
-mod progress;
