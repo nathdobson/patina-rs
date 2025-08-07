@@ -1,0 +1,20 @@
+[package]
+name = "yarn-holder"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name ="base"
+path="src/base.rs"
+
+[[bin]]
+name = "post"
+path="src/post.rs"
+
+[dependencies]
+patina-sdf = {workspace = true}
+patina-geo = {workspace = true}
+patina-vec = {workspace = true}
+patina-mesh = {workspace = true}
+tokio = {version="1.47.1",features = ["rt","rt-multi-thread","macros"]}
+anyhow = "1.0.98"

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["examples/face","patina-3mf", "patina-bambu", "patina-bsp","patina-cad", "patina-extrude", "patina-font",  "patina-geo", "patina-mesh", "patina-progress", "patina-scalar", "patina-sdf", "patina-threads", "patina-vec"]
+members = ["examples/face", "examples/yarn-holder","patina-3mf", "patina-bambu", "patina-bsp","patina-cad", "patina-extrude", "patina-font",  "patina-geo", "patina-mesh", "patina-progress", "patina-scalar", "patina-sdf", "patina-threads", "patina-vec"]
 
 [workspace.dependencies]
 patina-cad = {path="patina-cad"}
