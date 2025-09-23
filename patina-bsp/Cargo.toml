@@ -7,3 +7,4 @@ edition = "2024"
 patina-mesh = {workspace = true}
 patina-geo ={   workspace = true}
 patina-vec={workspace = true}
+rand="0.9.2"

@@ -86,15 +86,25 @@ impl ObjectSettings {
 
 #[derive(Serialize, Deserialize)]
 #[non_exhaustive]
+#[serde(rename_all = "snake_case")]
+pub enum SettingsMetadataKey {
+    Name,
+    Extruder,
+    ObjectId,
+    PlaterId,
+}
+
+#[derive(Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct SettingsMetadata {
     #[serde(rename = "@key")]
-    pub key: String,
+    pub key: SettingsMetadataKey,
     #[serde(rename = "@value")]
     pub value: Option<String>,
 }
 
 impl SettingsMetadata {
-    pub fn new(key: String) -> Self {
+    pub fn new(key: SettingsMetadataKey) -> Self {
         SettingsMetadata { key, value: None }
     }
     pub fn value(mut self, value: Option<String>) -> Self {

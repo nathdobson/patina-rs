@@ -45,7 +45,7 @@ impl<R: Rng> Newton<R> {
         } else if starty > 0.0 && endy < 0.0 {
             inverted = true;
         } else {
-            panic!();
+            panic!("{:?} {:?}", starty, endy);
         }
         for _ in 0..self.starts {
             if let Some(x) = self.solve_once(&mut range, inverted, &mut eval) {

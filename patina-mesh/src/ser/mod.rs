@@ -1,5 +1,5 @@
 use crate::mesh::Mesh;
-use anyhow::{anyhow, Context};
+use anyhow::{Context, anyhow};
 use std::io;
 use std::path::{Path, PathBuf};
 use tokio::fs::File;
@@ -27,7 +27,7 @@ pub async fn encode_file<T: Encode>(encode: &T, filename: &Path) -> anyhow::Resu
     result.with_context(|| format!("while saving file {:?}", filename))
 }
 
-pub async fn encode_test_file<T: Encode>(encode: &T, filename: &str) -> anyhow::Result<()> {
+pub async fn create_test_path(filename: &str) -> anyhow::Result<PathBuf> {
     let manifest_dir = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR")?);
     let mut manifest_dir: &Path = &manifest_dir;
     let mut target_dir;
@@ -58,7 +58,10 @@ pub async fn encode_test_file<T: Encode>(encode: &T, filename: &str) -> anyhow::
     );
     let test_dir = target_dir.join("test_outputs").join(test_name);
     tokio::fs::create_dir_all(&test_dir).await?;
-    let file = test_dir.join(filename);
-    encode_file(encode, &file).await?;
+    Ok(test_dir.join(filename))
+}
+
+pub async fn encode_test_file<T: Encode>(encode: &T, filename: &str) -> anyhow::Result<()> {
+    encode_file(encode, &create_test_path(filename).await?).await?;
     Ok(())
 }

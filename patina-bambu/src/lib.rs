@@ -6,6 +6,7 @@
 #![allow(unused_variables)]
 
 pub mod cli;
+mod test;
 
 use itertools::Itertools;
 use patina_3mf::ModelContainer;
@@ -20,7 +21,7 @@ use patina_3mf::model::resources::{
 use patina_3mf::model::{Model, ModelMetadata, ModelUnit};
 use patina_3mf::model_settings::{
     Assemble, AssembleItem, ModelInstance, ModelSettings, ObjectSettings, Part, Plate,
-    SettingsMetadata,
+    SettingsMetadata, SettingsMetadataKey,
 };
 use patina_3mf::project_settings::ProjectSettings;
 use patina_3mf::project_settings::color::Color;
@@ -306,8 +307,9 @@ impl BambuBuilder {
                                     .to_string(),
                             )
                             .metadata(vec![
-                                SettingsMetadata::new("name".to_string()).value(part.name.clone()),
-                                SettingsMetadata::new("extruder".to_string())
+                                SettingsMetadata::new(SettingsMetadataKey::Name)
+                                    .value(part.name.clone()),
+                                SettingsMetadata::new(SettingsMetadataKey::Extruder)
                                     .value(part.material.map(|x| x.to_string())),
                             ]),
                     );
@@ -326,14 +328,15 @@ impl BambuBuilder {
                 object_settings.push(
                     ObjectSettings::new(object_id.to_string())
                         .metadata(vec![
-                            SettingsMetadata::new("name".to_string()).value(object.name.clone()),
-                            SettingsMetadata::new("extruder".to_string())
+                            SettingsMetadata::new(SettingsMetadataKey::Name)
+                                .value(object.name.clone()),
+                            SettingsMetadata::new(SettingsMetadataKey::Extruder)
                                 .value(Some("1".to_string())),
                         ])
                         .part(part_settings),
                 );
                 model_instances.push(ModelInstance::new().metadata(vec![
-                        SettingsMetadata::new("object_id".to_string())
+                        SettingsMetadata::new(SettingsMetadataKey::ObjectId)
                             .value(Some(object_id.to_string())),
                     ]));
                 assemble_items.push(AssembleItem::new(object_id.to_string()));
@@ -341,7 +344,7 @@ impl BambuBuilder {
             plate_settings.push(
                 Plate::new()
                     .metadata(vec![
-                        SettingsMetadata::new("plater_id".to_string())
+                        SettingsMetadata::new(SettingsMetadataKey::PlaterId)
                             .value(Some(plate_id.to_string())),
                     ])
                     .model_instance(model_instances),

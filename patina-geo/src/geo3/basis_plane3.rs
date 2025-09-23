@@ -15,6 +15,15 @@ impl BasisPlane3 {
             axis2,
         }
     }
+    pub fn origin(&self) -> Vec3 {
+        self.origin
+    }
+    pub fn axis1(&self) -> Vec3 {
+        self.axis1
+    }
+    pub fn axis2(&self) -> Vec3 {
+        self.axis2
+    }
     pub fn project(&self, point: Vec3) -> Vec2 {
         let point = point - self.origin;
         Vec2::new(self.axis1.dot(point), self.axis2.dot(point))
