@@ -67,11 +67,15 @@ pub struct ModelBaseMaterial {
     pub displaycolor: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "lowercase")]
 #[non_exhaustive]
 pub enum ModelObjectType {
     Model,
+    SolidSupport,
+    Support,
+    Surface,
+    Other,
 }
 
 #[derive(Serialize, Deserialize)]

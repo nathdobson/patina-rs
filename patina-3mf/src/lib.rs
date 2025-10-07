@@ -1,3 +1,4 @@
+#![feature(never_type)]
 #![feature(iter_array_chunks)]
 #![allow(dead_code, unused_imports, unused_mut, unused_variables)]
 

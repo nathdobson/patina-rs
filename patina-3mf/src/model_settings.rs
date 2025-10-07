@@ -24,7 +24,10 @@
 // </config>
 // "#;
 
+use crate::custom_serde::map_struct::{MapStruct, MapStructKeys};
 use serde::{Deserialize, Serialize};
+use serde_with::DisplayFromStr;
+use serde_with::serde_as;
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename = "config")]
@@ -57,25 +60,50 @@ impl ModelSettings {
     }
 }
 
+struct MetadataKeys;
+
+impl MapStructKeys for MetadataKeys {
+    const NAME: &'static str = "@key";
+    const VALUE: &'static str = "@value";
+}
+
+#[serde_as]
 #[derive(Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct ObjectSettings {
     #[serde(rename = "@id")]
     pub id: String,
-    pub metadata: Vec<SettingsMetadata>,
+    #[serde_as(as = "MapStruct<MetadataKeys>")]
+    pub metadata: ObjectSettingsMetadata,
     pub part: Vec<Part>,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ObjectSettingsMetadata {
+    name: Option<String>,
+    #[serde_as(as = "Option<DisplayFromStr>")]
+    extruder: Option<usize>,
 }
 
 impl ObjectSettings {
     pub fn new(id: String) -> Self {
         ObjectSettings {
             id,
-            metadata: vec![],
+            metadata: ObjectSettingsMetadata {
+                name: None,
+                extruder: None,
+            },
             part: vec![],
         }
     }
-    pub fn metadata(mut self, metadata: Vec<SettingsMetadata>) -> Self {
-        self.metadata = metadata;
+    pub fn metadata_name(mut self, name: Option<String>) -> Self {
+        self.metadata.name = name;
+        self
+    }
+    pub fn metadata_extruder(mut self, extruder: Option<usize>) -> Self {
+        self.metadata.extruder = extruder;
         self
     }
     pub fn part(mut self, part: Vec<Part>) -> Self {
@@ -84,82 +112,105 @@ impl ObjectSettings {
     }
 }
 
-#[derive(Serialize, Deserialize)]
-#[non_exhaustive]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "snake_case")]
-pub enum SettingsMetadataKey {
-    Name,
-    Extruder,
-    ObjectId,
-    PlaterId,
-}
-
-#[derive(Serialize, Deserialize)]
 #[non_exhaustive]
-pub struct SettingsMetadata {
-    #[serde(rename = "@key")]
-    pub key: SettingsMetadataKey,
-    #[serde(rename = "@value")]
-    pub value: Option<String>,
+pub enum PartSubtype {
+    NormalPart,
+    ModifierPart,
 }
 
-impl SettingsMetadata {
-    pub fn new(key: SettingsMetadataKey) -> Self {
-        SettingsMetadata { key, value: None }
-    }
-    pub fn value(mut self, value: Option<String>) -> Self {
-        self.value = value;
-        self
-    }
-}
-
+#[serde_as]
 #[derive(Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct Part {
     #[serde(rename = "@id")]
     pub id: String,
     #[serde(rename = "@subtype")]
-    pub subtype: String,
-    pub metadata: Vec<SettingsMetadata>,
+    pub subtype: Option<PartSubtype>,
+    #[serde_as(as = "MapStruct<MetadataKeys>")]
+    pub metadata: PartSettingsMetadata,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct PartSettingsMetadata {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    name: Option<String>,
+    #[serde_as(as = "Option<DisplayFromStr>")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    extruder: Option<usize>,
 }
 
 impl Part {
     pub fn new(id: String) -> Self {
         Part {
             id,
-            subtype: "".to_string(),
-            metadata: vec![],
+            subtype: None,
+            metadata: PartSettingsMetadata {
+                name: None,
+                extruder: None,
+            },
         }
     }
-    pub fn subtype(mut self, subtype: String) -> Self {
+    pub fn metadata_name(mut self, name: Option<String>) -> Self {
+        self.metadata.name = name;
+        self
+    }
+    pub fn metadata_extruder(mut self, extruder: Option<usize>) -> Self {
+        self.metadata.extruder = extruder;
+        self
+    }
+    pub fn subtype(mut self, subtype: Option<PartSubtype>) -> Self {
         self.subtype = subtype;
         self
     }
-    pub fn metadata(mut self, metadata: Vec<SettingsMetadata>) -> Self {
-        self.metadata = metadata;
-        self
-    }
 }
 
+#[serde_as]
 #[derive(Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct Plate {
-    pub metadata: Vec<SettingsMetadata>,
+    #[serde_as(as = "MapStruct<MetadataKeys>")]
+    pub metadata: PlateSettingsMetadata,
     pub model_instance: Vec<ModelInstance>,
 }
 
+#[serde_as]
+#[derive(Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct PlateSettingsMetadata {
+    #[serde_as(as = "Option<DisplayFromStr>")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    plater_id: Option<usize>,
+}
+
+#[serde_as]
 #[derive(Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct ModelInstance {
-    pub metadata: Vec<SettingsMetadata>,
+    #[serde_as(as = "MapStruct<MetadataKeys>")]
+    pub metadata: ModelInstanceSettingsMetadata,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct ModelInstanceSettingsMetadata {
+    #[serde_as(as = "Option<DisplayFromStr>")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    object_id: Option<usize>,
 }
 
 impl ModelInstance {
     pub fn new() -> Self {
-        ModelInstance { metadata: vec![] }
+        ModelInstance {
+            metadata: ModelInstanceSettingsMetadata { object_id: None },
+        }
     }
-    pub fn metadata(mut self, metadata: Vec<SettingsMetadata>) -> Self {
-        self.metadata = metadata;
+    pub fn metadata_object_id(mut self, object_id: Option<usize>) -> Self {
+        self.metadata.object_id = object_id;
         self
     }
 }
@@ -167,12 +218,13 @@ impl ModelInstance {
 impl Plate {
     pub fn new() -> Self {
         Plate {
-            metadata: vec![],
+            metadata: PlateSettingsMetadata { plater_id: None },
             model_instance: vec![],
         }
     }
-    pub fn metadata(mut self, metadata: Vec<SettingsMetadata>) -> Self {
-        self.metadata = metadata;
+
+    pub fn metadata_plater_id(mut self, plater_id: Option<usize>) -> Self {
+        self.metadata.plater_id = plater_id;
         self
     }
     pub fn model_instance(mut self, model_instance: Vec<ModelInstance>) -> Self {

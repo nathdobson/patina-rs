@@ -20,8 +20,7 @@ use patina_3mf::model::resources::{
 };
 use patina_3mf::model::{Model, ModelMetadata, ModelUnit};
 use patina_3mf::model_settings::{
-    Assemble, AssembleItem, ModelInstance, ModelSettings, ObjectSettings, Part, Plate,
-    SettingsMetadata, SettingsMetadataKey,
+    Assemble, AssembleItem, ModelInstance, ModelSettings, ObjectSettings, Part, PartSubtype, Plate,
 };
 use patina_3mf::project_settings::ProjectSettings;
 use patina_3mf::project_settings::color::Color;
@@ -55,12 +54,18 @@ pub struct BambuSupport {
     support_expansion: Option<f64>,
 }
 
+#[non_exhaustive]
+pub enum BambuPartType {
+    Model,
+    Modifier,
+}
+
 pub struct BambuPart {
     mesh: Mesh,
     name: Option<String>,
     material: Option<usize>,
     transform: Option<[f64; 12]>,
-    subtype: Option<String>,
+    typ: BambuPartType,
 }
 
 pub struct BambuObject {
@@ -178,7 +183,7 @@ impl BambuPart {
             mesh,
             material: None,
             transform: None,
-            subtype: None,
+            typ: BambuPartType::Model,
         }
     }
     pub fn name(&mut self, name: Option<String>) {
@@ -190,8 +195,8 @@ impl BambuPart {
     pub fn transform(&mut self, transform: Option<[f64; 12]>) {
         self.transform = transform;
     }
-    pub fn subtype(&mut self, subtype: Option<String>) {
-        self.subtype = subtype;
+    pub fn typ(&mut self, typ: BambuPartType) {
+        self.typ = typ;
     }
 }
 
@@ -292,26 +297,21 @@ impl BambuBuilder {
                         ModelTriangles::new(triangles),
                     );
                     let part_id = model_objects.len() + 1;
-                    model_objects.push(
-                        ModelObject::new(part_id)
-                            .mesh(Some(mesh))
-                            .object_type(Some(ModelObjectType::Model)),
-                    );
+                    model_objects.push(ModelObject::new(part_id).mesh(Some(mesh)).object_type(
+                        Some(match part.typ {
+                            BambuPartType::Model => ModelObjectType::Model,
+                            BambuPartType::Modifier => ModelObjectType::Other,
+                        }),
+                    ));
                     components.push(ModelComponent::new(part_id).transform(part.transform));
                     part_settings.push(
                         Part::new(part_id.to_string())
-                            .subtype(
-                                part.subtype
-                                    .as_deref()
-                                    .unwrap_or_else(|| "normal_part")
-                                    .to_string(),
-                            )
-                            .metadata(vec![
-                                SettingsMetadata::new(SettingsMetadataKey::Name)
-                                    .value(part.name.clone()),
-                                SettingsMetadata::new(SettingsMetadataKey::Extruder)
-                                    .value(part.material.map(|x| x.to_string())),
-                            ]),
+                            .subtype(Some(match part.typ {
+                                BambuPartType::Model => PartSubtype::NormalPart,
+                                BambuPartType::Modifier => PartSubtype::ModifierPart,
+                            }))
+                            .metadata_name(part.name.clone())
+                            .metadata_extruder(part.material.clone()),
                     );
                 }
                 let object_id = model_objects.len() + 1;
@@ -327,26 +327,16 @@ impl BambuBuilder {
                 );
                 object_settings.push(
                     ObjectSettings::new(object_id.to_string())
-                        .metadata(vec![
-                            SettingsMetadata::new(SettingsMetadataKey::Name)
-                                .value(object.name.clone()),
-                            SettingsMetadata::new(SettingsMetadataKey::Extruder)
-                                .value(Some("1".to_string())),
-                        ])
+                        .metadata_name(object.name.clone())
+                        .metadata_extruder(Some(1))
                         .part(part_settings),
                 );
-                model_instances.push(ModelInstance::new().metadata(vec![
-                        SettingsMetadata::new(SettingsMetadataKey::ObjectId)
-                            .value(Some(object_id.to_string())),
-                    ]));
+                model_instances.push(ModelInstance::new().metadata_object_id(Some(object_id)));
                 assemble_items.push(AssembleItem::new(object_id.to_string()));
             }
             plate_settings.push(
                 Plate::new()
-                    .metadata(vec![
-                        SettingsMetadata::new(SettingsMetadataKey::PlaterId)
-                            .value(Some(plate_id.to_string())),
-                    ])
+                    .metadata_plater_id(Some(plate_id))
                     .model_instance(model_instances),
             );
         }
@@ -361,15 +351,16 @@ impl BambuBuilder {
             .object(object_settings)
             .plate(plate_settings)
             .assemble(Some(Assemble::new().assemble_item(assemble_items)));
-        let filament_color = self.filaments.iter().map(|x| x.color.clone()).collect();
-        let filament_is_support = self.filaments.iter().map(|x| x.support.clone()).collect();
-        let filament_settings_id = self
+        let filament_color: Vec<_> = self.filaments.iter().map(|x| x.color.clone()).collect();
+        let filament_is_support: Vec<_> =
+            self.filaments.iter().map(|x| x.support.clone()).collect();
+        let filament_settings_id: Vec<_> = self
             .filaments
             .iter()
             .map(|x| x.settings_id.clone())
             .collect();
-        let filament_shrink = self.filaments.iter().map(|x| x.shrink.clone()).collect();
-        let filament_diameter = self.filaments.iter().map(|x| x.diameter.clone()).collect();
+        let filament_shrink: Vec<_> = self.filaments.iter().map(|x| x.shrink.clone()).collect();
+        let filament_diameter: Vec<_> = self.filaments.iter().map(|x| x.diameter.clone()).collect();
         let filament_flow_ratio: Vec<Option<f64>> = self
             .filaments
             .iter()
