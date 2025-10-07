@@ -66,6 +66,7 @@ pub struct BambuPart {
     material: Option<usize>,
     transform: Option<[f64; 12]>,
     typ: BambuPartType,
+    wall_loops: Option<usize>,
 }
 
 pub struct BambuObject {
@@ -184,6 +185,7 @@ impl BambuPart {
             material: None,
             transform: None,
             typ: BambuPartType::Model,
+            wall_loops: None,
         }
     }
     pub fn name(&mut self, name: Option<String>) {
@@ -197,6 +199,9 @@ impl BambuPart {
     }
     pub fn typ(&mut self, typ: BambuPartType) {
         self.typ = typ;
+    }
+    pub fn wall_loops(&mut self, wall_loops: Option<usize>) {
+        self.wall_loops = wall_loops;
     }
 }
 
@@ -311,7 +316,8 @@ impl BambuBuilder {
                                 BambuPartType::Modifier => PartSubtype::ModifierPart,
                             }))
                             .metadata_name(part.name.clone())
-                            .metadata_extruder(part.material.clone()),
+                            .metadata_extruder(part.material.clone())
+                            .metadata_wall_loops(part.wall_loops),
                     );
                 }
                 let object_id = model_objects.len() + 1;

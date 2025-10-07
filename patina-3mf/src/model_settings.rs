@@ -141,6 +141,9 @@ pub struct PartSettingsMetadata {
     #[serde_as(as = "Option<DisplayFromStr>")]
     #[serde(skip_serializing_if = "Option::is_none")]
     extruder: Option<usize>,
+    #[serde_as(as = "Option<DisplayFromStr>")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    wall_loops: Option<usize>,
 }
 
 impl Part {
@@ -151,6 +154,7 @@ impl Part {
             metadata: PartSettingsMetadata {
                 name: None,
                 extruder: None,
+                wall_loops: None,
             },
         }
     }
@@ -160,6 +164,10 @@ impl Part {
     }
     pub fn metadata_extruder(mut self, extruder: Option<usize>) -> Self {
         self.metadata.extruder = extruder;
+        self
+    }
+    pub fn metadata_wall_loops(mut self, wall_loops: Option<usize>) -> Self {
+        self.metadata.wall_loops = wall_loops;
         self
     }
     pub fn subtype(mut self, subtype: Option<PartSubtype>) -> Self {

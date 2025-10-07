@@ -47,10 +47,10 @@ async fn test_basic() -> anyhow::Result<()> {
             let mut obj = BambuObject::new();
             obj.name(Some("obj".to_string()));
             obj.add_part({
-                let cube = Mesh::from_aabb(Aabb3::new(Vec3::splat(0.0), Vec3::splat(10.0)));
+                let cube = Mesh::from_aabb(Aabb3::new(Vec3::splat(0.0), Vec3::splat(60.0)));
                 let mut part = BambuPart::new(cube);
                 part.transform(Some(
-                    Mat4::translate(Vec3::new(90.0, 90.0, 0.0))
+                    Mat4::translate(Vec3::new(60.0, 60.0, 0.0))
                         .as_affine()
                         .unwrap(),
                 ));
@@ -58,15 +58,16 @@ async fn test_basic() -> anyhow::Result<()> {
                 part
             });
             obj.add_part({
-                let cube = Mesh::from_aabb(Aabb3::new(Vec3::splat(0.0), Vec3::splat(10.0)));
+                let cube = Mesh::from_aabb(Aabb3::new(Vec3::splat(0.0), Vec3::splat(60.0)));
                 let mut part = BambuPart::new(cube);
                 part.transform(Some(
-                    Mat4::translate(Vec3::new(95.0, 95.0, 0.0))
+                    Mat4::translate(Vec3::new(90.0, 90.0, 0.0))
                         .as_affine()
                         .unwrap(),
                 ));
                 part.typ(BambuPartType::Modifier);
                 part.name(Some("modifier".to_string()));
+                part.wall_loops(Some(3));
                 part
             });
             obj
