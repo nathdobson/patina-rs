@@ -365,17 +365,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
-name = "face"
-version = "0.1.0"
-dependencies = [
- "glam",
- "patina-cad",
- "rand",
- "rand_xorshift",
- "tokio",
-]
-
-[[package]]
 name = "flate2"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -427,12 +416,6 @@ name = "gimli"
 version = "0.31.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "07e28edb80900c19c28f1072f2e8aeca7fa06b23cd4169cefe1af5aa3260783f"
-
-[[package]]
-name = "glam"
-version = "0.30.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "50a99dbe56b72736564cfa4b85bf9a33079f16ae8b74983ab06af3b1a3696b11"
 
 [[package]]
 name = "gmp-mpfr-sys"
@@ -814,23 +797,6 @@ dependencies = [
  "patina-mesh",
  "patina-vec",
  "rand",
-]
-
-[[package]]
-name = "patina-cad"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "arrayvec",
- "itertools",
- "ordered-float",
- "rand",
- "rand_xorshift",
- "serde",
- "serde-xml-rs",
- "tokio",
- "xml",
- "zip",
 ]
 
 [[package]]
