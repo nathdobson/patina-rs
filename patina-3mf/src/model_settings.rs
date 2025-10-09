@@ -118,6 +118,7 @@ impl ObjectSettings {
 pub enum PartSubtype {
     NormalPart,
     ModifierPart,
+    SupportBlocker,
 }
 
 #[serde_as]

@@ -6,8 +6,10 @@
 #![allow(unused_variables)]
 
 pub mod cli;
+pub mod model;
 mod test;
 
+use crate::model::{MeshModel, ModelModifier};
 use itertools::Itertools;
 use patina_3mf::ModelContainer;
 use patina_3mf::content_types::ContentTypes;
@@ -54,12 +56,15 @@ pub struct BambuSupport {
     support_expansion: Option<f64>,
 }
 
+#[derive(Clone, Debug)]
 #[non_exhaustive]
 pub enum BambuPartType {
     Model,
     Modifier,
+    SupportBlocker,
 }
 
+#[derive(Clone, Debug)]
 pub struct BambuPart {
     mesh: Mesh,
     name: Option<String>,
@@ -306,6 +311,7 @@ impl BambuBuilder {
                         Some(match part.typ {
                             BambuPartType::Model => ModelObjectType::Model,
                             BambuPartType::Modifier => ModelObjectType::Other,
+                            BambuPartType::SupportBlocker => ModelObjectType::Other,
                         }),
                     ));
                     components.push(ModelComponent::new(part_id).transform(part.transform));
@@ -314,6 +320,7 @@ impl BambuBuilder {
                             .subtype(Some(match part.typ {
                                 BambuPartType::Model => PartSubtype::NormalPart,
                                 BambuPartType::Modifier => PartSubtype::ModifierPart,
+                                BambuPartType::SupportBlocker => PartSubtype::SupportBlocker,
                             }))
                             .metadata_name(part.name.clone())
                             .metadata_extruder(part.material.clone())

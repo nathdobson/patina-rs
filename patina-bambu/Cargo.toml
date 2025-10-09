@@ -13,3 +13,5 @@ patina-vec={workspace = true}
 patina-geo = {workspace = true}
 serde = { version = "1.0.219", features = ["derive"] }
 serde-xml-rs = "0.8.1"
+patina-threads = {workspace = true}
+patina-sdf={workspace = true}

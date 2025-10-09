@@ -783,6 +783,8 @@ dependencies = [
  "patina-3mf",
  "patina-geo",
  "patina-mesh",
+ "patina-sdf",
+ "patina-threads",
  "patina-vec",
  "serde",
  "serde-xml-rs",

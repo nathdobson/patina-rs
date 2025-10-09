@@ -76,12 +76,12 @@ type MarchingOctree = Octree<MarchingNodeKey, MarchingNodeValue>;
 type MarchingOctreeBranch = OctreeBranch<MarchingNodeKey, MarchingNodeValue>;
 
 impl MarchingMesh {
-    pub fn new(aabb: Aabb3) -> Self {
+    pub fn new(aabb: &Aabb3) -> Self {
         Self {
             min_render_depth: 6,
             max_render_depth: 10,
             subdiv_max_dot: 0.9,
-            aabb,
+            aabb:*aabb,
             mesh_builder: Mutex::new(MeshBuilder {
                 vertex_table: HashMap::new(),
                 vertices: vec![],
@@ -471,7 +471,9 @@ impl MarchingMesh {
                     .with_message("collecting mesh"),
             )
             .collect();
-        Mesh::new(vertices, mesh_builder.triangles.clone())
+        let mesh = Mesh::new(vertices, mesh_builder.triangles.clone());
+        mesh.check_manifold().unwrap();
+        mesh
     }
 
     pub fn build(mut self, sdf: &Sdf3) -> Mesh {

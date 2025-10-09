@@ -27,6 +27,9 @@ impl<const N: usize> Vector<f64, N> {
             }
         }
     }
+    pub fn is_finite(&self) -> bool {
+        self.0.iter().all(|x| x.is_finite())
+    }
 }
 
 impl<T, const N: usize> Vector<T, N>
