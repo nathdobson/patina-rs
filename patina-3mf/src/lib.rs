@@ -1,15 +1,15 @@
 #![feature(never_type)]
 #![feature(iter_array_chunks)]
 #![allow(dead_code, unused_imports, unused_mut, unused_variables)]
-
+#![deny(unused_must_use)]
 pub mod content_types;
+mod custom_serde;
 pub mod model;
 pub mod model_settings;
 pub mod project_settings;
 pub mod relationships;
 pub mod settings_id;
 pub mod xmlns;
-mod custom_serde;
 
 use crate::content_types::ContentTypes;
 use crate::model::Model;
@@ -20,8 +20,8 @@ use serde::{Deserialize, Serialize};
 #[deny(unused_must_use)]
 use std::io::{Cursor, Write};
 use xml::EmitterConfig;
-use zip::ZipWriter;
 use zip::write::SimpleFileOptions;
+use zip::{DateTime, ZipWriter};
 
 const PROJECT_SETTINGS:&[u8]=br##"{
     "accel_to_decel_enable": "0",
@@ -1143,7 +1143,7 @@ impl ModelContainer {
     pub fn encode(&self) -> anyhow::Result<Vec<u8>> {
         let mut buffer = vec![];
         let mut zip = ZipWriter::new(Cursor::new(&mut buffer));
-        let opts = SimpleFileOptions::default();
+        let opts = SimpleFileOptions::default().last_modified_time(DateTime::default());
         if let Some(content_types) = &self.content_types {
             zip.start_file("[Content_Types].xml", opts.clone())?;
             zip.write_all(self.to_xml_string(content_types)?.as_bytes())?;

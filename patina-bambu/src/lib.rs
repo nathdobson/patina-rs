@@ -43,6 +43,7 @@ use patina_vec::vec2::Vec2;
 #[test]
 fn nothing() {}
 
+#[derive(Clone)]
 pub struct BambuSupport {
     independent_support_layer_height: Option<usize>,
     support_bottom_z_distance: Option<usize>,
@@ -74,16 +75,19 @@ pub struct BambuPart {
     wall_loops: Option<usize>,
 }
 
+#[derive(Clone)]
 pub struct BambuObject {
     name: Option<String>,
     parts: Vec<BambuPart>,
     transform: Option<[f64; 12]>,
 }
 
+#[derive(Clone)]
 pub struct BambuPlate {
     objects: Vec<BambuObject>,
 }
 
+#[derive(Clone)]
 pub struct BambuFilament {
     color: Option<Color>,
     support: Option<bool>,
@@ -92,6 +96,8 @@ pub struct BambuFilament {
     shrink: Option<String>,
     filament_flow_ratio: Option<f64>,
 }
+
+#[derive(Clone)]
 pub struct BambuBuilder {
     printer_settings_id: Option<PrinterSettingsId>,
     print_settings_id: Option<PrintSettingsId>,
@@ -99,6 +105,8 @@ pub struct BambuBuilder {
     filaments: Vec<BambuFilament>,
     prime_tower_positions: Option<Vec<Vec2>>,
     support: Option<BambuSupport>,
+    /// Sic
+    elefant_foot_compensation: Option<f64>,
 }
 
 impl BambuSupport {
@@ -247,6 +255,7 @@ impl BambuBuilder {
             filaments: vec![],
             prime_tower_positions: None,
             support: None,
+            elefant_foot_compensation: None,
         }
     }
     pub fn add_plate(&mut self, p: BambuPlate) {
@@ -266,6 +275,9 @@ impl BambuBuilder {
     }
     pub fn support(&mut self, support: BambuSupport) {
         self.support = Some(support);
+    }
+    pub fn elefant_foot_compensation(&mut self, elefant_foot_compensation: f64) {
+        self.elefant_foot_compensation = Some(elefant_foot_compensation);
     }
     pub fn build(self) -> anyhow::Result<Vec<u8>> {
         let application_metadata = ModelMetadata::new("Application".to_string())
@@ -463,6 +475,10 @@ impl BambuBuilder {
                 project_settings.support_expansion = Some(support_expansion);
                 different_settings_to_system1.push("support_expansion");
             }
+        }
+        if let Some(elefant_foot_compensation) = self.elefant_foot_compensation {
+            project_settings.elefant_foot_compensation = Some(elefant_foot_compensation);
+            different_settings_to_system1.push("elefant_foot_compensation");
         }
 
         project_settings.different_settings_to_system = Some(vec![

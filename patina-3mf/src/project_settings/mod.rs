@@ -103,6 +103,9 @@ pub struct ProjectSettings {
     #[serde_as(as = "Option<DisplayFromStr>")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub support_expansion: Option<f64>,
+    #[serde_as(as = "Option<DisplayFromStr>")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub elefant_foot_compensation: Option<f64>,
 }
 
 impl ProjectSettings {
@@ -139,6 +142,7 @@ impl ProjectSettings {
             support_type: None,
             different_settings_to_system: None,
             support_expansion: None,
+            elefant_foot_compensation: None,
         }
     }
 }
