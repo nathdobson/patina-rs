@@ -3,9 +3,11 @@ use patina_scalar::Scalar;
 use patina_scalar::deriv::Deriv;
 use rand::Rng;
 use rand::distr::{Distribution, StandardUniform};
+use serde::Deserialize;
 use std::fmt::{Debug, Display, Formatter};
 use std::iter;
 use std::iter::Sum;
+use std::marker::PhantomData;
 use std::ops::{Add, AddAssign, Div, Index, IndexMut, Mul, Neg, Sub};
 
 #[derive(Copy, Clone, Eq, Ord, PartialEq, PartialOrd, Hash)]
@@ -343,5 +345,45 @@ where
 {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Vector<T, N> {
         Vector::from_fn(|_| rng.random())
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de, T: Scalar + serde::Deserialize<'de>, const N: usize> serde::Deserialize<'de>
+    for Vector<T, N>
+{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        use serde::de::{Error, SeqAccess, Visitor};
+
+        struct V<T, const N: usize>(PhantomData<Vector<T, N>>);
+        impl<'de, T: Scalar + serde::Deserialize<'de>, const N: usize> Visitor<'de> for V<T, N> {
+            type Value = Vector<T, N>;
+
+            fn expecting(&self, formatter: &mut Formatter) -> std::fmt::Result {
+                write!(formatter, "a vector of length {}", N)
+            }
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: SeqAccess<'de>,
+            {
+                let mut result = Vector::<T, N>::default();
+                for i in 0..N {
+                    result[i] = seq
+                        .next_element::<T>()?
+                        .ok_or_else(|| A::Error::custom("missing vector element"))?;
+                }
+                Ok(result)
+            }
+        }
+        deserializer.deserialize_tuple(N, V(PhantomData))
+    }
+}
+
+impl<T: Scalar, const N: usize> Default for Vector<T, N> {
+    fn default() -> Self {
+        Self::zero()
     }
 }

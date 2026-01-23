@@ -6,7 +6,7 @@ use tokio::fs::File;
 use tokio::io::{AsyncWrite, AsyncWriteExt, BufWriter};
 
 pub mod stl;
-mod svg;
+pub mod svg;
 
 pub trait Encode {
     fn extension() -> &'static str;

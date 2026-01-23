@@ -32,6 +32,7 @@ impl EdgeBuilder {
     }
 }
 
+#[derive(Debug)]
 enum VertexKind {
     Mesh { mesh: usize, interior: bool },
     Intersect { cross: bool },
@@ -40,6 +41,7 @@ enum VertexKind {
 impl Bimesh2 {
     pub fn new(mesh1: Arc<EdgeMesh2>, mesh2: Arc<EdgeMesh2>) -> Self {
         let meshes = [mesh1, mesh2];
+
         let mut vertices = vec![];
         let mut vertex_remap = [vec![], vec![]];
         let mut vertex_kinds = vec![];
@@ -134,7 +136,10 @@ impl Bimesh2 {
                 }
             }
         }
-        EdgeMesh2::from_vecs(vertices, edges).without_dead_vertices()
+        let result = EdgeMesh2::from_vecs(vertices, edges);
+        let result = result.without_dead_vertices();
+        result.as_polygons();
+        result
     }
     pub fn union(&self) -> EdgeMesh2 {
         self.as_mesh(false, false, false, false)
@@ -176,4 +181,52 @@ fn test() {
     for poly in bimesh.difference().as_polygons() {
         println!("{}", poly);
     }
+}
+
+#[test]
+fn test_letter() {
+    let m1 = EdgeMesh2::from_vecs(
+        vec![
+            Vec2::new(6.71418, 15.90733),
+            Vec2::new(9.16883, 24.68630),
+            Vec2::new(17.71677, 24.68630),
+            Vec2::new(4.20178, -17.36035),
+            Vec2::new(-3.16216, -17.36035),
+            Vec2::new(-16.93706, 24.68630),
+            Vec2::new(-8.38911, 24.68630),
+            Vec2::new(-5.90559, 15.90733),
+            Vec2::new(-3.91299, 9.00544),
+            Vec2::new(0.50537, -6.47327),
+            Vec2::new(4.80822, 9.00544),
+        ],
+        vec![
+            DirectedMeshEdge::new(0, 1),
+            DirectedMeshEdge::new(1, 2),
+            DirectedMeshEdge::new(2, 3),
+            DirectedMeshEdge::new(3, 4),
+            DirectedMeshEdge::new(4, 5),
+            DirectedMeshEdge::new(5, 6),
+            DirectedMeshEdge::new(6, 7),
+            DirectedMeshEdge::new(7, 0),
+            DirectedMeshEdge::new(8, 9),
+            DirectedMeshEdge::new(9, 10),
+            DirectedMeshEdge::new(10, 8),
+        ],
+    );
+    let m2 = EdgeMesh2::from_vecs(
+        vec![
+            Vec2::new(-19.49000, 1.51500),
+            Vec2::new(19.49000, 1.51500),
+            Vec2::new(19.49000, 36.49500),
+            Vec2::new(-19.49000, 36.49500),
+        ],
+        vec![
+            DirectedMeshEdge::new(0, 1),
+            DirectedMeshEdge::new(1, 2),
+            DirectedMeshEdge::new(2, 3),
+            DirectedMeshEdge::new(3, 0),
+        ],
+    );
+    let bm = Bimesh2::new(Arc::new(m1), Arc::new(m2));
+    bm.intersection();
 }

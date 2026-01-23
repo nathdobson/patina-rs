@@ -77,7 +77,11 @@ impl EdgeMesh2 {
                     break;
                 }
                 poly.push(self.vertices[v]);
-                v = *forward.get(&v).unwrap();
+                if let Some(v2) = forward.get(&v) {
+                    v = *v2;
+                } else {
+                    panic!("missing forward edge for {}", v);
+                }
             }
             if !poly.is_empty() {
                 polys.push(Polygon2::new(poly));
