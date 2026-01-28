@@ -380,10 +380,12 @@ impl BambuBuilder {
         let filament_settings_id: Vec<_> = self
             .filaments
             .iter()
-            .map(|x| {
-                x.settings_id
-                    .as_ref()
-                    .map_or_else(|| "custom".to_string(), |id| format!("{} (custom)", id))
+            .enumerate()
+            .map(|(index, filament)| {
+                filament.settings_id.as_ref().map_or_else(
+                    || "custom".to_string(),
+                    |id| format!("{} (custom {})", id, index),
+                )
             })
             .collect();
         let filament_shrink: Vec<_> = self.filaments.iter().map(|x| x.shrink.clone()).collect();
