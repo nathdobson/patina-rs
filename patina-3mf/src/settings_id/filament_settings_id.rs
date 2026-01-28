@@ -24,6 +24,8 @@ pub enum FilamentMaterial {
     PlaMatte,
     #[serde(rename = "Support For PLA")]
     SupportForPla,
+    #[serde(rename = "PETG HF")]
+    PetgHf,
 }
 
 #[derive(Clone)]

@@ -47,10 +47,10 @@ impl<'de> Deserialize<'de> for Color {
             .chunks_exact(2)
             .into_iter()
             .map(|color| {
-                Ok(str::from_utf8(color)
-                    .map_err(D::Error::custom)?
-                    .parse()
-                    .map_err(D::Error::custom)?)
+                Ok(
+                    u8::from_str_radix(str::from_utf8(color).map_err(|x| D::Error::custom(x))?, 16)
+                        .map_err(|x| D::Error::custom(format!("while parsing color: {}", x)))?,
+                )
             })
             .collect::<Result<ArrayVec<u8, 3>, D::Error>>()?
             .into_inner()

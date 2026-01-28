@@ -27,7 +27,7 @@ pub struct ProjectSettings {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub filament_is_support: Option<Vec<Option<bool>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub filament_settings_id: Option<Vec<Option<FilamentSettingsId>>>,
+    pub filament_settings_id: Option<Vec<Option<String>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub filament_shrink: Option<Vec<Option<String>>>,
     #[serde_as(as = "Option<Vec<OptionOrNil<DisplayFromStr>>>")]
@@ -106,6 +106,8 @@ pub struct ProjectSettings {
     #[serde_as(as = "Option<DisplayFromStr>")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub elefant_foot_compensation: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub inherits_group: Option<Vec<Option<String>>>,
 }
 
 impl ProjectSettings {
@@ -143,6 +145,8 @@ impl ProjectSettings {
             different_settings_to_system: None,
             support_expansion: None,
             elefant_foot_compensation: None,
+            inherits_group: None,
+
         }
     }
 }

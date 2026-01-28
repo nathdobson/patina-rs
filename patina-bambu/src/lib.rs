@@ -13,6 +13,7 @@ use crate::model::{MeshModel, ModelModifier};
 use itertools::Itertools;
 use patina_3mf::ModelContainer;
 use patina_3mf::content_types::ContentTypes;
+use patina_3mf::filament_settings::{FilamentExtruderStandard, FilamentSettings};
 use patina_3mf::model::build::{ModelBuild, ModelItem};
 use patina_3mf::model::mesh::{
     ModelMesh, ModelTriangle, ModelTriangles, ModelVertex, ModelVertices,
@@ -39,9 +40,6 @@ use patina_3mf::settings_id::printer::Printer;
 use patina_3mf::settings_id::printer_settings_id::PrinterSettingsId;
 use patina_mesh::mesh::Mesh;
 use patina_vec::vec2::Vec2;
-
-#[test]
-fn nothing() {}
 
 #[derive(Clone)]
 pub struct BambuSupport {
@@ -382,7 +380,11 @@ impl BambuBuilder {
         let filament_settings_id: Vec<_> = self
             .filaments
             .iter()
-            .map(|x| x.settings_id.clone())
+            .map(|x| {
+                x.settings_id
+                    .as_ref()
+                    .map_or_else(|| "custom".to_string(), |id| format!("{} (custom)", id))
+            })
             .collect();
         let filament_shrink: Vec<_> = self.filaments.iter().map(|x| x.shrink.clone()).collect();
         let filament_diameter: Vec<_> = self.filaments.iter().map(|x| x.diameter.clone()).collect();
@@ -399,7 +401,8 @@ impl BambuBuilder {
         let mut project_settings = ProjectSettings::new();
         project_settings.filament_colour = Some(filament_color);
         project_settings.filament_is_support = Some(filament_is_support);
-        project_settings.filament_settings_id = Some(filament_settings_id);
+        project_settings.filament_settings_id =
+            Some(filament_settings_id.iter().cloned().map(Some).collect());
         project_settings.filament_shrink = Some(filament_shrink);
         project_settings.filament_diameter = Some(filament_diameter);
         project_settings.flush_volumes_matrix = Some(flush_volumes_matrix);
@@ -415,85 +418,111 @@ impl BambuBuilder {
             .prime_tower_positions
             .as_ref()
             .map(|ps| ps.iter().map(|p| p.y()).collect());
-        let mut different_settings_to_system1 = vec![];
-        let mut different_settings_to_system4 = vec![];
+        let mut different_settings_to_system = vec![];
+        let mut different_settings_to_filament = vec![vec![]; self.filaments.len()];
+        for (i, r) in filament_flow_ratio.iter().enumerate() {
+            if r.is_some() {
+                different_settings_to_filament[i].push("filament_flow_ratio");
+            }
+        }
         if filament_flow_ratio.iter().any(|x| x.is_some()) {
             project_settings.filament_flow_ratio = Some(filament_flow_ratio);
-            different_settings_to_system4.push("filament_flow_ratio");
         }
         if let Some(support) = self.support {
             project_settings.enable_support = Some(true);
-            different_settings_to_system1.push("enable_support");
+            different_settings_to_system.push("enable_support");
             if let Some(independent_support_layer_height) = support.independent_support_layer_height
             {
                 project_settings.independent_support_layer_height =
                     Some(independent_support_layer_height);
-                different_settings_to_system1.push("independent_support_layer_height");
+                different_settings_to_system.push("independent_support_layer_height");
             }
             if let Some(support_bottom_z_distance) = support.support_bottom_z_distance {
                 project_settings.support_bottom_z_distance = Some(support_bottom_z_distance);
-                different_settings_to_system1.push("support_bottom_z_distance");
+                different_settings_to_system.push("support_bottom_z_distance");
             }
 
             if let Some(support_bottom_z_distance) = support.support_bottom_z_distance {
                 project_settings.support_bottom_z_distance = Some(support_bottom_z_distance);
-                different_settings_to_system1.push("support_bottom_z_distance");
+                different_settings_to_system.push("support_bottom_z_distance");
             }
             if let Some(support_filament) = support.support_filament {
                 project_settings.support_filament = Some(support_filament);
-                different_settings_to_system1.push("support_filament");
+                different_settings_to_system.push("support_filament");
             }
             if let Some(support_filament) = support.support_filament {
                 project_settings.support_filament = Some(support_filament);
-                different_settings_to_system1.push("support_filament");
+                different_settings_to_system.push("support_filament");
             }
             if let Some(support_interface_filament) = support.support_interface_filament {
                 project_settings.support_interface_filament = Some(support_interface_filament);
-                different_settings_to_system1.push("support_interface_filament");
+                different_settings_to_system.push("support_interface_filament");
             }
             if let Some(support_interface_pattern) = support.support_interface_pattern {
                 project_settings.support_interface_pattern = Some(support_interface_pattern);
-                different_settings_to_system1.push("support_interface_pattern");
+                different_settings_to_system.push("support_interface_pattern");
             }
             if let Some(support_interface_spacing) = support.support_interface_spacing {
                 project_settings.support_interface_spacing = Some(support_interface_spacing);
-                different_settings_to_system1.push("support_interface_spacing");
+                different_settings_to_system.push("support_interface_spacing");
             }
             if let Some(support_style) = support.support_style {
                 project_settings.support_style = Some(support_style);
-                different_settings_to_system1.push("support_style");
+                different_settings_to_system.push("support_style");
             }
             if let Some(support_top_z_distance) = support.support_top_z_distance {
                 project_settings.support_top_z_distance = Some(support_top_z_distance);
-                different_settings_to_system1.push("support_top_z_distance");
+                different_settings_to_system.push("support_top_z_distance");
             }
             if let Some(support_type) = support.support_type {
                 project_settings.support_type = Some(support_type);
-                different_settings_to_system1.push("support_type");
+                different_settings_to_system.push("support_type");
             }
             if let Some(support_expansion) = support.support_expansion {
                 project_settings.support_expansion = Some(support_expansion);
-                different_settings_to_system1.push("support_expansion");
+                different_settings_to_system.push("support_expansion");
             }
         }
         if let Some(elefant_foot_compensation) = self.elefant_foot_compensation {
             project_settings.elefant_foot_compensation = Some(elefant_foot_compensation);
-            different_settings_to_system1.push("elefant_foot_compensation");
+            different_settings_to_system.push("elefant_foot_compensation");
         }
+        let mut different_settings_to_system_all = vec![];
+        different_settings_to_system_all.push(different_settings_to_system.into_iter().join(";"));
+        for filament in different_settings_to_filament {
+            different_settings_to_system_all.push(filament.into_iter().join(";"));
+        }
+        different_settings_to_system_all.push("".to_string());
+        project_settings.different_settings_to_system = Some(different_settings_to_system_all);
+        let mut inherits_group = vec![];
+        inherits_group.push(Some("".to_string()));
+        for filament in &self.filaments {
+            inherits_group.push(filament.settings_id.as_ref().map(|id| format!("{}", id)));
+        }
+        inherits_group.push(Some("".to_string()));
+        project_settings.inherits_group = Some(inherits_group);
 
-        project_settings.different_settings_to_system = Some(vec![
-            different_settings_to_system1.into_iter().join(";"),
-            "".to_string(),
-            "".to_string(),
-            different_settings_to_system4.into_iter().join(";"),
-            "".to_string(),
-        ]);
+        let filament_settings = self
+            .filaments
+            .iter()
+            .enumerate()
+            .map(|(index, filament)| FilamentSettings {
+                filament_extruder_variant: FilamentExtruderStandard::DirectDriveStandard,
+                filament_flow_ratio: Some(vec![filament.filament_flow_ratio]),
+                filament_settings_id: vec![filament_settings_id[index].clone()],
+                from: "project".to_string(),
+                inherits: filament.settings_id.clone(),
+                name: filament_settings_id[index].clone(),
+                version: "2.5.0.64".to_string(),
+            })
+            .collect();
 
         let mut model_cont = ModelContainer::new(model);
         model_cont.content_types = Some(content_types);
         model_cont.relationships = Some(relationships);
         model_cont.model_settings = Some(model_settings);
         model_cont.project_settings = Some(project_settings);
+        model_cont.filament_settings = filament_settings;
 
         let encoded = model_cont.encode()?;
         Ok(encoded)
