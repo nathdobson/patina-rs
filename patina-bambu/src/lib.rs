@@ -25,6 +25,7 @@ use patina_3mf::model::{Model, ModelMetadata, ModelUnit};
 use patina_3mf::model_settings::{
     Assemble, AssembleItem, ModelInstance, ModelSettings, ObjectSettings, Part, PartSubtype, Plate,
 };
+use patina_3mf::project_settings::brim_type::BrimType;
 use patina_3mf::project_settings::ProjectSettings;
 use patina_3mf::project_settings::color::Color;
 use patina_3mf::project_settings::support_interface_pattern::SupportInterfacePattern;
@@ -105,6 +106,7 @@ pub struct BambuBuilder {
     support: Option<BambuSupport>,
     /// Sic
     elefant_foot_compensation: Option<f64>,
+    brim_type: Option<BrimType>,
 }
 
 impl BambuSupport {
@@ -254,6 +256,7 @@ impl BambuBuilder {
             prime_tower_positions: None,
             support: None,
             elefant_foot_compensation: None,
+            brim_type: None,
         }
     }
     pub fn add_plate(&mut self, p: BambuPlate) {
@@ -270,6 +273,9 @@ impl BambuBuilder {
     }
     pub fn prime_tower_positions(&mut self, position: Option<Vec<Vec2>>) {
         self.prime_tower_positions = position;
+    }
+    pub fn brim_type(&mut self, brim_type: Option<BrimType>) {
+        self.brim_type = brim_type;
     }
     pub fn support(&mut self, support: BambuSupport) {
         self.support = Some(support);
@@ -488,6 +494,10 @@ impl BambuBuilder {
         if let Some(elefant_foot_compensation) = self.elefant_foot_compensation {
             project_settings.elefant_foot_compensation = Some(elefant_foot_compensation);
             different_settings_to_system.push("elefant_foot_compensation");
+        }
+        if let Some(brim_type) = self.brim_type{
+            project_settings.brim_type= Some(brim_type);
+            different_settings_to_system.push("brim_type");
         }
         let mut different_settings_to_system_all = vec![];
         different_settings_to_system_all.push(different_settings_to_system.into_iter().join(";"));

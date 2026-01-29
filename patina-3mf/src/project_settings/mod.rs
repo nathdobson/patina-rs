@@ -11,11 +11,13 @@ use serde::de::Error;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_with::DisplayFromStr;
 use serde_with::{DeserializeAs, SerializeAs, serde_as};
+use crate::project_settings::brim_type::BrimType;
 
 pub mod color;
 pub mod support_interface_pattern;
 pub mod support_style;
 pub mod support_type;
+pub mod brim_type;
 
 #[serde_as]
 #[derive(Serialize, Deserialize)]
@@ -108,6 +110,8 @@ pub struct ProjectSettings {
     pub elefant_foot_compensation: Option<f64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub inherits_group: Option<Vec<Option<String>>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub brim_type: Option<BrimType>,
 }
 
 impl ProjectSettings {
@@ -146,7 +150,7 @@ impl ProjectSettings {
             support_expansion: None,
             elefant_foot_compensation: None,
             inherits_group: None,
-
+            brim_type: None,
         }
     }
 }
