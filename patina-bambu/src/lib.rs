@@ -25,8 +25,8 @@ use patina_3mf::model::{Model, ModelMetadata, ModelUnit};
 use patina_3mf::model_settings::{
     Assemble, AssembleItem, ModelInstance, ModelSettings, ObjectSettings, Part, PartSubtype, Plate,
 };
-use patina_3mf::project_settings::brim_type::BrimType;
 use patina_3mf::project_settings::ProjectSettings;
+use patina_3mf::project_settings::brim_type::BrimType;
 use patina_3mf::project_settings::color::Color;
 use patina_3mf::project_settings::support_interface_pattern::SupportInterfacePattern;
 use patina_3mf::project_settings::support_style::SupportStyle;
@@ -94,6 +94,7 @@ pub struct BambuFilament {
     diameter: Option<f64>,
     shrink: Option<String>,
     filament_flow_ratio: Option<f64>,
+    filament_prime_volume: Option<f64>,
 }
 
 #[derive(Clone)]
@@ -107,6 +108,8 @@ pub struct BambuBuilder {
     /// Sic
     elefant_foot_compensation: Option<f64>,
     brim_type: Option<BrimType>,
+    prime_tower_rib_wall: Option<bool>,
+    prime_tower_width: Option<f64>,
 }
 
 impl BambuSupport {
@@ -168,6 +171,7 @@ impl BambuFilament {
             diameter: None,
             shrink: None,
             filament_flow_ratio: None,
+            filament_prime_volume: None,
         }
     }
     pub fn color(&mut self, color: Option<Color>) {
@@ -187,6 +191,9 @@ impl BambuFilament {
     }
     pub fn filament_flow_ratio(&mut self, filament_flow_ratio: Option<f64>) {
         self.filament_flow_ratio = filament_flow_ratio;
+    }
+    pub fn filament_prime_volume(&mut self, filament_prime_volume: Option<f64>) {
+        self.filament_prime_volume = filament_prime_volume;
     }
 }
 
@@ -257,6 +264,8 @@ impl BambuBuilder {
             support: None,
             elefant_foot_compensation: None,
             brim_type: None,
+            prime_tower_rib_wall: None,
+            prime_tower_width: None,
         }
     }
     pub fn add_plate(&mut self, p: BambuPlate) {
@@ -276,6 +285,12 @@ impl BambuBuilder {
     }
     pub fn brim_type(&mut self, brim_type: Option<BrimType>) {
         self.brim_type = brim_type;
+    }
+    pub fn prime_tower_rib_wall(&mut self, prime_tower_rib_wall: Option<bool>) {
+        self.prime_tower_rib_wall = prime_tower_rib_wall;
+    }
+    pub fn prime_tower_width(&mut self, prime_tower_width: Option<f64>) {
+        self.prime_tower_width = prime_tower_width;
     }
     pub fn support(&mut self, support: BambuSupport) {
         self.support = Some(support);
@@ -401,6 +416,11 @@ impl BambuBuilder {
             .iter()
             .map(|x| x.filament_flow_ratio)
             .collect();
+        let filament_prime_volume: Vec<Option<f64>> = self
+            .filaments
+            .iter()
+            .map(|x| x.filament_prime_volume)
+            .collect();
         let flush_volumes_matrix: Vec<_> = (0..self.filaments.len())
             .flat_map(|f1| {
                 (0..self.filaments.len()).map(move |f2| if f1 == f2 { 0.0 } else { 100.0 })
@@ -435,6 +455,19 @@ impl BambuBuilder {
         }
         if filament_flow_ratio.iter().any(|x| x.is_some()) {
             project_settings.filament_flow_ratio = Some(filament_flow_ratio);
+        }
+        for (i, r) in filament_prime_volume.iter().enumerate() {
+            if r.is_some() {
+                different_settings_to_filament[i].push("filament_prime_volume");
+            }
+        }
+        if filament_prime_volume.iter().any(|x| x.is_some()) {
+            project_settings.filament_prime_volume = Some(
+                filament_prime_volume
+                    .into_iter()
+                    .map(|x| x.unwrap_or_default())
+                    .collect(),
+            );
         }
         if let Some(support) = self.support {
             project_settings.enable_support = Some(true);
@@ -495,9 +528,17 @@ impl BambuBuilder {
             project_settings.elefant_foot_compensation = Some(elefant_foot_compensation);
             different_settings_to_system.push("elefant_foot_compensation");
         }
-        if let Some(brim_type) = self.brim_type{
-            project_settings.brim_type= Some(brim_type);
+        if let Some(brim_type) = self.brim_type {
+            project_settings.brim_type = Some(brim_type);
             different_settings_to_system.push("brim_type");
+        }
+        if let Some(prime_tower_rib_wall) = self.prime_tower_rib_wall {
+            project_settings.prime_tower_rib_wall = Some(prime_tower_rib_wall);
+            different_settings_to_system.push("prime_tower_rib_wall");
+        }
+        if let Some(prime_tower_width) = self.prime_tower_width {
+            project_settings.prime_tower_width = Some(prime_tower_width);
+            different_settings_to_system.push("prime_tower_width");
         }
         let mut different_settings_to_system_all = vec![];
         different_settings_to_system_all.push(different_settings_to_system.into_iter().join(";"));
@@ -521,6 +562,7 @@ impl BambuBuilder {
             .map(|(index, filament)| FilamentSettings {
                 filament_extruder_variant: FilamentExtruderStandard::DirectDriveStandard,
                 filament_flow_ratio: Some(vec![filament.filament_flow_ratio]),
+                filament_prime_volume: filament.filament_prime_volume.map(|x| vec![Some(x)]),
                 filament_settings_id: vec![filament_settings_id[index].clone()],
                 from: "project".to_string(),
                 inherits: filament.settings_id.clone(),

@@ -15,6 +15,8 @@ pub struct FilamentSettings {
     pub filament_extruder_variant: FilamentExtruderStandard,
     #[serde_as(as = "Option<Vec<OptionOrNil<DisplayFromStr>>>")]
     pub filament_flow_ratio: Option<Vec<Option<f64>>>,
+    #[serde_as(as = "Option<Vec<OptionOrNil<DisplayFromStr>>>")]
+    pub filament_prime_volume: Option<Vec<Option<f64>>>,
     pub filament_settings_id: Vec<String>,
     pub from: String,
     pub inherits: Option<FilamentSettingsId>,

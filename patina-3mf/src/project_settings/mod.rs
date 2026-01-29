@@ -1,5 +1,6 @@
 use crate::custom_serde::bool_from_int_string::BoolFromIntString;
 use crate::custom_serde::option_or_nil::OptionOrNil;
+use crate::project_settings::brim_type::BrimType;
 use crate::project_settings::support_interface_pattern::SupportInterfacePattern;
 use crate::project_settings::support_style::SupportStyle;
 use crate::project_settings::support_type::SupportType;
@@ -11,13 +12,12 @@ use serde::de::Error;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_with::DisplayFromStr;
 use serde_with::{DeserializeAs, SerializeAs, serde_as};
-use crate::project_settings::brim_type::BrimType;
 
+pub mod brim_type;
 pub mod color;
 pub mod support_interface_pattern;
 pub mod support_style;
 pub mod support_type;
-pub mod brim_type;
 
 #[serde_as]
 #[derive(Serialize, Deserialize)]
@@ -38,6 +38,9 @@ pub struct ProjectSettings {
     #[serde_as(as = "Option<Vec<OptionOrNil<DisplayFromStr>>>")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub filament_flow_ratio: Option<Vec<Option<f64>>>,
+    #[serde_as(as = "Option<Vec<DisplayFromStr>>")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub filament_prime_volume: Option<Vec<f64>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub filament_type: Option<Vec<String>>,
     #[serde_as(as = "Option<Vec<DisplayFromStr>>")]
@@ -67,6 +70,9 @@ pub struct ProjectSettings {
     pub prime_tower_rib_wall: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub prime_tower_infill_gap: Option<String>,
+    #[serde_as(as = "Option<DisplayFromStr>")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prime_tower_width: Option<f64>,
     #[serde_as(as = "Option<BoolFromIntString>")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enable_timelapse: Option<bool>,
@@ -123,6 +129,7 @@ impl ProjectSettings {
             filament_shrink: None,
             filament_diameter: None,
             filament_flow_ratio: None,
+            filament_prime_volume: None,
             filament_type: None,
             flush_volumes_matrix: None,
             nozzle_diameter: None,
@@ -134,6 +141,7 @@ impl ProjectSettings {
             wipe_tower_y: None,
             prime_tower_rib_wall: None,
             prime_tower_infill_gap: None,
+            prime_tower_width: None,
             enable_timelapse: None,
             timelapse_type: None,
             enable_support: None,
