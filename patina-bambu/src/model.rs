@@ -6,6 +6,7 @@ use patina_sdf::sdf::{AsSdf, Sdf3};
 use patina_threads::ThreadMetrics;
 use patina_vec::vec3::Vec3;
 use std::rc::Rc;
+use patina_3mf::brim_points::BrimPoint;
 
 #[derive(Clone, Debug)]
 #[non_exhaustive]
@@ -73,11 +74,14 @@ impl MeshModel {
 }
 
 impl BambuObject {
-    pub fn from_model(model: MeshModel) -> Self {
+    pub fn from_model(model: MeshModel, brim_points: &[BrimPoint]) -> Self {
         let mut object = BambuObject::new();
         object.name(Some("main_object".to_string()));
         let mut main = BambuPart::new(model.mesh().clone());
         main.name(Some("main_part".to_string()));
+        for brim_point in brim_points {
+            main.add_brim_point(brim_point.clone());
+        }
         object.add_part(main);
         for meta in model.metadata {
             match meta {

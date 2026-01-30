@@ -12,6 +12,7 @@ mod test;
 use crate::model::{MeshModel, ModelModifier};
 use itertools::Itertools;
 use patina_3mf::ModelContainer;
+use patina_3mf::brim_points::{BrimPoint, BrimPoints, PartBrimPoints};
 use patina_3mf::content_types::ContentTypes;
 use patina_3mf::filament_settings::{FilamentExtruderStandard, FilamentSettings};
 use patina_3mf::model::build::{ModelBuild, ModelItem};
@@ -72,6 +73,7 @@ pub struct BambuPart {
     transform: Option<[f64; 12]>,
     typ: BambuPartType,
     wall_loops: Option<usize>,
+    brim_points: Vec<BrimPoint>,
 }
 
 #[derive(Clone)]
@@ -206,6 +208,7 @@ impl BambuPart {
             transform: None,
             typ: BambuPartType::Model,
             wall_loops: None,
+            brim_points: vec![],
         }
     }
     pub fn name(&mut self, name: Option<String>) {
@@ -222,6 +225,9 @@ impl BambuPart {
     }
     pub fn wall_loops(&mut self, wall_loops: Option<usize>) {
         self.wall_loops = wall_loops;
+    }
+    pub fn add_brim_point(&mut self, brim_points: BrimPoint) {
+        self.brim_points.push(brim_points);
     }
 }
 
@@ -308,6 +314,7 @@ impl BambuBuilder {
         let mut object_settings = vec![];
         let mut plate_settings = vec![];
         let mut assemble_items = vec![];
+        let mut brim_points = vec![];
         for (plate_id_z, plate) in self.plates.iter().enumerate() {
             let plate_id = plate_id_z + 1;
             let mut model_instances = vec![];
@@ -357,6 +364,12 @@ impl BambuBuilder {
                             .metadata_extruder(part.material.clone())
                             .metadata_wall_loops(part.wall_loops),
                     );
+                    if !part.brim_points.is_empty() {
+                        brim_points.push(PartBrimPoints {
+                            object_id: part_id,
+                            points: part.brim_points.clone(),
+                        });
+                    }
                 }
                 let object_id = model_objects.len() + 1;
                 model_objects.push(
@@ -577,6 +590,9 @@ impl BambuBuilder {
         model_cont.model_settings = Some(model_settings);
         model_cont.project_settings = Some(project_settings);
         model_cont.filament_settings = filament_settings;
+        if !brim_points.is_empty() {
+            model_cont.brim_points = Some(BrimPoints { parts: brim_points });
+        }
 
         let encoded = model_cont.encode()?;
         Ok(encoded)

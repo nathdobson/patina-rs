@@ -14,3 +14,4 @@ serde_with = "3.13.0"
 itertools = "0.14.0"
 arrayvec = "0.7.6"
 serde_cow = "0.1.2"
+patina-vec = {workspace = true}

@@ -2,6 +2,7 @@
 #![feature(iter_array_chunks)]
 #![allow(dead_code, unused_imports, unused_mut, unused_variables)]
 #![deny(unused_must_use)]
+pub mod brim_points;
 pub mod content_types;
 mod custom_serde;
 pub mod filament_settings;
@@ -12,6 +13,7 @@ pub mod relationships;
 pub mod settings_id;
 pub mod xmlns;
 
+use crate::brim_points::BrimPoints;
 use crate::content_types::ContentTypes;
 use crate::filament_settings::{FilamentExtruderStandard, FilamentSettings};
 use crate::model::Model;
@@ -37,6 +39,7 @@ pub struct ModelContainer {
     pub model_settings: Option<ModelSettings>,
     pub project_settings: Option<ProjectSettings>,
     pub filament_settings: Vec<FilamentSettings>,
+    pub brim_points: Option<BrimPoints>,
 }
 
 impl ModelContainer {
@@ -48,6 +51,7 @@ impl ModelContainer {
             model_settings: None,
             project_settings: None,
             filament_settings: vec![],
+            brim_points: None,
         }
     }
     fn to_xml_string<T: Serialize>(&self, value: &T) -> anyhow::Result<String> {
@@ -87,7 +91,12 @@ impl ModelContainer {
             )?;
             zip.write_all(serde_json::to_string_pretty(filament)?.as_bytes())?;
         }
-
+        if let Some(brim_points) = &self.brim_points {
+            zip.start_file("Metadata/brim_ear_points.txt", opts.clone())?;
+            let mut brim_points_bytes = vec![];
+            brim_points.serialize(&mut brim_points_bytes);
+            zip.write_all(&brim_points_bytes)?;
+        }
         zip.finish()?;
         Ok(buffer)
     }
