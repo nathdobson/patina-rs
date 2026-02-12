@@ -18,7 +18,7 @@ impl Mat3 {
             Vec3::new(
                 y * x * (1.0 - cos) + z * sin,
                 cos + y * y * (1.0 - cos),
-                y * z * (1.0 - cos) - x * cos,
+                y * z * (1.0 - cos) - x * sin,
             ),
             Vec3::new(
                 z * x * (1.0 - cos) - y * sin,
