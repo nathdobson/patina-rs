@@ -1,13 +1,14 @@
+use crate::geo2::ray2::Ray2;
+use crate::geo2::segment2::Segment2;
 use anyhow::anyhow;
 use itertools::Itertools;
 use patina_vec::vec2::Vec2;
-use rand::{Rng, SeedableRng};
+use rand::{Rng, RngCore, SeedableRng, rng};
 use rand_xorshift::XorShiftRng;
 use std::fmt::{Display, Formatter};
 use std::ops::Range;
-use crate::geo2::segment2::Segment2;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialOrd, PartialEq)]
 pub struct Polygon2(Vec<Vec2>);
 
 impl Polygon2 {
@@ -32,10 +33,18 @@ impl Polygon2 {
             .sum::<f64>()
             / 2.0
     }
+    pub fn reverse(&mut self) {
+        self.0.reverse();
+    }
     pub fn check_self_separate(&self) -> anyhow::Result<()> {
-        for (v1, v2) in self.points().iter().tuple_combinations() {
+        for ((i1, v1), (i2, v2)) in self.points().iter().enumerate().tuple_combinations() {
             if v1 == v2 {
-                return Err(anyhow!("vertex {} is the same as vertex {}", v1, v2));
+                return Err(anyhow!(
+                    "vertex {} is the same as vertex {} (len {})",
+                    i1,
+                    i2,
+                    self.points().len()
+                ));
             }
         }
         for &v in self.points() {
@@ -106,6 +115,49 @@ impl Polygon2 {
                 poly
             })
         })
+    }
+    pub fn merge_adjacent_duplicates(&mut self) {
+        let mut prev = None;
+        self.0.retain(|next| {
+            let keep = Some(*next) != prev;
+            prev = Some(*next);
+            keep
+        });
+        if !self.0.is_empty() && self.0.last() == self.0.first() {
+            self.0.pop();
+        }
+    }
+    pub fn fix_winding(this: &[Self]) -> Vec<Self> {
+        let mut result = vec![];
+        for (i1, p1) in this.iter().enumerate() {
+            let mut count = 0;
+            let dir = Vec2::random_normal(&mut rng());
+            for (i2, p2) in this.iter().enumerate() {
+                if i1 != i2 {
+                    for segment in p2.segments() {
+                        if Ray2::new(p1.0[0], dir)
+                            .intersect_segment(&segment)
+                            .is_some()
+                        {
+                            count += 1;
+                        }
+                    }
+                }
+            }
+            let mut p1 = p1.clone();
+            let a = p1.signed_area();
+            if count % 2 == 0 {
+                if a < 0.0 {
+                    p1.reverse();
+                }
+            } else {
+                if a > 0.0 {
+                    p1.reverse();
+                }
+            }
+            result.push(p1);
+        }
+        result
     }
 }
 

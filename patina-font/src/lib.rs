@@ -8,6 +8,7 @@ mod test;
 use patina_geo::geo2::polygon2::Polygon2;
 use patina_vec::vec2::Vec2;
 use rusttype::{OutlineBuilder, Point};
+use std::collections::BTreeSet;
 use std::fmt::Pointer;
 
 pub struct PolygonOutlineBuilder {
@@ -43,10 +44,12 @@ impl OutlineBuilder for PolygonOutlineBuilder {
     }
     fn close(&mut self) {
         assert_eq!(self.poly.first(), self.poly.last());
-        self.poly.pop();
-        let poly = Polygon2::new(self.poly.clone());
+        let mut poly = Polygon2::new(self.poly.clone());
+        poly.merge_adjacent_duplicates();
         poly.check_self_separate().unwrap();
-        self.polys.push(poly);
+        if !self.polys.contains(&poly) {
+            self.polys.push(poly);
+        }
         self.poly.clear();
     }
 }
