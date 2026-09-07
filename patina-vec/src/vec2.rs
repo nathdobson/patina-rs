@@ -1,6 +1,5 @@
 use crate::vec::Vector;
 use std::ops::{Mul, Sub};
-use std::f64;
 
 pub type Vector2<T> = Vector<T, 2>;
 pub type Vec2 = Vector2<f64>;

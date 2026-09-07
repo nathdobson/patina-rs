@@ -25,8 +25,8 @@ impl<const N: usize> Deriv<N> {
     }
     pub fn nan() -> Self {
         Deriv {
-            value: std::f64::NAN,
-            deriv: [std::f64::NAN; N],
+            value: f64::NAN,
+            deriv: [f64::NAN; N],
         }
     }
     pub fn value(&self) -> f64 {

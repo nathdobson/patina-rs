@@ -2,7 +2,6 @@
 #![allow(unused_variables)]
 #![allow(dead_code)]
 #![allow(unused_imports)]
-#![feature(generic_const_exprs)]
 #![allow(incomplete_features)]
 
 pub mod mat;
