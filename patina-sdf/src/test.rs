@@ -23,7 +23,7 @@ async fn test_mesh() -> anyhow::Result<()> {
     // let csdf = sdf.compile();
     let sdf = SdfUnion::new(sphere1, sphere2).into_sdf();
     let scene = Aabb::new(Vec3::new(-10.0, -10.0, -1.1), Vec3::new(10.0, 10.0, 1.0));
-    let march = MarchingMesh::new(scene);
+    let march = MarchingMesh::new(&scene);
     // let naive = MarchingMesh::new(
     //     scene.min(),
     //     scene.dimensions() / (detail as f64),

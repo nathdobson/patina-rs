@@ -13,3 +13,6 @@ itertools = "0.14.0"
 [dev-dependencies]
 tokio = {version="1.46.0",features = ["rt","macros"]}
 anyhow = "1.0.98"
+
+[lints]
+workspace = true

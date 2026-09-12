@@ -10,3 +10,6 @@ itertools = "0.14.0"
 ordered-float = "5.0.0"
 rand_xorshift = "0.4.0"
 anyhow = "1.0.98"
+
+[lints]
+workspace = true

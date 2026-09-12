@@ -17,6 +17,7 @@ use std::collections::HashMap;
 use std::ops::Range;
 use std::thread;
 use std::thread::Thread;
+use patina_mesh::ser::encode_test_file;
 
 pub struct ExtrusionBuilder {
     vertices: Vec<Vec3>,
@@ -111,6 +112,6 @@ async fn test() -> anyhow::Result<()> {
     let cube = cube.build();
     println!("{:#?}", cube);
     cube.check_manifold()?;
-    write_test_stl_file(&cube, "test.stl").await?;
+    encode_test_file(&cube, "test.stl").await?;
     Ok(())
 }

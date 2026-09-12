@@ -5,7 +5,6 @@ edition = "2024"
 
 [dependencies]
 rusttype = "0.9.3"
-patina-mesh = {workspace = true}
 patina-geo ={workspace = true}
 patina-vec={workspace = true}
 
@@ -13,4 +12,7 @@ patina-vec={workspace = true}
 patina-extrude = {workspace = true}
 tokio = {version="1.46.0",features=["macros","rt"]}
 anyhow = "1.0.98"
+patina-mesh = {workspace = true}
 
+[lints]
+workspace = true

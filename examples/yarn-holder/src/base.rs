@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 mod consts;
 
 use crate::consts::{
@@ -43,7 +45,7 @@ async fn main() -> anyhow::Result<()> {
         )
         .as_sdf(),
     );
-    let mut mesh = MarchingMesh::new(Aabb3::new(
+    let mut mesh = MarchingMesh::new(&Aabb3::new(
         Vec3::new(-BASE_RADIUS - EPS, -BASE_RADIUS - EPS, -EPS),
         Vec3::new(
             BASE_RADIUS + EPS,

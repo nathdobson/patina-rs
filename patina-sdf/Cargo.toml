@@ -20,3 +20,6 @@ patina-progress = {workspace = true}
 
 [dev-dependencies]
 tokio = {version = "1.46.0", features=["macros","rt"]}
+
+[lints]
+workspace = true

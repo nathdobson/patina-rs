@@ -25,7 +25,7 @@ impl Vec2 {
         }
     }
     pub fn from_deg(x: f64) -> Self {
-        Self::from_rad(x * (2.0 * f64::consts::PI / 360.0))
+        Self::from_rad(x * (2.0 * std::f64::consts::PI / 360.0))
     }
     pub fn from_rad(x: f64) -> Self {
         Self::new(x.cos(), x.sin())

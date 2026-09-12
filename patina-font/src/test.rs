@@ -2,13 +2,12 @@ use crate::PolygonOutlineBuilder;
 use anyhow::anyhow;
 use patina_extrude::ExtrusionBuilder;
 use patina_geo::geo2::polygon2::Polygon2;
-use patina_geo::segment2::Segment2;
 use patina_mesh::edge_mesh2::EdgeMesh2;
 use patina_mesh::mesh_cut::MeshCut;
-use patina_mesh::ser::stl::write_test_stl_file;
 use patina_vec::vec2::Vec2;
 use rusttype::{Font, Point, Scale};
 use tokio::fs;
+use patina_mesh::ser::encode_test_file;
 
 #[tokio::test]
 async fn test() -> anyhow::Result<()> {
@@ -49,7 +48,7 @@ async fn test() -> anyhow::Result<()> {
 
         let extrusion = extrusion.build();
         // extrusion.check_manifold()?;
-        write_test_stl_file(&extrusion, &format!("{}.stl", letter as u32)).await?;
+        encode_test_file(&extrusion, &format!("{}.stl", letter as u32)).await?;
     }
     Ok(())
 }

@@ -1,14 +1,15 @@
+#![allow(dead_code)]
 mod consts;
 
 use crate::consts::{
-    BASE_RADIUS, BASE_THICKNESS, CATCH_LENGTH, CATCH_WIDTH, CLIP_HOLE_RADIUS, EPS, POST_LENGTH,
+    CATCH_LENGTH, CATCH_WIDTH, CLIP_HOLE_RADIUS, EPS, POST_LENGTH,
     POST_THICKNESS, POST_WIDTH,
 };
 use patina_geo::geo3::aabb3::Aabb3;
 use patina_geo::geo3::cylinder::Cylinder;
 use patina_mesh::ser::encode_file;
 use patina_sdf::marching_mesh::MarchingMesh;
-use patina_sdf::sdf::{AsSdf, Sdf};
+use patina_sdf::sdf::{AsSdf};
 use patina_vec::vec3::Vec3;
 use std::path::Path;
 
@@ -42,7 +43,7 @@ async fn main() -> anyhow::Result<()> {
         )
         .as_sdf(),
     );
-    let mut mesh = MarchingMesh::new(Aabb3::new(
+    let mut mesh = MarchingMesh::new(&Aabb3::new(
         post.min() - Vec3::new(CATCH_WIDTH + EPS, CATCH_LENGTH + EPS, EPS),
         post.max() + Vec3::new(POST_WIDTH + EPS, CATCH_LENGTH + EPS, EPS),
     ));

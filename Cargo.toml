@@ -18,3 +18,6 @@ patina-progress={path="patina-progress"}
 
 [profile.release]
 debug = true
+
+[workspace.lints.cargo]
+unused_workspace_dependencies = "allow"

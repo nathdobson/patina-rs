@@ -3,7 +3,6 @@ use patina_scalar::Scalar;
 use patina_scalar::deriv::Deriv;
 use rand::Rng;
 use rand::distr::{Distribution, StandardUniform};
-use serde::Deserialize;
 use std::fmt::{Debug, Display, Formatter};
 use std::iter;
 use std::iter::Sum;
@@ -34,9 +33,27 @@ impl<const N: usize> Vector<f64, N> {
     }
 }
 
+pub trait AtLeast1 {}
+impl<T> AtLeast1 for Vector<T, 1> {}
+impl<T> AtLeast1 for Vector<T, 2> {}
+impl<T> AtLeast1 for Vector<T, 3> {}
+impl<T> AtLeast1 for Vector<T, 4> {}
+
+pub trait AtLeast2 {}
+impl<T> AtLeast2 for Vector<T, 2> {}
+impl<T> AtLeast2 for Vector<T, 3> {}
+impl<T> AtLeast2 for Vector<T, 4> {}
+
+pub trait AtLeast3 {}
+impl<T> AtLeast3 for Vector<T, 3> {}
+impl<T> AtLeast3 for Vector<T, 4> {}
+
+pub trait AtLeast4 {}
+impl<T> AtLeast4 for Vector<T, 4> {}
+
 impl<T, const N: usize> Vector<T, N>
 where
-    [T; N - 1]: Sized,
+    Self: AtLeast1,
 {
     pub fn x(&self) -> T
     where
@@ -54,7 +71,7 @@ where
 
 impl<T, const N: usize> Vector<T, N>
 where
-    [T; N - 2]: Sized,
+    Self: AtLeast2,
 {
     pub fn y(&self) -> T
     where
@@ -72,7 +89,7 @@ where
 
 impl<T, const N: usize> Vector<T, N>
 where
-    [T; N - 3]: Sized,
+    Self: AtLeast3,
 {
     pub fn z(&self) -> T
     where
@@ -90,7 +107,7 @@ where
 
 impl<T, const N: usize> Vector<T, N>
 where
-    [T; N - 4]: Sized,
+    Self: AtLeast4,
 {
     pub fn w(&self) -> T
     where
