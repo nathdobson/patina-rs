@@ -4,7 +4,6 @@
 #![allow(unused_imports)]
 #![deny(unused_must_use)]
 #![feature(try_blocks)]
-#![feature(debug_closure_helpers)]
 #![feature(float_minimum_maximum)]
 
 pub mod directed_mesh_edge;
